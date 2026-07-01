@@ -1,0 +1,2957 @@
+{
+  "families": [
+    {
+      "best_dsr": 0.7845954873309968,
+      "best_net_sharpe": 73.53502987899614,
+      "id": "crypto_microstructure",
+      "killed_count": 52,
+      "leak_review_count": 1,
+      "name": "crypto_microstructure",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": 0.1203340443381858,
+              "id": "crypto_microstructure/H-CRYPTO-001",
+              "net_sr": 73.53502987899614,
+              "verdict": "LEAK-REVIEW"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-003",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.5181071285428254,
+              "id": "crypto_microstructure/H-CRYPTO-100",
+              "net_sr": 0.793307262078711,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.7845954873309968,
+              "id": "crypto_microstructure/H-CRYPTO-101",
+              "net_sr": 1.0642652523076892,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.7469952623016185,
+              "id": "crypto_microstructure/H-CRYPTO-102",
+              "net_sr": 1.0434270781340993,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.18734786818202523,
+              "id": "crypto_microstructure/H-CRYPTO-103",
+              "net_sr": 0.641276582936281,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.08984849328955041,
+              "id": "crypto_microstructure/H-CRYPTO-104",
+              "net_sr": 0.461796776162359,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-105",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-106",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-107",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-108",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-109",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.007538738802039394,
+              "id": "crypto_microstructure/H-CRYPTO-110",
+              "net_sr": 0.03173906583799608,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-111",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-112",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.6123417945543774,
+              "id": "crypto_microstructure/H-CRYPTO-113",
+              "net_sr": 0.8905581870794992,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.11695110438231836,
+              "id": "crypto_microstructure/H-CRYPTO-114",
+              "net_sr": 0.5418972996660983,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-115",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.021237648954047176,
+              "id": "crypto_microstructure/H-CRYPTO-116",
+              "net_sr": 0.16685758783650015,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.10521012165965252,
+              "id": "crypto_microstructure/H-CRYPTO-117",
+              "net_sr": 0.5720053526268285,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-118",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.03735772678647071,
+              "id": "crypto_microstructure/H-CRYPTO-119",
+              "net_sr": 0.31594784112608376,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.13800532812676455,
+              "id": "crypto_microstructure/H-CRYPTO-120",
+              "net_sr": 0.46601840354291335,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.4957167106740156,
+              "id": "crypto_microstructure/H-CRYPTO-121",
+              "net_sr": 0.8810553200492043,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.6808748226179121,
+              "id": "crypto_microstructure/H-CRYPTO-122",
+              "net_sr": 1.115481954659886,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.10360627770894902,
+              "id": "crypto_microstructure/H-CRYPTO-123",
+              "net_sr": 0.6040313003589503,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.022184458407383093,
+              "id": "crypto_microstructure/H-CRYPTO-124",
+              "net_sr": 0.2454739778765365,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-125",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.3337837897986475,
+              "id": "crypto_microstructure/H-CRYPTO-126",
+              "net_sr": 0.8015743237484838,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.024497580963482448,
+              "id": "crypto_microstructure/H-CRYPTO-127",
+              "net_sr": 0.2871404806694839,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.011389564523775268,
+              "id": "crypto_microstructure/H-CRYPTO-128",
+              "net_sr": 0.13751237441163935,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-129",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.006044488030661001,
+              "id": "crypto_microstructure/H-CRYPTO-130",
+              "net_sr": 0.05165921188146872,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-131",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-132",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.04481652642394492,
+              "id": "crypto_microstructure/H-CRYPTO-133",
+              "net_sr": 0.3748773994722723,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.03848144923382739,
+              "id": "crypto_microstructure/H-CRYPTO-134",
+              "net_sr": 0.3554284535131888,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-135",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-136",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-137",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-138",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-139",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-140",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-141",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-142",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-143",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-144",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-145",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-146",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.04152565861503212,
+              "id": "crypto_microstructure/H-CRYPTO-147",
+              "net_sr": 0.371458531422606,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "crypto_microstructure/H-CRYPTO-148",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.0926368100950857,
+              "id": "crypto_microstructure/H-CRYPTO-149",
+              "net_sr": 0.5322529829035727,
+              "verdict": "KILLED-AT-STAGE-2"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "suspected_leak",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "crypto_microstructure",
+          "id": "NK-crypto_microstructure",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": true,
+            "level": "QUARANTINED",
+            "override_requires_reason": true,
+            "reason": "resembles family 'crypto_microstructure' — 52 killed, 0 survivor; best net SR 73.535, best DSR 0.785"
+          },
+          "representative_killed_specs": [
+            "crypto_microstructure/H-CRYPTO-001",
+            "crypto_microstructure/H-CRYPTO-002",
+            "crypto_microstructure/H-CRYPTO-003",
+            "crypto_microstructure/H-CRYPTO-100",
+            "crypto_microstructure/H-CRYPTO-101",
+            "crypto_microstructure/H-CRYPTO-102",
+            "crypto_microstructure/H-CRYPTO-103",
+            "crypto_microstructure/H-CRYPTO-104",
+            "crypto_microstructure/H-CRYPTO-105",
+            "crypto_microstructure/H-CRYPTO-106",
+            "crypto_microstructure/H-CRYPTO-107",
+            "crypto_microstructure/H-CRYPTO-108",
+            "crypto_microstructure/H-CRYPTO-109",
+            "crypto_microstructure/H-CRYPTO-110",
+            "crypto_microstructure/H-CRYPTO-111",
+            "crypto_microstructure/H-CRYPTO-112",
+            "crypto_microstructure/H-CRYPTO-113",
+            "crypto_microstructure/H-CRYPTO-114",
+            "crypto_microstructure/H-CRYPTO-115",
+            "crypto_microstructure/H-CRYPTO-116",
+            "crypto_microstructure/H-CRYPTO-117",
+            "crypto_microstructure/H-CRYPTO-118",
+            "crypto_microstructure/H-CRYPTO-119",
+            "crypto_microstructure/H-CRYPTO-120",
+            "crypto_microstructure/H-CRYPTO-121",
+            "crypto_microstructure/H-CRYPTO-122",
+            "crypto_microstructure/H-CRYPTO-123",
+            "crypto_microstructure/H-CRYPTO-124",
+            "crypto_microstructure/H-CRYPTO-125",
+            "crypto_microstructure/H-CRYPTO-126",
+            "crypto_microstructure/H-CRYPTO-127",
+            "crypto_microstructure/H-CRYPTO-128",
+            "crypto_microstructure/H-CRYPTO-129",
+            "crypto_microstructure/H-CRYPTO-130",
+            "crypto_microstructure/H-CRYPTO-131",
+            "crypto_microstructure/H-CRYPTO-132",
+            "crypto_microstructure/H-CRYPTO-133",
+            "crypto_microstructure/H-CRYPTO-134",
+            "crypto_microstructure/H-CRYPTO-135",
+            "crypto_microstructure/H-CRYPTO-136",
+            "crypto_microstructure/H-CRYPTO-137",
+            "crypto_microstructure/H-CRYPTO-138",
+            "crypto_microstructure/H-CRYPTO-139",
+            "crypto_microstructure/H-CRYPTO-140",
+            "crypto_microstructure/H-CRYPTO-141",
+            "crypto_microstructure/H-CRYPTO-142",
+            "crypto_microstructure/H-CRYPTO-143",
+            "crypto_microstructure/H-CRYPTO-144",
+            "crypto_microstructure/H-CRYPTO-145",
+            "crypto_microstructure/H-CRYPTO-146",
+            "crypto_microstructure/H-CRYPTO-147",
+            "crypto_microstructure/H-CRYPTO-148",
+            "crypto_microstructure/H-CRYPTO-149"
+          ],
+          "summary": "crypto_microstructure variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 52 killed, 0 survivor, 1 leak-review.",
+          "title": "crypto_microstructure — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "QUARANTINED",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 1.0,
+      "best_net_sharpe": 9.666544563583146,
+      "id": "leadlag",
+      "killed_count": 1,
+      "leak_review_count": 3,
+      "name": "leadlag",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": 1.0,
+              "id": "leadlag/H-LL-001",
+              "net_sr": 9.666544563583146,
+              "verdict": "LEAK-REVIEW"
+            },
+            {
+              "dsr": 1.0,
+              "id": "leadlag/H-LL-002",
+              "net_sr": 4.205390721949112,
+              "verdict": "LEAK-REVIEW"
+            },
+            {
+              "dsr": null,
+              "id": "leadlag/H-LL-003",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 1.0,
+              "id": "leadlag/H-LL-004",
+              "net_sr": 4.625668233226155,
+              "verdict": "LEAK-REVIEW"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "suspected_leak"
+          ],
+          "family_id": "leadlag",
+          "id": "NK-leadlag",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": true,
+            "level": "QUARANTINED",
+            "override_requires_reason": true,
+            "reason": "resembles family 'leadlag' — 1 killed, 0 survivor; best net SR 9.667, best DSR 1.000"
+          },
+          "representative_killed_specs": [
+            "leadlag/H-LL-001",
+            "leadlag/H-LL-002",
+            "leadlag/H-LL-003",
+            "leadlag/H-LL-004"
+          ],
+          "summary": "leadlag variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 1 killed, 0 survivor, 3 leak-review.",
+          "title": "leadlag — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "QUARANTINED",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.15720983168910888,
+      "best_net_sharpe": 3.998025197772567,
+      "id": "carry",
+      "killed_count": 23,
+      "leak_review_count": 0,
+      "name": "carry",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-001",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-0"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-0"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-003",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-0"
+            },
+            {
+              "dsr": 0.02866086024660332,
+              "id": "carry/H-CARRY-004",
+              "net_sr": 0.26606552725478344,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.014232957208127846,
+              "id": "carry/H-CARRY-005",
+              "net_sr": 0.23686048295806,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.15720983168910888,
+              "id": "carry/H-CARRY-006",
+              "net_sr": 0.7326263628605924,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-100",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.04308959717951374,
+              "id": "carry/H-CARRY-101",
+              "net_sr": 3.998025197772567,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.009094391781547115,
+              "id": "carry/H-CARRY-102",
+              "net_sr": 0.5014457580850413,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-103",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.003712424277406491,
+              "id": "carry/H-CARRY-104",
+              "net_sr": 0.1869892203600992,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-109",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-110",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.0062509704990295675,
+              "id": "carry/H-CARRY-112",
+              "net_sr": 0.35870813205655944,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-113",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.0036391035580366337,
+              "id": "carry/H-CARRY-114",
+              "net_sr": 0.1536317529346158,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.0986753290864736,
+              "id": "carry/H-CARRY-115",
+              "net_sr": 1.6637760127991563,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-121",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-122",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "carry/H-CARRY-127",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.06771535603090267,
+              "id": "carry/H-CARRY-133",
+              "net_sr": 1.5208634073637584,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.05774501426104804,
+              "id": "carry/H-CARRY-140",
+              "net_sr": 1.2878231427105624,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.005975199298922855,
+              "id": "carry/H-CARRY-144",
+              "net_sr": 0.4087330926452457,
+              "verdict": "KILLED-AT-STAGE-2"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "data_floor",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "carry",
+          "id": "NK-carry",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "HIGH",
+            "override_requires_reason": true,
+            "reason": "resembles family 'carry' — 23 killed, 0 survivor; best net SR 3.998, best DSR 0.157"
+          },
+          "representative_killed_specs": [
+            "carry/H-CARRY-001",
+            "carry/H-CARRY-002",
+            "carry/H-CARRY-003",
+            "carry/H-CARRY-004",
+            "carry/H-CARRY-005",
+            "carry/H-CARRY-006",
+            "carry/H-CARRY-100",
+            "carry/H-CARRY-101",
+            "carry/H-CARRY-102",
+            "carry/H-CARRY-103",
+            "carry/H-CARRY-104",
+            "carry/H-CARRY-109",
+            "carry/H-CARRY-110",
+            "carry/H-CARRY-112",
+            "carry/H-CARRY-113",
+            "carry/H-CARRY-114",
+            "carry/H-CARRY-115",
+            "carry/H-CARRY-121",
+            "carry/H-CARRY-122",
+            "carry/H-CARRY-127",
+            "carry/H-CARRY-133",
+            "carry/H-CARRY-140",
+            "carry/H-CARRY-144"
+          ],
+          "summary": "carry variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 23 killed, 0 survivor, 0 leak-review.",
+          "title": "carry — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "HIGH",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.6872156191414662,
+      "best_net_sharpe": 1.1412494167113107,
+      "id": "fx",
+      "killed_count": 28,
+      "leak_review_count": 0,
+      "name": "fx",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": 0.02993873459712188,
+              "id": "fx/H-FX-001",
+              "net_sr": 0.08362542456106886,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.6872156191414662,
+              "id": "fx/H-FX-003",
+              "net_sr": 0.398792308059738,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.005481638624992895,
+              "id": "fx/H-FX-100",
+              "net_sr": 0.046666699196057385,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.0036568690506598063,
+              "id": "fx/H-FX-101",
+              "net_sr": 0.020908080253517265,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.0115503750816704,
+              "id": "fx/H-FX-102",
+              "net_sr": 0.10203930658865408,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.00622349757582505,
+              "id": "fx/H-FX-103",
+              "net_sr": 0.05779249609007924,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.0031890843335314286,
+              "id": "fx/H-FX-104",
+              "net_sr": 0.01384365156398958,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-106",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-107",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.22597436244350785,
+              "id": "fx/H-FX-108",
+              "net_sr": 0.4419249959907857,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-109",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-110",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-111",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-112",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-113",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-114",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.020410574060544733,
+              "id": "fx/H-FX-115",
+              "net_sr": 0.14855126347871195,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-116",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-117",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-124",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.013525636908079355,
+              "id": "fx/H-FX-126",
+              "net_sr": 1.1412494167113107,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-127",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-128",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-135",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-137",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-139",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "fx/H-FX-149",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "fx",
+          "id": "NK-fx",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "HIGH",
+            "override_requires_reason": true,
+            "reason": "resembles family 'fx' — 28 killed, 0 survivor; best net SR 1.141, best DSR 0.687"
+          },
+          "representative_killed_specs": [
+            "fx/H-FX-001",
+            "fx/H-FX-002",
+            "fx/H-FX-003",
+            "fx/H-FX-100",
+            "fx/H-FX-101",
+            "fx/H-FX-102",
+            "fx/H-FX-103",
+            "fx/H-FX-104",
+            "fx/H-FX-106",
+            "fx/H-FX-107",
+            "fx/H-FX-108",
+            "fx/H-FX-109",
+            "fx/H-FX-110",
+            "fx/H-FX-111",
+            "fx/H-FX-112",
+            "fx/H-FX-113",
+            "fx/H-FX-114",
+            "fx/H-FX-115",
+            "fx/H-FX-116",
+            "fx/H-FX-117",
+            "fx/H-FX-124",
+            "fx/H-FX-126",
+            "fx/H-FX-127",
+            "fx/H-FX-128",
+            "fx/H-FX-135",
+            "fx/H-FX-137",
+            "fx/H-FX-139",
+            "fx/H-FX-149"
+          ],
+          "summary": "fx variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 28 killed, 0 survivor, 0 leak-review.",
+          "title": "fx — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "HIGH",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.8708508731919966,
+      "best_net_sharpe": 3.968654826859122,
+      "id": "momentum",
+      "killed_count": 32,
+      "leak_review_count": 0,
+      "name": "momentum",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": 0.11243333373724178,
+              "id": "momentum/H-MOM-001",
+              "net_sr": 0.10729839223414352,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.34134826488005665,
+              "id": "momentum/H-MOM-003",
+              "net_sr": 0.5906943920277603,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.032865316208827926,
+              "id": "momentum/H-MOM-004",
+              "net_sr": 0.04839851853119378,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-100",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.1305694925523701,
+              "id": "momentum/H-MOM-101",
+              "net_sr": 0.39563259163340136,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.14627603492565047,
+              "id": "momentum/H-MOM-102",
+              "net_sr": 0.38040731814997114,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-103",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.08403348101264844,
+              "id": "momentum/H-MOM-104",
+              "net_sr": 0.2483296861788244,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-105",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-106",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.01566079032976733,
+              "id": "momentum/H-MOM-107",
+              "net_sr": 0.13910496071271067,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-110",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.02067408993944418,
+              "id": "momentum/H-MOM-111",
+              "net_sr": 0.17291080319750388,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-112",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-113",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.0029624744215717112,
+              "id": "momentum/H-MOM-115",
+              "net_sr": 0.22537548730317275,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-116",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.039290085299395296,
+              "id": "momentum/H-MOM-117",
+              "net_sr": 0.3734590423735249,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.3292600690777722,
+              "id": "momentum/H-MOM-118",
+              "net_sr": 0.8115005985335458,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.8708508731919966,
+              "id": "momentum/H-MOM-121",
+              "net_sr": 1.0325452387435627,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.8408417164365144,
+              "id": "momentum/H-MOM-122",
+              "net_sr": 1.255509596670805,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.003134284409911897,
+              "id": "momentum/H-MOM-124",
+              "net_sr": 0.21519647595192365,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.2318204093268432,
+              "id": "momentum/H-MOM-125",
+              "net_sr": 0.42403260582549734,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.10310284838857414,
+              "id": "momentum/H-MOM-130",
+              "net_sr": 0.2716385142844269,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-134",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-135",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.0970585274190271,
+              "id": "momentum/H-MOM-137",
+              "net_sr": 1.7736470379176517,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-138",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-140",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "momentum/H-MOM-141",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.03649378242019831,
+              "id": "momentum/H-MOM-148",
+              "net_sr": 3.968654826859122,
+              "verdict": "KILLED-AT-STAGE-2"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "momentum",
+          "id": "NK-momentum",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "HIGH",
+            "override_requires_reason": true,
+            "reason": "resembles family 'momentum' — 32 killed, 0 survivor; best net SR 3.969, best DSR 0.871"
+          },
+          "representative_killed_specs": [
+            "momentum/H-MOM-001",
+            "momentum/H-MOM-002",
+            "momentum/H-MOM-003",
+            "momentum/H-MOM-004",
+            "momentum/H-MOM-100",
+            "momentum/H-MOM-101",
+            "momentum/H-MOM-102",
+            "momentum/H-MOM-103",
+            "momentum/H-MOM-104",
+            "momentum/H-MOM-105",
+            "momentum/H-MOM-106",
+            "momentum/H-MOM-107",
+            "momentum/H-MOM-110",
+            "momentum/H-MOM-111",
+            "momentum/H-MOM-112",
+            "momentum/H-MOM-113",
+            "momentum/H-MOM-115",
+            "momentum/H-MOM-116",
+            "momentum/H-MOM-117",
+            "momentum/H-MOM-118",
+            "momentum/H-MOM-121",
+            "momentum/H-MOM-122",
+            "momentum/H-MOM-124",
+            "momentum/H-MOM-125",
+            "momentum/H-MOM-130",
+            "momentum/H-MOM-134",
+            "momentum/H-MOM-135",
+            "momentum/H-MOM-137",
+            "momentum/H-MOM-138",
+            "momentum/H-MOM-140",
+            "momentum/H-MOM-141",
+            "momentum/H-MOM-148"
+          ],
+          "summary": "momentum variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 32 killed, 0 survivor, 0 leak-review.",
+          "title": "momentum — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "HIGH",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.9998572410133618,
+      "best_net_sharpe": 2.0539637040084595,
+      "id": "rates",
+      "killed_count": 32,
+      "leak_review_count": 0,
+      "name": "rates",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-001",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-0"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-003",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-004",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-100",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-101",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-105",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-106",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-107",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-110",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-114",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-115",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-117",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-118",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.05015294723683386,
+              "id": "rates/H-RATES-119",
+              "net_sr": 2.0539637040084595,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-120",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.012965868640722782,
+              "id": "rates/H-RATES-121",
+              "net_sr": 0.20516704182130752,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.014839731252282802,
+              "id": "rates/H-RATES-123",
+              "net_sr": 0.1563203198777652,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-125",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-126",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-127",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-129",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-130",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-132",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-134",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-135",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-137",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.04983614284631756,
+              "id": "rates/H-RATES-139",
+              "net_sr": 1.2878231427105624,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-140",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-143",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "rates/H-RATES-145",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.9998572410133618,
+              "id": "rates/H-RATES-146",
+              "net_sr": 1.4569028006187186,
+              "verdict": "KILLED-AT-STAGE-3"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "data_floor",
+            "microstructure_or_placebo",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "rates",
+          "id": "NK-rates",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "HIGH",
+            "override_requires_reason": true,
+            "reason": "resembles family 'rates' — 32 killed, 0 survivor; best net SR 2.054, best DSR 1.000"
+          },
+          "representative_killed_specs": [
+            "rates/H-RATES-001",
+            "rates/H-RATES-002",
+            "rates/H-RATES-003",
+            "rates/H-RATES-004",
+            "rates/H-RATES-100",
+            "rates/H-RATES-101",
+            "rates/H-RATES-105",
+            "rates/H-RATES-106",
+            "rates/H-RATES-107",
+            "rates/H-RATES-110",
+            "rates/H-RATES-114",
+            "rates/H-RATES-115",
+            "rates/H-RATES-117",
+            "rates/H-RATES-118",
+            "rates/H-RATES-119",
+            "rates/H-RATES-120",
+            "rates/H-RATES-121",
+            "rates/H-RATES-123",
+            "rates/H-RATES-125",
+            "rates/H-RATES-126",
+            "rates/H-RATES-127",
+            "rates/H-RATES-129",
+            "rates/H-RATES-130",
+            "rates/H-RATES-132",
+            "rates/H-RATES-134",
+            "rates/H-RATES-135",
+            "rates/H-RATES-137",
+            "rates/H-RATES-139",
+            "rates/H-RATES-140",
+            "rates/H-RATES-143",
+            "rates/H-RATES-145",
+            "rates/H-RATES-146"
+          ],
+          "summary": "rates variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 32 killed, 0 survivor, 0 leak-review.",
+          "title": "rates — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "HIGH",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.9999999998920848,
+      "best_net_sharpe": 2.0377758093325364,
+      "id": "reversal",
+      "killed_count": 9,
+      "leak_review_count": 0,
+      "name": "reversal",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-001",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.9999999998920848,
+              "id": "reversal/H-REV-003",
+              "net_sr": 1.0706464240509517,
+              "verdict": "KILLED-AT-STAGE-3"
+            },
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-004",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.028386535166595325,
+              "id": "reversal/H-REV-005",
+              "net_sr": 2.0377758093325364,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.999999441504389,
+              "id": "reversal/H-REV-100",
+              "net_sr": 1.6112429070900078,
+              "verdict": "KILLED-AT-STAGE-3"
+            },
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-101",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-102",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "reversal/H-REV-103",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "microstructure_or_placebo",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "reversal",
+          "id": "NK-reversal",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack",
+              "require a minimum observation threshold",
+              "require an explanation of material difference from killed variants"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "HIGH",
+            "override_requires_reason": true,
+            "reason": "resembles family 'reversal' — 9 killed, 0 survivor; best net SR 2.038, best DSR 1.000"
+          },
+          "representative_killed_specs": [
+            "reversal/H-REV-001",
+            "reversal/H-REV-002",
+            "reversal/H-REV-003",
+            "reversal/H-REV-004",
+            "reversal/H-REV-005",
+            "reversal/H-REV-100",
+            "reversal/H-REV-101",
+            "reversal/H-REV-102",
+            "reversal/H-REV-103"
+          ],
+          "summary": "reversal variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 9 killed, 0 survivor, 0 leak-review.",
+          "title": "reversal — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "HIGH",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": 0.9971020881194644,
+      "best_net_sharpe": 0.7124078340968628,
+      "id": "calendar",
+      "killed_count": 13,
+      "leak_review_count": 0,
+      "name": "calendar",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": 0.8543050451604188,
+              "id": "calendar/H-CAL-001",
+              "net_sr": 0.5473842797494145,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.9971020881194644,
+              "id": "calendar/H-CAL-003",
+              "net_sr": 0.3768369439347268,
+              "verdict": "KILLED-AT-STAGE-4"
+            },
+            {
+              "dsr": 0.02150637446719503,
+              "id": "calendar/H-CAL-004",
+              "net_sr": 0.01335490194179955,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-101",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.04155195549523748,
+              "id": "calendar/H-CAL-107",
+              "net_sr": 0.3861745532038323,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-108",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-109",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-110",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": 0.07752196295449063,
+              "id": "calendar/H-CAL-111",
+              "net_sr": 0.24942126530947817,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": 0.941874507532529,
+              "id": "calendar/H-CAL-123",
+              "net_sr": 0.7124078340968628,
+              "verdict": "KILLED-AT-STAGE-2"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-124",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "calendar/H-CAL-132",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag",
+            "regime_local",
+            "trial_adjusted_dsr"
+          ],
+          "family_id": "calendar",
+          "id": "NK-calendar",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "MEDIUM",
+            "override_requires_reason": true,
+            "reason": "resembles family 'calendar' — 13 killed, 0 survivor; best net SR 0.712, best DSR 0.997"
+          },
+          "representative_killed_specs": [
+            "calendar/H-CAL-001",
+            "calendar/H-CAL-002",
+            "calendar/H-CAL-003",
+            "calendar/H-CAL-004",
+            "calendar/H-CAL-101",
+            "calendar/H-CAL-107",
+            "calendar/H-CAL-108",
+            "calendar/H-CAL-109",
+            "calendar/H-CAL-110",
+            "calendar/H-CAL-111",
+            "calendar/H-CAL-123",
+            "calendar/H-CAL-124",
+            "calendar/H-CAL-132"
+          ],
+          "summary": "calendar variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 13 killed, 0 survivor, 0 leak-review.",
+          "title": "calendar — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "MEDIUM",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    },
+    {
+      "best_dsr": null,
+      "best_net_sharpe": null,
+      "id": "local_factors",
+      "killed_count": 4,
+      "leak_review_count": 0,
+      "name": "local_factors",
+      "negative_knowledge": [
+        {
+          "conditions_for_reopen": [
+            "new_data_source",
+            "larger_sample",
+            "different_frequency",
+            "different_universe",
+            "new_regime",
+            "different_construction",
+            "independent_oos_evidence",
+            "explicit_preregistration",
+            "prior_data_issue_fixed"
+          ],
+          "created_at": 1781410664159,
+          "evidence_summary": [
+            {
+              "dsr": null,
+              "id": "local_factors/H-LF-001",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "local_factors/H-LF-002",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "local_factors/H-LF-003",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            },
+            {
+              "dsr": null,
+              "id": "local_factors/H-LF-004",
+              "net_sr": null,
+              "verdict": "KILLED-AT-STAGE-1"
+            }
+          ],
+          "failure_modes": [
+            "cost_drag"
+          ],
+          "family_id": "local_factors",
+          "id": "NK-local_factors",
+          "policy": {
+            "additional_requirements": [
+              "charge the global registry trial once (rule 13)",
+              "require DSR pass",
+              "require PBO/CSCV referee pass",
+              "require data-snooping check",
+              "require split-half robustness",
+              "require skip-a-bar / staleness attack"
+            ],
+            "allow_override": true,
+            "blocks_without_override": false,
+            "level": "MEDIUM",
+            "override_requires_reason": true,
+            "reason": "resembles family 'local_factors' — 4 killed, 0 survivor; best net SR n/a, best DSR n/a"
+          },
+          "representative_killed_specs": [
+            "local_factors/H-LF-001",
+            "local_factors/H-LF-002",
+            "local_factors/H-LF-003",
+            "local_factors/H-LF-004"
+          ],
+          "summary": "local_factors variants have repeatedly produced eye-catching raw/net Sharpe in thin samples but failed trial-adjusted DSR and/or robustness. 4 killed, 0 survivor, 0 leak-review.",
+          "title": "local_factors — negative knowledge / high false-positive risk",
+          "updated_at": 1781410664159
+        }
+      ],
+      "skepticism": "MEDIUM",
+      "status": "negative-knowledge",
+      "survivor_count": 0
+    }
+  ],
+  "generated_at": 1781424611472,
+  "log": [
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "reversal",
+      "hypothesis_id": null,
+      "seq": 1426,
+      "summary": "negative knowledge for 'reversal'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1425,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "momentum",
+      "hypothesis_id": null,
+      "seq": 1424,
+      "summary": "negative knowledge for 'momentum'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "local_factors",
+      "hypothesis_id": null,
+      "seq": 1423,
+      "summary": "negative knowledge for 'local_factors'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "leadlag",
+      "hypothesis_id": null,
+      "seq": 1422,
+      "summary": "negative knowledge for 'leadlag'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "fx",
+      "hypothesis_id": null,
+      "seq": 1421,
+      "summary": "negative knowledge for 'fx'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "crypto_microstructure",
+      "hypothesis_id": null,
+      "seq": 1420,
+      "summary": "negative knowledge for 'crypto_microstructure'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "carry",
+      "hypothesis_id": null,
+      "seq": 1419,
+      "summary": "negative knowledge for 'carry'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "calendar",
+      "hypothesis_id": null,
+      "seq": 1418,
+      "summary": "negative knowledge for 'calendar'"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "local_factors",
+      "hypothesis_id": null,
+      "seq": 1417,
+      "summary": "negative knowledge for 'local_factors'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-003",
+      "seq": 1416,
+      "summary": "run sync:local_factors/H-LF-003 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-003",
+      "seq": 1415,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-003",
+      "seq": 1414,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-003",
+      "seq": 1413,
+      "summary": "gauntlet run sync:local_factors/H-LF-003"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_CREATED",
+      "family_id": "local_factors",
+      "hypothesis_id": null,
+      "seq": 1412,
+      "summary": "negative knowledge for 'local_factors'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-002",
+      "seq": 1411,
+      "summary": "run sync:local_factors/H-LF-002 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-002",
+      "seq": 1410,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-002",
+      "seq": 1409,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-002",
+      "seq": 1408,
+      "summary": "gauntlet run sync:local_factors/H-LF-002"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-004",
+      "seq": 1407,
+      "summary": "run sync:local_factors/H-LF-004 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-004",
+      "seq": 1406,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-004",
+      "seq": 1405,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-004",
+      "seq": 1404,
+      "summary": "gauntlet run sync:local_factors/H-LF-004"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-001",
+      "seq": 1403,
+      "summary": "run sync:local_factors/H-LF-001 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-001",
+      "seq": 1402,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-001",
+      "seq": 1401,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "local_factors",
+      "hypothesis_id": "local_factors/H-LF-001",
+      "seq": 1400,
+      "summary": "gauntlet run sync:local_factors/H-LF-001"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1399,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1398,
+      "summary": "run sync:rates/H-RATES-119 complete: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1397,
+      "summary": "killed: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1396,
+      "summary": "era_robustness: FAIL"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1395,
+      "summary": "split_halves: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1394,
+      "summary": "skip_a_bar: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1393,
+      "summary": "placebo: PASS"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1392,
+      "summary": "deflated_sharpe: FAIL"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1391,
+      "summary": "cost_drag: PASS"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-119",
+      "seq": 1390,
+      "summary": "gauntlet run sync:rates/H-RATES-119"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1389,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1388,
+      "summary": "run sync:rates/H-RATES-123 complete: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1387,
+      "summary": "killed: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1386,
+      "summary": "era_robustness: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1385,
+      "summary": "split_halves: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1384,
+      "summary": "skip_a_bar: PASS"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1383,
+      "summary": "placebo: FAIL"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1382,
+      "summary": "deflated_sharpe: FAIL"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1381,
+      "summary": "cost_drag: PASS"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-123",
+      "seq": 1380,
+      "summary": "gauntlet run sync:rates/H-RATES-123"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1379,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-135",
+      "seq": 1378,
+      "summary": "run sync:rates/H-RATES-135 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-135",
+      "seq": 1377,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-135",
+      "seq": 1376,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-135",
+      "seq": 1375,
+      "summary": "gauntlet run sync:rates/H-RATES-135"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1374,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-115",
+      "seq": 1373,
+      "summary": "run sync:rates/H-RATES-115 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-115",
+      "seq": 1372,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-115",
+      "seq": 1371,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-115",
+      "seq": 1370,
+      "summary": "gauntlet run sync:rates/H-RATES-115"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1369,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1368,
+      "summary": "run sync:rates/H-RATES-139 complete: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1367,
+      "summary": "killed: KILLED-AT-STAGE-2"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1366,
+      "summary": "era_robustness: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1365,
+      "summary": "split_halves: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1364,
+      "summary": "skip_a_bar: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1363,
+      "summary": "placebo: PASS"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1362,
+      "summary": "deflated_sharpe: FAIL"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1361,
+      "summary": "cost_drag: PASS"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-139",
+      "seq": 1360,
+      "summary": "gauntlet run sync:rates/H-RATES-139"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1359,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-114",
+      "seq": 1358,
+      "summary": "run sync:rates/H-RATES-114 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-114",
+      "seq": 1357,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-114",
+      "seq": 1356,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-114",
+      "seq": 1355,
+      "summary": "gauntlet run sync:rates/H-RATES-114"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1354,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-143",
+      "seq": 1353,
+      "summary": "run sync:rates/H-RATES-143 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-143",
+      "seq": 1352,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-143",
+      "seq": 1351,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-143",
+      "seq": 1350,
+      "summary": "gauntlet run sync:rates/H-RATES-143"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1349,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-134",
+      "seq": 1348,
+      "summary": "run sync:rates/H-RATES-134 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-134",
+      "seq": 1347,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-134",
+      "seq": 1346,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-134",
+      "seq": 1345,
+      "summary": "gauntlet run sync:rates/H-RATES-134"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1344,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-118",
+      "seq": 1343,
+      "summary": "run sync:rates/H-RATES-118 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-118",
+      "seq": 1342,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-118",
+      "seq": 1341,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-118",
+      "seq": 1340,
+      "summary": "gauntlet run sync:rates/H-RATES-118"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1339,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-001",
+      "seq": 1338,
+      "summary": "run sync:rates/H-RATES-001 complete: KILLED-AT-STAGE-0"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-001",
+      "seq": 1337,
+      "summary": "killed: KILLED-AT-STAGE-0"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-001",
+      "seq": 1336,
+      "summary": "gauntlet run sync:rates/H-RATES-001"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1335,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-105",
+      "seq": 1334,
+      "summary": "run sync:rates/H-RATES-105 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-105",
+      "seq": 1333,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-105",
+      "seq": 1332,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-105",
+      "seq": 1331,
+      "summary": "gauntlet run sync:rates/H-RATES-105"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1330,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-129",
+      "seq": 1329,
+      "summary": "run sync:rates/H-RATES-129 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-129",
+      "seq": 1328,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-129",
+      "seq": 1327,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-129",
+      "seq": 1326,
+      "summary": "gauntlet run sync:rates/H-RATES-129"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1325,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-125",
+      "seq": 1324,
+      "summary": "run sync:rates/H-RATES-125 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-125",
+      "seq": 1323,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-125",
+      "seq": 1322,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-125",
+      "seq": 1321,
+      "summary": "gauntlet run sync:rates/H-RATES-125"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1320,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-132",
+      "seq": 1319,
+      "summary": "run sync:rates/H-RATES-132 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-132",
+      "seq": 1318,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-132",
+      "seq": 1317,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-132",
+      "seq": 1316,
+      "summary": "gauntlet run sync:rates/H-RATES-132"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1315,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-145",
+      "seq": 1314,
+      "summary": "run sync:rates/H-RATES-145 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-145",
+      "seq": 1313,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-145",
+      "seq": 1312,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-145",
+      "seq": 1311,
+      "summary": "gauntlet run sync:rates/H-RATES-145"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1310,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-107",
+      "seq": 1309,
+      "summary": "run sync:rates/H-RATES-107 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-107",
+      "seq": 1308,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-107",
+      "seq": 1307,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-107",
+      "seq": 1306,
+      "summary": "gauntlet run sync:rates/H-RATES-107"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1305,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-003",
+      "seq": 1304,
+      "summary": "run sync:rates/H-RATES-003 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-003",
+      "seq": 1303,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-003",
+      "seq": 1302,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-003",
+      "seq": 1301,
+      "summary": "gauntlet run sync:rates/H-RATES-003"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1300,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1299,
+      "summary": "run sync:rates/H-RATES-146 complete: KILLED-AT-STAGE-3"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1298,
+      "summary": "killed: KILLED-AT-STAGE-3"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1297,
+      "summary": "era_robustness: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1296,
+      "summary": "split_halves: PASS"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1295,
+      "summary": "skip_a_bar: FAIL"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1294,
+      "summary": "placebo: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1293,
+      "summary": "deflated_sharpe: PASS"
+    },
+    {
+      "event": "GATE_PASSED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1292,
+      "summary": "cost_drag: PASS"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-146",
+      "seq": 1291,
+      "summary": "gauntlet run sync:rates/H-RATES-146"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1290,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-127",
+      "seq": 1289,
+      "summary": "run sync:rates/H-RATES-127 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-127",
+      "seq": 1288,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-127",
+      "seq": 1287,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-127",
+      "seq": 1286,
+      "summary": "gauntlet run sync:rates/H-RATES-127"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1285,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-126",
+      "seq": 1284,
+      "summary": "run sync:rates/H-RATES-126 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-126",
+      "seq": 1283,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-126",
+      "seq": 1282,
+      "summary": "cost_drag: FAIL"
+    },
+    {
+      "event": "RUN_STARTED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-126",
+      "seq": 1281,
+      "summary": "gauntlet run sync:rates/H-RATES-126"
+    },
+    {
+      "event": "NEGATIVE_KNOWLEDGE_UPDATED",
+      "family_id": "rates",
+      "hypothesis_id": null,
+      "seq": 1280,
+      "summary": "negative knowledge for 'rates'"
+    },
+    {
+      "event": "RUN_COMPLETED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-130",
+      "seq": 1279,
+      "summary": "run sync:rates/H-RATES-130 complete: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "HYPOTHESIS_KILLED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-130",
+      "seq": 1278,
+      "summary": "killed: KILLED-AT-STAGE-1"
+    },
+    {
+      "event": "GATE_FAILED",
+      "family_id": "rates",
+      "hypothesis_id": "rates/H-RATES-130",
+      "seq": 1277,
+      "summary": "cost_drag: FAIL"
+    }
+  ]
+}

@@ -1,0 +1,519 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 225 12% 4.5%;
+    --foreground: 220 8% 92%;
+    --card: 220 8% 10%;
+    --card-foreground: 220 8% 92%;
+    --popover: 220 9% 11%;
+    --popover-foreground: 220 8% 92%;
+    --primary: 213 90% 66%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 8% 15%;
+    --secondary-foreground: 220 8% 88%;
+    --muted: 220 7% 16%;
+    --muted-foreground: 220 6% 62%;
+    --accent: 220 8% 18%;
+    --accent-foreground: 220 8% 92%;
+    --destructive: 0 66% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 7% 18%;
+    --input: 220 7% 19%;
+    --ring: 213 90% 66%;
+    --radius: 0.375rem;
+    --surface-app: 225 12% 4.5%;
+    --surface-sidebar: 225 8% 12%;
+    --surface-panel: 225 8% 9.5%;
+    --surface-header: 225 8% 14%;
+    --surface-toolbar: 225 7% 12.5%;
+    --surface-input: 225 10% 6.5%;
+    --surface-hover: 225 7% 15%;
+    --surface-active: 225 7% 17%;
+    --outline-subtle: 225 7% 15%;
+    --outline-strong: 225 7% 20%;
+    --icon-muted: 220 6% 66%;
+    --icon-active: 213 90% 70%;
+    --icon-tile: 213 40% 16%;
+    --icon-tile-foreground: 213 90% 80%;
+    --scrollbar-track: 225 7% 13%;
+    --scrollbar-thumb: 225 7% 42%;
+    --scrollbar-thumb-hover: 225 6% 54%;
+  }
+
+  :root[data-theme="light"] {
+    --background: 42 33% 97%;
+    --foreground: 215 28% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 16%;
+    --primary: 217 80% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 28% 94%;
+    --secondary-foreground: 215 28% 18%;
+    --muted: 210 22% 94%;
+    --muted-foreground: 215 12% 42%;
+    --accent: 38 75% 92%;
+    --accent-foreground: 215 28% 18%;
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 18% 84%;
+    --input: 210 18% 88%;
+    --ring: 217 80% 48%;
+    --surface-app: 42 33% 97%;
+    --surface-sidebar: 42 24% 94%;
+    --surface-panel: 0 0% 100%;
+    --surface-header: 42 24% 92%;
+    --surface-toolbar: 42 18% 95%;
+    --surface-input: 0 0% 100%;
+    --surface-hover: 42 24% 91%;
+    --surface-active: 193 58% 90%;
+    --outline-subtle: 210 18% 86%;
+    --outline-strong: 210 18% 74%;
+    --icon-muted: 215 12% 46%;
+    --icon-active: 193 72% 38%;
+    --icon-tile: 193 72% 92%;
+    --icon-tile-foreground: 193 72% 30%;
+    --scrollbar-track: 42 24% 92%;
+    --scrollbar-thumb: 210 14% 66%;
+    --scrollbar-thumb-hover: 210 14% 52%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-surface-app text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    text-rendering: geometricPrecision;
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.7);
+    outline-offset: 2px;
+  }
+  svg {
+    @apply text-current;
+    stroke-width: 1.65;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.24);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--scrollbar-track) / 0.72);
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: hsl(var(--scrollbar-thumb) / 0.9);
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--scrollbar-thumb-hover) / 0.95);
+    background-clip: content-box;
+  }
+  * {
+    scrollbar-color: hsl(var(--scrollbar-thumb) / 0.9) hsl(var(--scrollbar-track) / 0.72);
+    scrollbar-width: thin;
+  }
+
+}
+
+/* CubeCanvas emits Tailwind's sr-only utility from an external package. Keep a
+   concrete local definition so assistive text never leaks into app layouts when
+   Tailwind content scanning does not see that external class. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+@layer utilities {
+  /* Kept for compatibility with older component classes; now intentionally quiet. */
+  .bg-grid {
+    background-image: none;
+  }
+  .aurora {
+    background: transparent;
+  }
+  .glass {
+    @apply border border-outline-subtle bg-surface-panel;
+  }
+  .text-gradient {
+    @apply text-primary;
+  }
+}
+
+@layer components {
+  /* Rendered markdown in Explore notebook cells (ADR-0029). Scoped, compact
+     prose tuned to the app's dark surfaces — no external typography plugin. */
+  .qf-prose > :first-child {
+    margin-top: 0;
+  }
+  .qf-prose > :last-child {
+    margin-bottom: 0;
+  }
+  .qf-prose h1,
+  .qf-prose h2,
+  .qf-prose h3 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0.9em 0 0.4em;
+  }
+  .qf-prose h1 {
+    font-size: 1.25rem;
+  }
+  .qf-prose h2 {
+    font-size: 1.1rem;
+  }
+  .qf-prose h3 {
+    font-size: 1rem;
+  }
+  .qf-prose p,
+  .qf-prose ul,
+  .qf-prose ol,
+  .qf-prose blockquote,
+  .qf-prose table {
+    margin: 0.5em 0;
+  }
+  .qf-prose ul,
+  .qf-prose ol {
+    padding-left: 1.4em;
+  }
+  .qf-prose ul {
+    list-style: disc;
+  }
+  .qf-prose ol {
+    list-style: decimal;
+  }
+  .qf-prose a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+  }
+  .qf-prose code {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.85em;
+    background: hsl(var(--surface-toolbar));
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+  .qf-prose pre {
+    background: hsl(var(--surface-input));
+    border: 1px solid hsl(var(--outline-subtle));
+    border-radius: 6px;
+    padding: 0.7em 0.9em;
+    overflow-x: auto;
+  }
+  .qf-prose pre code {
+    background: transparent;
+    padding: 0;
+  }
+  .qf-prose blockquote {
+    border-left: 3px solid hsl(var(--outline-strong));
+    padding-left: 0.8em;
+    color: hsl(var(--muted-foreground));
+  }
+  .qf-prose table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .qf-prose th,
+  .qf-prose td {
+    border: 1px solid hsl(var(--outline-subtle));
+    padding: 0.3em 0.55em;
+    text-align: left;
+  }
+  .qf-prose hr {
+    border: 0;
+    border-top: 1px solid hsl(var(--outline-subtle));
+    margin: 1em 0;
+  }
+
+  .qf-function-panel {
+    container-type: inline-size;
+  }
+
+  .quantfabric-result-grid {
+    --cube-grid-font: var(--font-sans, Inter, "SF Pro Text", "Segoe UI", ui-sans-serif, system-ui, sans-serif);
+    --cube-grid-radius: var(--radius);
+    --cube-grid-bg: hsl(var(--surface-panel));
+    --cube-grid-text: hsl(var(--foreground));
+    --cube-grid-muted-text: hsl(var(--muted-foreground));
+    --cube-grid-border: hsl(var(--outline-subtle));
+    --cube-grid-header-bg: hsl(var(--surface-header));
+    --cube-grid-header-hover-bg: hsl(var(--surface-hover));
+    --cube-grid-header-text: hsl(var(--foreground));
+    --cube-grid-column-divider: hsl(var(--outline-subtle) / 0.85);
+    --cube-grid-pinned-bg: hsl(var(--surface-panel));
+    --cube-grid-footer-bg: hsl(var(--surface-toolbar));
+    --cube-grid-row-hover-bg: hsl(var(--surface-hover));
+    --cube-grid-row-hover-overlay: hsl(var(--surface-hover) / 0.62);
+    --cube-grid-row-active-bg: hsl(var(--primary) / 0.11);
+    --cube-grid-row-active-bg-hover: hsl(var(--primary) / 0.16);
+    --cube-grid-row-selected-overlay: hsl(var(--primary) / 0.14);
+    --cube-grid-row-selected-overlay-hover: hsl(var(--primary) / 0.22);
+    --cube-grid-cell-range-selected-overlay: hsl(var(--primary) / 0.16);
+    --cube-grid-cell-range-selected-overlay-hover: hsl(var(--primary) / 0.28);
+    --cube-grid-cell-range-selected-border: hsl(var(--primary) / 0.72);
+    --cube-grid-scrollbar-bg: hsl(var(--surface-toolbar));
+    --cube-grid-scrollbar-track: hsl(var(--surface-panel));
+    --cube-grid-scrollbar-track-border: hsl(var(--outline-subtle));
+    --cube-grid-scrollbar-thumb: hsl(var(--scrollbar-thumb) / 0.9);
+    --cube-grid-scrollbar-thumb-hover: hsl(var(--scrollbar-thumb-hover) / 0.95);
+    --cube-grid-scrollbar-thumb-active: hsl(var(--foreground) / 0.72);
+    --cube-grid-scrollbar-size: 10px;
+    --cube-grid-loading-bg: hsl(var(--surface-panel) / 0.78);
+    --cube-grid-splash-bg: hsl(var(--surface-panel) / 0.88);
+    --cube-grid-splash-spinner: hsl(var(--primary));
+    --cube-grid-splash-spinner-track: hsl(var(--outline-subtle));
+    --cube-grid-error-bg: hsl(var(--destructive) / 0.1);
+    --cube-grid-error-text: hsl(var(--destructive));
+    --cube-grid-error-border: hsl(var(--destructive) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  .quantfabric-result-grid .cube-grid {
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-cell {
+    cursor: pointer !important;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-cell,
+  .quantfabric-result-grid .cube-grid-header-row-number-cell {
+    letter-spacing: 0;
+  }
+
+  .quantfabric-result-grid .cube-grid-column-grip {
+    width: 3px;
+    height: 16px;
+    border-radius: 999px;
+    background: hsl(var(--outline-strong) / 0.72);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-cell:hover .cube-grid-column-grip,
+  .quantfabric-result-grid .cube-grid-header-cell:focus-within .cube-grid-column-grip {
+    opacity: 1;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-actions {
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-cell:hover .cube-grid-header-actions,
+  .quantfabric-result-grid .cube-grid-header-cell:focus-within .cube-grid-header-actions,
+  .quantfabric-result-grid .cube-grid-header-actions:has([data-state="open"]) {
+    opacity: 1;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-filter-trigger,
+  .quantfabric-result-grid .cube-grid-header-menu-trigger {
+    display: inline-grid;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: hsl(var(--muted-foreground));
+    background: transparent;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-filter-trigger:hover,
+  .quantfabric-result-grid .cube-grid-header-menu-trigger:hover,
+  .quantfabric-result-grid .cube-grid-header-filter-trigger:focus,
+  .quantfabric-result-grid .cube-grid-header-menu-trigger:focus,
+  .quantfabric-result-grid .cube-grid-header-filter-trigger[data-state="open"],
+  .quantfabric-result-grid .cube-grid-header-menu-trigger[data-state="open"] {
+    border-color: hsl(var(--outline-strong));
+    background: hsl(var(--surface-hover));
+    color: hsl(var(--foreground));
+    outline: none;
+  }
+
+  .quantfabric-result-grid .cube-grid-header-filter-trigger svg,
+  .quantfabric-result-grid .cube-grid-header-menu-trigger svg,
+  .quantfabric-result-grid .cube-grid-sort-indicator svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .quantfabric-result-grid .cube-grid-cell,
+  .quantfabric-result-grid .cube-grid-meta-cell,
+  .quantfabric-result-grid .cube-grid-row-number-cell,
+  .quantfabric-result-grid .cube-grid-group-cell {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-group-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-meta-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-row-number-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-row-selection-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-validation-cell,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-full-width-row {
+    box-shadow: inset 0 0 0 9999px var(--cube-grid-row-hover-overlay);
+  }
+
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-group-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-meta-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-row-number-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-row-selection-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-validation-cell,
+  .quantfabric-result-grid .cube-grid-row-active:not(.cube-grid-row-selected) .cube-grid-full-width-row {
+    box-shadow: inset 0 0 0 9999px var(--cube-grid-row-active-bg);
+  }
+
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-group-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-meta-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-row-number-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-row-selection-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-validation-cell,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-full-width-row {
+    box-shadow: inset 0 0 0 9999px var(--cube-grid-row-selected-overlay);
+  }
+
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-group-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-meta-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-row-number-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-row-selection-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-validation-cell,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-full-width-row {
+    box-shadow: inset 0 0 0 9999px var(--cube-grid-row-selected-overlay-hover);
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-selected {
+    --cube-grid-cell-range-selected-current-overlay: var(--cube-grid-cell-range-selected-overlay);
+    --cube-grid-cell-range-edge-top-shadow: 0 0 0 0 transparent;
+    --cube-grid-cell-range-edge-right-shadow: 0 0 0 0 transparent;
+    --cube-grid-cell-range-edge-bottom-shadow: 0 0 0 0 transparent;
+    --cube-grid-cell-range-edge-left-shadow: 0 0 0 0 transparent;
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-selected,
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-cell-range-selected,
+  .quantfabric-result-grid .cube-grid-row-selected .cube-grid-cell-range-selected,
+  .quantfabric-result-grid .cube-grid-row-selected:hover .cube-grid-cell-range-selected {
+    box-shadow:
+      var(--cube-grid-cell-range-edge-top-shadow),
+      var(--cube-grid-cell-range-edge-right-shadow),
+      var(--cube-grid-cell-range-edge-bottom-shadow),
+      var(--cube-grid-cell-range-edge-left-shadow),
+      inset 0 0 0 9999px var(--cube-grid-cell-range-selected-current-overlay);
+  }
+
+  .quantfabric-result-grid .cube-grid-row:hover .cube-grid-cell-range-selected {
+    --cube-grid-cell-range-selected-current-overlay: var(--cube-grid-cell-range-selected-overlay-hover);
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-edge-top {
+    --cube-grid-cell-range-edge-top-shadow: inset 0 1px 0 0 var(--cube-grid-cell-range-selected-border);
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-edge-right {
+    --cube-grid-cell-range-edge-right-shadow: inset -1px 0 0 0 var(--cube-grid-cell-range-selected-border);
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-edge-bottom {
+    --cube-grid-cell-range-edge-bottom-shadow: inset 0 -1px 0 0 var(--cube-grid-cell-range-selected-border);
+  }
+
+  .quantfabric-result-grid .cube-grid-cell-range-edge-left {
+    --cube-grid-cell-range-edge-left-shadow: inset 1px 0 0 0 var(--cube-grid-cell-range-selected-border);
+  }
+
+  .quantfabric-result-grid .cube-grid-status-bar {
+    border-top: 1px solid hsl(var(--outline-subtle));
+    background: hsl(var(--surface-toolbar));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .quantfabric-result-grid .cube-grid-horizontal-scrollbar::-webkit-scrollbar {
+    height: var(--cube-grid-scrollbar-size);
+  }
+
+  .quantfabric-result-grid .cube-grid-horizontal-scrollbar::-webkit-scrollbar-track {
+    background: var(--cube-grid-scrollbar-track);
+  }
+
+  .quantfabric-result-grid .cube-grid-horizontal-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: var(--cube-grid-scrollbar-thumb);
+    background-clip: content-box;
+  }
+
+  .quantfabric-result-grid .cube-grid-horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--cube-grid-scrollbar-thumb-hover);
+    background-clip: content-box;
+  }
+
+  [data-radix-popper-content-wrapper]
+    [role="dialog"]:has([aria-label="Operator"], [aria-label="Value"]) {
+    width: min(300px, calc(100vw - 24px)) !important;
+    padding: 8px !important;
+    border: 1px solid hsl(var(--outline-strong)) !important;
+    border-radius: 6px !important;
+    background: hsl(var(--surface-panel)) !important;
+    color: hsl(var(--foreground)) !important;
+    box-shadow: 0 18px 42px -22px hsl(var(--foreground) / 0.42) !important;
+    font-size: 12px !important;
+  }
+
+  [data-radix-popper-content-wrapper]
+    [role="dialog"]:has([aria-label="Operator"], [aria-label="Value"])
+    select,
+  [data-radix-popper-content-wrapper]
+    [role="dialog"]:has([aria-label="Operator"], [aria-label="Value"])
+    input {
+    height: 26px !important;
+    min-height: 26px !important;
+    border-color: hsl(var(--outline-subtle)) !important;
+    border-radius: 5px !important;
+    background: hsl(var(--surface-input)) !important;
+    color: hsl(var(--foreground)) !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  [data-radix-popper-content-wrapper]
+    [role="dialog"]:has([aria-label="Operator"], [aria-label="Value"])
+    button {
+    min-height: 24px;
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,3 @@
+Wrote `energy_facts.jsonl` from `energy_sample.jsonl`.
+
+docs processed: 8, total facts: 40

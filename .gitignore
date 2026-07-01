@@ -1,0 +1,27 @@
+# dependencies / build output
+node_modules/
+dist/
+**/target/
+*.tsbuildinfo
+
+# python caches
+__pycache__/
+*.pyc
+.venv/
+
+# local Qdrant storage — 500MB+, regenerate by running index_facts.py
+qdrant_storage/
+qdrant_snapshots/
+.qdrant-initialized
+
+# orchestrator-generated config + scratch
+config/*.generated.json
+data/tmp/
+
+# os / editor / logs
+.DS_Store
+*.log
+
+# secrets
+.env
+.env.*

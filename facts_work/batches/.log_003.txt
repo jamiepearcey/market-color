@@ -1,0 +1,434 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1af4-53cf-7072-85f7-1f471e6d3e57
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `energy_batch_003.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `energy_batch_003.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `energy_facts_003.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-06-30T23:54:12.528500Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `energy_batch_003.jsonl` to see the document structure and content patterns, then I’ll extract the facts and write `energy_facts_003.jsonl` in the same order.
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc 'wc -l energy_batch_003.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 energy_batch_003.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('energy_batch_003.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print('DOC',i,obj['doc_id'])
+        print('TITLE:',obj['title'])
+        print('DATE:',obj['published_date'])
+        print('BODY:',obj['body_text'][:1500].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1 9feb71f2f8008294ec1d6d5e17ae58bc
+TITLE: Global HSE& Sustainability Business Leader - Lufkin
+DATE: 2026-06-30
+BODY: Job Title: Global HSE& Sustainability Business LeaderDo you have a passion for building world-class safety cultures while driving sustainability and environmental excellence across global operations •Do you enjoy partnering with senior leaders to influence strategy, manage risk, and lead transformational HSE initiatives that create lasting business impact •Job Summary: As a Global HSE & Sustainability Business Partner, you will work across Baker Hughes' global Power Transmission operations to shape our Health, Safety, and Environment strategy. You will collaborate closely with operational leaders, integrating HSE into business decision-making, and driving a culture where safety, sustainability, and continuous improvement are at the core of how we work. You will also lead, coach, and mentor HSE professionals worldwide, developing future leaders and building a consistent standard of excellence across our organization. To be successful in this role, you will:- Partnering with operations and functional leadership across multiple geographies to embed HSE into day-to-day decisions, long-term strategies, and performance metrics. - Leading the global deployment and governance of the Baker Hughes HSE Management System, ensuring robust environmental compliance with ISO 14001/45001, sustainability frameworks, and applicable local, regional, and international regulations. - Establishing and enforcing environmental governance frameworks, including standards, procedures, and controls, to e
+---
+DOC 2 a5925de1d0817ea890794fe1eb7608ba
+TITLE: Who Is the World's Biggest Oil Producer?
+DATE: 2026-06-30
+BODY: Who Is the World's Biggest Oil Producer? The world’s biggest oil producer is the United States, according to the Energy Institute’s (EI) latest statistical review of world energy report, which was published recently. This report showed that the U.S. produced 21.065 million barrels of oil per day in 2025. That represented a 3.9 percent increase year on year and 20.9 percent of the total oil production in 2025, according to the report, which highlighted that U.S. oil production has seen an average yearly growth rate of 5.1 percent from 2015 to 2025. Saudi Arabia was shown in the report to be second biggest oil producer in the world last year, with 11.408 million barrels per day. That figure marked a 5.1 percent rise year on year and 11.3 percent of the world’s total, the report outlined. From 2015 to 2025, Saudi Arabia has seen an average yearly oil production decline rate of 0.5 percent, the report highlighted. Russia was the third biggest oil producer last year in the EI report, with 10.737 million barrels per day. That figure represented a 0.2 percent drop year on year and 10.7 percent of the global total for 2025, the report highlighted. From 2015 to 2025, Russia has seen an average yearly oil production reduction rate of 0.3 percent, the report showed. Total world oil production came in at 100.590 million barrels per day in 2025, according to the EI’s latest report, which showed that this was a year on year increase of 3.5 percent. Total world oil output has increased by a
+---
+DOC 3 a62418c37caf998c86e93e0d1a1191fa
+TITLE: The Oil Benchmark Named Brent Is Losing Its Brent | OilPrice.com
+DATE: 2026-06-30
+BODY: The world's most important oil benchmark is about to experience an identity crisis. For the first time since records began, no Brent crude cargoes are scheduled to load in August, according to Reuters calculations based on loading programs and LSEG data. In other words, the benchmark that gives Brent crude its name is slowly disappearing. That's not because Brent is losing relevance. Quite the opposite. Brent still underpins pricing for more than 60% of internationally traded crude. The problem is that the original Brent field has simply been producing less and less oil for decades. What's left of Brent itself now averages just 23,000 barrels per day this year. This is roughly one cargo per month and less than a quarter of the production seen a decade ago. The benchmark has been reinventing itself for years. Today's Dated Brent is no longer just Brent. It also includes Forties, Oseberg, Ekofisk, Troll, and, since 2023, U.S. WTI Midland. That slow shift has kept the benchmark liquid even as the namesake crude transitions into a historical footnote. "What is left of Brent is just a brand name," veteran oil trader Adi Imsirovic told Reuters. He's probably right. The crude may eventually disappear altogether, but the benchmark isn't going anywhere. In fact, recent events in the Middle East have reinforced just how important North Sea barrels remain. During the Strait of Hormuz crisis, refiners scrambled for any crude that didn't require sailing through one of the world's most dan
+---
+
+codex
+The file has 12 documents. I’ve confirmed at least one is non-market content, so I’m checking all titles and a compact body preview to separate empty-fact docs from extractable ones before generating output.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('energy_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        body=' '.join(obj['body_text'].split())
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['title']}\")
+        print(body[:500])
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 9feb71f2f8008294ec1d6d5e17ae58bc | 2026-06-30 | Global HSE& Sustainability Business Leader - Lufkin
+Job Title: Global HSE& Sustainability Business LeaderDo you have a passion for building world-class safety cultures while driving sustainability and environmental excellence across global operations •Do you enjoy partnering with senior leaders to influence strategy, manage risk, and lead transformational HSE initiatives that create lasting business impact •Job Summary: As a Global HSE & Sustainability Business Partner, you will work across Baker Hughes' global Power Transmission operations to sh
+---
+2. a5925de1d0817ea890794fe1eb7608ba | 2026-06-30 | Who Is the World's Biggest Oil Producer?
+Who Is the World's Biggest Oil Producer? The world’s biggest oil producer is the United States, according to the Energy Institute’s (EI) latest statistical review of world energy report, which was published recently. This report showed that the U.S. produced 21.065 million barrels of oil per day in 2025. That represented a 3.9 percent increase year on year and 20.9 percent of the total oil production in 2025, according to the report, which highlighted that U.S. oil production has seen an average
+---
+3. a62418c37caf998c86e93e0d1a1191fa | 2026-06-30 | The Oil Benchmark Named Brent Is Losing Its Brent | OilPrice.com
+The world's most important oil benchmark is about to experience an identity crisis. For the first time since records began, no Brent crude cargoes are scheduled to load in August, according to Reuters calculations based on loading programs and LSEG data. In other words, the benchmark that gives Brent crude its name is slowly disappearing. That's not because Brent is losing relevance. Quite the opposite. Brent still underpins pricing for more than 60% of internationally traded crude. The problem 
+---
+4. a8f2c7b7ab76f608b25b313c02414eac | 2026-06-30 | Shell sees flat LNG trade in 2026 as Hormuz recovery remains uncertain
+Shell sees flat LNG trade in 2026 as Hormuz recovery remains uncertain (Bloomberg) – Shell Plc expects global liquefied natural gas flows to be little changed this year—after more than a decade of growth—if shipping through the Strait of Hormuz returns to normal this summer. However, under an alternative scenario, published in Shell’s LNG Outlook 2026 released on Tuesday, LNG supply could see a rare annual contraction if Hormuz remains shut for weeks to come. The conflict in the Middle East has 
+---
+5. aa9734f558a9fdc34c78416947b0c957 | 2026-06-30 | US Crude Output Sets New Monthly Production Record | OilPrice.com
+According to monthly data released Tuesday by the U.S. Energy Information Administration (EIA), U.S. crude oil production climbed to a record 13.934 million barrels per day (bpd) in April—the highest monthly production rate ever recorded. The new record surpassed March's 13.718 million bpd by 216,000 bpd, as producers responded to the oil price spike triggered by the Iran war and the closure of the Strait of Hormuz. While oil prices have since retreated as exports from the Persian Gulf gradually
+---
+6. abf9cbf1f0b22c810af991f6a7faff7e | 2026-06-30 | China's Energy Future Runs on Coal and Solar | OilPrice.com
+China will continue spending heavily on both coal and alternative energy, such as wind and solar, over the next five years, Beijing’s latest five-year plan revealed this month. The apparent paradox sees the world’s largest emitter by far continue to generate a solid portion of its energy from coal while also boosting the largest alternative energy capacity in the world. The thing is, it is not actually a paradox. Ever since the signing of the Paris Agreement in 2015, a host of countries have bee
+---
+7. ac95e2e31b1e78f21ec3bb8c3f6d1fb8 | 2026-06-30 | NextDecade Seeks to Raise $3.5B in Debt Instrument Sale for Rio Grande LNG
+NextDecade Seeks to Raise $3.5B in Debt Instrument Sale for Rio Grande LNG NextDecade Corp has priced a series of senior secured notes with a total principal amount of $3.5 billion to fund the under-construction Rio Grande LNG project in Brownsville, Texas. The first tranche, due 2031 with a 5.25 percent interest rate, totals $1 billion. The $500-million second tranche matures 2034 with a 5.5 percent interest rate. A further $1.25-billion notes mature 2036 with a 5.75 percent interest rate. Roun
+---
+8. ad593e9fe62a7ca60e36eb1c64a2c7c2 | 2026-06-30 | Siemens, IFS partner on Industrial AI for asset, production optimization
+Siemens, IFS partner on Industrial AI for asset, production optimization (WO) — Siemens and IFS have formed a strategic partnership to integrate industrial AI, digital twin technology and asset lifecycle management, aiming to improve operational performance across manufacturing and industrial sectors, including energy. The collaboration combines Siemens' engineering, automation, manufacturing execution and digital twin technologies with IFS' enterprise asset management and field service platform
+---
+9. b047c6c987a1c5d3d8b3d0804282df81 | 2026-06-30 | Allison Transmission Holdings Set to Join S&P MidCap 400 and Goodyear Tire & Rubber to Join S&P SmallCap 600
+Press Releases NEW YORK, June 30, 2026 /PRNewswire/ -- Allison Transmission Holdings Inc. (NYSE: ALSN) will replace Goodyear Tire & Rubber Co. (NASD: GT) in the S&P MidCap 400, and Goodyear Tire & Rubber will replace Stellar Bancorp Inc. (NYSE: STEL) in the S&P SmallCap 600 effective prior to the opening of trading on Monday, July 6. S&P MidCap 400 constituent Prosperity Bancshares Inc. (NYSE: PB) is acquiring Stellar Bancorp in a deal expected to close July 1. Following is a summary of the chan
+---
+10. ba65274265699e55ab0560bed99983e0 | 2026-06-30 | Trump suspends Morocco phosphate duties for 8 months | Latest Market News
+US President Donald Trump said late Monday he will temporarily suspend countervailing duties on certain phosphate fertilizer imports into the US from Morocco for eight months, citing a "supply emergency" for US farmers. Under the proclamation, anti-dumping and countervailing duties issued against certain phosphate fertilizers from Morocco will be suspended for eight months, or until the emergency order is terminated, depending on which occurs first. Global supply chains for phosphate fertilizers
+---
+11. beb9351c94d1f33dfd57ef50a3ca6142 | 2026-06-30 | EXPERT DATA & AI ARCHITECT
+Come Expert Data & AI Architect farai parte della funzione Digital Information Technologies di Eni e ti occuperai della progettazione e implementazione di soluzioni end-to-end in ambito Dati e AI in un contesto Enterprise. Opererai all'interno di team multidisciplinari, traducendo requisiti di business in architetture tecniche scalabili, sicure e governate, contribuendo attivamente alla delivery progettuale e alla crescita tecnica del team. Attivita principali: Caratteristiche richieste: Complet
+---
+12. c1fc100f1d528b258f9ba6682ac6967e | 2026-06-30 | Tenaris invests $90 million to modernize Pennsylvania OCTG manufacturing
+Tenaris invests $90 million to modernize Pennsylvania OCTG manufacturing (WO) — Tenaris will invest more than $90 million to modernize its steelmaking and seamless pipe manufacturing operations in Pennsylvania, expanding automation and production capabilities to support growing demand from the U.S. oil and gas industry. The investment will fund upgrades at the company's steel shop in Koppel and seamless pipe mill in Ambridge, where automation and equipment improvements are expected to increase p
+---
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from collections import Counter
+c=Counter()
+with open('energy_batch_003.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        c[obj['source_name']]+=1
+print(c)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Counter({'Rigzone Latest': 4, 'OilPrice.com': 3, 'World Oil News': 3, 'S&P Global Commodity Insights (Platts)': 1, 'Argus Media': 1})
+
+codex
+I’ve identified likely market-bearing documents. I’m pulling the full text for those now so the facts stay strictly grounded in stated numbers, dates, and causes rather than compressed previews.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('energy_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        if i in [4,5,6,7,8,9,10,12]:
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:',obj['title'])
+            print('DATE:',obj['published_date'])
+            print(obj['body_text'])
+            print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 4 a8f2c7b7ab76f608b25b313c02414eac =====
+TITLE: Shell sees flat LNG trade in 2026 as Hormuz recovery remains uncertain
+DATE: 2026-06-30
+Shell sees flat LNG trade in 2026 as Hormuz recovery remains uncertain (Bloomberg) – Shell Plc expects global liquefied natural gas flows to be little changed this year—after more than a decade of growth—if shipping through the Strait of Hormuz returns to normal this summer. However, under an alternative scenario, published in Shell’s LNG Outlook 2026 released on Tuesday, LNG supply could see a rare annual contraction if Hormuz remains shut for weeks to come. The conflict in the Middle East has choked off about a fifth of global exports over the past four months. When the strait is eventually deemed safe to pass, LNG facilities could require around six to eight weeks to ramp up, Shell said. The oil major is an equity stakeholder at Qatar’s massive Ras Laffan complex, where production units were damaged by Iranian missiles in March. London-based Shell, the world’s biggest LNG trader, sees supply of the super-chilled fuel returning to growth in 2027. That contrasts with Vitol Group and the International Energy Agency, which expect supplies could be tight for around two more years. Shell shares were little changed in London trading on Tuesday. Even as new export facilities—mainly in the U.S.—come online, Qatar has said that about 17% of its capacity would need years of repairs after the Iranian attacks. Some experts also predict delays to new projects in the Middle East. While shipping traffic is recovering after the U.S. and Iran signed a deal to reopen Hormuz, tensions in the Persian Gulf remain high with renewed attacks on cargo vessels in recent days pushing benchmark gas contracts higher. Qatar is yet to resume normal operations after it shut its LNG production in March following the Iranian strikes. Shell also operates Qatar’s Pearl gas-to-liquids facility, which also remains offline after being hit during the conflict. Global demand for LNG is expected to climb to nearly 700 million tons a year by 2050, an increase of around 65% from 2025 levels, according to Shell.
+
+===== DOC 5 aa9734f558a9fdc34c78416947b0c957 =====
+TITLE: US Crude Output Sets New Monthly Production Record | OilPrice.com
+DATE: 2026-06-30
+According to monthly data released Tuesday by the U.S. Energy Information Administration (EIA), U.S. crude oil production climbed to a record 13.934 million barrels per day (bpd) in April—the highest monthly production rate ever recorded. The new record surpassed March's 13.718 million bpd by 216,000 bpd, as producers responded to the oil price spike triggered by the Iran war and the closure of the Strait of Hormuz. While oil prices have since retreated as exports from the Persian Gulf gradually resume, April's data captures the industry's response when crude briefly flirted with $120 per barrel. The Permian Basin once again did the heavy lifting. New Mexico set a new production record at 2.37 million bpd, while Texas boosted output to 5.83 million bpd, its highest level since November. North Dakota also posted its strongest production since November at 1.13 million bpd. The monthly figures also help explain the disconnect that many analysts noticed over the past several weeks. Weekly EIA estimates had already suggested U.S. production was hovering near record territory, climbing from 13.66 million bpd in late March to more than 13.8 million bpd through June. The monthly data now confirms those gains weren't statistical noise. They reflected a genuine surge in production. The latest figures also exceeded the EIA's own expectations. In its June Short-Term Energy Outlook, released just three weeks ago, the agency forecast average U.S. crude production of 13.7 million bpd for 2026. April alone came in more than 200,000 bpd above that projection, highlighting just how quickly higher prices encouraged additional supply. Oil prices have fallen sharply from their wartime highs as the U.S.-Iran ceasefire remains in place and crude trapped inside the Persian Gulf continues to make its way to market. But much of the recent increase in exports consists of previously stranded barrels finally escaping the Gulf, while inbound tanker traffic remains well below pre-war levels, leaving questions about how quickly normal supply can truly return. By Julianne Geiger for Oilprice.com More Top Reads From Oilprice.com
+
+===== DOC 6 abf9cbf1f0b22c810af991f6a7faff7e =====
+TITLE: China's Energy Future Runs on Coal and Solar | OilPrice.com
+DATE: 2026-06-30
+China will continue spending heavily on both coal and alternative energy, such as wind and solar, over the next five years, Beijing’s latest five-year plan revealed this month. The apparent paradox sees the world’s largest emitter by far continue to generate a solid portion of its energy from coal while also boosting the largest alternative energy capacity in the world. The thing is, it is not actually a paradox. Ever since the signing of the Paris Agreement in 2015, a host of countries have been working hard to reduce their reliance on hydrocarbons in transport and power generation. China has been among the most active transitioners, while maintaining that it will pursue an all-of-the-above attitude to energy. While Germany was shutting down its last nuclear reactors and Britain was strangling its North Sea oil and gas production to free space for wind and solar, China was building both wind and solar installations and coal power plants. And it intends to continue doing just that. In 2025, China accounted for as much as 78% of all new coal power generation capacity globally. It currently accounts for 86% of coal generation capacity currently under construction in the world that is planned to be put into operation this year. China, in other words, is building coal power plants like there’s no tomorrow. This is because China appears to be very well aware of the importance of baseload generation, the kind that comes on demand rather than when the weather is right. Yet China also appears to be well aware of the importance of diversification, which is why it has been investing massively into the buildout of the world’s largest alternative energy generation capacity. Between 2019 and 2025, the world spent a total of $1.1 trillion on wind, solar, and other alternative energy solutions. China spent more than half of that. There is also the matter of self-reliance, and China has really excelled at that, turning into the global superpower in energy transition tech, controlling critical mineral supply chains, rare earth processing capacity, and becoming the biggest manufacturer of wind and solar equipment that other transition-eager parts of the world depend on for their plans. Meanwhile, China has continued to boost its domestic coal and natural gas production, still on the grounds of self-reliance and its crucial importance for energy security. It is likely for reas
+
+===== DOC 7 ac95e2e31b1e78f21ec3bb8c3f6d1fb8 =====
+TITLE: NextDecade Seeks to Raise $3.5B in Debt Instrument Sale for Rio Grande LNG
+DATE: 2026-06-30
+NextDecade Seeks to Raise $3.5B in Debt Instrument Sale for Rio Grande LNG NextDecade Corp has priced a series of senior secured notes with a total principal amount of $3.5 billion to fund the under-construction Rio Grande LNG project in Brownsville, Texas. The first tranche, due 2031 with a 5.25 percent interest rate, totals $1 billion. The $500-million second tranche matures 2034 with a 5.5 percent interest rate. A further $1.25-billion notes mature 2036 with a 5.75 percent interest rate. Rounding up the offering are $750-million notes due 2041 with a 6.15 percent interest rate. Rio Grande LNG LLC (RGLNG) "intends to use the net proceeds from the offering of Senior Secured Notes to (i) repay a portion of the outstanding borrowings under its existing credit agreements and (ii) to pay related fees and expenses thereto", Houston, Texas-based NextDecade said in a press release. "The Senior Secured Notes will rank pari passu to RGLNG’s existing term loan facilities, working capital facility, senior secured notes, and senior secured loans". For phase 1, which consists of liquefaction trains 1-3, Rio Grande LNG expects to invest $18 billion. "Phase 1 LLC has refinanced a total of over $1.85 billion of its original $11.1 billion term loan facilities since July 2023 through the issuance of senior secured notes and loans", NextDecade said in its quarterly filing for the first three months of 2026. "In April 2025, Phase 1 LLC elected to terminate $250 million of commitments under its working capital facility due to a decrease in expected requirements for credit support during construction, which reduced the outstanding commitments under the working capital facility to $250 million". Last year NextDecade greenlighted trains 4 and 5. Each train would add about 6 million metric tons per annum (MMtpa) of capacity; Rio Grande LNG now has around 30 MMtpa of capacity under construction. Trains 4 and 5 are estimated to each require $6.7 billion. "[W]e are developing and advancing the permitting process for Trains 6 through 8", NextDecade said in its Q1 2026 filing. "There is sufficient space at the Rio Grande LNG Facility site for up to 10 liquefaction trains". Rio Grande LNG initially obtained federal authorization to export up to 1.32 trillion cubic feet a year of natural gas equivalent, or 27 MMtpa of LNG, to countries with or without a free trade agreement (FTA) with the
+
+===== DOC 8 ad593e9fe62a7ca60e36eb1c64a2c7c2 =====
+TITLE: Siemens, IFS partner on Industrial AI for asset, production optimization
+DATE: 2026-06-30
+Siemens, IFS partner on Industrial AI for asset, production optimization (WO) — Siemens and IFS have formed a strategic partnership to integrate industrial AI, digital twin technology and asset lifecycle management, aiming to improve operational performance across manufacturing and industrial sectors, including energy. The collaboration combines Siemens' engineering, automation, manufacturing execution and digital twin technologies with IFS' enterprise asset management and field service platforms to better connect engineering, production and operational data throughout the asset lifecycle. The companies said the partnership is intended to help operators improve production efficiency, reduce unplanned downtime and optimize maintenance by linking engineering design with real-time operational performance. A key objective is the development of a closed-loop digital twin that combines engineering, simulation and manufacturing data with operational and asset performance information. The companies said the integrated approach is designed to provide more accurate, context-aware AI applications for industrial environments, where reliability, safety and regulatory compliance are critical. "Industrial AI only delivers value when it is grounded in both engineering intent and real-world performance," said Tony Hemmelgarn, president and CEO of Siemens Digital Industries Software. "Together with IFS, we are bringing these domains together by connecting design, manufacturing and asset lifecycle data." The partnership also aims to improve production planning, maintenance scheduling and asset management by reducing information silos between engineering, operations and service organizations. Mark Moffat, CEO of IFS, said combining the companies' industrial AI capabilities will help manufacturers better align factory operations with engineering objectives while delivering measurable improvements in operational performance. The companies plan to jointly develop integrated Industrial AI capabilities that enable operators to optimize production assets, accelerate decision-making and improve equipment performance throughout the product lifecycle.
+
+===== DOC 9 b047c6c987a1c5d3d8b3d0804282df81 =====
+TITLE: Allison Transmission Holdings Set to Join S&P MidCap 400 and Goodyear Tire & Rubber to Join S&P SmallCap 600
+DATE: 2026-06-30
+Press Releases NEW YORK, June 30, 2026 /PRNewswire/ -- Allison Transmission Holdings Inc. (NYSE: ALSN) will replace Goodyear Tire & Rubber Co. (NASD: GT) in the S&P MidCap 400, and Goodyear Tire & Rubber will replace Stellar Bancorp Inc. (NYSE: STEL) in the S&P SmallCap 600 effective prior to the opening of trading on Monday, July 6. S&P MidCap 400 constituent Prosperity Bancshares Inc. (NYSE: PB) is acquiring Stellar Bancorp in a deal expected to close July 1. Following is a summary of the changes that will take place prior to the open of trading on the effective date: | Effective Date | Index Name | Action | Company Name | Ticker | GICS Sector | | | July 6, 2026 | S&P MidCap 400 | Addition | Allison Transmission | ALSN | Industrials | | | July 6, 2026 | S&P MidCap 400 | Deletion | Goodyear Tire & Rubber | GT | Consumer Discretionary | | | July 6, 2026 | S&P SmallCap 600 | Addition | Goodyear Tire & Rubber | GT | Consumer Discretionary | | | July 6, 2026 | S&P SmallCap 600 | Deletion | Stellar Bancorp | STEL | Financials | | ABOUT S&P DOW JONES INDICES S&P Dow Jones Indices is the largest global resource for essential index-based concepts, data and research, and home to iconic financial market indicators, such as the S&P 500® and the Dow Jones Industrial Average®. More assets are invested in products based on our indices than products based on indices from any other provider in the world. Since Charles Dow invented the first index in 1884, S&P DJI has been innovating and developing indices across the spectrum of asset classes helping to define the way investors measure and trade the markets. S&P Dow Jones Indices is a division of S&P Global (NYSE: SPGI), which provides essential intelligence for individuals, companies, and governments to make decisions with confidence. For more information, visit www.spglobal.com/spdji/en/. FOR MORE INFORMATION: S&P Dow Jones Indices index_services@spglobal.com Media Inquiries spdji.comms@spglobal.com SOURCE S&P Dow Jones Indices
+
+===== DOC 10 ba65274265699e55ab0560bed99983e0 =====
+TITLE: Trump suspends Morocco phosphate duties for 8 months | Latest Market News
+DATE: 2026-06-30
+US President Donald Trump said late Monday he will temporarily suspend countervailing duties on certain phosphate fertilizer imports into the US from Morocco for eight months, citing a "supply emergency" for US farmers. Under the proclamation, anti-dumping and countervailing duties issued against certain phosphate fertilizers from Morocco will be suspended for eight months, or until the emergency order is terminated, depending on which occurs first. Global supply chains for phosphate fertilizers and fertilizer inputs have been disrupted by conflicts in fertilizer-producing regions, and trade actions taken by major fertilizer-producing regions, a fact sheet related to the proclamation said. This would include the US-Israel war with Iran, which had largely stopped traffic through the strait of Hormuz, trapping Saudi Arabian phosphate cargoes, while sending raw material costs such as sulfur and ammonia, significantly higher. Even with more Saudi Arabian phosphates cargoes moving through the strait in recent days, none of those vessels are en route to the US, according to vessel tracking data. The countervailing duties imposed on Morocco have been under a five-year sunset review by the Department of Commerce since early March, with Commerce earlier this month announcing it would be extending the deadline for a preliminary decision until 20 July. Moroccan fertilizer producer OCP and Russian fertilizer producers have been subject to countervailing duties on phosphate exports to the US since 2021, after US fertilizer producer Mosaic filed a petition with authorities alleging the two countries' phosphate imports materially injured the US market. It is unclear if Commerce was aware of Trump administration's emergency proclamation ahead of time. The circumstances related to fertilizer supply emergency will be monitored, according to the White House, with further action possible.
+
+===== DOC 12 c1fc100f1d528b258f9ba6682ac6967e =====
+TITLE: Tenaris invests $90 million to modernize Pennsylvania OCTG manufacturing
+DATE: 2026-06-30
+Tenaris invests $90 million to modernize Pennsylvania OCTG manufacturing (WO) — Tenaris will invest more than $90 million to modernize its steelmaking and seamless pipe manufacturing operations in Pennsylvania, expanding automation and production capabilities to support growing demand from the U.S. oil and gas industry. The investment will fund upgrades at the company's steel shop in Koppel and seamless pipe mill in Ambridge, where automation and equipment improvements are expected to increase productivity, improve reliability and enhance employee safety. The projects build on approximately $150 million that Tenaris has invested at the facilities since acquiring them in 2020. Planned upgrades include improvements to the electric arc furnace at the Koppel steel shop, higher-capacity ladles and the addition of a steel bar yard. A new bar-cutting area at the Ambridge facility will streamline material handling between the two sites and improve manufacturing efficiency. Tenaris also plans to upgrade the scrap shredder at its recycling operation adjacent to the Koppel steel shop following its subsidiary Steel Recycling Services' acquisition of SA Recycling. The company said the investment will further strengthen its vertically integrated manufacturing process. "This improvement plan is another important step to bring our long-term vision for our Ambridge and Koppel facilities to fruition," said Guillermo Moreno, president of Tenaris U.S. Moreno said the company remains focused on supplying U.S. oil and gas operators with domestically manufactured products while continuing to invest in automation and production efficiency. Construction on the projects is expected to begin in the coming months, with most upgrades scheduled for completion during the second half of 2027.
+
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('energy_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        if i in [2,3,6,11]:
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:',obj['title'])
+            print('DATE:',obj['published_date'])
+            print(obj['body_text'])
+            print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 2 a5925de1d0817ea890794fe1eb7608ba =====
+TITLE: Who Is the World's Biggest Oil Producer?
+DATE: 2026-06-30
+Who Is the World's Biggest Oil Producer? The world’s biggest oil producer is the United States, according to the Energy Institute’s (EI) latest statistical review of world energy report, which was published recently. This report showed that the U.S. produced 21.065 million barrels of oil per day in 2025. That represented a 3.9 percent increase year on year and 20.9 percent of the total oil production in 2025, according to the report, which highlighted that U.S. oil production has seen an average yearly growth rate of 5.1 percent from 2015 to 2025. Saudi Arabia was shown in the report to be second biggest oil producer in the world last year, with 11.408 million barrels per day. That figure marked a 5.1 percent rise year on year and 11.3 percent of the world’s total, the report outlined. From 2015 to 2025, Saudi Arabia has seen an average yearly oil production decline rate of 0.5 percent, the report highlighted. Russia was the third biggest oil producer last year in the EI report, with 10.737 million barrels per day. That figure represented a 0.2 percent drop year on year and 10.7 percent of the global total for 2025, the report highlighted. From 2015 to 2025, Russia has seen an average yearly oil production reduction rate of 0.3 percent, the report showed. Total world oil production came in at 100.590 million barrels per day in 2025, according to the EI’s latest report, which showed that this was a year on year increase of 3.5 percent. Total world oil output has increased by a yearly average of 0.9 percent from 2015 to 2025, the report highlighted. The report pointed out that its oil production figures include “crude oil, shale oil, oil sands, condensates (lease condensate or gas condensates that require further refining), and NGLs (natural gas liquids - ethane, LPG and naphtha separated from the production of natural gas)”. These figures exclude liquid fuels from other sources such as biofuels and synthetic derivatives of coal and natural gas, as well as liquid fuel adjustment factors such as refinery processing gain, the report highlighted. The figures also exclude oil shales/kerogen extracted in solid form, the report revealed. Top Crude Oil and Condensate Producer The EI’s latest statistical review of world energy showed that the U.S. was also the world’s top producer of crude oil and condensate last year. According to the report, the U.S. produced 13.586
+
+===== DOC 3 a62418c37caf998c86e93e0d1a1191fa =====
+TITLE: The Oil Benchmark Named Brent Is Losing Its Brent | OilPrice.com
+DATE: 2026-06-30
+The world's most important oil benchmark is about to experience an identity crisis. For the first time since records began, no Brent crude cargoes are scheduled to load in August, according to Reuters calculations based on loading programs and LSEG data. In other words, the benchmark that gives Brent crude its name is slowly disappearing. That's not because Brent is losing relevance. Quite the opposite. Brent still underpins pricing for more than 60% of internationally traded crude. The problem is that the original Brent field has simply been producing less and less oil for decades. What's left of Brent itself now averages just 23,000 barrels per day this year. This is roughly one cargo per month and less than a quarter of the production seen a decade ago. The benchmark has been reinventing itself for years. Today's Dated Brent is no longer just Brent. It also includes Forties, Oseberg, Ekofisk, Troll, and, since 2023, U.S. WTI Midland. That slow shift has kept the benchmark liquid even as the namesake crude transitions into a historical footnote. "What is left of Brent is just a brand name," veteran oil trader Adi Imsirovic told Reuters. He's probably right. The crude may eventually disappear altogether, but the benchmark isn't going anywhere. In fact, recent events in the Middle East have reinforced just how important North Sea barrels remain. During the Strait of Hormuz crisis, refiners scrambled for any crude that didn't require sailing through one of the world's most dangerous waterways. North Sea grades, particularly Forties, became some of the most sought-after barrels on the planet, with physical cargoes trading at unprecedented premiums over Brent futures as buyers paid whatever it took for immediate, accessible supply. That premium has eased as stranded Gulf cargoes have gradually begun leaving the Persian Gulf. But accessibility remains the operative word. Despite the U.S.-Iran ceasefire, tanker traffic through Hormuz remains well below pre-war levels, with Iran still exercising discretion over vessel movements. Physical markets continue to reflect that uncertainty even as futures have retreated. Years of declining production, record-low exploration, punitive taxation, and a ban on new licensing have pushed one of the world's great oil provinces into managed decline. By Julianne Geiger for Oilprice.com More Top Reads From Oilprice.com
+
+===== DOC 6 abf9cbf1f0b22c810af991f6a7faff7e =====
+TITLE: China's Energy Future Runs on Coal and Solar | OilPrice.com
+DATE: 2026-06-30
+China will continue spending heavily on both coal and alternative energy, such as wind and solar, over the next five years, Beijing’s latest five-year plan revealed this month. The apparent paradox sees the world’s largest emitter by far continue to generate a solid portion of its energy from coal while also boosting the largest alternative energy capacity in the world. The thing is, it is not actually a paradox. Ever since the signing of the Paris Agreement in 2015, a host of countries have been working hard to reduce their reliance on hydrocarbons in transport and power generation. China has been among the most active transitioners, while maintaining that it will pursue an all-of-the-above attitude to energy. While Germany was shutting down its last nuclear reactors and Britain was strangling its North Sea oil and gas production to free space for wind and solar, China was building both wind and solar installations and coal power plants. And it intends to continue doing just that. In 2025, China accounted for as much as 78% of all new coal power generation capacity globally. It currently accounts for 86% of coal generation capacity currently under construction in the world that is planned to be put into operation this year. China, in other words, is building coal power plants like there’s no tomorrow. This is because China appears to be very well aware of the importance of baseload generation, the kind that comes on demand rather than when the weather is right. Yet China also appears to be well aware of the importance of diversification, which is why it has been investing massively into the buildout of the world’s largest alternative energy generation capacity. Between 2019 and 2025, the world spent a total of $1.1 trillion on wind, solar, and other alternative energy solutions. China spent more than half of that. There is also the matter of self-reliance, and China has really excelled at that, turning into the global superpower in energy transition tech, controlling critical mineral supply chains, rare earth processing capacity, and becoming the biggest manufacturer of wind and solar equipment that other transition-eager parts of the world depend on for their plans. Meanwhile, China has continued to boost its domestic coal and natural gas production, still on the grounds of self-reliance and its crucial importance for energy security. It is likely for reas
+
+===== DOC 11 beb9351c94d1f33dfd57ef50a3ca6142 =====
+TITLE: EXPERT DATA & AI ARCHITECT
+DATE: 2026-06-30
+Come Expert Data & AI Architect farai parte della funzione Digital Information Technologies di Eni e ti occuperai della progettazione e implementazione di soluzioni end-to-end in ambito Dati e AI in un contesto Enterprise. Opererai all'interno di team multidisciplinari, traducendo requisiti di business in architetture tecniche scalabili, sicure e governate, contribuendo attivamente alla delivery progettuale e alla crescita tecnica del team. Attivita principali: Caratteristiche richieste: Completano il profilo: Sede: San Donato Milanese Promuoviamo forme flessibili di lavoro, offrendo opzioni di Smart working ed orari flessibili al fine di sostenere il maggior equilibrio tra vita professionale e personale. Proponiamo: Le candidature ritenute di maggior interesse saranno contattate per le fasi successive. Per informazioni sul processo di selezione e consigli utili puoi cliccare qui . Chi Siamo Eni e una societa integrata lungo l'intera catena del valore e impegnata con azioni concrete a fornire energia sempre piu sicura, diversificata e a emissioni progressivamente ridotte. Il modello di business punta alla creazione di valore di lungo termine per tutti gli stakeholder. Le nostre persone sono il motore di questa strategia, il cui talento, know-how e impegno guidano una crescita costante e trasformano la nostra visione in progressi concreti. #LI-ECU #LI-Hybrid Opererai all'interno di team multidisciplinari, traducendo requisiti di business in architetture tecniche scalabili, sicure e governate, contribuendo attivamente alla delivery progettuale e alla crescita tecnica del team. Attivita principali: - Disegnare architetture scalabili, robuste e sicure in ambito Dati & AI che permettano di supportare gli use-case di business facendo riferimento ai piu recenti pattern (e.g. data lakehouse e data mesh / AI e agentic AI) su almeno uno dei principali cloud service provider - Definire pipeline di ingestion/trasformazione e modalita di serving dei dati, con attenzione a scalabilita, costi e qualita - Progettare e supportare l'implementazione di soluzioni "productn-ready" legate a Machine Learning e Generative AI seguendo approcci consolidati come DevSecOps, MLOps, AIOps - Applicare standard e best practices (governance, qualita, sicurezza) negli use-case e contribuire allo stesso tempo alla loro definizione ed evoluzione - Collaborare con Data Engineer, Data scientist,
+
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('energy_batch_003.jsonl') as f:
+    docs=[json.loads(line) for line in f]
+obj=docs[1]
+print(len(obj['body_text']))
+print(obj['body_text'][3500:])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+2400
+
+
+codex
+I have enough context to write the output directly. I’m generating `energy_facts_003.jsonl` with one object per source document, preserving input order and using empty fact lists for the job-posting documents.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+infile = Path('energy_batch_003.jsonl')
+outfile = Path('energy_facts_003.jsonl')
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+with infile.open() as f:
+    docs = [json.loads(line) for line in f]
+
+facts_by_doc = {
+    '9feb71f2f8008294ec1d6d5e17ae58bc': [],
+    'a5925de1d0817ea890794fe1eb7608ba': [
+        fact('The United States produced 21.065 million barrels of oil per day in 2025, up 3.9 percent year on year, according to the Energy Institute report.', 'United States', 'production_change', None, 'up', '21.065 million barrels per day; 3.9 percent', '2025', None, ['United States', 'Energy Institute'], 0.98),
+        fact('The United States accounted for 20.9 percent of total world oil production in 2025, according to the Energy Institute report.', 'United States', 'statement', 'Global oil production', 'na', '20.9 percent', '2025', None, ['United States', 'Energy Institute'], 0.96),
+        fact('U.S. oil production recorded an average yearly growth rate of 5.1 percent from 2015 to 2025, according to the Energy Institute report.', 'United States', 'production_change', None, 'up', '5.1 percent', '2015 to 2025', None, ['United States', 'Energy Institute'], 0.95),
+        fact('Saudi Arabia produced 11.408 million barrels of oil per day in 2025, up 5.1 percent year on year, according to the Energy Institute report.', 'Saudi Arabia', 'production_change', None, 'up', '11.408 million barrels per day; 5.1 percent', '2025', None, ['Saudi Arabia', 'Energy Institute'], 0.98),
+        fact('Saudi Arabia accounted for 11.3 percent of world oil production in 2025, according to the Energy Institute report.', 'Saudi Arabia', 'statement', 'Global oil production', 'na', '11.3 percent', '2025', None, ['Saudi Arabia', 'Energy Institute'], 0.96),
+        fact('Saudi Arabia saw an average yearly oil production decline rate of 0.5 percent from 2015 to 2025, according to the Energy Institute report.', 'Saudi Arabia', 'production_change', None, 'down', '0.5 percent', '2015 to 2025', None, ['Saudi Arabia', 'Energy Institute'], 0.95),
+        fact('Russia produced 10.737 million barrels of oil per day in 2025, down 0.2 percent year on year, according to the Energy Institute report.', 'Russia', 'production_change', None, 'down', '10.737 million barrels per day; 0.2 percent', '2025', None, ['Russia', 'Energy Institute'], 0.98),
+        fact('Russia accounted for 10.7 percent of global oil production in 2025, according to the Energy Institute report.', 'Russia', 'statement', 'Global oil production', 'na', '10.7 percent', '2025', None, ['Russia', 'Energy Institute'], 0.96),
+        fact('Russia saw an average yearly oil production reduction rate of 0.3 percent from 2015 to 2025, according to the Energy Institute report.', 'Russia', 'production_change', None, 'down', '0.3 percent', '2015 to 2025', None, ['Russia', 'Energy Institute'], 0.95),
+        fact('Total world oil production was 100.590 million barrels per day in 2025, up 3.5 percent year on year, according to the Energy Institute report.', 'Global oil production', 'production_change', None, 'up', '100.590 million barrels per day; 3.5 percent', '2025', None, ['Energy Institute'], 0.98),
+        fact('Total world oil output increased by an average of 0.9 percent per year from 2015 to 2025, according to the Energy Institute report.', 'Global oil production', 'production_change', None, 'up', '0.9 percent', '2015 to 2025', None, ['Energy Institute'], 0.95),
+    ],
+    'a62418c37caf998c86e93e0d1a1191fa': [
+        fact('No Brent crude cargoes are scheduled to load in August, the first time since records began, according to Reuters calculations based on loading programs and LSEG data.', 'Brent crude', 'supply_change', None, 'down', '0 cargoes', 'August', None, ['Brent crude', 'Reuters', 'LSEG'], 0.97),
+        fact('Brent still underpins pricing for more than 60 percent of internationally traded crude.', 'Brent crude', 'statement', 'Internationally traded crude', 'na', 'more than 60 percent', '2026-06-30', None, ['Brent crude'], 0.95),
+        fact('Brent field output is averaging 23,000 barrels per day this year, roughly one cargo per month and less than a quarter of the production seen a decade ago.', 'Brent field', 'production_change', None, 'down', '23,000 barrels per day', 'this year', None, ['Brent field'], 0.96),
+        fact('Dated Brent includes Forties, Oseberg, Ekofisk, Troll, and U.S. WTI Midland.', 'Dated Brent', 'statement', None, 'na', None, '2026-06-30', None, ['Dated Brent', 'Forties', 'Oseberg', 'Ekofisk', 'Troll', 'WTI Midland'], 0.94),
+        fact('During the Strait of Hormuz crisis, North Sea grades, particularly Forties, traded at unprecedented premiums over Brent futures.', 'North Sea crude grades', 'price_move', 'Brent futures', 'up', 'unprecedented premiums', 'during the Strait of Hormuz crisis', 'Refiners scrambled for crude that did not require sailing through the Strait of Hormuz.', ['North Sea', 'Forties', 'Brent futures', 'Strait of Hormuz'], 0.96),
+        fact('The premium on North Sea cargoes has eased as stranded Gulf cargoes have gradually begun leaving the Persian Gulf.', 'North Sea crude grades', 'price_move', None, 'down', None, '2026-06-30', 'Stranded Gulf cargoes have gradually begun leaving the Persian Gulf.', ['North Sea', 'Persian Gulf'], 0.93),
+        fact('Tanker traffic through the Strait of Hormuz remains well below pre-war levels despite the U.S.-Iran ceasefire.', 'Strait of Hormuz tanker traffic', 'supply_change', None, 'down', 'well below pre-war levels', '2026-06-30', 'Iran is still exercising discretion over vessel movements.', ['Strait of Hormuz', 'Iran', 'United States'], 0.95),
+    ],
+    'a8f2c7b7ab76f608b25b313c02414eac': [
+        fact('Shell expects global LNG flows to be little changed in 2026 if shipping through the Strait of Hormuz returns to normal this summer.', 'Global LNG trade', 'forecast', None, 'flat', None, '2026', 'Shipping through the Strait of Hormuz returns to normal this summer.', ['Shell plc', 'Liquefied natural gas', 'Strait of Hormuz'], 0.97),
+        fact('Shell said LNG supply could post a rare annual contraction if the Strait of Hormuz remains shut for weeks.', 'Global LNG supply', 'forecast', None, 'down', None, '2026', 'The Strait of Hormuz remains shut for weeks.', ['Shell plc', 'Liquefied natural gas', 'Strait of Hormuz'], 0.97),
+        fact('The Middle East conflict has choked off about a fifth of global LNG exports over the past four months.', 'Global LNG exports', 'supply_change', None, 'down', 'about a fifth', 'the past four months', 'The conflict in the Middle East.', ['Liquefied natural gas', 'Middle East'], 0.96),
+        fact('Shell said LNG facilities could require around six to eight weeks to ramp up once the Strait of Hormuz is deemed safe to pass.', 'LNG facilities linked to the Strait of Hormuz', 'forecast', None, 'na', 'six to eight weeks', 'when the Strait of Hormuz is deemed safe to pass', None, ['Shell plc', 'Liquefied natural gas', 'Strait of Hormuz'], 0.94),
+        fact('Shell sees LNG supply returning to growth in 2027.', 'Global LNG supply', 'forecast', None, 'up', None, '2027', None, ['Shell plc', 'Liquefied natural gas'], 0.95),
+        fact('Qatar has said about 17 percent of its LNG capacity would need years of repairs after Iranian attacks.', 'Qatar LNG capacity', 'supply_change', None, 'down', 'about 17 percent', '2026-06-30', 'Iranian attacks damaged production units.', ['Qatar', 'Liquefied natural gas', 'Iran'], 0.96),
+        fact('Benchmark gas contracts rose after renewed attacks on cargo vessels in the Persian Gulf.', 'Benchmark gas contracts', 'price_move', None, 'up', None, '2026-06-30', 'Renewed attacks on cargo vessels in the Persian Gulf.', ['Persian Gulf', 'Liquefied natural gas'], 0.95),
+        fact('Qatar has not resumed normal LNG operations after shutting production in March following Iranian strikes.', 'Qatar LNG production', 'production_change', None, 'down', None, 'since March', 'Iranian strikes.', ['Qatar', 'Liquefied natural gas', 'Iran'], 0.95),
+        fact('Shell\\'s Pearl gas-to-liquids facility remains offline after being hit during the conflict.', 'Pearl gas-to-liquids facility', 'event', 'Shell plc', 'down', None, '2026-06-30', 'The facility was hit during the conflict.', ['Shell plc', 'Pearl GTL', 'Qatar'], 0.94),
+        fact('Shell expects global LNG demand to climb to nearly 700 million tons a year by 2050, about 65 percent above 2025 levels.', 'Global LNG demand', 'forecast', None, 'up', 'nearly 700 million tons a year; around 65 percent', '2050', None, ['Shell plc', 'Liquefied natural gas'], 0.97),
+    ],
+    'aa9734f558a9fdc34c78416947b0c957': [
+        fact('U.S. crude oil production rose to a record 13.934 million barrels per day in April, up 216,000 barrels per day from March\\'s 13.718 million barrels per day.', 'United States crude oil production', 'production_change', None, 'up', '13.934 million barrels per day; 216,000 barrels per day', 'April', 'Producers responded to the oil price spike triggered by the Iran war and the closure of the Strait of Hormuz.', ['United States', 'U.S. Energy Information Administration', 'Iran', 'Strait of Hormuz'], 0.98),
+        fact('New Mexico set a crude production record of 2.37 million barrels per day in April.', 'New Mexico crude oil production', 'production_change', None, 'up', '2.37 million barrels per day', 'April', None, ['New Mexico', 'United States'], 0.96),
+        fact('Texas crude oil output rose to 5.83 million barrels per day in April, its highest level since November.', 'Texas crude oil production', 'production_change', None, 'up', '5.83 million barrels per day', 'April', None, ['Texas', 'United States'], 0.96),
+        fact('North Dakota crude oil production reached 1.13 million barrels per day in April, its strongest level since November.', 'North Dakota crude oil production', 'production_change', None, 'up', '1.13 million barrels per day', 'April', None, ['North Dakota', 'United States'], 0.96),
+        fact('Weekly EIA estimates showed U.S. production climbing from 13.66 million barrels per day in late March to more than 13.8 million barrels per day through June.', 'United States crude oil production', 'production_change', None, 'up', '13.66 million barrels per day to more than 13.8 million barrels per day', 'late March through June', None, ['United States', 'U.S. Energy Information Administration'], 0.95),
+        fact('The EIA forecast average U.S. crude production of 13.7 million barrels per day for 2026 in its June Short-Term Energy Outlook.', 'United States crude oil production', 'forecast', None, 'na', '13.7 million barrels per day', '2026', None, ['United States', 'U.S. Energy Information Administration'], 0.95),
+        fact('Oil prices have fallen sharply from wartime highs as the U.S.-Iran ceasefire remains in place and crude trapped inside the Persian Gulf reaches the market.', 'Oil prices', 'price_move', None, 'down', None, '2026-06-30', 'The U.S.-Iran ceasefire remains in place and crude trapped inside the Persian Gulf is making its way to market.', ['Oil', 'United States', 'Iran', 'Persian Gulf'], 0.96),
+        fact('Inbound tanker traffic to the Persian Gulf remains well below pre-war levels.', 'Persian Gulf tanker traffic', 'supply_change', None, 'down', 'well below pre-war levels', '2026-06-30', None, ['Persian Gulf'], 0.93),
+    ],
+    'abf9cbf1f0b22c810af991f6a7faff7e': [
+        fact('China\\'s latest five-year plan calls for continued heavy spending on both coal and alternative energy over the next five years.', 'China', 'policy_action', None, 'up', None, 'over the next five years', None, ['China', 'Coal', 'Wind power', 'Solar power'], 0.95),
+        fact('China accounted for 78 percent of all new coal power generation capacity added globally in 2025.', 'China coal power generation capacity', 'production_change', None, 'up', '78 percent', '2025', None, ['China', 'Coal'], 0.95),
+        fact('China accounts for 86 percent of coal generation capacity under construction globally that is planned to enter operation this year.', 'China coal generation capacity under construction', 'production_change', None, 'up', '86 percent', 'this year', None, ['China', 'Coal'], 0.94),
+        fact('Global spending on wind, solar, and other alternative energy solutions totaled "'$1.1 trillion from 2019 to 2025, and China spent more than half of that amount.'"', 'China alternative energy investment', 'demand_change', None, 'up', 'more than half of "'$1.1 trillion'"', '2019 to 2025', None, ['China', 'Wind power', 'Solar power'], 0.92),
+        fact('China has continued to increase domestic coal and natural gas production on the grounds of self-reliance and energy security.', 'China coal and natural gas production', 'production_change', None, 'up', None, '2026-06-30', 'China cites self-reliance and energy security.', ['China', 'Coal', 'Natural gas'], 0.9),
+    ],
+    'ac95e2e31b1e78f21ec3bb8c3f6d1fb8': [
+        fact('NextDecade priced "'$3.5 billion of senior secured notes to fund the Rio Grande LNG project in Brownsville, Texas.'"', 'NextDecade Corp', 'corporate_action', 'Rio Grande LNG', 'up', '"'$3.5 billion'"', '2026-06-30', None, ['NextDecade Corp', 'Rio Grande LNG', 'Texas'], 0.98),
+        fact('Rio Grande LNG priced "'$1 billion of senior secured notes due 2031 at a 5.25 percent interest rate.'"', 'Rio Grande LNG', 'corporate_action', None, 'na', '"'$1 billion; 5.25 percent'"', '2031', None, ['Rio Grande LNG'], 0.97),
+        fact('Rio Grande LNG priced "'$500 million of senior secured notes due 2034 at a 5.5 percent interest rate.'"', 'Rio Grande LNG', 'corporate_action', None, 'na', '"'$500 million; 5.5 percent'"', '2034', None, ['Rio Grande LNG'], 0.97),
+        fact('Rio Grande LNG priced "'$1.25 billion of senior secured notes due 2036 at a 5.75 percent interest rate.'"', 'Rio Grande LNG', 'corporate_action', None, 'na', '"'$1.25 billion; 5.75 percent'"', '2036', None, ['Rio Grande LNG'], 0.97),
+        fact('Rio Grande LNG priced "'$750 million of senior secured notes due 2041 at a 6.15 percent interest rate.'"', 'Rio Grande LNG', 'corporate_action', None, 'na', '"'$750 million; 6.15 percent'"', '2041', None, ['Rio Grande LNG'], 0.97),
+        fact('Rio Grande LNG said it intends to use the net proceeds from the senior secured notes to repay part of its existing borrowings and pay related fees and expenses.', 'Rio Grande LNG', 'corporate_action', 'Existing credit agreements', 'na', None, '2026-06-30', None, ['Rio Grande LNG'], 0.96),
+        fact('Rio Grande LNG Phase 1 expects to invest "'$18 billion in liquefaction trains 1 through 3.'"', 'Rio Grande LNG Phase 1', 'forecast', None, 'na', '"'$18 billion'"', '2026-06-30', None, ['Rio Grande LNG'], 0.95),
+        fact('Rio Grande LNG Phase 1 has refinanced more than "'$1.85 billion of its original $11.1 billion term loan facilities since July 2023.'"', 'Rio Grande LNG Phase 1', 'corporate_action', None, 'na', 'over "'$1.85 billion of $11.1 billion'"', 'since July 2023', None, ['Rio Grande LNG'], 0.95),
+        fact('In April 2025, Rio Grande LNG Phase 1 terminated "'$250 million of working capital facility commitments, reducing outstanding commitments under that facility to $250 million.'"', 'Rio Grande LNG Phase 1', 'corporate_action', 'Working capital facility', 'down', '"'$250 million'"', 'April 2025', 'Expected requirements for credit support during construction decreased.', ['Rio Grande LNG'], 0.96),
+        fact('NextDecade approved trains 4 and 5 for Rio Grande LNG last year.', 'NextDecade Corp', 'corporate_action', 'Rio Grande LNG trains 4 and 5', 'up', None, 'last year', None, ['NextDecade Corp', 'Rio Grande LNG'], 0.94),
+        fact('Each of Rio Grande LNG trains 4 and 5 would add about 6 million metric tons per annum of capacity.', 'Rio Grande LNG trains 4 and 5', 'production_change', 'Rio Grande LNG', 'up', 'about 6 million metric tons per annum each', '2026-06-30', None, ['Rio Grande LNG'], 0.95),
+        fact('Rio Grande LNG has around 30 million metric tons per annum of capacity under construction.', 'Rio Grande LNG', 'production_change', None, 'up', 'around 30 million metric tons per annum', '2026-06-30', None, ['Rio Grande LNG'], 0.95),
+        fact('NextDecade estimates that each of Rio Grande LNG trains 4 and 5 will require "'$6.7 billion.'"', 'Rio Grande LNG trains 4 and 5', 'forecast', None, 'na', '"'$6.7 billion each'"', '2026-06-30', None, ['NextDecade Corp', 'Rio Grande LNG'], 0.95),
+        fact('NextDecade said it is developing and advancing the permitting process for Rio Grande LNG trains 6 through 8.', 'NextDecade Corp', 'corporate_action', 'Rio Grande LNG trains 6 through 8', 'up', None, '2026-06-30', None, ['NextDecade Corp', 'Rio Grande LNG'], 0.94),
+    ],
+    'ad593e9fe62a7ca60e36eb1c64a2c7c2': [
+        fact('Siemens and IFS formed a strategic partnership to integrate industrial AI, digital twin technology, and asset lifecycle management.', 'Siemens', 'deal_or_contract', 'IFS', 'na', None, '2026-06-30', None, ['Siemens', 'IFS'], 0.98),
+        fact('Siemens and IFS plan to jointly develop integrated Industrial AI capabilities for production and asset optimization.', 'Siemens', 'corporate_action', 'IFS', 'up', None, '2026-06-30', None, ['Siemens', 'IFS', 'Industrial AI'], 0.95),
+    ],
+    'b047c6c987a1c5d3d8b3d0804282df81': [
+        fact('Allison Transmission Holdings will replace Goodyear Tire & Rubber in the S&P MidCap 400 before the market opens on July 6, 2026.', 'Allison Transmission Holdings Inc.', 'event', 'S&P MidCap 400', 'na', None, 'July 6, 2026', None, ['Allison Transmission Holdings Inc.', 'Goodyear Tire & Rubber Co.', 'S&P MidCap 400'], 0.98),
+        fact('Goodyear Tire & Rubber will replace Stellar Bancorp in the S&P SmallCap 600 before the market opens on July 6, 2026.', 'Goodyear Tire & Rubber Co.', 'event', 'S&P SmallCap 600', 'na', None, 'July 6, 2026', None, ['Goodyear Tire & Rubber Co.', 'Stellar Bancorp Inc.', 'S&P SmallCap 600'], 0.98),
+        fact('Prosperity Bancshares is acquiring Stellar Bancorp in a deal expected to close on July 1, 2026.', 'Prosperity Bancshares Inc.', 'deal_or_contract', 'Stellar Bancorp Inc.', 'na', None, 'July 1, 2026', None, ['Prosperity Bancshares Inc.', 'Stellar Bancorp Inc.'], 0.97),
+    ],
+    'ba65274265699e55ab0560bed99983e0': [
+        fact('President Donald Trump said the United States will suspend anti-dumping and countervailing duties on certain phosphate fertilizer imports from Morocco for eight months.', 'United States', 'policy_action', 'Moroccan phosphate fertilizer imports', 'down', 'eight months', '2026-06-30', 'The White House cited a supply emergency for U.S. farmers.', ['United States', 'Morocco', 'Donald Trump', 'Phosphate fertilizers'], 0.98),
+        fact('The proclamation says the duty suspension will last for eight months or until the emergency order is terminated, whichever comes first.', 'United States', 'policy_action', 'Moroccan phosphate fertilizer imports', 'down', 'eight months', '2026-06-30', None, ['United States', 'Morocco', 'Phosphate fertilizers'], 0.96),
+        fact('Global supply chains for phosphate fertilizers and fertilizer inputs have been disrupted by conflicts in fertilizer-producing regions and trade actions by major fertilizer-producing regions.', 'Global phosphate fertilizer supply chains', 'supply_change', None, 'down', None, '2026-06-30', 'Conflicts in fertilizer-producing regions and trade actions by major fertilizer-producing regions.', ['Phosphate fertilizers'], 0.94),
+        fact('The U.S.-Israel war with Iran largely stopped traffic through the Strait of Hormuz.', 'Strait of Hormuz traffic', 'supply_change', None, 'down', 'largely stopped', '2026-06-30', 'The U.S.-Israel war with Iran.', ['United States', 'Israel', 'Iran', 'Strait of Hormuz'], 0.96),
+        fact('Saudi Arabian phosphate cargoes were trapped by the disruption in the Strait of Hormuz.', 'Saudi Arabian phosphate cargoes', 'supply_change', None, 'down', None, '2026-06-30', 'Traffic through the Strait of Hormuz was largely stopped.', ['Saudi Arabia', 'Strait of Hormuz', 'Phosphate fertilizers'], 0.95),
+        fact('Sulfur and ammonia costs rose significantly after the Strait of Hormuz disruption.', 'Sulfur and ammonia costs', 'price_move', None, 'up', 'significantly higher', '2026-06-30', 'The U.S.-Israel war with Iran largely stopped traffic through the Strait of Hormuz.', ['Sulfur', 'Ammonia', 'Strait of Hormuz', 'Iran', 'Israel', 'United States'], 0.96),
+        fact('None of the Saudi Arabian phosphate cargo vessels currently moving through the Strait of Hormuz are headed to the United States.', 'Saudi Arabian phosphate cargoes', 'supply_change', 'United States', 'down', 'none', '2026-06-30', None, ['Saudi Arabia', 'United States', 'Strait of Hormuz', 'Phosphate fertilizers'], 0.95),
+        fact('The Department of Commerce extended the deadline for a preliminary decision in its sunset review of the Morocco phosphate duties to July 20.', 'U.S. Department of Commerce', 'policy_action', 'Morocco phosphate duties', 'na', None, 'July 20', None, ['United States', 'Morocco', 'U.S. Department of Commerce', 'Phosphate fertilizers'], 0.95),
+        fact('Moroccan producer OCP and Russian fertilizer producers have been subject to U.S. countervailing duties on phosphate exports since 2021.', 'OCP', 'sanction', 'United States', 'na', None, 'since 2021', 'Mosaic petitioned U.S. authorities, alleging the imports materially injured the U.S. market.', ['OCP', 'Russia', 'United States', 'Mosaic', 'Phosphate fertilizers'], 0.95),
+    ],
+    'beb9351c94d1f33dfd57ef50a3ca6142': [],
+    'c1fc100f1d528b258f9ba6682ac6967e': [
+        fact('Tenaris will invest more than "'$90 million to modernize its steelmaking and seamless pipe manufacturing operations in Pennsylvania.'"', 'Tenaris', 'corporate_action', 'Pennsylvania OCTG manufacturing operations', 'up', 'more than "'$90 million'"', '2026-06-30', 'The company is supporting growing demand from the U.S. oil and gas industry.', ['Tenaris', 'Pennsylvania', 'United States'], 0.98),
+        fact('Tenaris said the Pennsylvania upgrades are expected to increase productivity, improve reliability, and enhance employee safety.', 'Tenaris Pennsylvania operations', 'forecast', None, 'up', None, '2026-06-30', 'Automation and equipment improvements at the Koppel and Ambridge facilities.', ['Tenaris', 'Pennsylvania'], 0.95),
+        fact('The new investment builds on about "'$150 million that Tenaris has invested in the Pennsylvania facilities since 2020.'"', 'Tenaris', 'corporate_action', 'Pennsylvania facilities', 'up', 'approximately "'$150 million'"', 'since 2020', None, ['Tenaris', 'Pennsylvania'], 0.96),
+        fact('Tenaris plans to upgrade the scrap shredder at its recycling operation next to the Koppel steel shop after Steel Recycling Services acquired SA Recycling.', 'Tenaris', 'corporate_action', 'Koppel recycling operation', 'up', None, '2026-06-30', 'Steel Recycling Services acquired SA Recycling.', ['Tenaris', 'Steel Recycling Services', 'SA Recycling', 'Pennsylvania'], 0.94),
+        fact('Construction on the Pennsylvania projects is expected to begin in the coming months, with most upgrades scheduled for completion in the second half of 2027.', 'Tenaris Pennsylvania modernization project', 'forecast', None, 'na', None, 'the second half of 2027', None, ['Tenaris', 'Pennsylvania'], 0.95),
+    ],
+}
+
+assert len(docs) == 12
+
+out_lines = []
+total_facts = 0
+for doc in docs:
+    facts = facts_by_doc[doc['doc_id']]
+    total_facts += len(facts)
+    out_lines.append(json.dumps({
+        'doc_id': doc['doc_id'],
+        'title': doc['title'],
+        'facts': facts,
+    }, ensure_ascii=True))
+
+outfile.write_text('\\n'.join(out_lines) + '\\n')
+print(f'docs processed: {len(docs)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 74
+
+codex
+The output file is written. I’m doing a quick validation pass on the JSONL structure and spot-checking a few records so the final count line matches the file contents.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+count=0
+facts=0
+with open('energy_facts_003.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        count+=1
+        facts+=len(obj['facts'])
+print(count, facts)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 74
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('energy_facts_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in (1,2,7,10,12):
+            obj=json.loads(line)
+            print(i, obj['doc_id'], len(obj['facts']))
+            print(obj['facts'][:2])
+            print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1 9feb71f2f8008294ec1d6d5e17ae58bc 0
+[]
+---
+2 a5925de1d0817ea890794fe1eb7608ba 11
+[{'claim': 'The United States produced 21.065 million barrels of oil per day in 2025, up 3.9 percent year on year, according to the Energy Institute report.', 'subject': 'United States', 'predicate': 'production_change', 'object': None, 'direction': 'up', 'magnitude': '21.065 million barrels per day; 3.9 percent', 'time': '2025', 'cause': None, 'entities': ['United States', 'Energy Institute'], 'confidence': 0.98}, {'claim': 'The United States accounted for 20.9 percent of total world oil production in 2025, according to the Energy Institute report.', 'subject': 'United States', 'predicate': 'statement', 'object': 'Global oil production', 'direction': 'na', 'magnitude': '20.9 percent', 'time': '2025', 'cause': None, 'entities': ['United States', 'Energy Institute'], 'confidence': 0.96}]
+---
+7 ac95e2e31b1e78f21ec3bb8c3f6d1fb8 14
+[{'claim': 'NextDecade priced $3.5 billion of senior secured notes to fund the Rio Grande LNG project in Brownsville, Texas.', 'subject': 'NextDecade Corp', 'predicate': 'corporate_action', 'object': 'Rio Grande LNG', 'direction': 'up', 'magnitude': '$3.5 billion', 'time': '2026-06-30', 'cause': None, 'entities': ['NextDecade Corp', 'Rio Grande LNG', 'Texas'], 'confidence': 0.98}, {'claim': 'Rio Grande LNG priced $1 billion of senior secured notes due 2031 at a 5.25 percent interest rate.', 'subject': 'Rio Grande LNG', 'predicate': 'corporate_action', 'object': None, 'direction': 'na', 'magnitude': '$1 billion; 5.25 percent', 'time': '2031', 'cause': None, 'entities': ['Rio Grande LNG'], 'confidence': 0.97}]
+---
+10 ba65274265699e55ab0560bed99983e0 9
+[{'claim': 'President Donald Trump said the United States will suspend anti-dumping and countervailing duties on certain phosphate fertilizer imports from Morocco for eight months.', 'subject': 'United States', 'predicate': 'policy_action', 'object': 'Moroccan phosphate fertilizer imports', 'direction': 'down', 'magnitude': 'eight months', 'time': '2026-06-30', 'cause': 'The White House cited a supply emergency for U.S. farmers.', 'entities': ['United States', 'Morocco', 'Donald Trump', 'Phosphate fertilizers'], 'confidence': 0.98}, {'claim': 'The proclamation says the duty suspension will last for eight months or until the emergency order is terminated, whichever comes first.', 'subject': 'United States', 'predicate': 'policy_action', 'object': 'Moroccan phosphate fertilizer imports', 'direction': 'down', 'magnitude': 'eight months', 'time': '2026-06-30', 'cause': None, 'entities': ['United States', 'Morocco', 'Phosphate fertilizers'], 'confidence': 0.96}]
+---
+12 c1fc100f1d528b258f9ba6682ac6967e 5
+[{'claim': 'Tenaris will invest more than $90 million to modernize its steelmaking and seamless pipe manufacturing operations in Pennsylvania.', 'subject': 'Tenaris', 'predicate': 'corporate_action', 'object': 'Pennsylvania OCTG manufacturing operations', 'direction': 'up', 'magnitude': 'more than $90 million', 'time': '2026-06-30', 'cause': 'The company is supporting growing demand from the U.S. oil and gas industry.', 'entities': ['Tenaris', 'Pennsylvania', 'United States'], 'confidence': 0.98}, {'claim': 'Tenaris said the Pennsylvania upgrades are expected to increase productivity, improve reliability, and enhance employee safety.', 'subject': 'Tenaris Pennsylvania operations', 'predicate': 'forecast', 'object': None, 'direction': 'up', 'magnitude': None, 'time': '2026-06-30', 'cause': 'Automation and equipment improvements at the Koppel and Ambridge facilities.', 'entities': ['Tenaris', 'Pennsylvania'], 'confidence': 0.95}]
+---
+
+codex
+docs processed: 12, total facts: 74
+tokens used
+36,162
+docs processed: 12, total facts: 74

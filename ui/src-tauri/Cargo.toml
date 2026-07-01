@@ -1,0 +1,35 @@
+# Minimal desktop shell for Market Color. The webview loads the static UI
+# (dist/, or the Vite dev server) which talks to the Market Color API over HTTP;
+# there are no native commands, so the crate is just Tauri.
+#
+# The Celeritas/QuantFabric donor sources shipped with this template are parked
+# in src/ (lib.rs, scheduler, keychain, etc.) but NOT compiled — target
+# autodiscovery is off and only the one bin below is declared.
+
+[package]
+name = "market-color-app"
+version = "0.1.0"
+description = "Desktop shell for the Market Color UI"
+edition = "2021"
+autobins = false
+autolib = false
+
+[workspace]
+
+[[bin]]
+name = "market-color-app"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2.6.1", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.1", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 1
+panic = "abort"

@@ -1,0 +1,4 @@
+# The app depends on pglite-oxide (ADR-0021), whose Wasmer runtime requires
+# rustc >= 1.93. The rest of the QuantFabric workspace keeps its 1.77 MSRV.
+[toolchain]
+channel = "1.96.0"

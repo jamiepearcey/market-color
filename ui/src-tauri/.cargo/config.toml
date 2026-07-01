@@ -1,0 +1,12 @@
+# Durable default location of the celeritas ETL extension binaries, so
+# `cargo tauri dev` makes connectors "available" without anyone exporting
+# CELERITAS_BIN_DIR by hand. Build/refresh those binaries with the celeritas
+# repo's ./build-extensions.sh (collects into celeritas/bin).
+#
+# `relative = true` resolves the path against THIS config's project dir
+# (quant-fabric-app/src-tauri), mirroring the sibling ETL layout already assumed
+# by quant-fabric's `celeritas-ipc = { path = "../../../../ETL/celeritas-ipc" }`.
+# `force` defaults to false, so an explicit CELERITAS_BIN_DIR in the environment
+# still wins (e.g. to point at a --release build elsewhere).
+[env]
+CELERITAS_BIN_DIR = { value = "../../../../../ETL/celeritas/bin", relative = true }

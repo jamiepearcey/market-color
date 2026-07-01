@@ -1,0 +1,389 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1af7-024e-77b2-a3ec-aea4365ced9e
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `energy_batch_007.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `energy_batch_007.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `energy_facts_007.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-06-30T23:57:08.400391Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `energy_batch_007.jsonl` directly and will extract supported market facts into `energy_facts_007.jsonl` without using the network. First I’m checking the file shape and document count so I can process it in order and keep the output schema exact.
+exec
+/bin/zsh -lc 'wc -l energy_batch_007.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+       2 energy_batch_007.jsonl
+
+exec
+/bin/zsh -lc "sed -n '1,3p' energy_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "0c48231ac775a63e91b3718ef9997872", "source_name": "Rigzone Latest", "published_date": "2026-06-28", "url": "https://www.rigzone.com/news/topic/company_mergers_acquisitions_jvs", "title": "Company Mergers, Acquisitions, & JVs News", "body_text": "Results 50 articles shown Eldorado Drilling Seals Vantage Acquisition 'The combination brings together Eldorado's Atlantic Zonda with Vantage's asset base, strong operating capabilities, global footprint, and proven track record managing high specification drilling assets'. 8:00 PM EST | June 28, 2026 Petronas Farms Down Several Malaysian Assets Petronas said it continues to expand participation by state governments in the development of Malaysia's oil and gas resources. 8:00 PM EST | June 14, 2026 Woodside Says No Takeover Offer from ExxonMobil The Australian company said it was not in discussions with ExxonMobil over a potential takeover, while an analyst said any deal would likely face regulatory hurdles if it came to fruition. 8:00 PM EST | June 14, 2026 APA Expands Alaska Footprint with Savant Acquisition 'The acquisition of Savant secures control of strategic infrastructure adjacent to our eastern North Slope acreage, enhancing our ability to execute our planned drilling program efficiently'. 8:00 PM EST | June 11, 2026 Repsol Brings In Masdar as Partner in Spanish Renewables Portfolio The partnership covers assets valued around $983 million including 705 megawatts of operational capacity. 8:00 PM EST | June 11, 2026 Eni, Petronas Launch Southeast Asian Gas JV The 50:50 joint venture, which combines Petronas and Eni assets in Indonesia and Malaysia, launches with a production base of 300,000 boed and aims to grow to over 500,000 boed over the next 3 years. 8:00 PM EST | June 09, 2026 Falcon Now under Tamboran The merger consolidates Tamboran's position in the Beetaloo Basin onshore Australia's Northern Territory into a leading 2.8 million net prospective acres. 8:00 PM EST | June 01, 2026 Eni, Seri Industrial Agree Integrated Battery Partnership in Italy Eni and fellow Italian company Seri Industrial agreed to launch a partnership that spans the lithium iron phosphate battery value chain in the country. 8:00 PM EST | May 31, 2026 Petrofac Emirates Sold to Mason-Led Consortium Petrofac, under administration since 2025, said it had completed the divestment of its core engineering and construction business in the UAE to a consortium of financial investors led by Mason and Pearlstone Alternative. 8:00 PM EST | May 26, 2026 Ithaca Completes Acquisition in Shell Discovery, Farms Down Fotla The UK producer completed the purchase of a 50 percent stake in two S"}
+{"doc_id": "f6f1bf4795417740b728e3089db01372", "source_name": "Rigzone Latest", "published_date": "2026-06-28", "url": "https://www.rigzone.com/news/europe_averts_jet_fuel_chaos-28-jun-2026-184004-article", "title": "Europe Averts Jet Fuel Chaos", "body_text": "Europe Averts Jet Fuel Chaos A combination of surging local production and increased imports from non-Middle East suppliers have helped Europe to avoid a jet fuel crisis that some had feared going into the continent’s summer-vacation season. The continent’s longstanding reliance on imports from the Persian Gulf had sparked fears of potential shortages because the Iran war blocked cargo flows through the Strait of Hormuz, the narrow shipping corridor through which tankers must pass to reach global markets. Early in the conflict, airlines canceled some flights, jet fuel prices shot to a record, and the International Energy Agency warned of possible demand destruction. But rather than result in shortages, the blockage has caused refiners to tweak their operations while imports from some key non-Persian Gulf suppliers ramped up. The message from the region’s airlines and fuelmakers is that holidaymakers needn’t fret about their vacation this year. “Our fuel suppliers don’t expect problems this summer,” said Thomas Thessen, chief analyst at SAS AB. While prices are still relatively high, most airlines probably feel they are — at least to some extent — “in control of the situation.” While imports from the Middle East plunged, arrivals soared from the US and Nigeria, home to a giant and relatively new refinery. At the same time, data from consulting firm Energy Aspects Ltd. show the continent’s refiners skewed their production toward jet fuel and kerosene, helping them to ramp output above seasonal norms. Spanish refiner Repsol SA said in an emailed response to questions that it has managed to increase jet fuel yields by up to 25%. Two months into the conflict, Shell Plc said that every oil refinery in Europe was maximizing output of the fuel to help cope with the Hormuz blockage. It owns the giant Pernis plant in Rotterdam, the continent’s largest. The result has been impressive: air traffic remains healthy, even surpassing 2025 levels in recent weeks, according to figures from Eurocontrol. “The jet fuel market has managed to limit the impact of the Strait of Hormuz closure by partially replacing missing volumes from the Middle East with imports from other sources and increased jet fuel production in the European Union,” the EU said in a statement. Around a dozen airline-industry executives around the world expressed confidence about fuel-supply through summer and"}
+
+codex
+The batch has 2 documents. One is a news roundup page with many short M&A/JV snippets, so I’m pulling the full text before I extract facts to avoid truncating any claim.
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"0c48231ac775a63e91b3718ef9997872\") | .body_text' energy_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Results 50 articles shown Eldorado Drilling Seals Vantage Acquisition 'The combination brings together Eldorado's Atlantic Zonda with Vantage's asset base, strong operating capabilities, global footprint, and proven track record managing high specification drilling assets'. 8:00 PM EST | June 28, 2026 Petronas Farms Down Several Malaysian Assets Petronas said it continues to expand participation by state governments in the development of Malaysia's oil and gas resources. 8:00 PM EST | June 14, 2026 Woodside Says No Takeover Offer from ExxonMobil The Australian company said it was not in discussions with ExxonMobil over a potential takeover, while an analyst said any deal would likely face regulatory hurdles if it came to fruition. 8:00 PM EST | June 14, 2026 APA Expands Alaska Footprint with Savant Acquisition 'The acquisition of Savant secures control of strategic infrastructure adjacent to our eastern North Slope acreage, enhancing our ability to execute our planned drilling program efficiently'. 8:00 PM EST | June 11, 2026 Repsol Brings In Masdar as Partner in Spanish Renewables Portfolio The partnership covers assets valued around $983 million including 705 megawatts of operational capacity. 8:00 PM EST | June 11, 2026 Eni, Petronas Launch Southeast Asian Gas JV The 50:50 joint venture, which combines Petronas and Eni assets in Indonesia and Malaysia, launches with a production base of 300,000 boed and aims to grow to over 500,000 boed over the next 3 years. 8:00 PM EST | June 09, 2026 Falcon Now under Tamboran The merger consolidates Tamboran's position in the Beetaloo Basin onshore Australia's Northern Territory into a leading 2.8 million net prospective acres. 8:00 PM EST | June 01, 2026 Eni, Seri Industrial Agree Integrated Battery Partnership in Italy Eni and fellow Italian company Seri Industrial agreed to launch a partnership that spans the lithium iron phosphate battery value chain in the country. 8:00 PM EST | May 31, 2026 Petrofac Emirates Sold to Mason-Led Consortium Petrofac, under administration since 2025, said it had completed the divestment of its core engineering and construction business in the UAE to a consortium of financial investors led by Mason and Pearlstone Alternative. 8:00 PM EST | May 26, 2026 Ithaca Completes Acquisition in Shell Discovery, Farms Down Fotla The UK producer completed the purchase of a 50 percent stake in two S
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"f6f1bf4795417740b728e3089db01372\") | .body_text' energy_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Europe Averts Jet Fuel Chaos A combination of surging local production and increased imports from non-Middle East suppliers have helped Europe to avoid a jet fuel crisis that some had feared going into the continent’s summer-vacation season. The continent’s longstanding reliance on imports from the Persian Gulf had sparked fears of potential shortages because the Iran war blocked cargo flows through the Strait of Hormuz, the narrow shipping corridor through which tankers must pass to reach global markets. Early in the conflict, airlines canceled some flights, jet fuel prices shot to a record, and the International Energy Agency warned of possible demand destruction. But rather than result in shortages, the blockage has caused refiners to tweak their operations while imports from some key non-Persian Gulf suppliers ramped up. The message from the region’s airlines and fuelmakers is that holidaymakers needn’t fret about their vacation this year. “Our fuel suppliers don’t expect problems this summer,” said Thomas Thessen, chief analyst at SAS AB. While prices are still relatively high, most airlines probably feel they are — at least to some extent — “in control of the situation.” While imports from the Middle East plunged, arrivals soared from the US and Nigeria, home to a giant and relatively new refinery. At the same time, data from consulting firm Energy Aspects Ltd. show the continent’s refiners skewed their production toward jet fuel and kerosene, helping them to ramp output above seasonal norms. Spanish refiner Repsol SA said in an emailed response to questions that it has managed to increase jet fuel yields by up to 25%. Two months into the conflict, Shell Plc said that every oil refinery in Europe was maximizing output of the fuel to help cope with the Hormuz blockage. It owns the giant Pernis plant in Rotterdam, the continent’s largest. The result has been impressive: air traffic remains healthy, even surpassing 2025 levels in recent weeks, according to figures from Eurocontrol. “The jet fuel market has managed to limit the impact of the Strait of Hormuz closure by partially replacing missing volumes from the Middle East with imports from other sources and increased jet fuel production in the European Union,” the EU said in a statement. Around a dozen airline-industry executives around the world expressed confidence about fuel-supply through summer and
+
+codex
+I have enough context to write the output directly. I’m keeping the first document conservative because the roundup page contains partial snippets, and I’m excluding the truncated Ithaca item rather than guessing the missing text.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+out = [
+  {
+    \"doc_id\": \"0c48231ac775a63e91b3718ef9997872\",
+    \"title\": \"Company Mergers, Acquisitions, & JVs News\",
+    \"facts\": [
+      {
+        \"claim\": \"Eldorado Drilling sealed its acquisition of Vantage on June 28, 2026.\",
+        \"subject\": \"Eldorado Drilling\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"Vantage\",
+        \"direction\": \"na\",
+        \"magnitude\": None,
+        \"time\": \"June 28, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Eldorado Drilling\", \"Vantage\"],
+        \"confidence\": 0.93
+      },
+      {
+        \"claim\": \"Petronas farmed down several Malaysian assets on June 14, 2026.\",
+        \"subject\": \"Petronas\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"several Malaysian assets\",
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"June 14, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Petronas\", \"Malaysia\"],
+        \"confidence\": 0.88
+      },
+      {
+        \"claim\": \"Petronas said it continues to expand participation by state governments in the development of Malaysia's oil and gas resources.\",
+        \"subject\": \"Petronas\",
+        \"predicate\": \"statement\",
+        \"object\": \"state governments in Malaysia\",
+        \"direction\": \"up\",
+        \"magnitude\": None,
+        \"time\": \"June 14, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Petronas\", \"Malaysia\"],
+        \"confidence\": 0.86
+      },
+      {
+        \"claim\": \"Woodside said it was not in discussions with ExxonMobil over a potential takeover on June 14, 2026.\",
+        \"subject\": \"Woodside Energy\",
+        \"predicate\": \"statement\",
+        \"object\": \"ExxonMobil\",
+        \"direction\": \"na\",
+        \"magnitude\": None,
+        \"time\": \"June 14, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Woodside Energy\", \"Exxon Mobil Corporation\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"APA expanded its Alaska footprint with the acquisition of Savant on June 11, 2026.\",
+        \"subject\": \"APA Corporation\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"Savant\",
+        \"direction\": \"up\",
+        \"magnitude\": None,
+        \"time\": \"June 11, 2026\",
+        \"cause\": None,
+        \"entities\": [\"APA Corporation\", \"Savant\", \"Alaska\"],
+        \"confidence\": 0.91
+      },
+      {
+        \"claim\": \"Repsol brought in Masdar as a partner in a Spanish renewables portfolio on June 11, 2026.\",
+        \"subject\": \"Repsol\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"Masdar\",
+        \"direction\": \"na\",
+        \"magnitude\": None,
+        \"time\": \"June 11, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Repsol\", \"Masdar\", \"Spain\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"The Repsol-Masdar partnership covers assets valued around "'$983 million, including 705 megawatts of operational capacity.",
+        "subject": "Repsol-Masdar partnership",
+        "predicate": "deal_or_contract",
+        "object": "Spanish renewables portfolio",
+        "direction": "na",
+        "magnitude": "$983 million; 705 megawatts",
+        "time": "June 11, 2026",
+        "cause": None,
+        "entities": ["Repsol", "Masdar", "Spain"],
+        "confidence": 0.92
+      },
+      {
+        "claim": "Eni and Petronas launched a 50:50 Southeast Asian gas joint venture on June 9, 2026.",
+        "subject": "Eni",
+        "predicate": "deal_or_contract",
+        "object": "Petronas",
+        "direction": "na",
+        "magnitude": "50:50",
+        "time": "June 09, 2026",
+        "cause": None,
+        "entities": ["Eni", "Petronas", "Indonesia", "Malaysia"],
+        "confidence": 0.95
+      },
+      {
+        "claim": "The Eni-Petronas joint venture launched with a production base of 300,000 boed.",
+        "subject": "Eni-Petronas joint venture",
+        "predicate": "production_change",
+        "object": None,
+        "direction": "na",
+        "magnitude": "300,000 boed",
+        "time": "June 09, 2026",
+        "cause": None,
+        "entities": ["Eni", "Petronas", "Indonesia", "Malaysia"],
+        "confidence": 0.93
+      },
+      {
+        "claim": "The Eni-Petronas joint venture aims to grow production to over 500,000 boed over the next 3 years.",
+        "subject": "Eni-Petronas joint venture",
+        "predicate": "forecast",
+        "object": None,
+        "direction": "up",
+        "magnitude": "over 500,000 boed",
+        "time": "over the next 3 years",
+        "cause": None,
+        "entities": ["Eni", "Petronas", "Indonesia", "Malaysia"],
+        "confidence": 0.91
+      },
+      {
+        "claim": "Tamboran'"'s merger with Falcon consolidated Tamboran's Beetaloo Basin position into 2.8 million net prospective acres on June 1, 2026.\",
+        \"subject\": \"Tamboran Resources\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"Falcon Oil & Gas\",
+        \"direction\": \"up\",
+        \"magnitude\": \"2.8 million net prospective acres\",
+        \"time\": \"June 01, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Tamboran Resources\", \"Falcon Oil & Gas\", \"Beetaloo Basin\", \"Northern Territory\", \"Australia\"],
+        \"confidence\": 0.89
+      },
+      {
+        \"claim\": \"Eni and Seri Industrial agreed to launch a partnership spanning Italy's lithium iron phosphate battery value chain on May 31, 2026.\",
+        \"subject\": \"Eni\",
+        \"predicate\": \"deal_or_contract\",
+        \"object\": \"Seri Industrial\",
+        \"direction\": \"na\",
+        \"magnitude\": None,
+        \"time\": \"May 31, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Eni\", \"Seri Industrial\", \"Italy\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"Petrofac completed the divestment of its core engineering and construction business in the UAE to a consortium led by Mason and Pearlstone Alternative on May 26, 2026.\",
+        \"subject\": \"Petrofac\",
+        \"predicate\": \"corporate_action\",
+        \"object\": \"consortium led by Mason and Pearlstone Alternative\",
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"May 26, 2026\",
+        \"cause\": None,
+        \"entities\": [\"Petrofac\", \"United Arab Emirates\", \"Mason\", \"Pearlstone Alternative\"],
+        \"confidence\": 0.94
+      }
+    ]
+  },
+  {
+    \"doc_id\": \"f6f1bf4795417740b728e3089db01372\",
+    \"title\": \"Europe Averts Jet Fuel Chaos\",
+    \"facts\": [
+      {
+        \"claim\": \"Surging local production and increased imports from non-Middle East suppliers helped Europe avoid a jet fuel crisis going into the summer-vacation season.\",
+        \"subject\": \"Europe jet fuel market\",
+        \"predicate\": \"supply_change\",
+        \"object\": None,
+        \"direction\": \"up\",
+        \"magnitude\": None,
+        \"time\": \"2026-06-28\",
+        \"cause\": \"surging local production and increased imports from non-Middle East suppliers\",
+        \"entities\": [\"Europe\"],
+        \"confidence\": 0.96
+      },
+      {
+        \"claim\": \"The Iran war blocked cargo flows through the Strait of Hormuz.\",
+        \"subject\": \"Strait of Hormuz cargo flows\",
+        \"predicate\": \"event\",
+        \"object\": None,
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"2026-06-28\",
+        \"cause\": \"the Iran war\",
+        \"entities\": [\"Iran\", \"Strait of Hormuz\"],
+        \"confidence\": 0.95
+      },
+      {
+        \"claim\": \"Early in the conflict, airlines canceled some flights.\",
+        \"subject\": \"Airlines\",
+        \"predicate\": \"event\",
+        \"object\": None,
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"early in the conflict\",
+        \"cause\": None,
+        \"entities\": [\"Airlines\"],
+        \"confidence\": 0.88
+      },
+      {
+        \"claim\": \"Early in the conflict, jet fuel prices shot to a record.\",
+        \"subject\": \"Jet fuel\",
+        \"predicate\": \"price_move\",
+        \"object\": None,
+        \"direction\": \"up\",
+        \"magnitude\": \"a record\",
+        \"time\": \"early in the conflict\",
+        \"cause\": None,
+        \"entities\": [\"Jet fuel\"],
+        \"confidence\": 0.96
+      },
+      {
+        \"claim\": \"The International Energy Agency warned of possible demand destruction early in the conflict.\",
+        \"subject\": \"International Energy Agency\",
+        \"predicate\": \"statement\",
+        \"object\": \"fuel demand\",
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"early in the conflict\",
+        \"cause\": None,
+        \"entities\": [\"International Energy Agency\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"Imports from the Middle East into Europe plunged during the conflict.\",
+        \"subject\": \"Europe jet fuel imports from the Middle East\",
+        \"predicate\": \"supply_change\",
+        \"object\": \"Europe\",
+        \"direction\": \"down\",
+        \"magnitude\": None,
+        \"time\": \"2026-06-28\",
+        \"cause\": \"the Strait of Hormuz blockage\",
+        \"entities\": [\"Europe\", \"Middle East\", \"Strait of Hormuz\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"Jet fuel arrivals into Europe from the United States and Nigeria soared during the conflict.\",
+        \"subject\": \"Europe jet fuel imports from the United States and Nigeria\",
+        \"predicate\": \"supply_change\",
+        \"object\": \"Europe\",
+        \"direction\": \"up\",
+        \"magnitude\": None,
+        \"time\": \"2026-06-28\",
+        \"cause\": None,
+        \"entities\": [\"Europe\", \"United States\", \"Nigeria\"],
+        \"confidence\": 0.94
+      },
+      {
+        \"claim\": \"European refiners ramped jet fuel and kerosene output above seasonal norms during the conflict.\",
+        \"subject\": \"European refiners\",
+        \"predicate\": \"production_change\",
+        \"object\": \"jet fuel and kerosene\",
+        \"direction\": \"up\",
+        \"magnitude\": \"above seasonal norms\",
+        \"time\": \"2026-06-28\",
+        \"cause\": \"the Strait of Hormuz blockage\",
+        \"entities\": [\"Europe\"],
+        \"confidence\": 0.95
+      },
+      {
+        \"claim\": \"Repsol said it increased jet fuel yields by up to 25%.\",
+        \"subject\": \"Repsol\",
+        \"predicate\": \"production_change\",
+        \"object\": \"jet fuel yields\",
+        \"direction\": \"up\",
+        \"magnitude\": \"up to 25%\",
+        \"time\": \"2026-06-28\",
+        \"cause\": None,
+        \"entities\": [\"Repsol\"],
+        \"confidence\": 0.96
+      },
+      {
+        \"claim\": \"Shell said every oil refinery in Europe was maximizing jet fuel output two months into the conflict.\",
+        \"subject\": \"Shell\",
+        \"predicate\": \"statement\",
+        \"object\": \"European oil refineries\",
+        \"direction\": \"up\",
+        \"magnitude\": None,
+        \"time\": \"two months into the conflict\",
+        \"cause\": \"to help cope with the Hormuz blockage\",
+        \"entities\": [\"Shell\", \"Europe\", \"Strait of Hormuz\"],
+        \"confidence\": 0.9
+      },
+      {
+        \"claim\": \"European air traffic surpassed 2025 levels in recent weeks.\",
+        \"subject\": \"European air traffic\",
+        \"predicate\": \"demand_change\",
+        \"object\": None,
+        \"direction\": \"up\",
+        \"magnitude\": \"surpassing 2025 levels\",
+        \"time\": \"recent weeks\",
+        \"cause\": None,
+        \"entities\": [\"Europe\", \"Eurocontrol\"],
+        \"confidence\": 0.92
+      },
+      {
+        \"claim\": \"The EU said the jet fuel market limited the impact of the Strait of Hormuz closure by replacing missing Middle East volumes with imports from other sources and increased jet fuel production in the European Union.\",
+        \"subject\": \"European Union\",
+        \"predicate\": \"statement\",
+        \"object\": \"Europe jet fuel market\",
+        \"direction\": \"na\",
+        \"magnitude\": None,
+        \"time\": \"2026-06-28\",
+        \"cause\": None,
+        \"entities\": [\"European Union\", \"Strait of Hormuz\", \"Middle East\"],
+        \"confidence\": 0.96
+      }
+    ]
+  }
+]
+
+path = Path('energy_facts_007.jsonl')
+with path.open('w', encoding='utf-8') as f:
+    for row in out:
+        f.write(json.dumps(row, ensure_ascii=False) + '\\n')
+
+print(f\"docs processed: {len(out)}, total facts: {sum(len(x['facts']) for x in out)}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 2, total facts: 25
+
+codex
+docs processed: 2, total facts: 25
+tokens used
+13,932
+docs processed: 2, total facts: 25
