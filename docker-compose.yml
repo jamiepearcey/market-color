@@ -1,0 +1,65 @@
+# market-color full stack: Postgres + Qdrant + the app (Node API/UI + Python MCP).
+#
+#   ANTHROPIC_API_KEY=sk-... docker compose up --build
+#
+# The `seed-facts` one-shot loads facts_work/facts.parquet into the Qdrant
+# `market_facts` collection so the chat/reports have grounded facts on first run.
+# Chat requires ANTHROPIC_API_KEY (retrieval/graph works without it).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: market_color
+      POSTGRES_USER: market
+      POSTGRES_PASSWORD: market
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U market -d market_color"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    image: qdrant/qdrant:v1.18.2
+    volumes:
+      - qdrantdata:/qdrant/storage
+    ports:
+      - "6333:6333"
+
+  seed-facts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      qdrant:
+        condition: service_started
+    working_dir: /app
+    entrypoint: ["python3", "bridge_facts_to_market_facts.py", "--recreate", "--qdrant-url", "http://qdrant:6333"]
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://market:market@postgres:5432/market_color
+      QDRANT_URL: http://qdrant:6333
+      MARKET_FACTS_COLLECTION: market_facts
+      MARKET_MCP_COMMAND: python3
+      MARKET_MCP_ARGS: /app/mcp/qdrant_facts_server.py
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      PORT: "8787"
+    ports:
+      # host 8790 -> container 8787 (host 8787 is used by unrelated workspace-shell infra)
+      - "8790:8787"
+
+volumes:
+  pgdata: {}
+  qdrantdata: {}
