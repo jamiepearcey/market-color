@@ -1,0 +1,14 @@
+```json
+{"doc_id":"6dba2f5ddcdb6a648ca39bc95eeaa0ca","title":"ECB's Lagarde says she is not a French presidential candidate but will advocate for EU","facts":[{"claim":"ECB raised interest rates for the first time in nearly three years","subject":"ECB","predicate":"policy_action","object":null,"direction":"up","magnitude":null,"time":"last month","cause":"Iran war led to rise in eurozone inflation","entities":["ECB","Eurozone","Iran"],"confidence":0.95}]}
+{"doc_id":"6e08246bf6ec7cda6671544bab7a1acc","title":"Ninety One plc (NINETY 1P) JSE:N91 share price","facts":[]}
+{"doc_id":"6e4297ea1582bff92aff26d5ff8acf3c","title":"Assetbase CPI + 4% Prescient Fund of Funds (A1) - AC4FA1 - Click a Unit Trust","facts":[]}
+{"doc_id":"6f00cbbbbdc61d5af137197fc1ca1230","title":"Oyo police arrest 2 over unlawful possession human skull in Ijio - Businessday NG","facts":[]}
+{"doc_id":"6f3bddeea259549c5644747f5a761a7a","title":"Câmaras de comércio dos EUA e CNI pedem acordo para evitar sobretaxa ao Brasil","facts":[{"claim":"US Section 301 investigation against Brazil threatens additional tariffs on Brazilian products","subject":"Brazil","predicate":"sanction","object":"United States","direction":"down","magnitude":null,"time":"2026-07-09","cause":"Section 301 investigation","entities":["Brazil","United States"],"confidence":0.85}]}
+{"doc_id":"6f747278388ceef3e776c13d09cee6a0","title":"Quote of the day: Ralph Waldo Emerson's lesson on patience: 'Adopt the pace of nature: her secret is….' | Today News","facts":[]}
+{"doc_id":"6f9ad50604c469ef3017d38ceacefdc2","title":"South32 Ltd. (SOUTH32) JSE:S32 share price","facts":[]}
+{"doc_id":"70e977d1c9002ac5b4381846746526b8","title":"Congress targets Centre over fresh UGC-NET allegations; AAP student wing president seeks forensic probe | Mint","facts":[]}
+{"doc_id":"70ee0ba542c0ea9cb9479ee2774f001a","title":"Firm unveils Mainland Housing Summit to spotlight Lagos-Ogun investment opportunities - Businessday NG","facts":[]}
+{"doc_id":"7101326e00a9fb81831c23790559c69c","title":"Myanmar FM to meet ASEAN ministers in Bangkok on Sunday - Asia & Pacific - The Jakarta Post","facts":[]}
+{"doc_id":"715992904ec81eafb811b61cad02dcfb","title":"States advocate transparent fibre duct pricing to support 90,000km rollout - Businessday NG","facts":[]}
+{"doc_id":"721e4b11b8d3883cc86d7fad3ad61cff","title":"Analytics Ci Balanced Fund of Funds (A) - ANABA - Click a Unit Trust","facts":[]}
+```

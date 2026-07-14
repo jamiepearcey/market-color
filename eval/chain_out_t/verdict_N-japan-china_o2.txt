@@ -1,0 +1,3 @@
+VERDICT: B
+
+Answer B is more grounded: it specifies the concrete countermeasures (four blacklisted defense institutes, 20 export-control entities, 20 watch-list entities) with citations, tying the mechanism to root events, whereas A omits these specifics.

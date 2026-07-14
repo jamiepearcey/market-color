@@ -1,0 +1,491 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fbe-408a-71b3-b5bd-62c9d2efa1ca
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_040.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_040.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_040.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:13:14.111705Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_040.jsonl` to confirm its structure, then I’ll extract per-document market facts and write `all_facts_040.jsonl` in the same order.
+exec
+/bin/zsh -lc 'wc -l all_batch_040.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_040.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_040.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(i, sorted(obj.keys()))
+        print(obj['doc_id'])
+        print(obj['title'][:160])
+        print(obj['body_text'][:300].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+0b98ac9994d0f6dff6f2590b52673e24
+Sharplink buys 10,000 ETH, repurchases 2.13 million SBET shares in latest buyback
+Sharplink buys 10,000 ETH, repurchases 2.13 million SBET shares in latest buyback Quick Take - SharpLink bought 10,000 ETH, lifting its total ether holdings to 886,725 tokens as of June 28. - The company also repurchased 2.13 million SBET shares in the latest buyback, bringing its cumulative repurch
+---
+2 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+0c0b7fcdd9fb0f340c8315525f20faf5
+Maybe transported convicts took the gravy boat to Australia | Brief letters
+In the 1970s, a nursing colleague of mine talked about an Australian street food known as a “pie floater” (Letters, 30 June). This delicacy used to be sold from kerbside carts, and consisted of a meat pie, thick with gravy, served in a bowl, inverted and smothered in pea soup. Melanie Hewitt London 
+---
+3 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+0d5a95bccfa64a9a9d688ef260d2000c
+The Take: The path from Gaza to Trump’s return
+What happened inside the White House after October 7, 2023, changed the course of Israel’s genocidal war on Gaza and reshaped the Democratic Party. After three primary elections that could indicate the future of the Democratic base, a new book by Akbar Shahid Ahmed reveals the inside story of how th
+---
+
+codex
+The file is small enough to handle directly. I’m pulling all titles and publication dates now so I can extract facts document by document without adding unsupported inference.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_040.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 0b98ac9994d0f6dff6f2590b52673e24 | 2026-06-30 | Sharplink buys 10,000 ETH, repurchases 2.13 million SBET shares in latest buyback
+2. 0c0b7fcdd9fb0f340c8315525f20faf5 | 2026-06-30 | Maybe transported convicts took the gravy boat to Australia | Brief letters
+3. 0d5a95bccfa64a9a9d688ef260d2000c | 2026-06-30 | The Take: The path from Gaza to Trump’s return
+4. 0da0838d8f486df63e61e020e91615ad | 2026-06-30 | TD Cowen Slashes Strategy Price Target, Citing Ongoing Bitcoin Weakness - Decrypt
+5. 0dd4a02fedd50b5d17c137d0d2723b34 | 2026-06-30 | Is Wicked star Ariana Grande back with her ex Ricky Alvarez?
+6. 0de61634c6fb4776dbbeeb622e888a8c | 2026-06-30 | ‘Cleverest woman that ever lived’: the rise of China’s Empress Dowager Cixi
+7. 0dfd1e30241a371538290221593506c4 | 2026-06-30 | Patient being tested for Ebola virus at Glasgow hospital
+8. 0e2a32b5cf1185c0b93684a5713c12d8 | 2026-06-30 | UK disposable incomes squeezed by price rises and tax changes
+9. 0e4e94cc8efbad7b8518e0ba38260057 | 2026-06-30 | Ether, noticias sobre el precio de doge: Las criptomonedas caen mientras el plan de ventas de bitcoin de Strategy presiona el mercado
+10. 0e7ef9111d08c659e910a45201c7b5ee | 2026-06-30 | Q2 Leveraged Loan Market Wrap: PE drought, software rout forge divided market of haves, have-nots
+11. 0e98fdd4d92ef9d5b6be7fa022b234bb | 2026-06-30 | Why did they pancake? Building failures, soft soil amplify Venezuela quake destruction
+12. 0ef6162a62ec0474c52c5e534dc23e0a | 2026-06-30 | Blackstone Sells Stake In Three Virginia Data Centers Amid Grassroot Outrage
+
+codex
+Several documents look non-market and will likely produce empty fact lists. I’m reading the market-relevant candidates in full to extract only explicit claims with the required fields.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json, textwrap
+keep={1,4,8,9,10,12,7,11}
+with open('all_batch_040.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i not in keep: continue
+        obj=json.loads(line)
+        print('='*100)
+        print(i, obj['doc_id'])
+        print('TITLE:', obj['title'])
+        print('DATE:', obj['published_date'])
+        print(textwrap.fill(obj['body_text'], width=120))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+====================================================================================================
+1 0b98ac9994d0f6dff6f2590b52673e24
+TITLE: Sharplink buys 10,000 ETH, repurchases 2.13 million SBET shares in latest buyback
+DATE: 2026-06-30
+Sharplink buys 10,000 ETH, repurchases 2.13 million SBET shares in latest buyback Quick Take - SharpLink bought 10,000
+ETH, lifting its total ether holdings to 886,725 tokens as of June 28. - The company also repurchased 2.13 million SBET
+shares in the latest buyback, bringing its cumulative repurchases to 4.07 million shares since August 2025. We'd love
+your feedback. Sharplink disclosed on Tuesday that it purchased 10,000 ETH and repurchased more shares under its ongoing
+buyback program, expanding one of the largest corporate ether treasuries in the public markets. The Miami-based company
+said the latest acquisition increased its total ether holdings to 886,725 ETH as of June 28. The purchase was made at an
+average price of $1,611 per ETH, implying a transaction value of about $16.1 million, according to the company's
+statement. The disclosure marks Sharplink's first publicly announced ether purchase in eight months. Last week, onchain
+analyst EmberCN reported that the company had acquired 5,000 ETH through FalconX, citing Arkham data, though Sharplink
+had not confirmed the transaction at the time. Sharplink said its latest purchases reflect its continued commitment to
+expanding its ETH treasury as a long-term reserve asset. The company also announced the repurchase of 2,132,773 shares
+of its common stock in the open market at an average price of $4.69 per share. The buyback brings the company's
+cumulative repurchases to 4,071,223 shares since initiating the program in August 2025. The update follows the
+completion of a $75 million registered direct offering of common stock and warrants during the week ended June 28. "The
+successful completion of our $75 million registered direct offering last week has strengthened our balance sheet and
+provided the capital to support our active ETH treasury management strategy,” Sharplink CEO Joseph Chalom said. “Our
+capital allocation philosophy is disciplined and straightforward: every financing decision we make is based on our long-
+term objective to increase ETH per share.” Ether traded above $1,550 on Tuesday, down 1.09% over the previous 24 hours,
+according to The Block's ETH price page. Sharplink shares (SBET) closed at $4.92 on Monday, up 2.29% on the session, but
+dropped to $4.78 in early trading hours on Tuesday, according to The Block's equities price page. Disclaimer: The Block
+is an independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a
+majority investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange
+Bitget is an anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective,
+impactful, and timely information about the crypto industry. Here are our current financial disclosures. © 2026 The
+Block. All Rights Reserved. This article is provided for informational purposes only. It is not offered or intended to
+be used as legal, tax, investment, financial, or other advice.
+
+====================================================================================================
+4 0da0838d8f486df63e61e020e91615ad
+TITLE: TD Cowen Slashes Strategy Price Target, Citing Ongoing Bitcoin Weakness - Decrypt
+DATE: 2026-06-30
+In brief - TD Cowen lowered its price target for Strategy by 35%, citing Bitcoin's lingering weakness. - The investment
+bank expressed a positive outlook on Strategy's sweeping capital management framework. - Analysts said Strategy's
+decision to shore up $2.55 billion in cash should address some investor concerns. TD Cowen slashed its price target by
+35% for shares of Strategy (MSTR) on Tuesday, recalibrating expectations as Bitcoin continues struggling to build
+momentum. Analysts led by Lance Vitanza lowered their price target for Strategy to $260 from $400 to reflect Bitcoin’s
+“observed ongoing weakness,” according to a note. The investment bank now foresees the digital asset hitting $100,000 by
+year’s end, as opposed to $140,000 previously. The leading digital asset by market cap fell back below $60,000 on
+Tuesday, according to CoinGecko. At $58,400, its price had tumbled more than 20% over the past month. Bitcoin has now
+fallen more than 53% from an all-time high mark above $126,000 set last October. Shares of Strategy fell 8.6% to $84.75
+on Tuesday, shedding gains after snapping a nine-day losing streak the day before, according to Yahoo Finance. Since
+Strategy sold Bitcoin roughly a month ago, for the first time since 2022, the firm’s stock has tumbled nearly 41% from
+$142.69. Although the update comes on the heels of a capital management framework unveiled by the Bitcoin-buying firm
+this week, the analysts emphasized that their expectations were renewed independently of the company’s sweeping
+announcement on Monday. In fact, they described Strategy’s Digital Credit Capital Framework as “a positive for credit
+visibility and capital flexibility,” given it outlines how the company intends to manage its cash reserves, flagship
+preferred stock, and stockpile of 847,363 Bitcoin moving forward. Alongside the framework’s adoption on Monday, Strategy
+signaled that its cash reserves had expanded to $2.55 billion. In recent weeks, the company’s so-called USD Reserve has
+come into focus as analysts have pointed to ballooning costs associated with Stretch (STRC). “This tactical move should
+go a long way toward restoring confidence in the company’s ability to weather a protracted Bitcoin downturn,” the
+analysts argued, referencing concerns around the durability of dividends that Strategy routinely pays on products like
+STRC. On Monday, the preferred stock’s dividend rate was hiked for an eighth time to 12%, increasing Strategy’s
+recurring costs. On Tuesday, STRC fell 0.7% to $83.11, lingering below its $100 par value after falling to a record low
+of $71.25 last week. By linking STRC’s dividend adjustments more explicitly to the management of Strategy’s cash
+reserves and future Bitcoin liquidations, the firm took “a modestly positive step toward improving price stability and
+investor confidence in the preferred stock,” the analysts wrote. What’s more, Strategy’s framework marked a shift toward
+“two-way capital allocation,” the analysts wrote, noting that the company’s ability to repurchase $1 billion in common
+shares and $1 billion in preferred shares may present arbitrage opportunities. The analysts highlighted Strategy’s new
+monetization program for Bitcoin, under which the firm can sell $1.25 billion worth of Bitcoin to top off its cash
+reserves. The initiative formalized the digital asset as a “flexible source of capital” alongside other levers, they
+added. Strategy’s stock price tumbled early this month after the firm sold 32 Bitcoin for $2.5 million. The move was
+telegraphed in advance as a way for the company to show its commitment to preferred stockholders, but it stoked
+uncertainty about future sales. On Myriad, a prediction market owned by Decrypt parent company Dastan, traders penciled
+in a 14% chance that Strategy would hold more than 1 million Bitcoin before year’s end. That marked a decrease from
+17.5% a week ago. Last July, TD Cowen raised its Strategy price target to $680, around the time shares were trading
+above $450. MSTR shares are now down more than 79% in the last year.
+
+====================================================================================================
+7 0dfd1e30241a371538290221593506c4
+TITLE: Patient being tested for Ebola virus at Glasgow hospital
+DATE: 2026-06-30
+A patient is being tested for the Ebola virus at a Glasgow hospital, the Press Association has reported. It is
+understood the patient was admitted to the Queen Elizabeth university hospital in the early hours of Tuesday. Tests are
+now being carried out to confirm whether the individual has contracted the disease. A Public Health Scotland (PHS)
+spokesperson said there are “no confirmed cases of Ebola” in Scotland right now. However, it continued: “Public Health
+Scotland is working closely with UKHSA [the UK Health Security Agency] to assess routes by which travellers may enter
+the UK from affected countries. “The risk from people arriving in the UK from affected areas is low and the NHS has safe
+procedures in place for detecting and managing any such cases. “PHS and NHS boards across Scotland have well-established
+protocols for assessing and testing travellers arriving in the UK from areas affected by Ebola where necessary. “Where
+required, contact tracing will occur and contacts may undergo clinical assessment and precautionary testing.” There have
+been almost 700 confirmed cases of bundibugyo Ebola virus, the majority of which are in the Democratic Republic of
+Congo. About 138 people have died, including two in neighbouring Uganda. If confirmed, it would be the first case in the
+UK since the outbreak in the DRC was declared a public health emergency of international concern by the World Health
+Organization. The UK has committed up to £21m to support the local response to Ebola in DRC, helping to protect
+frontline workers and vulnerable communities.
+
+====================================================================================================
+8 0e2a32b5cf1185c0b93684a5713c12d8
+TITLE: UK disposable incomes squeezed by price rises and tax changes
+DATE: 2026-06-30
+UK households suffered a drop in disposable incomes in the first three months of the year as price rises and extra
+wealth taxes hit average spending power. The Office for National Statistics said a rise in the consumer prices index
+(CPI) measure of inflation in the first quarter and higher capital gains tax receipts reduced real household disposable
+income by 0.8% from January to the end of March. It marked the fourth quarter in the last five when disposable incomes
+have fallen, the ONS said in its latest assessment of the economy. Andy Burnham, who is expected to replace Keir Starmer
+as prime minister next month, used a major speech on Monday to signal that tackling the cost of living and decline in
+living standards would be central to his premiership. He said: “We need a new determination to raise living standards of
+every person in this land. And we must accept that to do that, to fix the economy and the country, we need to change
+politics and we need to do it now.” Burnham announced a 10-year mission to raise living standards across the UK and
+bring down the cost of essentials such as water, energy and transport. The ONS confirmed early estimates that showed the
+economy growing by 0.6% in the first quarter, but GDP growth over last year was revised down slightly from 1.4% to 1.3%.
+All three main sectors of the economy – services, production and construction – grew in the first quarter of this year,
+the ONS said, with the largest contribution from services, which expanded by 0.8%. Thomas Watts, an investment manager
+at the private bank Julius Baer, said the figures represented a boost for Rachel Reeves in what are expected to be her
+last weeks as chancellor. “Encouragingly, the composition of growth was more balanced than in recent quarters. Both
+construction and production posted gains of 0.2%, signalling a modest but welcome broadening in economic momentum,” he
+said. “The fact that all three main sectors contributed positively will be particularly reassuring for policymakers,
+both at Threadneedle Street and in Downing Street.” The household saving ratio, which measures the proportion of
+disposable income that households save rather than spend, edged down marginally from 9.6% in the last three months of
+2025 to 8.9%. Households pushed the saving ratio to 27.5% during the pandemic lockdowns, when they were unable to spend
+much of their income, and increased it again during the politically unstable period before the last election, after
+which it has steadily declined, though it remains above pre-pandemic levels. Phil Shaw, an economist at Investec, said
+the first quarter “marked a decent start to 2026”, but predicted that attention would soon turn to the negative impact
+from the recent rise in energy prices. “We envisage growth coming close to a halt in the third quarter, although the
+level of the saving ratio will give households in aggregate a cushion to absorb cost increases without an abrupt
+interruption in spending,” he said. “Thereafter the unwinding of the energy price spike should form a tailwind and help
+to support expenditure and economy activity more widely.” He added that the Bank of England was likely to view the
+figures as showing the economy remains robust, although without the prospect of much growth in the next six months,
+allowing it to avoid interest rate rises. Shaw said: “We have lowered our forecast of the peak in inflation over the
+remainder of the year from 4.0% to 3.1% … Nevertheless we still consider that the [Bank] will adopt a cautious approach
+to policy and guard against lingering threats of more persistent inflationary pressures. “We remain of the view that a
+rate increase is off the table, but that the committee will maintain the Bank rate at 3.75% for the remainder of the
+year, with rate cuts coming into view over 2027.”
+
+====================================================================================================
+9 0e4e94cc8efbad7b8518e0ba38260057
+TITLE: Ether, noticias sobre el precio de doge: Las criptomonedas caen mientras el plan de ventas de bitcoin de Strategy presiona el mercado
+DATE: 2026-06-30
+Ether, Solana y Dogecoin caen mientras el plan de ventas de Bitcoin de Strategy presiona al mercado Bitcoin se mantuvo
+por debajo de $60,000 mientras un dólar en alza mantenía a las criptomonedas contenidas. La demanda onchain permaneció
+tranquila durante las pérdidas de la semana, y el plan de Strategy de posiblemente vender bitcoin añadió cautela. - Las
+principales criptomonedas retrocedieron mientras el yen japonés cayó a un mínimo de 40 años, impulsando al dólar
+estadounidense y presionando activos de riesgo como el bitcoin. - Bitcoin se mantuvo alrededor de $59,500, por debajo de
+su media móvil de 200 semanas, mientras que la mayoría de las altcoins registraron fuertes pérdidas semanales, excepto
+Solana y HYPE de Hyperliquid, que lograron obtener ganancias. - Los datos onchain mostraron una demanda moderada y
+tarifas de transacción en disminución, y la perspectiva de más de $1 mil millones en posibles ventas de bitcoin por
+parte de Strategy está aumentando la cautela en un mercado ya de por sí limitado. Ether (ETH), Solana (SOL) y Bitcoin
+cotizó alrededor de $59,514, con una caída del 0.3% en 24 horas y del 7% en la semana, según datos de CoinDesk,
+manteniéndose por debajo de su promedio móvil de 200 semanas, el precio promedio durante aproximadamente los últimos
+cuatro años y una línea a largo plazo en la que se ha mantenido durante todo el mes. Las pérdidas de la semana fueron
+profundas en las altcoins. Ether cayó un 8.2% en siete días hasta aproximadamente $1,587, XRP bajó un 7.1% hasta $1.04 y
+dogecoin se deslizó un 11.9% hasta $0.072, siendo la peor de las principales. BNB perdió un 6.5%. Solana desafió la
+tendencia, subiendo un 3% en el día y un 2.9% en la semana hasta $74, y HYPE de Hyperliquid rebotó un 7% en el día,
+dejándolo aproximadamente estable en la semana. El motor inmediato fueron las monedas. El yen cayó por debajo de 162 por
+dólar, su nivel más débil desde 1986, impulsando al dólar al alza en todos los ámbitos. Un dólar más fuerte encarece los
+activos valorados en dólares como el bitcoin para los compradores extranjeros y tiende a retirar dinero de las
+operaciones de riesgo. La demanda en cadena se mantuvo débil durante la caída, según datos de Glassnode. El número de
+direcciones activas, una medida aproximada de cuántos usuarios están realmente realizando transacciones, se situó
+alrededor de 618,000, en el medio de su rango reciente en lugar de superar niveles más altos. El valor de las monedas
+que se mueven a través de la red se mantuvo cerca de 4.200 millones de dólares, justo por encima del mínimo de su rango
+alrededor de 3.600 millones de dólares, lo que indica una actividad moderada en lugar de un aumento, señaló la firma en
+un informe del lunes. Las tarifas totales de transacción, o lo que los usuarios pagan para mover fondos y una medida de
+la competencia por el espacio en cada bloque, continuaron contrayéndose. En conjunto, ambos indicadores indican que la
+demanda no se ha incrementado a pesar de la disminución de los precios. Sumando a la cautela, Strategy, el mayor tenedor
+corporativo de bitcoin, declaró el lunes que podría vender más de mil millones de dólares del token bajo un nuevo
+programa para reforzar sus finanzas, una reversión de la larga negativa del fundador Michael Saylor a vender. La
+perspectiva de esas ventas pesa sobre un mercado ya de por sí débil. Esto deja a las criptomonedas donde han estado
+operando durante semanas, afectadas por un dólar fuerte y la falta de una demanda fresca en lugar de un único impacto.
+Las próximas pruebas son si la escalada del dólar se detiene y si la caída del yen obliga a Japón a intervenir, un
+movimiento que algunos advierten podría deshacer el financiamiento a bajo costo en yenes, utilizado durante mucho tiempo
+para respaldar operaciones de riesgo a nivel mundial. Por ahora, con una actividad onchain tranquila y un posible gran
+vendedor esperando, el cripto tiene poco que lo impulse. - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9 - 10 Zcash’s Tachyon
+upgrade aims to scale shielded payments, improve quantum readiness, and test whether its funding, security, and
+governance can hold. Zcash’s Tachyon upgrade aims to scale shielded payments, improve quantum readiness, and test
+whether its funding, security, and governance can hold. Por qué es importante: Zcash’s Tachyon upgrade aims to scale
+shielded payments, improve quantum readiness, and test whether its funding, security, and governance can hold.
+
+====================================================================================================
+10 0e7ef9111d08c659e910a45201c7b5ee
+TITLE: Q2 Leveraged Loan Market Wrap: PE drought, software rout forge divided market of haves, have-nots
+DATE: 2026-06-30
+Bifurcation defined the leveraged loan market in the second quarter of 2026, between higher- and lower-rated borrowers,
+PE-backed issuers and corporates, and across sectors. A confluence of headwinds hit simultaneously: a Fed that has
+shelved rate cuts and now openly debates hikes; an energy-driven inflation shock tied to the Middle East conflict; and
+mounting fears of AI-driven disruption compressing the runway for software-sector credits. Against that challenging
+backdrop, the new-issue market of leveraged loans proved more resilient than the macro noise suggested, as corporates
+stepped in to fill the void in sponsor-backed activity. Key takeaways: - PE dealmaking collapsed to near-historic lows
+in Q2 — overall PE deal volume was down 52%, resulting in a sponsored loan issuance drop of 34% QoQ. - Overall US
+leveraged loan activity in Q2 was $221 billion, down just 9% from Q1 and above historical averages, as corporates filled
+the PE vacuum. - Sponsors retreated entirely into balance-sheet defense, driving 74% of maturity extension amendments
+while accounting for just 44% of new-money activity. - Amend-to-extend transactions rose to a record high in Q2 as
+sponsors raced to chip away at the 2028 maturity wall before this window closes. - Software has lost its throne: the
+share of overall BSL issuance in this segment collapsed from 17.6% in 2025 to 8.6% YTD, the lowest reading since 2013. -
+Lenders are drawing sharp lines at the bottom of the credit spectrum: B-minus spreads have blown out 57 bps since Q4
+2025, to S+411, while BB-minus and B-plus spreads have barely moved. - The BSL market's second half of 2026 hinges on PE
+recovery, but the $40 billion 2028 software maturity wall has barely moved this year, leaving the most-watched corner of
+the loan market with a challenging path ahead. Amendment-driven recovery US leveraged loan activity totaled $221 billion
+in the second quarter through June 24, including repricing and extension amendments, down 9% from Q1, which absorbed the
+worst of the tech-sector sell-off. That still leaves 2026's second quarter 16% above the five-year quarterly average and
+roughly double the Q2 2025 level, when "Liberation Day" turmoil brought the market to a near standstill. The $462
+billion of overall primary market activity this year tracks closely with the same period in 2025, with the proportions
+of net new supply and amendment activity nearly unchanged. This has disappointed loan investors who expected buyout and
+M&A deal flow to overtake opportunistic transactions.
+
+====================================================================================================
+11 0e98fdd4d92ef9d5b6be7fa022b234bb
+TITLE: Why did they pancake? Building failures, soft soil amplify Venezuela quake destruction
+DATE: 2026-06-30
+Why did they pancake? Building failures, soft soil amplify Venezuela quake destruction Experts point to poor code
+enforcement, risky geography as factors in collapses in the wake of twin earthquakes When late Venezuelan leader Hugo
+Chavez built this coastal housing development bearing his name as part of his socialist revolution, residents found a
+fresh start after deadly floods had decimated the area more than a decade earlier. But after two back-to-back
+earthquakes flattened parts of the 1,100-unit complex last Wednesday, engineers have urged the Venezuelan government to
+swiftly audit similar public housing that is still standing. “I lost my whole apartment,” said Yelsa Rojas, who since
+2015 has lived on the second floor of the building colloquially known as ‘Los Cocos’, for its proximity to a beach of
+the same name. “We think everyone on the second floor is dead,” she said. The only reason she’s alive is because she was
+at a medical appointment when the quakes hit, she added. While engineers and construction specialists said it was too
+soon to declare exactly why individual buildings collapsed, decades of neglect, a lack of enforcement of building codes
+and shoddy licensing practices under Chavez and his successor, Nicolas Maduro, likely exacerbated the disaster’s human
+cost. They also pointed to soil instability in the worst-hit state of La Guaira, where Los Cocos is located, making it
+an especially risky location to build.
+
+====================================================================================================
+12 0ef6162a62ec0474c52c5e534dc23e0a
+TITLE: Blackstone Sells Stake In Three Virginia Data Centers Amid Grassroot Outrage
+DATE: 2026-06-30
+Up until now, when it comes to real estate, Blackstone was best known in recent years for dumping many of its trophy
+office properties - which in the aftermath of work from home never recovered their projected cash flow potential - at a
+huge discount. Now, it may be pulling a page from its old, pre-Lehman playbook by calling the top in yet another
+commercial real estate segment: data centers. According to Bloomberg, Blackstone is selling its stakes in a trio of data
+centers across Northern Virginia for $3.5 billion, cashing out of part of a bet it made less than three years ago.
+Digital Realty Trust will pay $1.2 billion of cash and offer $2.3 billion of its shares to Blackstone funds, the firms
+said in a statement Monday. In exchange, the data center company will acquire Blackstone’s 80% interest in two
+96-megawatt data centers in Manassas, Virginia, and a 50% interest in a 96-megawatt center in nearby Sterling. The
+assets involved in this week’s sale were part of a joint venture that Blackstone announced it would set up with Digital
+Realty in 2023 as it sought to get ahead in the AI arms race that has engulfed Wall Street in recent years. Blackstone
+and Digital Realty will continue to work together on their remaining data center investments located elsewhere in
+Northern Virginia as well as in Paris and Frankfurt. “We have developed a strong partnership with Blackstone,” Greg
+Wright, Digital Realty CEO, said in the statement. “This transaction reflects the next phase of that relationship,
+allowing us to increase our ownership in a portfolio of fully leased, high-quality hyperscale assets.” It does. The
+question is why did Blackstone decide to pull the cord now, just as fresh doubts are creeping whether the Mag 7s will
+continue funding the AI expansion with virtually unlimited capex. As part of Wall Street’s broader push into data
+centers, investment has poured into Northern Virginia, which is considered the country’s largest data center market, and
+is better known as "Data Center Alley". That includes Digital Gateway, an ambitious plan for a 2,100-acre corridor in
+the region that would house as many as 37 data-center buildings. Data center developers eyeing that land have faced
+strident opposition. Compass Datacenters, backed by Brookfield Asset Management, recently pulled out of a yearslong
+effort to build a key part of the development after facing intense pushback from local residents. Blackstone’s QTS is
+also fighting in court to salvage a similarly sized development on adjacent parcels. The increasingly vocal political
+and grassroots pushback against new data center construction may explain why Blackstone is getting cold feet just as the
+AI bubble is peaking. A recent Gallup poll found that 7 in 10 Americans oppose constructing data centers for artificial
+intelligence in their local area, including nearly half, 48%, who are strongly opposed. Barely a quarter favor these
+projects, with 7% strongly in favor. Half of opponents mention data centers’ excessive use of resources, including 18%
+each mentioning their use of water and energy. Sixteen percent mention a related environmental concern of pollution,
+including noise pollution and air and water pollution. About one in five opponents are concerned with the impact on
+local quality of life, including increased population, increased traffic and preferring that the land be used for other
+purposes. A similar share mention potentially negative economic consequences, including higher utility bills, cost-of-
+living increases, and the cost of building the data centers (which could involve the use of taxpayer funds). Most of the
+remaining opposition stems from general or specific concerns about artificial intelligence. Blackstone, which manages
+more than $1.3 trillion, bills itself as the largest global provider of data centers, and also owns some of the
+utilities that power them. It acquired QTS in 2021 and bought Australian computing provider AirTrunk in 2024. In May,
+the firm held an initial public offering for Blackstone Digital Infrastructure Trust Inc., its data center acquisition
+vehicle, which aims to buy already built and leased properties benefiting from the artificial intelligence boom. The
+firm has more than $150 billion of data center assets, and it has identified an additional $160 billion worth of
+opportunities for its pipeline, CEO Steve Schwarzman said in April. Affiliates of Blackstone are already selling the
+Digital Realty equity they’re set to receive from this week’s deal, which is expected to be completed Tuesday. They’re
+offering the stock at as much as a 2.9% discount to Monday’s closing price of $190.58, Bloomberg reported citing people
+familiar.
+
+
+codex
+I have the candidate facts. Next I’m writing the output file directly from a small local script so the records stay in input order and the empty-document cases are explicit.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from collections import OrderedDict
+
+facts_by_doc = {
+    '0b98ac9994d0f6dff6f2590b52673e24': [
+        {\"claim\":\"SharpLink purchased 10,000 ETH at an average price of "'$1,611 per ETH for about $16.1 million.","subject":"SharpLink","predicate":"corporate_action","object":"Ether","direction":"up","magnitude":"10,000 ETH at $1,611 per ETH; about $16.1 million","time":"as of June 28","cause":None,"entities":["SharpLink","Ether"],"confidence":0.98},
+        {"claim":"SharpLink'"'s total ether holdings increased to 886,725 ETH as of June 28.\",\"subject\":\"SharpLink\",\"predicate\":\"corporate_action\",\"object\":\"Ether\",\"direction\":\"up\",\"magnitude\":\"886,725 ETH\",\"time\":\"as of June 28\",\"cause\":\"the company purchased 10,000 ETH\",\"entities\":[\"SharpLink\",\"Ether\"],\"confidence\":0.97},
+        {\"claim\":\"SharpLink repurchased 2,132,773 shares of SBET common stock in the open market at an average price of "'$4.69 per share.","subject":"SharpLink","predicate":"corporate_action","object":"SBET common stock","direction":"up","magnitude":"2,132,773 shares at $4.69 per share","time":"2026-06-30","cause":None,"entities":["SharpLink","SBET"],"confidence":0.98},
+        {"claim":"SharpLink'"'s cumulative repurchases reached 4,071,223 shares since it initiated the buyback program in August 2025.\",\"subject\":\"SharpLink\",\"predicate\":\"corporate_action\",\"object\":\"SBET common stock\",\"direction\":\"up\",\"magnitude\":\"4,071,223 shares\",\"time\":\"since August 2025\",\"cause\":\"the latest repurchase of 2,132,773 shares\",\"entities\":[\"SharpLink\",\"SBET\"],\"confidence\":0.97},
+        {\"claim\":\"SharpLink completed a "'$75 million registered direct offering of common stock and warrants during the week ended June 28.","subject":"SharpLink","predicate":"corporate_action","object":"common stock and warrants","direction":"up","magnitude":"$75 million","time":"week ended June 28","cause":None,"entities":["SharpLink"],"confidence":0.96},
+        {"claim":"Ether traded above $1,550 on Tuesday, down 1.09% over the previous 24 hours.","subject":"Ether","predicate":"price_move","object":None,"direction":"down","magnitude":"down 1.09%; above $1,550","time":"Tuesday","cause":None,"entities":["Ether"],"confidence":0.9},
+        {"claim":"SharpLink shares closed at $4.92 on Monday, up 2.29% on the session.","subject":"SharpLink","predicate":"price_move","object":None,"direction":"up","magnitude":"up 2.29% to $4.92","time":"Monday","cause":None,"entities":["SharpLink","SBET"],"confidence":0.9},
+        {"claim":"SharpLink shares fell to $4.78 in early Tuesday trading.","subject":"SharpLink","predicate":"price_move","object":None,"direction":"down","magnitude":"$4.78","time":"Tuesday early trading","cause":None,"entities":["SharpLink","SBET"],"confidence":0.89}
+    ],
+    '"'0c0b7fcdd9fb0f340c8315525f20faf5': [],
+    '0d5a95bccfa64a9a9d688ef260d2000c': [],
+    '0da0838d8f486df63e61e020e91615ad': [
+        {\"claim\":\"TD Cowen lowered its price target on Strategy to "'$260 from $400, a 35% cut, citing Bitcoin'"'s ongoing weakness.\",\"subject\":\"TD Cowen\",\"predicate\":\"forecast\",\"object\":\"Strategy\",\"direction\":\"down\",\"magnitude\":\"to "'$260 from $400; 35%","time":"2026-06-30","cause":"Bitcoin'"'s observed ongoing weakness\",\"entities\":[\"TD Cowen\",\"Strategy\",\"Bitcoin\"],\"confidence\":0.98},
+        {\"claim\":\"TD Cowen lowered its year-end Bitcoin price forecast to "'$100,000 from $140,000.","subject":"TD Cowen","predicate":"forecast","object":"Bitcoin","direction":"down","magnitude":"to $100,000 from $140,000","time":"year’s end","cause":"Bitcoin'"'s observed ongoing weakness\",\"entities\":[\"TD Cowen\",\"Bitcoin\"],\"confidence\":0.97},
+        {\"claim\":\"Bitcoin fell below "'$60,000 on Tuesday and traded at $58,400.","subject":"Bitcoin","predicate":"price_move","object":None,"direction":"down","magnitude":"$58,400; below $60,000","time":"Tuesday","cause":None,"entities":["Bitcoin"],"confidence":0.95},
+        {"claim":"Bitcoin had fallen more than 20% over the past month.","subject":"Bitcoin","predicate":"price_move","object":None,"direction":"down","magnitude":"more than 20%","time":"over the past month","cause":None,"entities":["Bitcoin"],"confidence":0.94},
+        {"claim":"Bitcoin had fallen more than 53% from the all-time high above $126,000 set last October.","subject":"Bitcoin","predicate":"price_move","object":None,"direction":"down","magnitude":"more than 53% from above $126,000","time":"since last October","cause":None,"entities":["Bitcoin"],"confidence":0.94},
+        {"claim":"Strategy shares fell 8.6% to $84.75 on Tuesday.","subject":"Strategy","predicate":"price_move","object":None,"direction":"down","magnitude":"8.6% to $84.75","time":"Tuesday","cause":None,"entities":["Strategy","MSTR"],"confidence":0.96},
+        {"claim":"Strategy'"'s stock had fallen nearly 41% from "'$142.69 since the company sold Bitcoin roughly a month earlier.","subject":"Strategy","predicate":"price_move","object":None,"direction":"down","magnitude":"nearly 41% from $142.69","time":"since roughly a month ago","cause":None,"entities":["Strategy","MSTR","Bitcoin"],"confidence":0.92},
+        {"claim":"Strategy said on Monday that its cash reserves had expanded to $2.55 billion.","subject":"Strategy","predicate":"corporate_action","object":"cash reserves","direction":"up","magnitude":"$2.55 billion","time":"Monday","cause":None,"entities":["Strategy"],"confidence":0.96},
+        {"claim":"Strategy raised STRC'"'s dividend rate to 12% on Monday for the eighth time.\",\"subject\":\"Strategy\",\"predicate\":\"corporate_action\",\"object\":\"STRC preferred stock\",\"direction\":\"up\",\"magnitude\":\"12%\",\"time\":\"Monday\",\"cause\":None,\"entities\":[\"Strategy\",\"STRC\"],\"confidence\":0.96},
+        {\"claim\":\"STRC fell 0.7% to "'$83.11 on Tuesday.","subject":"STRC","predicate":"price_move","object":None,"direction":"down","magnitude":"0.7% to $83.11","time":"Tuesday","cause":None,"entities":["Strategy","STRC"],"confidence":0.95},
+        {"claim":"STRC fell to a record low of $71.25 last week.","subject":"STRC","predicate":"price_move","object":None,"direction":"down","magnitude":"$71.25","time":"last week","cause":None,"entities":["Strategy","STRC"],"confidence":0.94},
+        {"claim":"Strategy'"'s framework allows the company to repurchase "'$1 billion in common shares and $1 billion in preferred shares.","subject":"Strategy","predicate":"corporate_action","object":"common shares and preferred shares","direction":"na","magnitude":"$1 billion in common shares and $1 billion in preferred shares","time":"2026-06-30","cause":None,"entities":["Strategy"],"confidence":0.95},
+        {"claim":"Strategy'"'s new monetization program allows it to sell "'$1.25 billion worth of Bitcoin to replenish its cash reserves.","subject":"Strategy","predicate":"corporate_action","object":"Bitcoin","direction":"down","magnitude":"$1.25 billion","time":"2026-06-30","cause":"to top off its cash reserves","entities":["Strategy","Bitcoin"],"confidence":0.96},
+        {"claim":"Strategy sold 32 Bitcoin for $2.5 million earlier this month.","subject":"Strategy","predicate":"corporate_action","object":"Bitcoin","direction":"down","magnitude":"32 Bitcoin for $2.5 million","time":"earlier this month","cause":None,"entities":["Strategy","Bitcoin"],"confidence":0.96},
+        {"claim":"MSTR shares are down more than 79% over the last year.","subject":"Strategy","predicate":"price_move","object":None,"direction":"down","magnitude":"more than 79%","time":"the last year","cause":None,"entities":["Strategy","MSTR"],"confidence":0.93}
+    ],
+    '"'0dd4a02fedd50b5d17c137d0d2723b34': [],
+    '0de61634c6fb4776dbbeeb622e888a8c': [],
+    '0dfd1e30241a371538290221593506c4': [],
+    '0e2a32b5cf1185c0b93684a5713c12d8': [
+        {\"claim\":\"UK real household disposable income fell 0.8% in the first quarter of 2026.\",\"subject\":\"United Kingdom\",\"predicate\":\"demand_change\",\"object\":\"household disposable income\",\"direction\":\"down\",\"magnitude\":\"0.8%\",\"time\":\"first quarter of 2026\",\"cause\":\"higher CPI inflation and higher capital gains tax receipts\",\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.98},
+        {\"claim\":\"The ONS said this was the fourth quarter in the last five in which UK disposable incomes fell.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"household disposable income\",\"direction\":\"down\",\"magnitude\":\"four quarters in the last five\",\"time\":\"2026-06-30\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.93},
+        {\"claim\":\"The UK economy grew 0.6% in the first quarter of 2026.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"GDP\",\"direction\":\"up\",\"magnitude\":\"0.6%\",\"time\":\"first quarter of 2026\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.97},
+        {\"claim\":\"UK GDP growth for 2025 was revised down to 1.3% from 1.4%.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"GDP\",\"direction\":\"down\",\"magnitude\":\"to 1.3% from 1.4%\",\"time\":\"2025\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.96},
+        {\"claim\":\"UK services output grew 0.8% in the first quarter of 2026.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"services sector\",\"direction\":\"up\",\"magnitude\":\"0.8%\",\"time\":\"first quarter of 2026\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.95},
+        {\"claim\":\"UK construction output grew 0.2% in the first quarter of 2026.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"construction sector\",\"direction\":\"up\",\"magnitude\":\"0.2%\",\"time\":\"first quarter of 2026\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.95},
+        {\"claim\":\"UK production output grew 0.2% in the first quarter of 2026.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"production sector\",\"direction\":\"up\",\"magnitude\":\"0.2%\",\"time\":\"first quarter of 2026\",\"cause\":None,\"entities\":[\"United Kingdom\",\"Office for National Statistics\"],\"confidence\":0.95},
+        {\"claim\":\"The UK household saving ratio fell to 8.9% in the first quarter of 2026 from 9.6% in the last three months of 2025.\",\"subject\":\"United Kingdom\",\"predicate\":\"other\",\"object\":\"household saving ratio\",\"direction\":\"down\",\"magnitude\":\"to 8.9% from 9.6%\",\"time\":\"first quarter of 2026\",\"cause\":None,\"entities\":[\"United Kingdom\"],\"confidence\":0.96},
+        {\"claim\":\"Investec predicted UK growth would come close to a halt in the third quarter because of the recent rise in energy prices.\",\"subject\":\"Investec\",\"predicate\":\"forecast\",\"object\":\"United Kingdom\",\"direction\":\"down\",\"magnitude\":None,\"time\":\"third quarter\",\"cause\":\"the recent rise in energy prices\",\"entities\":[\"Investec\",\"United Kingdom\"],\"confidence\":0.92},
+        {\"claim\":\"Investec lowered its forecast for the UK's peak inflation this year to 3.1% from 4.0%.\",\"subject\":\"Investec\",\"predicate\":\"forecast\",\"object\":\"United Kingdom\",\"direction\":\"down\",\"magnitude\":\"to 3.1% from 4.0%\",\"time\":\"the remainder of the year\",\"cause\":None,\"entities\":[\"Investec\",\"United Kingdom\"],\"confidence\":0.94},
+        {\"claim\":\"Investec expects the Bank of England to keep Bank Rate at 3.75% for the rest of the year and sees rate cuts coming into view over 2027.\",\"subject\":\"Investec\",\"predicate\":\"forecast\",\"object\":\"Bank of England\",\"direction\":\"flat\",\"magnitude\":\"3.75%\",\"time\":\"remainder of the year; 2027\",\"cause\":\"the economy remains robust but lacks much growth in the next six months\",\"entities\":[\"Investec\",\"Bank of England\",\"United Kingdom\"],\"confidence\":0.93}
+    ],
+    '0e4e94cc8efbad7b8518e0ba38260057': [
+        {\"claim\":\"Bitcoin traded around "'$59,514, down 0.3% in 24 hours and 7% on the week.","subject":"Bitcoin","predicate":"price_move","object":None,"direction":"down","magnitude":"0.3% in 24 hours and 7% on the week to about $59,514","time":"2026-06-30","cause":"a stronger US dollar driven by yen weakness pressured risk assets","entities":["Bitcoin","US dollar","Japanese yen"],"confidence":0.97},
+        {"claim":"Bitcoin remained below its 200-week moving average.","subject":"Bitcoin","predicate":"price_move","object":None,"direction":"down","magnitude":None,"time":"2026-06-30","cause":None,"entities":["Bitcoin"],"confidence":0.9},
+        {"claim":"Ether fell 8.2% in seven days to about $1,587.","subject":"Ether","predicate":"price_move","object":None,"direction":"down","magnitude":"8.2% to about $1,587","time":"seven days","cause":"a stronger US dollar driven by yen weakness pressured cryptocurrencies","entities":["Ether","US dollar","Japanese yen"],"confidence":0.96},
+        {"claim":"XRP fell 7.1% to $1.04.","subject":"XRP","predicate":"price_move","object":None,"direction":"down","magnitude":"7.1% to $1.04","time":"2026-06-30","cause":"a stronger US dollar driven by yen weakness pressured cryptocurrencies","entities":["XRP","US dollar","Japanese yen"],"confidence":0.95},
+        {"claim":"Dogecoin fell 11.9% to $0.072.","subject":"Dogecoin","predicate":"price_move","object":None,"direction":"down","magnitude":"11.9% to $0.072","time":"2026-06-30","cause":"a stronger US dollar driven by yen weakness pressured cryptocurrencies","entities":["Dogecoin","US dollar","Japanese yen"],"confidence":0.96},
+        {"claim":"BNB fell 6.5%.","subject":"BNB","predicate":"price_move","object":None,"direction":"down","magnitude":"6.5%","time":"2026-06-30","cause":"a stronger US dollar driven by yen weakness pressured cryptocurrencies","entities":["BNB","US dollar","Japanese yen"],"confidence":0.93},
+        {"claim":"Solana rose 3% on the day and 2.9% on the week to $74.","subject":"Solana","predicate":"price_move","object":None,"direction":"up","magnitude":"3% on the day and 2.9% on the week to $74","time":"2026-06-30","cause":None,"entities":["Solana"],"confidence":0.96},
+        {"claim":"HYPE rose 7% on the day and was roughly flat on the week.","subject":"Hyperliquid HYPE","predicate":"price_move","object":None,"direction":"up","magnitude":"7% on the day; approximately flat on the week","time":"2026-06-30","cause":None,"entities":["Hyperliquid HYPE"],"confidence":0.93},
+        {"claim":"The Japanese yen fell below 162 per dollar, its weakest level since 1986.","subject":"Japanese yen","predicate":"price_move","object":"US dollar","direction":"down","magnitude":"below 162 per dollar","time":"2026-06-30","cause":None,"entities":["Japanese yen","US dollar"],"confidence":0.97},
+        {"claim":"Glassnode said Bitcoin active addresses were around 618,000, in the middle of their recent range.","subject":"Bitcoin","predicate":"demand_change","object":"active addresses","direction":"flat","magnitude":"around 618,000","time":"2026-06-30","cause":None,"entities":["Bitcoin","Glassnode"],"confidence":0.92},
+        {"claim":"Glassnode said the value of coins moving across the Bitcoin network was near $4.2 billion, just above the lower end of its recent range around $3.6 billion.","subject":"Bitcoin","predicate":"demand_change","object":"on-chain transfer value","direction":"flat","magnitude":"near $4.2 billion versus around $3.6 billion at the low end","time":"2026-06-30","cause":None,"entities":["Bitcoin","Glassnode"],"confidence":0.92},
+        {"claim":"Bitcoin transaction fees continued contracting, indicating weaker competition for block space.","subject":"Bitcoin","predicate":"demand_change","object":"transaction fees","direction":"down","magnitude":None,"time":"2026-06-30","cause":None,"entities":["Bitcoin"],"confidence":0.91},
+        {"claim":"Strategy said on Monday it could sell more than $1 billion of Bitcoin under a new program to strengthen its finances.","subject":"Strategy","predicate":"corporate_action","object":"Bitcoin","direction":"down","magnitude":"more than $1 billion","time":"Monday","cause":"to shore up its finances","entities":["Strategy","Bitcoin"],"confidence":0.96}
+    ],
+    '"'0e7ef9111d08c659e910a45201c7b5ee': [
+        {\"claim\":\"Private equity deal volume fell 52% in the second quarter of 2026.\",\"subject\":\"US leveraged loan market\",\"predicate\":\"demand_change\",\"object\":\"private equity deal volume\",\"direction\":\"down\",\"magnitude\":\"52%\",\"time\":\"second quarter of 2026\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.96},
+        {\"claim\":\"Sponsored loan issuance fell 34% quarter over quarter in the second quarter of 2026.\",\"subject\":\"US leveraged loan market\",\"predicate\":\"demand_change\",\"object\":\"sponsored loan issuance\",\"direction\":\"down\",\"magnitude\":\"34% QoQ\",\"time\":\"second quarter of 2026\",\"cause\":\"private equity dealmaking collapsed to near-historic lows\",\"entities\":[\"United States\"],\"confidence\":0.96},
+        {\"claim\":\"Overall US leveraged loan activity totaled "'$221 billion in the second quarter of 2026.","subject":"US leveraged loan market","predicate":"other","object":"leveraged loan activity","direction":"na","magnitude":"$221 billion","time":"second quarter of 2026","cause":None,"entities":["United States"],"confidence":0.98},
+        {"claim":"Overall US leveraged loan activity in the second quarter of 2026 was down 9% from the first quarter.","subject":"US leveraged loan market","predicate":"price_move","object":"leveraged loan activity","direction":"down","magnitude":"9%","time":"second quarter of 2026","cause":None,"entities":["United States"],"confidence":0.96},
+        {"claim":"Second-quarter 2026 US leveraged loan activity was 16% above the five-year quarterly average.","subject":"US leveraged loan market","predicate":"other","object":"leveraged loan activity","direction":"up","magnitude":"16%","time":"second quarter of 2026","cause":None,"entities":["United States"],"confidence":0.95},
+        {"claim":"Sponsors accounted for 74% of maturity extension amendments in the second quarter of 2026.","subject":"US leveraged loan market","predicate":"other","object":"maturity extension amendments","direction":"na","magnitude":"74%","time":"second quarter of 2026","cause":"sponsors retreated into balance-sheet defense","entities":["United States"],"confidence":0.95},
+        {"claim":"Sponsors accounted for 44% of new-money activity in the second quarter of 2026.","subject":"US leveraged loan market","predicate":"other","object":"new-money activity","direction":"na","magnitude":"44%","time":"second quarter of 2026","cause":None,"entities":["United States"],"confidence":0.94},
+        {"claim":"Amend-to-extend transactions reached a record high in the second quarter of 2026.","subject":"US leveraged loan market","predicate":"event","object":"amend-to-extend transactions","direction":"up","magnitude":"record high","time":"second quarter of 2026","cause":"sponsors raced to reduce the 2028 maturity wall","entities":["United States"],"confidence":0.94},
+        {"claim":"Software'"'s share of overall BSL issuance fell to 8.6% year to date from 17.6% in 2025.\",\"subject\":\"US leveraged loan market\",\"predicate\":\"demand_change\",\"object\":\"software BSL issuance share\",\"direction\":\"down\",\"magnitude\":\"to 8.6% from 17.6%\",\"time\":\"year to date in 2026 versus 2025\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.96},
+        {\"claim\":\"Software's share of BSL issuance is at its lowest level since 2013.\",\"subject\":\"US leveraged loan market\",\"predicate\":\"other\",\"object\":\"software BSL issuance share\",\"direction\":\"down\",\"magnitude\":\"lowest since 2013\",\"time\":\"2026\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.93},
+        {\"claim\":\"B-minus spreads widened 57 basis points since the fourth quarter of 2025 to S+411.\",\"subject\":\"US leveraged loan market\",\"predicate\":\"price_move\",\"object\":\"B-minus spreads\",\"direction\":\"up\",\"magnitude\":\"57 basis points to S+411\",\"time\":\"since Q4 2025\",\"cause\":\"lenders are drawing sharper lines at the bottom of the credit spectrum\",\"entities\":[\"United States\"],\"confidence\":0.96},
+        {\"claim\":\"The 2028 software maturity wall remains about "'$40 billion and has barely moved in 2026.","subject":"US leveraged loan market","predicate":"other","object":"2028 software maturity wall","direction":"flat","magnitude":"$40 billion","time":"2026","cause":None,"entities":["United States"],"confidence":0.94},
+        {"claim":"Overall primary market activity reached $462 billion in 2026 year to date.","subject":"US leveraged loan market","predicate":"other","object":"primary market activity","direction":"na","magnitude":"$462 billion","time":"2026 year to date","cause":None,"entities":["United States"],"confidence":0.95}
+    ],
+    '"'0e98fdd4d92ef9d5b6be7fa022b234bb': [],
+    '0ef6162a62ec0474c52c5e534dc23e0a': [
+        {\"claim\":\"Blackstone is selling its stakes in three Northern Virginia data centers for "'$3.5 billion.","subject":"Blackstone","predicate":"deal_or_contract","object":"Digital Realty Trust","direction":"down","magnitude":"$3.5 billion","time":"2026-06-30","cause":None,"entities":["Blackstone","Digital Realty Trust"],"confidence":0.98},
+        {"claim":"Digital Realty Trust will pay $1.2 billion in cash and $2.3 billion in shares to Blackstone for the data center stakes.","subject":"Digital Realty Trust","predicate":"deal_or_contract","object":"Blackstone","direction":"na","magnitude":"$1.2 billion cash and $2.3 billion in shares","time":"Monday","cause":None,"entities":["Digital Realty Trust","Blackstone"],"confidence":0.98},
+        {"claim":"Digital Realty Trust will acquire Blackstone'"'s 80% interest in two 96-megawatt data centers in Manassas, Virginia.\",\"subject\":\"Digital Realty Trust\",\"predicate\":\"deal_or_contract\",\"object\":\"Blackstone\",\"direction\":\"up\",\"magnitude\":\"80% interest in two 96-megawatt data centers\",\"time\":\"Monday\",\"cause\":None,\"entities\":[\"Digital Realty Trust\",\"Blackstone\"],\"confidence\":0.97},
+        {\"claim\":\"Digital Realty Trust will acquire Blackstone's 50% interest in a 96-megawatt data center in Sterling, Virginia.\",\"subject\":\"Digital Realty Trust\",\"predicate\":\"deal_or_contract\",\"object\":\"Blackstone\",\"direction\":\"up\",\"magnitude\":\"50% interest in one 96-megawatt data center\",\"time\":\"Monday\",\"cause\":None,\"entities\":[\"Digital Realty Trust\",\"Blackstone\"],\"confidence\":0.97},
+        {\"claim\":\"Blackstone and Digital Realty will continue working together on their remaining data center investments in Northern Virginia, Paris, and Frankfurt.\",\"subject\":\"Blackstone\",\"predicate\":\"statement\",\"object\":\"Digital Realty Trust\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"Monday\",\"cause\":None,\"entities\":[\"Blackstone\",\"Digital Realty Trust\"],\"confidence\":0.93},
+        {\"claim\":\"Compass Datacenters withdrew from a key part of the Digital Gateway development after intense opposition from local residents.\",\"subject\":\"Compass Datacenters\",\"predicate\":\"corporate_action\",\"object\":\"Digital Gateway development\",\"direction\":\"down\",\"magnitude\":None,\"time\":\"recently\",\"cause\":\"intense pushback from local residents\",\"entities\":[\"Compass Datacenters\",\"Brookfield Asset Management\"],\"confidence\":0.94},
+        {\"claim\":\"Blackstone affiliates are offering the Digital Realty shares from this week's deal at up to a 2.9% discount to Monday's closing price of "'$190.58.","subject":"Blackstone","predicate":"corporate_action","object":"Digital Realty Trust shares","direction":"down","magnitude":"up to 2.9% discount to $190.58","time":"this week","cause":"they are selling the Digital Realty equity received in the deal","entities":["Blackstone","Digital Realty Trust"],"confidence":0.95},
+        {"claim":"The Blackstone-Digital Realty deal is expected to be completed on Tuesday.","subject":"Blackstone","predicate":"event","object":"Digital Realty Trust","direction":"na","magnitude":None,"time":"Tuesday","cause":None,"entities":["Blackstone","Digital Realty Trust"],"confidence":0.93}
+    ]
+}
+
+infile = '"'all_batch_040.jsonl'
+outfile = 'all_facts_040.jsonl'
+
+docs = 0
+total_facts = 0
+with open(infile) as f, open(outfile, 'w') as out:
+    for line in f:
+        obj = json.loads(line)
+        facts = facts_by_doc[obj['doc_id']]
+        out.write(json.dumps({
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }, ensure_ascii=False) + '\\n')
+        docs += 1
+        total_facts += len(facts)
+print(f\"docs processed: {docs}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 68
+
+codex
+docs processed: 12, total facts: 68
+tokens used
+28,502
+docs processed: 12, total facts: 68

@@ -1,0 +1,365 @@
+2026-07-01T22:11:09.284252Z ERROR codex_core_skills::manager: failed to install system skills: io error while remove existing system skills dir: Directory not empty (os error 66)
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fbc-6a6e-7ec0-8e93-3e3b4d6f6714
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_035.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_035.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_035.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:11:14.968197Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading the input structure first and then I’ll generate `all_facts_035.jsonl` directly from that file, preserving document order and keeping extraction strictly tied to each title and body.
+exec
+/bin/zsh -lc "pwd && ls -l all_batch_035.jsonl && python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_035.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print('DOC',i,obj['doc_id'])
+        print(obj['title'][:300])
+        print(obj['published_date'])
+        print((obj.get('body_text') or '')[:800].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+-rw-r--r--@ 1 jamiepearcey  staff  38839 Jul  1 22:50 all_batch_035.jsonl
+DOC 1 f9a6ad86b8f5b2aa3f713b45cad700d5
+Preview - Goldman sees 130k June payrolls with World Cup adding 40k boost to print | investingLive
+2026-06-29
+A 130k headline that embeds a 40k World Cup distortion implies an underlying trend read closer to 90k, which at the current stage of the Fed's deliberation on rate timing would register as a meaningful softening signal. The private payrolls forecast of 95k is the number to watch: if it prints near Goldman's estimate rather than the 118k consensus, the argument for a September Fed cut firms materially. Wages at 0.2% MoM would also be dovish at the margin, reducing the stickiness concern that has kept the Fed cautious despite slowing growth. The revision flag on state and local educational services payrolls is a useful reminder for traders not to overreact to a strong headline; the third release has consistently come in 45k lower than the initial print in that category over the past three ye
+---
+DOC 2 fa2688ea1b2ff160f1b448f53db4d123
+EURUSD buyers make a play. EURUSD price trades above the 200 hour MA at 1.14236 | investingLive
+2026-06-29
+The EURUSD has pushed to a fresh session high of 1.1427, breaking above its 200-hour moving average at 1.14236. The move higher comes after buyers successfully defended the 100-hour moving average earlier in the day, helping keep the bullish bias intact following last Thursday's and Friday's rallies. Those gains late last week did fade into the close, raising the question of whether today's advance will suffer the same fate or if buyers can finally build on the upside momentum. For the bulls, the key near-term level is 1.14114, a swing area low that dates back to March 13. Holding above that level should keep buyers firmly in control and open the door for a move toward the next resistance zone between 1.1442 and 1.14587. Beyond that, the 50% retracement of the decline from the June 15 high
+---
+DOC 3 fcba778da8cde2a3fe4d50416f63d916
+What remains of the city upon the hill?
+2026-06-29
+What remains of the city upon the hill? America cannot serve as an example if its founding principles are discarded, writes Michael Beschloss LAST MONTH I gave the main commencement speech at the University of Pennsylvania in Philadelphia, where 250 years ago our founders signed the Declaration of Independence. They were a jubilant and friendly crowd, with one exception I was later told about: when I praised our country’s rule of law a man sprang furiously to his feet, thrust a middle finger at me and stormed out of the arena. Such is America in 2026. We are enveloped by anger, polarisation and fear. Before we get too hyperbolic about our current national predicament, it is worth noting that America has endured grave crises before. But what has repeatedly sustained it is adherence—however 
+---
+
+exec
+/bin/zsh -lc 'wc -l all_batch_035.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_035.jsonl
+
+codex
+The file is small enough to handle directly. I’ve confirmed there are 12 documents, and I’m scanning all titles plus article bodies now to separate market facts from commentary-only pieces.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_035.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. f9a6ad86b8f5b2aa3f713b45cad700d5 | 2026-06-29 | Preview - Goldman sees 130k June payrolls with World Cup adding 40k boost to print | investingLive
+2. fa2688ea1b2ff160f1b448f53db4d123 | 2026-06-29 | EURUSD buyers make a play. EURUSD price trades above the 200 hour MA at 1.14236 | investingLive
+3. fcba778da8cde2a3fe4d50416f63d916 | 2026-06-29 | What remains of the city upon the hill?
+4. fcf4dd899d6201c24638308187c05649 | 2026-06-29 | A Chinese dissident recounts his perilous dinghy escape to South Korea and how he got to Canada
+5. fd4b0bf33bdd27d693d10b60da5c33e8 | 2026-06-29 | Gold price falls nearly 2% as rebound proves short-lived
+6. fd65db8a426c8a4e227ead4d8b51d0d0 | 2026-06-29 | What's good for the US economy now may not be good for stocks
+7. fdbf0937577ec5c213588e23b3629ada | 2026-06-29 | Pakistani strikes kill at least 28 civilians in Afghanistan, UN says
+8. fe088e2c17592b65c169409509a3a2c5 | 2026-06-29 | Supreme Court rules constitutional privacy protections apply to cellphone users' location history
+9. ffc7243d1c90fe827d7b6373aeb5a955 | 2026-06-29 | Resource Upgrade at Botswana’s Selkirk Copper-Nickel Mine - Shanghai Metals Market (SMM)
+10. ffd4c3b08cb4f6f8a0c78e84546e21f7 | 2026-06-29 | SMM, June 29 — According to SMM, Shandong Humon has launched a public - Shanghai Metals Market (SMM)
+11. 001d0974c0661fa6f80a5d9443406699 | 2026-06-30 | Zinc Prices Under Pressure and Retreating in June: How Will They Perform in July? [SMM Analysis]
+12. 007d7ac94e4e8f0435f9b3a13359ec6c | 2026-06-30 | Euro softens against Japanese Yen as traders on alert for possible intervention | FXStreet
+
+codex
+Most entries look like a mix of market notes and unrelated news. I’m pulling the full text for the potentially market-relevant set and will leave commentary or non-market documents with empty fact lists.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids={'f9a6ad86b8f5b2aa3f713b45cad700d5','fa2688ea1b2ff160f1b448f53db4d123','fd4b0bf33bdd27d693d10b60da5c33e8','fd65db8a426c8a4e227ead4d8b51d0d0','ffc7243d1c90fe827d7b6373aeb5a955','ffd4c3b08cb4f6f8a0c78e84546e21f7','001d0974c0661fa6f80a5d9443406699','007d7ac94e4e8f0435f9b3a13359ec6c'}
+with open('all_batch_035.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        if obj['doc_id'] in ids:
+            print('DOC_ID:',obj['doc_id'])
+            print('TITLE:',obj['title'])
+            print('DATE:',obj['published_date'])
+            print(obj['body_text'])
+            print('\\n'+'='*100+'\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids={'fcba778da8cde2a3fe4d50416f63d916','fcf4dd899d6201c24638308187c05649','fdbf0937577ec5c213588e23b3629ada','fe088e2c17592b65c169409509a3a2c5'}
+with open('all_batch_035.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        if obj['doc_id'] in ids:
+            print('DOC_ID:',obj['doc_id'])
+            print('TITLE:',obj['title'])
+            print('DATE:',obj['published_date'])
+            print((obj['body_text'] or '')[:2000])
+            print('\\n'+'='*60+'\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC_ID: fcba778da8cde2a3fe4d50416f63d916
+TITLE: What remains of the city upon the hill?
+DATE: 2026-06-29
+What remains of the city upon the hill? America cannot serve as an example if its founding principles are discarded, writes Michael Beschloss LAST MONTH I gave the main commencement speech at the University of Pennsylvania in Philadelphia, where 250 years ago our founders signed the Declaration of Independence. They were a jubilant and friendly crowd, with one exception I was later told about: when I praised our country’s rule of law a man sprang furiously to his feet, thrust a middle finger at me and stormed out of the arena. Such is America in 2026. We are enveloped by anger, polarisation and fear. Before we get too hyperbolic about our current national predicament, it is worth noting that America has endured grave crises before. But what has repeatedly sustained it is adherence—however imperfect—to certain shared founding principles.
+
+============================================================
+
+DOC_ID: fcf4dd899d6201c24638308187c05649
+TITLE: A Chinese dissident recounts his perilous dinghy escape to South Korea and how he got to Canada
+DATE: 2026-06-29
+A Chinese dissident recounts his perilous dinghy escape to South Korea and how he got to Canada A Chinese dissident recounts his perilous dinghy escape to South Korea and how he got to Canada HONG KONG (AP) — A roughly 40-hour sea journey on a dinghy with a dying phone. Detention in South Korea. That’s just part of what Chinese dissident Dong Guangping endured to escape his native country. He arrived late last week in Canada, a destination he had eyed for more than a decade. Dong had been locked up in China several times, including for his activities commemorating the 1989 crackdown on pro-democracy protesters in Beijing’s Tiananmen Square and past efforts to flee. “It’s like living in a cage. Very suffocating,” he said in an online video interview with The Associated Press from Toronto, referring to the lack of freedom of expression in China. After his release from prison, the 68-year-old dissident said he was unable to receive retirement benefits or renew his passport and was under constant police monitoring. China’s Foreign Ministry said the government handles the entry and exit of its citizens in accordance with the law and that Chinese citizens must abide by the Constitution and the law. Dong attempted to flee at least three previous times: in 2015 to Thailand, where authorities deported him back to China; in 2019 when he tried to swim to a Taiwanese island off China’s east coast; and in 2020, when he reached Vietnam, only to be deported back again. Last month, he tried again. Dong says he shook off the fear of death In the early hours of May 24, he set off in a gray rubber dinghy fitted with an engine from Weihai, a coastal city in eastern China’s Shandong province, under fine weather. He was eyeing Japan, confident that the government there would not send him back to China. But the next day brought fog. When he noticed his phone, which he relied on for GPS navigation, was on its last bar, he became terrified. His power bank also died. He quickly switched to h
+
+============================================================
+
+DOC_ID: fdbf0937577ec5c213588e23b3629ada
+TITLE: Pakistani strikes kill at least 28 civilians in Afghanistan, UN says
+DATE: 2026-06-29
+- Published At least 28 civilians were killed after Pakistan launched air strikes in Afghan provinces along its border on Sunday, the United Nations Afghan mission has said. A further 49 were injured and women and children were among the victims, according to Unama. Afghanistan's Taliban government said civilian homes were hit and described the attack as a "cowardly act" and an "atrocity". Pakistan said it had carried out a ground operation along the border and air strikes targeting militant hideouts in Afghanistan's Paktia, Paktika and Kunar provinces. The two countries agreed to a ceasefire last October following weeks of deadly clashes - an agreement that has since fallen apart. Casualties were concentrated in Mandokhail, a village in the Paktia province, according to Taliban officials. Adam Khan, 63, told AFP news agency he "cannot put into words the condition of the children I saw at the hospital, or the screams of their parents and siblings". Those killed in one of the strikes included "children, elderly people and women" sleeping in a house, he said. Afghanistan's Taliban government put the civilian death toll at 36 and said more than 160 had been injured. Pakistan's information minister Attaullah Tarar said 29 militants had been killed in an operation responding to "recent terrorist attacks against innocent people". The BBC has not independently confirmed figures from either side. The attacks come a day after three members of the Sindh Rangers, a Pakistani paramilitary force, were killed at their headquarters in Karachi, according to Pakistan's military. Three militants also died in the suicide attack, and Pakistani officials said they had arrested a fourth, who was an Afghan. Jamaat-ul-Ahrar, a splinter faction of the TTP, claimed responsibility for Saturday's attack. Both the TTP, also known as the Pakistan Taliban, and Jamaat-ul-Ahrar are banned in Pakistan, and by the UN, because of their involvement in past attacks. Pakistan has long accused Afghanistan
+
+============================================================
+
+DOC_ID: fe088e2c17592b65c169409509a3a2c5
+TITLE: Supreme Court rules constitutional privacy protections apply to cellphone users' location history
+DATE: 2026-06-29
+Supreme Court rules constitutional privacy protections apply to cellphone users’ location history WASHINGTON (AP) — The Supreme Court held Monday that constitutional privacy protections extend to cellphone location information, ruling in the case of a bank robber whose identity was discovered through a geofence warrant. Justice Elena Kagan wrote for the 6-3 court that people don’t forfeit expectations of privacy even when they opt into Google’s location history. “A cellphone user is not to be viewed as sharing private information with third parties—which then can be freely passed on to the government—just by doing the ordinary things cellphone users do,” Kagan wrote. Justice Samuel Alito wrote in dissent that Okello Chatrie had no expectation of privacy in information he voluntarily turned over to Google. The decision is the court’s latest effort to apply a constitutional provision ratified in 1791 to technology the nation’s founders could not have envisioned. Police obtained a geofence warrant after a bank robbery in a suburb of Richmond, Virginia, and used it to locate cellphones that were near the bank around the time it was robbed in May 2019. One of those phones belonged to Chatrie, who had eluded the police until they turned to the powerful technological tool. The warrant kick-started the investigation. After determining that Chatrie was among those near the Call Federal Credit Union in Midlothian at the time, police obtained a search warrant for his home. They found nearly $100,000 in cash, including bills wrapped in bands signed by the bank teller. Chatrie pleaded guilty to robbing the bank and was sentenced to nearly 12 years in prison. His lawyers argued on appeal that none of the evidence should have been used against him. They challenged the warrant as a violation of his privacy because it allowed authorities to gather the location history of people near the bank without having any evidence they had anything to do with the robbery. Prosecutors argued tha
+
+============================================================
+
+
+ succeeded in 0ms:
+DOC_ID: f9a6ad86b8f5b2aa3f713b45cad700d5
+TITLE: Preview - Goldman sees 130k June payrolls with World Cup adding 40k boost to print | investingLive
+DATE: 2026-06-29
+A 130k headline that embeds a 40k World Cup distortion implies an underlying trend read closer to 90k, which at the current stage of the Fed's deliberation on rate timing would register as a meaningful softening signal. The private payrolls forecast of 95k is the number to watch: if it prints near Goldman's estimate rather than the 118k consensus, the argument for a September Fed cut firms materially. Wages at 0.2% MoM would also be dovish at the margin, reducing the stickiness concern that has kept the Fed cautious despite slowing growth. The revision flag on state and local educational services payrolls is a useful reminder for traders not to overreact to a strong headline; the third release has consistently come in 45k lower than the initial print in that category over the past three years, making any beat in Thursday's number potentially illusory. Dollar and rates markets will be the primary transmission, with a soft private payrolls and wages combination likely to steepen the front end and pressure the dollar index heading into the long weekend. --- Goldman Sachs forecasts 130k June nonfarm payrolls, below the 115k consensus, with a 40k World Cup boost offset by a 10k government payroll decline. Wages seen at 0.2% MoM; unemployment steady at 4.3%. Summary: - Goldman Sachs forecasts June nonfarm payrolls at +130k, above the consensus of +115k, against a prior reading of +172k - Private payrolls seen at +95k versus consensus +118k and prior +120k - Goldman estimates the FIFA World Cup could add approximately 40k to June payroll growth - June payrolls carry a consistent positive initial print bias, particularly in state and local government educational services, which has been revised down by an average of 45k between first and third releases over the past three years - Government payrolls outside state and local educational services expected to decline by 10k - Average hourly earnings forecast at +0.2% month-on-month, below the +0.3% consensus, reflecting negative calendar effects - Unemployment rate seen unchanged at 4.3%, consistent with stabilisation in continuing claims Goldman Sachs is heading into Thursday's June nonfarm payrolls print with a forecast of 130k, above the Street consensus of 115k but well below May's 172k, with the bank's economics team flagging a series of offsetting distortions that make the headline number harder to read than usual. The most unusual factor in the June print is the FIFA World Cup. Goldman estimates the tournament could add approximately 40k to payroll growth for the month, reflecting the hospitality, security, logistics and event staffing that large-scale sporting events of this scale generate in host cities. That boost sits on the positive side of the ledger, but the bank is equally explicit about what pulls in the other direction. Government payrolls outside state and local educational services are expected to decline by 10k, a reflection of the federal workforce dynamics that have been a recurring drag in recent months. More structurally, Goldman flags a well-established seasonal bias in the educational services component of state and local government payrolls: over the past three years, that category has been revised down by an average of 45k between the initial and third release, meaning the headline print on Thursday is likely to overstate the underlying trend even if it beats expectations. On wages, Goldman is a tenth below consensus, forecasting average hourly earnings growth of 0.2% month-on-month against the 0.3% expected, attributing the softer reading to negative calendar effects rather than any deterioration in underlying pay momentum. The unemployment rate is seen holding at 4.3% on a rounded basis, consistent with the recent stabilisation in continuing jobless claims which have plateaued after an earlier drift higher. Private payrolls, at a Goldman forecast of 95k against a consensus of 118k and a prior reading of 120k, represent the sharpest divergence from the Street in the preview, and will be the figure watched most closely for signal on underlying labour demand once the government and World Cup distortions are stripped away. --- Date due Thursday 2 July:
+
+====================================================================================================
+
+DOC_ID: fa2688ea1b2ff160f1b448f53db4d123
+TITLE: EURUSD buyers make a play. EURUSD price trades above the 200 hour MA at 1.14236 | investingLive
+DATE: 2026-06-29
+The EURUSD has pushed to a fresh session high of 1.1427, breaking above its 200-hour moving average at 1.14236. The move higher comes after buyers successfully defended the 100-hour moving average earlier in the day, helping keep the bullish bias intact following last Thursday's and Friday's rallies. Those gains late last week did fade into the close, raising the question of whether today's advance will suffer the same fate or if buyers can finally build on the upside momentum. For the bulls, the key near-term level is 1.14114, a swing area low that dates back to March 13. Holding above that level should keep buyers firmly in control and open the door for a move toward the next resistance zone between 1.1442 and 1.14587. Beyond that, the 50% retracement of the decline from the June 15 high comes in at 1.1472 and represents the next major upside target. From a broader perspective, the EURUSD has been trending lower since peaking at 1.18476 on April 17. The pair eventually fell to last week's low of 1.13238, a decline of nearly 525 pips over 48 trading days. However, from the June 15 high, the pair moved down nearly 300 pips in just seven to eight trading days. As a result, is it time to start a larger corrective rally? The answer will hinge on two key levels: the 200-hour moving average at 1.14236 and the swing level at 1.14114 (old low from March 13). Staying above those levels would signal that buyers remain in control and could pave the way for further gains. A move back below them would suggest the latest breakout has failed and that sellers are once again regaining control.
+
+====================================================================================================
+
+DOC_ID: fd4b0bf33bdd27d693d10b60da5c33e8
+TITLE: Gold price falls nearly 2% as rebound proves short-lived
+DATE: 2026-06-29
+Gold price falls nearly 2% as rebound proves short-lived Gold fell back towards the $4,000-an-ounce level on Monday following last week’s short-lived rebound, as renewed tensions between the US and Iran sparked concerns over prolonged periods of inflation. Spot gold declined as much as 1.8% to just above $4,000/oz., as the metal continues to trend downwards amid geopolitical turmoil in the Middle East. Since the war started in late February, bullion has fallen by more than 22%, driven by surging energy prices that raised expectations of higher interest rates to combat inflation, a scenario that hurts gold. Despite having surged to a record six months ago, the precious metal has now wiped out its entire gains on the year and is now down by 6%, a sharp contrast from the 60% rise in 2025. Still, many see gold maintaining its value and even recovering in the coming months, with the expectation that central banks will continue buying the metal as they have done in recent years. Major banks including Goldman Sachs and UBS have all set year-end price targets above current levels, implying a rebound in the second half. In the short term, the $4,000 level has been pegged as a major support. Gold holding that level, despite renewed signs of tensions in the Gulf, “suggests marginal dip buyers have returned and are willing to defend this level,” Justin Lin, an analyst at Global X ETFs Australia, told Bloomberg. “I expect gold to become increasingly resilient to Middle East volatility, especially now that it has completely erased year-to-date gains and fast-money investors have likely largely moved on,” he added. The latest developments in the Middle East come in the wake of US inflation data last week that, while high, fell within analyst estimates. Sponsored: Secure your wealth today — buy gold bullion directly through our trusted partner, Sprott Money.
+
+====================================================================================================
+
+DOC_ID: fd65db8a426c8a4e227ead4d8b51d0d0
+TITLE: What's good for the US economy now may not be good for stocks
+DATE: 2026-06-29
+NEW YORK, June 29 (Reuters) - The U.S. economy and the U.S. stock market are starting to go their own ways. An eventful June featuring the launch of the record-busting SpaceX (SPCX.O), IPO and Federal Reserve chief Kevin Warsh's first meeting has been full of contradictions. U.S. economic data has been solid, led by continued job gains and strong consumer spending, while sentiment is ticking up. Yet the Nasdaq (.IXIC), and S&P 500 (.SPX), are down for the month and the once-unstoppable Magnificent Seven technology stocks are off more than 10% by one measure . Treasury bonds rallied, sending yields lower even after inflation exceeded 4% last week for the first time in three years. "The one thing that sticks out to me is that through a period of higher energy prices, consumers have remained resilient in their spending in non-energy goods and services," said Guy LeBas, chief fixed income strategist at Janney Montgomery Scott in Philadelphia. "So that kind of combination strongly suggests a level of economic stability, resilience and strength over and above what we intuitively expected heading into the year. And so that creates a little bit of upside risk" for U.S. growth estimates. RISING REAL RATES CHANGE THE GAME Investors are at a crossroads as rising real, inflation-adjusted interest rates ripple through markets driven by the epic AI investment boom. Warsh's hawkish turn has fueled a surge in bets that the central bank will raise interest rates. Many analysts doubt he will actually do so, as tightening financial conditions already have sent gold and bitcoin down sharply alongside Microsoft (MSFT.O), and Meta (META.O). Meanwhile, Wall Street is selling new shares and debt at a breakneck pace. This is partly to finance further AI spending whose proponents deride any bubble talk as blasphemy, yet it also reflects resilient investor demand. The tension between a solid if uneven economy and a go-go market driven mostly by one sector has often been decided in favor of markets whose multiples seem perpetually to be near all-time highs. But that trend might not hold if the age of higher real borrowing costs is here. The collapse this month of war fears and the decline of oil prices return markets to a “friendly fundamental/cyclical backdrop but one that is reflected in high valuations,” said Goldman Sachs analyst Kamakshya Trivedi. “That tension is most acute in the AI space, which is now also the primary source of volatility in equity markets.” Much of that volatility is being driven by investors jumping off one momentum trade into another. Since the markets' war scare crested late in March, the semiconductor index (.SOX), has gone nearly parabolic, putting the index up 87% for the year. Micron (MU.O), has quadrupled while Intel (INTC.O), and Marvell Technology (MRVL.O), tripled in 2026. Conversely, the Mag 7 group of tech giants led by Nvidia (NVDA.O), Apple (AAPL.O), and Alphabet (GOOGL.O), is down for the year after accounting in 2025 for around 40% of S&P 500 gains, reflecting price appreciation and dividends. DEBT SURGE CHANGES SENTIMENT Many investors say a reassessment of the so-called hyperscalers building AI infrastructure began late last year when Oracle and other firms known for clean balance sheets began to take on more debt. Companies such as Amazon and Alphabet have issued $60 billion in bonds in multiple currencies in the last 12 months. Investment-grade bond sales by hyperscalers have surpassed their full‑year 2025 total and are on pace to reach BNP Paribas' $250 billion forecast this year. "AI is working for the providers" of products such as chipmakers, said Jake Dollarhide, chief executive officer of Longbow Asset Management in Tulsa, Oklahoma. "It is not working for the spenders. That's why Mag 7 is down on the year. They are the spenders." Some investors worry that the tech-spenders' selloff will pick up steam, given the size of the Mag 7 firms. This past week UBS cut its exposure to semiconductor and hardware stocks in its artificial intelligence portfolio, warning of possible future AI capital-expenditure cuts by hyperscalers given their share-price declines. Any reduction in AI capex would likely also hit the economy, given the scale of spending by the biggest tech firms. "The biggest swing factor in economic growth is corporate spending, corporate investment," said LeBas, referencing the current plan among the biggest hyperscalers to spend $700 billion or more on capital projects in coming years. "It's very hard to have a material economic downturn when the biggest swing factor in GDP is growing." That said, it may be premature to discuss capex cuts given the resilience of U.S. markets in recent years. "This is a market that is trained like Pavlov's dog when there is blood in the water to buy the dip," said Dollarhide. Reporting by Caroline Valetkevitch and Karen Brettell, additional reporting by Akriti Shah; editing by Colin Barr and David Gregorio
+
+====================================================================================================
+
+DOC_ID: ffc7243d1c90fe827d7b6373aeb5a955
+TITLE: Resource Upgrade at Botswana’s Selkirk Copper-Nickel Mine - Shanghai Metals Market (SMM)
+DATE: 2026-06-29
+Mining.com reported that NexMetals Mining announced that its Selkirk copper-nickel-PGM project in Botswana has seen resources increase by nearly 70%, becoming a “significant force” in the company’s Botswana operations. On the 24th, NexMetals stated that through successful resampling and drilling, the Selkirk project’s resources were upgraded from Inferred to Indicated to approximately 1.1 billion pounds of copper equivalent, with ore resources of 78.2 million mt at a grade of 0.66% copper equivalent. After the upgrade, the remaining Inferred ore resources stand at 15.1 million mt at a grade of 0.60% copper equivalent, equating to 200 million pounds of copper equivalent. Compared with the latest update (2024), the project’s copper equivalent increased by 63%, mainly due to higher metallurgical recoveries and the inclusion of by-product cobalt, silver, and gold. Additionally, the company noted that changes in metal prices also had a significant impact on the resource estimate, as the Selkirk project is a polymetallic deposit. NexMetals stated that this resource upgrade has improved resource confidence and reduced development risk, representing an “important technical milestone” for the project. The company said that with the expanded resource, the project has now “developed into a strategically important, multi-commodity critical metals asset” with scale and development potential. Previously, Selkirk was “seen as a minor asset with limited value,” the company added. The project is located approximately 75 km northeast of NexMetals’ Selebi project; both projects are former copper-cobalt-nickel mines. The Selkirk project’s mining license covers 14.6 km², while one mining license for Selebi spans 115 km². On the 24th, NexMetals CEO Whiteford Sean said in a press release: “When we acquired the Selebi and Selkirk projects in liquidation in 2022, we saw the opportunity to unlock value through modern exploration and disciplined technical work, and today’s resource update at Selkirk is a great example of that strategy being put into action.”
+
+====================================================================================================
+
+DOC_ID: ffd4c3b08cb4f6f8a0c78e84546e21f7
+TITLE: SMM, June 29 — According to SMM, Shandong Humon has launched a public - Shanghai Metals Market (SMM)
+DATE: 2026-06-29
+Shandong Humon Launches Tender for 3,000 kg of 4N High-Purity Selenium, Bids Due by June 30, 2026 SMM, June 29 — According to SMM, Shandong Humon has launched a public tender today for its 4N high-purity selenium. The batch comprises 3,000 kilograms. Per the official announcement, the product is packaged in iron drums; delivery is on a buyer's self-collection basis, with freight costs borne by the buyer. Transport must comply with national regulations, using vehicles with full hazardous chemical transport qualifications. The buyer must collect the goods by June 20, 2026. The delivery location is Shandong Humon Smelting Co., Ltd.Data Source Statement: Except for publicly available information, all other data are processed by SMM based on publicly available information, market communication, and relying on SMM's internal database model. They are for reference only and do not constitute decision-making recommendations.
+
+====================================================================================================
+
+DOC_ID: 001d0974c0661fa6f80a5d9443406699
+TITLE: Zinc Prices Under Pressure and Retreating in June: How Will They Perform in July? [SMM Analysis]
+DATE: 2026-06-30
+SMM, June 30: As of June 30, the most-traded SHFE zinc contract closed at 24,350 yuan/mt, down 615 yuan/mt for the month, a decline of 2.46%. June saw SHFE zinc retreat from highs, touching a high of 25,355 yuan/mt early in the month and a low of 23,720 yuan/mt at month-end, with the overall price center pulling back. Entering July, the ore tightness situation in China persists; how will zinc prices perform? Macro side. In June, the market continued to focus on the Middle East situation. A ceasefire between both sides and the opening of the Strait of Hormuz boosted market sentiment, leading to a broad rebound in non-ferrous metals prices early in the month, with zinc prices also rising. Later, expectations for US Fed interest rate hikes resurfaced, with the market pricing in a 25-basis-point hike within the year, increasing liquidity risk and dragging non-ferrous metals broadly lower, which weighed on zinc prices. Supply side. In June, strikes in Bolivia outside China remained unresolved, and imported ore TCs continued to slide; domestically, TCs dropped to -200 yuan/mt in metal content. Tightness on the ore side supported zinc prices. Entering July, although smelter profit margins have narrowed significantly, leading to increased routine maintenance and production cuts, and July production is expected to decline somewhat, TCs are still expected to have downside room given the high smelter operating rates in the near term, and ore side tightness will continue to support zinc prices. While domestic zinc concentrate TCs fell to historical lows, the sulphuric acid price remains high, preventing signs of large-scale production cuts by smelters. Refined zinc production in July is expected to see limited MoM decline, and domestic zinc ingot supply remains robust, exerting some pressure on zinc prices. End-use consumption side. June was the traditional off-season for domestic consumption, with end-use consumption continuing to weaken, and export orders for downstream zinc products showed no standout performance. The consumption side exerted pressure on zinc prices. Entering July, increasing rainfall across various regions, combined with rising temperatures, will jointly impact end-user operating rates. The real estate sector performed poorly, and the disbursement of local government special bond funds fell short of expectations, while drawings for steel tower-related projects have yet to be released. Overall, consumption in July will continue to weaken, persistently exerting pressure on zinc prices. Overall view. On the macro front, the market will continue to focus on US-Iran tensions and signals of US Fed interest rate hikes. Fundamentals side, the ore shortage is not expected to ease in July, yet large-scale production cuts at smelters remain unseen. The export window has not yet fully opened, with exports still awaiting opportunities. Meanwhile, consumption is expected to gradually weaken, and refined zinc supply remains robust. However, spot transactions improved somewhat after the zinc price decline and expectations for smelter production cuts limit the downside room for zinc prices, which are expected to edge down from June levels, but only to a limited extent.
+
+====================================================================================================
+
+DOC_ID: 007d7ac94e4e8f0435f9b3a13359ec6c
+TITLE: Euro softens against Japanese Yen as traders on alert for possible intervention | FXStreet
+DATE: 2026-06-30
+The EUR/JPY cross loses ground to around 184.85 during the early European trading hours on Tuesday. The Japanese Yen (JPY) rebounds against the Euro (EUR) as traders on alert for possible intervention from Japanese authorities. Germany’s Retail Sales and inflation data will be published later in the day. Japanese Finance Minister Satsuki Katayama on Tuesday reiterated the authorities stood ready to respond appropriately at any time. Meanwhile, Chief Cabinet Secretary Minoru Kihara said that the Japanese government will work to build an economy less vulnerable to foreign-exchange volatility while remaining prepared to intervene in currency markets if necessary. Kihara also declined to comment on the Japanese Yen’s current level. "It's a question of when, not if, the Ministry of Finance (MOF) intervenes again to support the yen," said Carol Kong, currency strategist at Commonwealth Bank of Australia. ECB President Christine Lagarde said in a speech opening her institution’s annual retreat on Monday that Europe is becoming less vulnerable to outside shocks thanks to a better financial framework and progress on the green transition. Lagarde emphasized that tensions subside amid a peace deal, which is “far from assured.” Policymakers must decide whether further monetary tightening is needed. Markets have pared expectations for future ECB rate increases as energy prices retreat. Oxford Economics and Capital Economics expect the ECB won’t raise the interest rates further, though investors are still pricing one more quarter-point move, which would bring the deposit rate to 2.50%. Japanese Yen FAQs The Japanese Yen (JPY) is one of the world’s most traded currencies. Its value is broadly determined by the performance of the Japanese economy, but more specifically by the Bank of Japan’s policy, the differential between Japanese and US bond yields, or risk sentiment among traders, among other factors. One of the Bank of Japan’s mandates is currency control, so its moves are key for the Yen. The BoJ has directly intervened in currency markets sometimes, generally to lower the value of the Yen, although it refrains from doing it often due to political concerns of its main trading partners. The BoJ ultra-loose monetary policy between 2013 and 2024 caused the Yen to depreciate against its main currency peers due to an increasing policy divergence between the Bank of Japan and other main central banks. More recently, the gradually unwinding of this ultra-loose policy has given some support to the Yen. Over the last decade, the BoJ’s stance of sticking to ultra-loose monetary policy has led to a widening policy divergence with other central banks, particularly with the US Federal Reserve. This supported a widening of the differential between the 10-year US and Japanese bonds, which favored the US Dollar against the Japanese Yen. The BoJ decision in 2024 to gradually abandon the ultra-loose policy, coupled with interest-rate cuts in other major central banks, is narrowing this differential. The Japanese Yen is often seen as a safe-haven investment. This means that in times of market stress, investors are more likely to put their money in the Japanese currency due to its supposed reliability and stability. Turbulent times are likely to strengthen the Yen’s value against other currencies seen as more risky to invest in. Author
+
+====================================================================================================
+
+
+codex
+I have the relevant articles isolated. Next step is to write the output file with a hand-checked fact set per document, including empty lists where the article is not market-relevant.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_035.jsonl')
+output_path = Path('all_facts_035.jsonl')
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+facts_by_doc = {
+    'f9a6ad86b8f5b2aa3f713b45cad700d5': [
+        fact('Goldman Sachs forecasts June nonfarm payrolls will rise by 130k.', 'US nonfarm payrolls', 'forecast', 'June payroll report', 'up', '130k', 'June', None, ['Goldman Sachs', 'United States'], 0.99),
+        fact('Goldman Sachs forecasts June private payrolls will rise by 95k.', 'US private payrolls', 'forecast', 'June payroll report', 'up', '95k', 'June', None, ['Goldman Sachs', 'United States'], 0.99),
+        fact('Goldman Sachs estimates the FIFA World Cup could add approximately 40k to June payroll growth.', 'US nonfarm payrolls', 'forecast', 'June payroll report', 'up', '40k', 'June', 'the FIFA World Cup boost to hospitality, security, logistics, and event staffing', ['Goldman Sachs', 'FIFA World Cup', 'United States'], 0.97),
+        fact('Goldman Sachs expects government payrolls outside state and local educational services to decline by 10k in June.', 'US government payrolls outside state and local educational services', 'forecast', 'June payroll report', 'down', '10k', 'June', 'federal workforce dynamics', ['Goldman Sachs', 'United States'], 0.96),
+        fact('Goldman Sachs forecasts US average hourly earnings will rise 0.2% month on month in June.', 'US average hourly earnings', 'forecast', 'June payroll report', 'up', '0.2% MoM', 'June', 'negative calendar effects', ['Goldman Sachs', 'United States'], 0.98),
+        fact('Goldman Sachs expects the US unemployment rate to remain unchanged at 4.3% in June.', 'US unemployment rate', 'forecast', None, 'flat', '4.3%', 'June', 'stabilisation in continuing claims', ['Goldman Sachs', 'United States'], 0.98),
+        fact('A soft combination of private payrolls and wages is likely to pressure the US Dollar Index heading into the long weekend.', 'US Dollar Index', 'forecast', None, 'down', None, 'heading into the long weekend', 'a soft private payrolls and wages combination', ['US Dollar Index', 'Federal Reserve', 'United States'], 0.91),
+    ],
+    'fa2688ea1b2ff160f1b448f53db4d123': [
+        fact('EUR/USD rose to a fresh session high of 1.1427.', 'EUR/USD', 'price_move', None, 'up', '1.1427', '2026-06-29', None, ['EUR/USD', 'Euro', 'US Dollar'], 0.99),
+        fact('EUR/USD traded above its 200-hour moving average at 1.14236.', 'EUR/USD', 'price_move', '200-hour moving average', 'up', '1.14236', '2026-06-29', None, ['EUR/USD', 'Euro', 'US Dollar'], 0.98),
+        fact('Buyers defended EUR/USD at the 100-hour moving average earlier in the day.', 'EUR/USD', 'price_move', '100-hour moving average', 'up', None, '2026-06-29', None, ['EUR/USD', 'Euro', 'US Dollar'], 0.93),
+        fact('EUR/USD fell from 1.18476 on April 17 to last week\\'s low of 1.13238, a decline of nearly 525 pips over 48 trading days.', 'EUR/USD', 'price_move', None, 'down', 'nearly 525 pips', 'from April 17 to last week', None, ['EUR/USD', 'Euro', 'US Dollar'], 0.97),
+    ],
+    'fcba778da8cde2a3fe4d50416f63d916': [],
+    'fcf4dd899d6201c24638308187c05649': [],
+    'fd4b0bf33bdd27d693d10b60da5c33e8': [
+        fact('Spot gold fell as much as 1.8% to just above "'$4,000 an ounce on Monday.'"', 'Spot gold', 'price_move', None, 'down', '1.8%', 'Monday', None, ['Gold', 'United States', 'Iran'], 0.99),
+        fact('Since the war started in late February, bullion has fallen by more than 22%.', 'Gold', 'price_move', None, 'down', 'more than 22%', 'since late February', 'surging energy prices raised expectations of higher interest rates to combat inflation', ['Gold'], 0.97),
+        fact('Gold has erased its gains for the year and is down 6% year to date.', 'Gold', 'price_move', None, 'down', '6%', '2026', None, ['Gold'], 0.95),
+        fact('Goldman Sachs and UBS have set year-end gold price targets above current levels.', 'Gold', 'forecast', None, 'up', None, 'year-end', None, ['Goldman Sachs', 'UBS', 'Gold'], 0.94),
+    ],
+    'fd65db8a426c8a4e227ead4d8b51d0d0': [
+        fact('The Nasdaq and S&P 500 are down for June.', 'Nasdaq Composite and S&P 500', 'price_move', None, 'down', None, 'June', None, ['Nasdaq Composite', 'S&P 500'], 0.94),
+        fact('The Magnificent Seven technology stocks are down more than 10% by one measure in June.', 'Magnificent Seven', 'price_move', None, 'down', 'more than 10%', 'June', None, ['Magnificent Seven'], 0.93),
+        fact('Treasury bonds rallied and yields moved lower even after US inflation exceeded 4% last week for the first time in three years.', 'US Treasury bonds', 'price_move', None, 'up', None, 'last week', 'US inflation exceeded 4% last week for the first time in three years', ['US Treasury bonds', 'United States'], 0.95),
+        fact('Kevin Warsh\\'s hawkish turn has fueled a surge in bets that the Federal Reserve will raise interest rates.', 'Federal Reserve', 'forecast', None, 'up', None, '2026-06-29', 'Kevin Warsh\\'s hawkish turn', ['Federal Reserve', 'Kevin Warsh'], 0.94),
+        fact('Gold and bitcoin have fallen sharply alongside Microsoft and Meta as tightening financial conditions have taken hold.', 'Gold and Bitcoin', 'price_move', 'Microsoft and Meta', 'down', None, '2026-06-29', 'tightening financial conditions', ['Gold', 'Bitcoin', 'Microsoft', 'Meta Platforms'], 0.9),
+        fact('The semiconductor index is up 87% for the year.', 'Philadelphia Semiconductor Index', 'price_move', None, 'up', '87%', '2026', None, ['Philadelphia Semiconductor Index'], 0.98),
+        fact('Micron has quadrupled in 2026.', 'Micron Technology', 'price_move', None, 'up', 'quadrupled', '2026', None, ['Micron Technology'], 0.97),
+        fact('Intel and Marvell Technology have tripled in 2026.', 'Intel and Marvell Technology', 'price_move', None, 'up', 'tripled', '2026', None, ['Intel', 'Marvell Technology'], 0.97),
+        fact('Amazon and Alphabet have issued "'$60 billion in bonds in multiple currencies in the last 12 months.'"', 'Amazon and Alphabet', 'corporate_action', 'bond market', 'up', '"'$60 billion'"', 'last 12 months', 'to finance further AI spending', ['Amazon', 'Alphabet'], 0.97),
+        fact('Investment-grade bond sales by hyperscalers have surpassed their full-year 2025 total and are on pace to reach BNP Paribas\\' "'$250 billion forecast this year.'"', 'Hyperscaler investment-grade bond sales', 'forecast', None, 'up', '"'$250 billion'"', '2026', None, ['BNP Paribas'], 0.94),
+        fact('UBS cut its exposure to semiconductor and hardware stocks in its artificial intelligence portfolio this past week.', 'UBS artificial intelligence portfolio', 'corporate_action', 'semiconductor and hardware stocks', 'down', None, 'this past week', 'possible future AI capital-expenditure cuts by hyperscalers given their share-price declines', ['UBS', 'Semiconductor stocks', 'Hardware stocks'], 0.96),
+    ],
+    'fdbf0937577ec5c213588e23b3629ada': [
+        fact('At least 28 civilians were killed after Pakistan launched air strikes in Afghan provinces along the border on Sunday, according to the UN Afghan mission.', 'Pakistan', 'event', 'Afghanistan', 'na', '28 civilians killed', 'Sunday', None, ['Pakistan', 'Afghanistan', 'United Nations Assistance Mission in Afghanistan'], 0.98),
+        fact('A further 49 people were injured in the Pakistani strikes in Afghanistan, according to Unama.', 'Pakistan', 'event', 'Afghanistan', 'na', '49 injured', 'Sunday', None, ['Pakistan', 'Afghanistan', 'United Nations Assistance Mission in Afghanistan'], 0.97),
+        fact('Pakistan said it carried out a ground operation and air strikes targeting militant hideouts in Afghanistan\\'s Paktia, Paktika and Kunar provinces.', 'Pakistan', 'event', 'militant hideouts in Afghanistan', 'na', None, 'Sunday', None, ['Pakistan', 'Afghanistan'], 0.97),
+        fact('The Pakistan-Afghanistan ceasefire agreed last October has fallen apart.', 'Pakistan and Afghanistan', 'event', 'ceasefire', 'down', None, 'since last October', None, ['Pakistan', 'Afghanistan'], 0.92),
+    ],
+    'fe088e2c17592b65c169409509a3a2c5': [
+        fact('The US Supreme Court ruled that constitutional privacy protections extend to cellphone location information.', 'US Supreme Court', 'policy_action', 'cellphone location information', 'na', None, 'Monday', None, ['US Supreme Court', 'United States'], 0.99),
+        fact('The US Supreme Court ruled that people do not forfeit privacy expectations when they opt into Google\\'s location history.', 'US Supreme Court', 'policy_action', 'Google Location History', 'na', None, 'Monday', None, ['US Supreme Court', 'Google', 'United States'], 0.98),
+    ],
+    'ffc7243d1c90fe827d7b6373aeb5a955': [
+        fact('NexMetals Mining said resources at its Selkirk copper-nickel-PGM project in Botswana increased by nearly 70%.', 'Selkirk copper-nickel-PGM project', 'supply_change', None, 'up', 'nearly 70%', '2026-06-24', 'successful resampling and drilling', ['NexMetals Mining', 'Selkirk copper-nickel-PGM project', 'Botswana'], 0.98),
+        fact('NexMetals upgraded Selkirk project resources from Inferred to Indicated to approximately 1.1 billion pounds of copper equivalent.', 'Selkirk copper-nickel-PGM project', 'supply_change', None, 'up', 'approximately 1.1 billion pounds of copper equivalent', '2026-06-24', 'successful resampling and drilling', ['NexMetals Mining', 'Selkirk copper-nickel-PGM project', 'Botswana'], 0.99),
+        fact('The Selkirk project has ore resources of 78.2 million mt at a grade of 0.66% copper equivalent after the upgrade.', 'Selkirk copper-nickel-PGM project', 'supply_change', None, 'na', '78.2 million mt at 0.66% copper equivalent', '2026-06-24', None, ['NexMetals Mining', 'Selkirk copper-nickel-PGM project', 'Botswana'], 0.99),
+        fact('Remaining Inferred ore resources at Selkirk stand at 15.1 million mt at a grade of 0.60% copper equivalent, equal to 200 million pounds of copper equivalent.', 'Selkirk copper-nickel-PGM project', 'supply_change', None, 'na', '15.1 million mt at 0.60% copper equivalent', '2026-06-24', None, ['NexMetals Mining', 'Selkirk copper-nickel-PGM project', 'Botswana'], 0.99),
+        fact('Compared with the 2024 update, Selkirk\\'s copper equivalent increased by 63%, mainly because of higher metallurgical recoveries and the inclusion of by-product cobalt, silver, and gold.', 'Selkirk copper-nickel-PGM project', 'supply_change', None, 'up', '63%', 'compared with 2024', 'higher metallurgical recoveries and inclusion of by-product cobalt, silver, and gold', ['NexMetals Mining', 'Selkirk copper-nickel-PGM project', 'Botswana', 'Cobalt', 'Silver', 'Gold'], 0.98),
+    ],
+    'ffd4c3b08cb4f6f8a0c78e84546e21f7': [
+        fact('Shandong Humon launched a public tender for 3,000 kilograms of 4N high-purity selenium on June 29, 2026.', 'Shandong Humon Smelting Co., Ltd.', 'deal_or_contract', '4N high-purity selenium', 'na', '3,000 kilograms', '2026-06-29', None, ['Shandong Humon Smelting Co., Ltd.', 'Selenium'], 0.99),
+        fact('Bids for Shandong Humon\\'s tender for 4N high-purity selenium are due by June 30, 2026.', 'Shandong Humon Smelting Co., Ltd.', 'event', '4N high-purity selenium tender', 'na', None, 'June 30, 2026', None, ['Shandong Humon Smelting Co., Ltd.', 'Selenium'], 0.97),
+    ],
+    '001d0974c0661fa6f80a5d9443406699': [
+        fact('The most-traded SHFE zinc contract closed at 24,350 yuan/mt on June 30, down 615 yuan/mt for the month, a decline of 2.46%.', 'SHFE zinc', 'price_move', None, 'down', '615 yuan/mt, or 2.46%', 'June 30', None, ['SHFE zinc', 'Shanghai Futures Exchange', 'Zinc'], 0.99),
+        fact('SHFE zinc touched a high of 25,355 yuan/mt early in June and a low of 23,720 yuan/mt at month-end.', 'SHFE zinc', 'price_move', None, 'down', 'from 25,355 yuan/mt to 23,720 yuan/mt', 'June', None, ['SHFE zinc', 'Shanghai Futures Exchange', 'Zinc'], 0.97),
+        fact('A ceasefire in the Middle East and the opening of the Strait of Hormuz boosted market sentiment and led to a broad rebound in non-ferrous metals prices early in June, including zinc.', 'Non-ferrous metals prices', 'price_move', None, 'up', None, 'early in June', 'a ceasefire between both sides and the opening of the Strait of Hormuz', ['Zinc', 'Strait of Hormuz'], 0.94),
+        fact('Later in June, renewed expectations for US Federal Reserve interest rate hikes weighed on zinc prices.', 'SHFE zinc', 'price_move', None, 'down', None, 'later in June', 'the market priced in a 25-basis-point US Federal Reserve rate hike within the year, increasing liquidity risk', ['SHFE zinc', 'Federal Reserve', 'Zinc'], 0.97),
+        fact('Imported zinc ore treatment charges continued to slide in June, and domestic treatment charges fell to negative 200 yuan/mt in metal content.', 'Zinc ore treatment charges in China', 'price_move', None, 'down', '-200 yuan/mt', 'June', 'ore tightness', ['Zinc', 'China'], 0.98),
+        fact('July zinc production is expected to decline somewhat as smelter profit margins narrow and maintenance and production cuts increase.', 'China refined zinc production', 'forecast', None, 'down', None, 'July', 'narrower smelter profit margins, increased routine maintenance, and production cuts', ['China', 'Zinc'], 0.96),
+        fact('Ore-side tightness in China is not expected to ease in July and will continue to support zinc prices.', 'China zinc ore supply', 'forecast', 'zinc prices', 'down', None, 'July', None, ['China', 'Zinc'], 0.95),
+        fact('Domestic zinc ingot supply in China remains robust and is exerting pressure on zinc prices.', 'China zinc ingot supply', 'supply_change', 'zinc prices', 'up', None, 'July', None, ['China', 'Zinc'], 0.95),
+        fact('Consumption in July is expected to continue weakening and to keep pressuring zinc prices.', 'China zinc demand', 'forecast', 'zinc prices', 'down', None, 'July', 'rainfall, rising temperatures, poor real estate performance, weak special bond fund disbursement, and delayed steel tower project drawings', ['China', 'Zinc'], 0.96),
+        fact('Zinc prices are expected to edge down from June levels in July, but only to a limited extent.', 'Zinc prices', 'forecast', None, 'down', None, 'July', 'consumption is expected to weaken while refined zinc supply remains robust, offset partly by improved spot transactions and expectations for smelter production cuts', ['Zinc'], 0.96),
+    ],
+    '007d7ac94e4e8f0435f9b3a13359ec6c': [
+        fact('EUR/JPY fell to around 184.85 during early European trading on Tuesday.', 'EUR/JPY', 'price_move', None, 'down', 'around 184.85', 'Tuesday', None, ['EUR/JPY', 'Euro', 'Japanese Yen'], 0.99),
+        fact('The Japanese Yen rebounded against the Euro as traders stayed on alert for possible intervention from Japanese authorities.', 'Japanese Yen', 'price_move', 'Euro', 'up', None, 'Tuesday', 'traders were on alert for possible intervention from Japanese authorities', ['Japanese Yen', 'Euro', 'Japan'], 0.98),
+        fact('Japanese Finance Minister Satsuki Katayama said authorities stood ready to respond appropriately at any time.', 'Japan Ministry of Finance', 'statement', None, 'na', None, 'Tuesday', None, ['Japan Ministry of Finance', 'Satsuki Katayama', 'Japan'], 0.97),
+        fact('Chief Cabinet Secretary Minoru Kihara said the Japanese government remains prepared to intervene in currency markets if necessary.', 'Government of Japan', 'statement', 'currency markets', 'na', None, 'Tuesday', None, ['Government of Japan', 'Minoru Kihara', 'Japan'], 0.97),
+        fact('Markets have pared expectations for future European Central Bank rate increases as energy prices retreat.', 'European Central Bank', 'price_move', None, 'down', None, '2026-06-30', 'energy prices retreated', ['European Central Bank', 'Eurozone'], 0.94),
+        fact('Investors are still pricing one more quarter-point European Central Bank rate increase that would bring the deposit rate to 2.50%.', 'European Central Bank deposit rate', 'forecast', None, 'up', 'one quarter-point to 2.50%', '2026-06-30', None, ['European Central Bank', 'Eurozone'], 0.96),
+    ],
+}
+
+docs = []
+with input_path.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+
+with output_path.open('w') as out:
+    total_facts = 0
+    for obj in docs:
+        facts = facts_by_doc.get(obj['doc_id'], [])
+        total_facts += len(facts)
+        out.write(json.dumps({
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }, ensure_ascii=False) + '\\n')
+
+print(f'docs processed: {len(docs)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 55
+
+codex
+The output file is written. I’m doing a quick validation pass now to confirm every line parses, the order matches the source file, and the fact totals are consistent.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+inp = Path('all_batch_035.jsonl')
+out = Path('all_facts_035.jsonl')
+in_docs = [json.loads(line) for line in inp.open()]
+out_docs = [json.loads(line) for line in out.open()]
+assert len(in_docs) == len(out_docs)
+for a,b in zip(in_docs,out_docs):
+    assert a['doc_id'] == b['doc_id']
+    assert a['title'] == b['title']
+    assert isinstance(b['facts'], list)
+print('validated', len(out_docs), 'docs and', sum(len(d['facts']) for d in out_docs), 'facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+validated 12 docs and 55 facts
+
+exec
+/bin/zsh -lc 'wc -l all_facts_035.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_035.jsonl
+
+codex
+docs processed: 12, total facts: 55
+tokens used
+50,485
+docs processed: 12, total facts: 55

@@ -1,0 +1,842 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fa9-fd05-79e3-a508-e92650d8305c
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_003.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_003.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_003.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:51:09.417702Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_003.jsonl` and checking its structure first, then I’ll generate `all_facts_003.jsonl` strictly from that file with no network use.
+exec
+/bin/zsh -lc 'wc -l all_batch_003.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_003.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_003.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(i, sorted(obj.keys()))
+        print('doc_id', obj.get('doc_id'))
+        print('title', obj.get('title'))
+        print('body_preview', (obj.get('body_text') or '')[:400].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+doc_id 8be6dda385a432d2f85801129580b302
+title EU Crypto Penalty Rules: EBA Unveils Stablecoin Fines Matrix
+body_preview EU watchdog EBA details big crypto fines as landmark laws bite The European Banking Authority laid out a proposed penalty framework on Friday that can strip non-compliant significant token issuers of up to 12.5% of their annual revenue. The European Banking Authority on Friday unveiled a sweeping framework to penalize cryptocurrency issuers that violate the European Union’s digital-asset laws, sig
+---
+2 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+doc_id 8da028863fe065d78d109aeef22ec117
+title Global economic pressure points call for policy discipline: BIS
+body_preview Global economic pressure points call for policy discipline: BIS - The sustainability of the AI boom, financial vulnerabilities and strained public finances are among pressure points facing the global economy, along with the return of inflation. - The interplay of record-high public debt with the increasing role of highly-leveraged hedge funds creates a new sovereign-financial stability nexus and p
+---
+3 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+doc_id 8eca244085c823af2da4b851292058c2
+title Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks
+body_preview Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks DUBAI, United Arab Emirates (AP) — Iran again launched drone and missile attacks targeting Bahrain and Kuwait on Sunday following new U.S. airstrikes against the Islamic Republic, and threatened a “complete halt” in negotiations to end th
+---
+
+codex
+I’ve confirmed there are 12 documents. Next I’m scanning all titles and dates so I can decide whether a deterministic extraction script is enough or whether any documents need closer handling.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i:02d}\\t{obj['doc_id']}\\t{obj['published_date']}\\t{obj['source_name']}\\t{obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+01	8be6dda385a432d2f85801129580b302	2026-06-28	Cointelegraph	EU Crypto Penalty Rules: EBA Unveils Stablecoin Fines Matrix
+02	8da028863fe065d78d109aeef22ec117	2026-06-28	BIS Press Releases	Global economic pressure points call for policy discipline: BIS
+03	8eca244085c823af2da4b851292058c2	2026-06-28	AP Top News	Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks
+04	93e5458e3de8c56d7ceac16c261f2365	2026-06-28	AP Top News	Eustáquio's foot delivers late strike for Canada’s first World Cup knockout win
+05	9aec170d841789cfd567609508b40799	2026-06-28	Guardian Business	‘Crypto v community’: 4,000 local US lenders join forces to fight ‘stablecoins’ law
+06	a3c5327eb400568a693009828d6a2ea6	2026-06-28	ForexLive	Gold demand set to climb as $29 trillion in sovereign capital rethinks dollar reliance | investingLive
+07	a4dd2d05612a746f9e72d7b9c5dd27a5	2026-06-28	Cointelegraph	Will Bitcoin Price Recover in July?
+08	a91a2af74c03bf3e723d456cfd53f571	2026-06-28	Cointelegraph	BIS Crypto Warning: Stablecoins and Public Ledgers Flawed, Report Says
+09	a9d934981ec5a4f4afc2580071ec0432	2026-06-28	The Economist - Finance & Economics	Why can’t India’s government build a decent website?
+10	aae13ad23aa3938055061afbac009a07	2026-06-28	AP Top News	Israel moves to formally recognize Armenian WWI deaths as a genocide
+11	b1627b3ce98d55c0c11dce3bc8bad0ae	2026-06-28	Guardian Business	‘British food will disappear’: trade deal after Brexit is hitting UK farmers hard
+12	b1d369ca2471f45a916170eecda582f8	2026-06-28	ISW - Understanding War	Iran Update Special Report, June 28, 2026
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i:02d}\\tlen={len((obj.get('body_text') or ''))}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+01	len=4562
+02	len=4339
+03	len=6811
+04	len=4010
+05	len=6382
+06	len=6560
+07	len=4103
+08	len=4492
+09	len=796
+10	len=3667
+11	len=8678
+12	len=12000
+
+codex
+I’ve isolated the likely market-relevant set. I’m reading those articles in full now and will keep the non-market items empty unless the text states a direct market-relevant claim.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+idxs={1,2,5,6,7,8,11}
+with open('all_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in idxs:
+            obj=json.loads(line)
+            print(f\"===== DOC {i} {obj['doc_id']} =====\")
+            print(obj['title'])
+            print(obj['body_text'])
+            print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 1 8be6dda385a432d2f85801129580b302 =====
+EU Crypto Penalty Rules: EBA Unveils Stablecoin Fines Matrix
+EU watchdog EBA details big crypto fines as landmark laws bite The European Banking Authority laid out a proposed penalty framework on Friday that can strip non-compliant significant token issuers of up to 12.5% of their annual revenue. The European Banking Authority on Friday unveiled a sweeping framework to penalize cryptocurrency issuers that violate the European Union’s digital-asset laws, signaling a tougher enforcement stance as the trade bloc finalizes its historic regulatory architecture. The consultation paper published June 26 establishes a standardized playbook for hitting non-compliant issuers of what the EBA considers “significant” tokens with potentially multimillion-euro penalties. Under the proposal, the Paris-based watchdog will deploy a strict two-step process to determine fines, assessing the baseline severity of an infraction before factoring in aggravating or mitigating behavior. The move represents the sharpening of teeth for the EU’s landmark Markets in Crypto-Assets (MiCA) regulation. Introduced to bring order to a historically freewheeling sector, MiCA is the world's first comprehensive regulatory regime for digital assets, forcing token issuers and crypto service providers to operate with bank-like compliance, consumer protections and capital reserves if they want access to the single European market. The stakes for non-compliance are explicitly designed to be punitive. According to the EBA's consultation paper, final penalties could reach statutory ceilings of 12.5% of annual turnover for issuers of significant asset-referenced tokens and 10% for significant e-money tokens, or two times the profits generated by the violation, caps meant to deter even the largest global digital-asset operators. Cover screenshot of European Banking Authority's 14-page consultation paper. Source: EBA The roll-out of the penalty framework comes at a critical juncture for Europe's digital asset industry, landing just days ahead of a crucial July 1 deadline. By the start of next month, cryptocurrency firms must have secured formal licenses from national regulators to legally offer their services or market stablecoins within the 27-nation bloc, ending a transitional grace period that allowed many operators to function under looser local rules. Related: Binance faces EU service limits next week as MiCA rules take effect Firms that fail to secure their regulatory passports by July 1 face the prospect of being forced to halt operations entirely or risk triggering the exact infractions, such as unauthorized public disclosures or organizational failures, that the EBA’s new framework is built to penalize. Binance pushes “pause” on EU operations after license fail The world’s biggest exchange operator, Binance, last week notified European Union users that access to key services will be restricted after the exchange failed to secure MiCA authorization from a member state before the July 1 deadline after it withdrew its MiCA license application in Greece. Those restrictions include halting the onboarding of new EU users and limiting certain services for EU-based accounts effective July 1, according to exchange notices shared by users on social media. Notice sent by Binance to customers in Poland. Source: IT_Tech_PL The notices said users will still be able to withdraw their assets after that date, stating that “all digital assets are still available for withdrawal,” in line with applicable regulatory requirements. Binance recorded $1.96 billion in daily net outflows on Wednesday, following its withdrawal announcement, according to DefiLlama data viewed by Cointelegraph on Sunday. The exchange then saw another $2.52 billion and $1.46 billion in net outflows over the following two days. EU move shows sharp contrast with US enforcement approach The timing underscores the European Union's broader strategy to position itself as the dominant global standard-setter for digital finance, contrasting sharply with the regulation-by-enforcement approach seen in the United States. By laying out clear financial penalties right as the licensing mandate takes effect, authorities in Brussels are telling the market that the era of leniency is officially over. The industry now has a three-month consultation window ending September 28 to lobby for changes to the EBA's penalty methodology. However, with the July 1 licensing cliff edge just days away, executives will have to navigate an unforgiving compliance environment long before the final fining guidelines are formalized under law. More on the subject
+
+===== DOC 2 8da028863fe065d78d109aeef22ec117 =====
+Global economic pressure points call for policy discipline: BIS
+Global economic pressure points call for policy discipline: BIS - The sustainability of the AI boom, financial vulnerabilities and strained public finances are among pressure points facing the global economy, along with the return of inflation. - The interplay of record-high public debt with the increasing role of highly-leveraged hedge funds creates a new sovereign-financial stability nexus and poses growing financial stability risks. - Safeguarding price stability, ensuring fiscal sustainability, strengthening financial stability beyond the banking perimeter and structural reforms must be policy priorities. Discipline in each arm of policy expands the room in which the others have to act. Economic pressure points pose risks to global growth stemming from vulnerabilities in the financial system, strained public finances and major supply shocks which are still playing out, the Bank for International Settlements (BIS) said in its flagship economic report. The BIS's Annual Economic Report 2026 said policymakers must prioritise price stability, strengthen financial stability, ensuring sound monetary and fiscal foundations and undertaking reforms to ensure sustainable growth. Policy actions must reinforce each other to avoid a pull and push on the global economy. Ultimately, success depends on sound fiscal and financial foundations. Policymakers must act now. Delay will only make the necessary adjustments more costly and increase the chance of difficult trade-offs in the future. By addressing these challenges today, we can help to safeguard the stability of the global economy in the years to come. Fiscal fragilities, coupled with structural changes in sovereign debt markets, pose a growing risk to financial stability. The expanding role of non-banks, such as hedge funds, can amplify and accelerate the transmission of market stress, especially in some major advanced economies. This creates mounting challenges for central banks. The report details that up until earlier this year, the global economy had proved resilient, buoyed by optimism around progress in AI and surprisingly strong global trade. AI-related investment and associated expectations of productivity gains stimulated economic activity and kept financial conditions favourable. The historic closure of the Strait of Hormuz then triggered a supply crisis in energy and other raw materials, posing a renewed threat to the global outlook. Despite signs of easing geopolitical tensions and a significant drop in oil prices, the disruption's impact may linger. The report analyses four pressure points that demand urgent attention: - Inflation has risen. In a world of more frequent negative supply shocks, a key risk is that higher inflation could become ingrained if inflation expectations de-anchor. This could sustain inflationary pressure even after energy flows and oil prices normalise following the opening of the Straits of Hormuz. - Optimism surrounding AI may not last, despite its promise of future productivity gains. The current surge in capital expenditure could prove unsustainable if supply bottlenecks restrain production. And intense competition for market leadership may fuel over-investment, as seen in previous innovation waves. - Financial vulnerabilities remain a concern. Liquidity in core bond markets may be more fragile due to stretched asset valuations and investor complacency. The financing of AI is increasingly leveraged, featuring complex interactions within the AI supply chain. - Near-record high public debt and higher interest rates are straining fiscal positions in many economies, leaving governments with less room to respond to future recessions or crises. The new fiscal-financial stability nexus may mean more frequent and sharper drops in sovereign bond values. Such repricing can tighten financial conditions quickly and weigh on demand with uncertain effects on inflation and complicate the calibration of monetary policy. It can also prompt central banks to intervene to calm market stress, with side effects for market and fiscal discipline. One chapter, "Anchoring trust in money: innovation beyond stablecoins", was released on 23 June. The BIS also publishes its Annual Report 2025/26 today. It introduces the BIS's new strategy and shows how the BIS has supported stakeholders throughout the year.
+
+===== DOC 5 9aec170d841789cfd567609508b40799 =====
+‘Crypto v community’: 4,000 local US lenders join forces to fight ‘stablecoins’ law
+On a quiet summer morning, above a small mid-western town, an American flag is waving in the breeze. The camera cuts to a father helping his son at the wheel of a tractor, and flits to a smiling couple on a grass-lined pavement, moments before flashing to grainy images of “crypto insiders” in suits. “American families don’t want experiments with their money,” a voice booms. “They want jobs, growth, and available credit. When crypto gets a free pass, communities pay the price.” The 30-second video, which launched in Washington DC this month, is part of a six-figure advertising campaign by the Independent Community Bankers of America (ICBA), meant to help fight a landmark bill that will determine how America’s multibillion-dollar crypto sector is regulated. The ICBA – which represents about 4,000 small community banks across the US – is concerned that the Clarity Act will let crypto companies pay out rewards and incentives for customers transferring, or using, “stablecoins”. Stablecoins are cryptocurrencies whose value is typically pegged to an asset, or currency such as the US dollar, and tend to be used as an intermediary between fiat currency and crypto. Those incentives could encourage people to shift their cash out of local lenders and on to international crypto platforms online. The ICBA is warning that could drain $1.3tn (£980bn) of deposits from community banks, ultimately depriving small businesses and farmers of $850bn-worth of loans primarily funded by customers’ savings. ICBA president Rebeca Romero Rainey is quick to point out that community banks fund more than 60% of all small business loans, and 80% of agricultural loans, across the US. “They are, in many cases, that local economic engine, because they are taking local deposits and redeploying them in the form of loans, and creating economic growth.” If the Clarity Act passes in its current form, Rainey says, “how are those loans funded in the future? And we might argue they wouldn’t be”.. Big banks, such as JP Morgan, have long opposed important elements of the Clarity Act, pitting them against crypto bosses including Coinbase’s billionaire chief executive, Brian Armstrong. But the ICBA’s campaign expands the battle beyond Wall Street into rural America, and raises questions about the real impact that the Trump administration’s push to legitimise cryptocurrencies could have on communities across the US. It is also creating an ideological battle for Republicans as they head into the midterm elections. The question is whether to side with the Trump administration, which has been pushing to bring crypto and fringe financial firms into the mainstream, or the small farmers and rural business borrowers that have historically provided a bedrock of support for many Republican lawmakers. More than 1,000 miles south-west of ICBA’s DC offices, Guaranty Bank & Trust president Troy Richards is worried about what the new bill will mean for his industry. “It is very likely going to be one of the largest disrupters of community banking we’ve ever seen.” Guaranty Bank & Trust is already counting the costs of the crypto boom. Richards, who is one of 68 staff at the nine-branch bank, says $40,000 has flowed out of customer accounts to crypto investments over the past 90 days alone. While that is relatively minor for a lender with $450m (£340m) in assets, Richards worries it is a sign of what is to come. “It’s a relatively small amount now for us. But … it’ll only be exacerbated if the issuers of stablecoins, or the exchanges that are involved, are going to be allowed to pay interest or rewards. That’s just going to accelerate that deposit outflow, even more than now.” Whether that could lead to a silent bank run, where banks face a slow demise as deposits trickle away to tech firms, “that’s the question of the day,” Richards says. And if deposits dwindle, that will mean having to find more expensive sources of funding, which would push up costs and restrict the loans available for local borrowers. That will have ripple effects throughout the local community that Richards has worked with for more than 40 years. “These crypto issuers are not in our local communities. They can’t sit across the desk from a farmer, or from a small business owner, and counsel with them on how to improve their business. They don’t sponsor the local little league team, they don’t buy ads in the local high school yearbook, and they’re not paying local ‘ad valorem’ taxes,” he says, referring to a local property tax that benefits local school systems and municipalities. While some crypto advocates argue that stablecoin reserves will end up being held at traditional banks, Richard says is unlikely to make up for community lenders’ losses. “I don’t think any of the issuers of stablecoins are going to be looking to have their reserves at Guaranty Bank in north-east Louisiana. So that’s not going to happen for us.” Crypto lobbyists argue that major concessions have already been made for banks, with the Clarity Act having originally allowed awards to be paid out on stablecoin holdings, rather than use and transactions, akin to the traditional interest earned on deposits. Cody Carbone, chief executive of American crypto trade group, Digital Chamber, argues that community banks are merely trying to quash their upstart rivals. “ICBA’s campaign isn’t about protecting Main Street, it’s about shielding an outdated model from competition,” Carbone said. “Our industry is fighting for clear federal rules through the Clarity Act, while ICBA is fighting to keep Americans locked out of innovation. “Clear rules of the road will protect consumers and establish a transparent, fair way for crypto to be a choice for the 70 million Americans who own crypto.” However, the ICBA says it welcomes competition, but demands a “level playing field”, where any firm vying for lucrative deposits is subject to the same regulation, safeguards and capital requirements. Plus, it says, small banks have already grappled with the rise of fintechs, which it says forced them to innovate and offer more modern products and services to customers. “We’re not afraid of competition so long as it’s fair,” Richards adds. The hope now is that Congress will listen. “The crypto industry, I think, has done a pretty effective job of getting their message across,” Richards said. “It’s our turn now.”
+
+===== DOC 6 a3c5327eb400568a693009828d6a2ea6 =====
+Gold demand set to climb as $29 trillion in sovereign capital rethinks dollar reliance | investingLive
+The one-third of surveyed institutions planning to add gold represents a demand signal with genuine price implications: central banks and sovereign wealth funds operate at a scale where even incremental allocation shifts move the market, and the stated intention to increase holdings comes on top of two years of already elevated official sector buying. The tripling of central banks citing US debt as a negative for the dollar's reserve role, from 20% in 2024 to 61% now, is the structural driver behind the gold pivot rather than a short-term tactical call, which makes it stickier and harder to reverse. With the bond-equity diversification relationship having broken down during recent inflation shocks, gold is filling the portfolio role that fixed income can no longer reliably play for sovereign allocators. The custodian review findings add a further dimension: institutions quietly unwinding reliance on US financial infrastructure are simultaneously building non-dollar reserve buffers, and gold's status as a neutral, sanction-proof asset sits directly in the path of that trend. For bullion markets, the combination of structural sovereign demand, dollar reserve anxiety, and geopolitical fragmentation argues for a well-supported price floor even as near-term energy price relief reduces one source of inflationary pressure. --- One-third of sovereign wealth funds and central banks plan to increase gold holdings as 61% flag US debt as a long-term threat to the dollar's reserve status, an Invesco survey found. Summary: - One-third of the 144 sovereign wealth funds and central banks surveyed by Invesco said they planned to increase gold holdings as part of a broad diversification drive away from dollar-denominated assets, per the report published Monday and conveyed by Reuters - Some 61% of central bank respondents said US debt levels negatively affect the dollar's long-term reserve currency status, up from 20% in 2024, with 29% expecting the dollar's reserve role to be weaker in five years compared with 12% in 2022, - Several institutions reported reviewing reliance on US-based custodians, counterparties and clearing infrastructure, with one European central bank confirming it had already replaced its US custodian and a Latin American institution building non-US custodial relationships as a contingency - The positive bond-equity correlation seen in recent years has eroded the traditional diversification role of fixed income, pushing sovereign allocators toward real assets including gold and infrastructure - Some 80% of respondents identified energy security and energy transition infrastructure as the most credible resilience investments, with infrastructure reaching 9% of sovereign wealth fund assets in 2026 - Invesco head of research Benjamin Jones said resilience had become a hard requirement rather than a preference, with institutions redesigning portfolios to withstand a wider range of outcomes amid inflation shocks and geopolitical fragmentation A third of the world's largest sovereign investors plan to increase their gold holdings, according to an Invesco survey published Monday, as deepening concern about US debt levels and the dollar's long-term reserve status drives official sector capital toward assets that sit outside the reach of geopolitical pressure. The survey of 90 sovereign wealth funds and 54 central banks, collectively managing $29 trillion in assets, found the gold accumulation intention sits within a broader and accelerating reassessment of dollar reliance. Some 61% of central bank respondents said US debt levels are damaging the dollar's long-term position as the primary global reserve currency, a figure that has tripled from 20% in 2024 and represents the sharpest single-year deterioration in sovereign confidence in the greenback on record in the survey's history. Gold's appeal in this environment is specific and structural. The breakdown of the traditional bond-equity diversification relationship, as the two asset classes moved in positive correlation through recent inflation shocks, has left sovereign allocators without the portfolio buffer that fixed income reliably provided for decades. Gold has stepped into that role, offering a real asset with deep liquidity, no counterparty risk, and no exposure to the US financial infrastructure that a growing number of institutions are quietly reassessing. That reassessment of infrastructure is among the survey's most striking findings. Several institutions told Invesco they were actively reviewing their reliance on US-based custodians, counterparties and clearing systems. One European central bank had already completed a switch away from its US custodian. A Latin American institution was building new non-US custodial relationships as preparation for a worst-case deterioration in relations with Washington. Gold, which requires no custodian of the kind that generates political exposure, is a natural complement to that trend: it can be held in allocated form outside the US-dominated clearing and settlement network entirely. The dollar has not collapsed. It has risen around 3% this year, partly on safe-haven demand during the US-Israeli conflict with Iran, and survey respondents acknowledged that the absence of a credible alternative currency means any shift away from the dollar will be gradual and incremental. Renminbi potential as a reserve currency was noted but described as contingent on structural reforms not yet in prospect. Yet the directional signals are now consistent across multiple data points: 29% of respondents expect the dollar's reserve role to be weaker in five years, against 12% in 2022, and the institutions making that assessment control enough capital to make it self-fulfilling at the margin. The gold buying intention therefore lands not as a tactical inflation hedge but as a considered, long-horizon allocation decision by institutions whose time horizons are measured in decades. For bullion markets, that distinction matters. Central bank and sovereign wealth fund demand is characteristically patient, non-leveraged and insensitive to short-term price volatility, qualities that translate into a structural demand floor rather than a momentum-driven price spike. Combined with the broader energy and infrastructure rotation the survey documents, the picture is of sovereign capital systematically rebuilding portfolios around assets that can survive a world of fragmented geopolitics, unreliable correlations, and a reserve currency whose primacy is no longer taken as given.
+
+===== DOC 7 a4dd2d05612a746f9e72d7b9c5dd27a5 =====
+Will Bitcoin Price Recover in July?
+Will Bitcoin price recover in July? Bitcoin’s past July gains and heavy short bets point to a rally toward $75,000, but a break below key support keeps the risk of $55,000 in play. Bitcoin (BTC) is heading for its worst monthly loss since mid-2022, with BTC down roughly 18.5% in June as price struggles to hold the psychological $60,000 support level. BTC/USD monthly chart. Source: TradingView Will Bitcoin’s downside momentum extend in July, or is BTC preparing for a recovery? Key takeaways: - Bitcoin’s liquidity map shows a major short-liquidation “magnet zone” near $67,600. - BTC has historically gained 7.6% on average in July, while midterm-year seasonality points to an even stronger 10.3% average return. Bitcoin may hit $75,000 in July July may become a "bullish month for Bitcoin," according to analyst Fleh, who predicted BTC price to rally toward $75,000 next month. The bullish thesis is based on Bitcoin’s Binance BTC/USDT liquidation heatmap, which shows a large concentration of short liquidation levels sitting above the current price. On the monthly chart, the strongest visible liquidity cluster sits near $67,645, where the chart shows around $247.39 million in liquidation leverage and roughly $2.26 billion in cumulative short liquidation leverage. Binance BTC/USDT liquidation heatmap (1 month). Source: CoinGlass For beginners, such clusters are often called “magnet zones.” When many leveraged positions are concentrated around the same price area, the market can move toward that zone because liquidations create forced buying or selling pressure. In this case, significant liquidity sits above Bitcoin’s current price near $60,000. If BTC rebounds and pushes toward $67,600, short sellers may be forced to close their positions. Since closing shorts requires buying Bitcoin back, that can add fresh upside pressure and fuel a short squeeze. "I think $BTC bottoms here at 60k for now, targeting 75k to the upside before any chance of lower," Fleh said in a Saturday post. BTC rises 7.6% on average in July Bitcoin’s historical monthly returns also support Fleh’s bullish July outlook. BTC has returned a 7.6% gain on average in July, making it one of its stronger months after a typically weaker June, which shows an average return of -1.40%, according to CoinGlass data highlighted by analyst CGT_Trader. Bitcoin monthly returns tracking the July performance in since 2013. Source: CoinGlass/CGT_Trader The trend has appeared even during bear market years. For instance, Bitcoin rose 20.96% in July 2018 and 16.8% in July 2022. More recently, BTC gained 2.95% in July 2024 and 8.13% in July 2025, strengthening the case for another green month ahead. A separate midterm-year seasonality chart also shows that- Bitcoin has averaged a 10.3% gain during the month, its strongest monthly return in such years. Bitcoin performance by month during US mid-term election years. Source: More Crypto Online That compares with an average 17% loss in June, pointing to the possibility of a post-sell-off mean-reversion bounce. Based on Bitcoin’s current price near $60,000, its historical July average return of 7.6% projects a move toward roughly $64,500, while the stronger midterm-year average of 10.3% points to about $66,100. A repeat of Bitcoin’s bear-market July rebounds from 2022 and 2018 would put BTC between $70,000 and $72,500, while a 2020-style July rally would bring Fleh’s $75,000 target within reach. BTC's dip below the 200-week SMA may extend slide Bitcoin’s ongoing drop below its 200-week simple moving average (200-day SMA, the blue line) near $62,445 raises the risk of further downside in July. BTC/USD weekly chart. Source: TradingView A similar loss of long-term moving-average support preceded deeper weakness during the 2022 bear market, when BTC continued lower before forming a bottom. Related: Bitcoin faces fresh capitulation risk as 50K BTC moved at a loss Bitcoin's bear flag breakdown raises the odds of a price decline toward $55,000 in July unless BTC quickly reclaims the 200-day SMA. BTC/USD daily chart. Source: TradingView More on the subject
+
+===== DOC 8 a91a2af74c03bf3e723d456cfd53f571 =====
+BIS Crypto Warning: Stablecoins and Public Ledgers Flawed, Report Says
+BIS warns stablecoins risk fragmenting global financial system The Basel-based institution said that private digital tokens fall short of the requirements for sound money and urged policymakers to accelerate work on tokenized forms of central bank and commercial bank money. The Bank for International Settlements (BIS) warned that the rapid expansion of stablecoins risks fragmenting the global monetary system and weakening sovereign monetary control, urging central banks and the financial industry to accelerate the development of tokenized forms of central bank and commercial bank money as a safer alternative. In its Annual Economic Report published Sunday, the Basel-based institution delivered a sharp assessment of the approximately $316 billion stablecoin market, arguing that tokens pegged to fiat currencies lack the institutional features required to serve as safe, reliable money at scale. BIS pointed to structural vulnerabilities in reserve asset management and warned that a significant migration from commercial bank deposits into private digital tokens could reduce bank funding and constrain credit to the real economy. The report also provides a signal to policymakers that the current regulatory approach to stablecoins may prove insufficient if private digital currencies continue expanding. Rather than positioning stablecoins as a durable foundation for the future monetary system, BIS said that tokenized commercial bank deposits, combined with tokenized central bank money operating on regulated infrastructures, offer a more robust path toward modernizing payments while preserving monetary stability. Demand for foreign stablecoins connects FX markets with crypto ecosystem. Source: BIS Annual Economic Report 2026. The report focuses particular attention on "stablecoin dollarization," that is, the growing use of dollar-denominated stablecoins in economies with weaker domestic currencies. According to BIS, this trend could weaken monetary sovereignty, erode the effectiveness of domestic monetary policy, reduce bank intermediation and increase exposure to volatile cross-border capital flows, particularly in emerging market economies. Related: BIS Project Agorá shows tokenized payments can settle in seconds BIS raises fresh concerns about public blockchains' limits The report also delivers one of BIS's strongest critiques yet of public permissionless blockchains such as Bitcoin and Ethereum as a foundation for the monetary system. It argues that decentralized networks relying on distributed validation and lacking a central governance structure struggle to meet the requirements for scalability, legal accountability and settlement finality expected of systemically important financial infrastructure. BIS raises concerns on rising fragmentation across layer 1 and layer 2 networks. Source: BIS Annual Economic Report 2026. At the center of BIS's critique is the economics of decentralized consensus. The report argues that public permissionless blockchains compensate validators through transaction fees that rise as network activity increases, making congestion, longer confirmation times and higher costs structural features of the system rather than temporary technical shortcomings. According to BIS, these characteristics undermine the efficiency and network effects that are essential for a unified monetary system. The Basel-based institution further argues that permissionless blockchains lack the clear governance and accountability frameworks required for institutional finance. Without an identifiable entity responsible for maintaining the integrity of the system, resolving disputes or ensuring compliance with financial integrity standards, BIS contends that such networks face significant obstacles to supporting large-scale regulated financial activity. Rather than rejecting tokenization itself, BIS advocates a "unified ledger" architecture that combines tokenized central bank money, tokenized commercial bank deposits and tokenized financial assets on programmable platforms operating within regulated legal and institutional frameworks. By preserving the benefits of tokenization, including programmable transactions and faster settlement, while maintaining the institutional foundations of the existing monetary system, BIS said that financial markets can improve efficiency without sacrificing monetary stability, financial integrity or public trust. Related: Why stablecoins and SWIFT may have to coexist More on the subject
+
+===== DOC 11 b1627b3ce98d55c0c11dce3bc8bad0ae =====
+‘British food will disappear’: trade deal after Brexit is hitting UK farmers hard
+For Liz Webster, who farms 647 hectares (1600 acres) in Wiltshire, south west England, the latest impact of Brexit has been particularly brutal. About £400 per animal has been wiped off the price she can get for her beef cattle, a hefty blow at a time when all the inputs – feed, energy, fertiliser – are going through the roof. The fall in price, on livestock that typically fetch £2,000 to £3,000 per animal, is the result of a flood of cheaper meat arriving from Australia, the result of one of the new trade deals the government has signed since the UK left the European Union. Prices for beef in the supermarkets have remained broadly the same, but farmers have seen their income plummet. “It’s just inevitable that if it continues, British food will disappear, unless it’s niche, appealing to a particular wealthy market, because in the mainstream supermarkets British food won’t be able to complete,” she says. For farmers, it seems Brexit is the gift that keeps on taking away. A study published last year found the quantity of farmed exports to the EU, the biggest market for farm produce, had fallen by nearly half (47%) and the value by 35%, while the variety of exports also reduced by a third. Separate analysis by the National Farmers’ Union published earlier this year found exports from the poultry sector fell by 38%, beef exports 24%, lamb 14% and dairy 16%. Brexit has also cost the UK consumer – a study in 2023 found it had already added £7bn to food prices for consumers. Nor has Brexit been the only disaster to strike farmers in the last decade: Covid, energy shocks from the Ukraine and Iran wars, and extreme weather events have all compounded the damage. “There’s been so many global challenges, to try and decipher how much is down to leaving the EU and how much down to global turmoil is difficult,” says Tom Bradshaw, president of the NFU. “But we always warned that [the issue with Brexit] wasn’t going to be the immediate impact, it was sort of a death by a thousand cuts, a slow burn, and that’s exactly what we’re now seeing.” Brexit wreaked three massive changes to British farming: the withdrawal of the UK from the EU’s common agricultural policy (Cap), the subsidy system that held sway since the mid-1970s; changes to trade policy, which let in floods of imports, many of which farmers say are produced to lower standards than UK equivalents; and the introduction of trade friction with the EU, previously the biggest food export market. Added to these have been changes to environmental and animal welfare regulations that affect farmers, difficulties with visas for the seasonal workers many farmers rely on at harvest, and a huge increase in paperwork – ironically, for a rupture its supporters said would cut red tape. “It’s been the ultimate in shooting ourselves in the foot,” says Webster, who set up a group, Save British Food, to campaign for re-entry to the EU. “It’s dire for farms, but it’s mostly dire for the British people because it means they’re being forced to eat food which is bad for their health and it leaves us exposed in terms of national [food] security.” The government says that 65% of the food we eat is still grown here, and ministers say they are making the best of a bad job. “Brexit has been terrible for farming and even the Tories admit they made it worse by selling farmers down the river in bad trade deals,” Stephen Morgan, farming minister, says. “This Labour government is backing British farmers: cutting millions in red tape through a new EU agreement, securing a landmark £800m Gulf trade deal, and delivering a record £11.8bn farming budget.” The most tangible of the effects on farmers has been the reform of subsidies, the biggest shake-up in more than a generation. The Cap awarded payments to farmers based on how much land they farmed. Michael Gove, environment secretary at the time and one of the key architects of the Conservative party’s Brexit, hailed sweeping reforms that would lead to “public money for public goods”. His pledges were welcomed, initially, by farmers and green campaigners. The Cap has been called “welfare for the rich”, so notorious is it for rewarding the biggest farmers (though it is so opaque that it is hard to even tell who they are), with scant regard for the consequences of their overuse of pesticides, fertilisers and other trappings of intensified agriculture. Gove’s reforms would mean farmers – in England at least – had to start showing that their stewardship of the land was protecting nature, maintaining air and water quality, nurturing the soil and providing havens for wildlife. These are known collectively as ELMS – environmental land management schemes, under which farmers agree to take a series of actions, from sowing cover crops that nourish soil, to leaving wildflower borders. At least, that was the theory. In practice, delays and revisions, difficulties with measurement and direction, frequent changes of ministers and other disruptions got in the way. Now, farmers in England are facing the end of all the old form of land-based payments next year, but the switch to the replacement sustainable farming incentive (SFI), landscape recovery scheme, and other ELMS measures have been fraught and patchy. The farm budget is about £2.3bn a year for England alone, roughly the same as it was before Brexit, but it has not grown with inflation. In England, only about half of farmers receive payments now, with the rest either unable or unwilling to apply for the available schemes. Farm support systems in the devolved governments now differ widely – roughly another £1bn a year is spent among them. Introducing friction to trade with Europe has sent some small producers to the wall. “It’s been more significant for farming and food than for other sectors, particularly those wanting to trade livestock products from the UK into the EU market,” says Tom Lancaster, head of land, food and farming at thinktank the Energy and Climate Intelligence Unit. “It’s become much harder, particularly for smaller producers who can’t really afford the sort of haulage costs of having to send a small load.” All sorts of businesses found themselves stranded: exports of seed potatoes were banned; shellfish sales were suspended; the market for bull semen dried up. The reset promised by the Labour government could ease some of these issues, but not all, says Lancaster. “There’s a live debate at the moment over who the winners and losers will be from the realignment with the EU,” he says. For some small businesses, the last five years of destruction will have been too much ever to bounce back from. The Conservatives also promised that Brexit would be green, with farmers playing a key role in this. But a report this week from the Wildlife Trusts found the reality has been anything but. Instead, the UK has diverged from the EU on key environmental regulations, and Labour’s pitting of “bats and newts” as the enemies of developments needed to solve the housing and economic crises has plunged nature into a worse plight. Matthew Browne, head of public affairs at the Wildlife Trusts, says: “We were promised a green Brexit, but what we got was a greyer UK. Brexit freedoms have been used to attack the laws that help nature and people flourish, risking a dangerous future and a standard of living below that of our EU neighbours.” Concerns over farmers doing the minimum for their public subsidy – taking the easiest methods such as scattering wildflower seeds in margins, rather than the more difficult but more valuable actions such as restoring ponds or peatland areas – contributed to the government’s decision to abruptly close the SFI last year. But Vicki Hird, strategic lead on agriculture at The Royal Society of Wildlife Trusts, worries there has been little focus on organic farming. “We are importing more organic food than ever, instead of growing it – that’s a bit mad.” Meanwhile, in the EU, the Cap is still controversial, and key environmental protections have also been rolled back across the bloc. Furious farmer protests in 2024 involving tractor blockades and burning hay bales nearly sabotaged a landmark law to restore nature and contributed to a weakening of green strings attached to the Cap, which still makes up a third of the EU’s budget. As it is, Ariel Brunner, regional director of BirdLife Europe and Central Asia, a nature protection group that has lobbied for reform, concludes: “[The Cap] remains a policy that is terribly wasteful, harmful to the environment, and socially regressive.” Before Brexit, the UK had been one of the leading voices striving to make the system fairer, greener and more efficient.
+
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+idxs={3,10,12}
+with open('all_batch_003.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in idxs:
+            obj=json.loads(line)
+            print(f\"===== DOC {i} {obj['doc_id']} =====\")
+            print(obj['title'])
+            print(obj['body_text'][:5000])
+            print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 3 8eca244085c823af2da4b851292058c2 =====
+Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks
+Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks Iran attacks Bahrain and Kuwait following US strikes and threatens to halt talks DUBAI, United Arab Emirates (AP) — Iran again launched drone and missile attacks targeting Bahrain and Kuwait on Sunday following new U.S. airstrikes against the Islamic Republic, and threatened a “complete halt” in negotiations to end the war if Washington continues its attacks. Efforts to reopen the Strait of Hormuz without Iran’s oversight has sparked days of crossfire. A multinational maritime body overseen by the U.S. Navy said Saturday it would expand a route near Oman for inbound and outbound traffic. Iranian Foreign Minister Abbas Araghchi on Sunday reiterated the claim that Tehran must govern the strait to the Persian Gulf that once carried a fifth of the world’s oil and natural gas. “Any attempt to establish new or separate arrangements from those currently being carried out by the Islamic Republic of Iran will only lead to further complications, delay the reopening of the Strait of Hormuz and increase the level of tension,” Araghchi said. The strait has long been considered an international waterway despite its location in Iran and Oman’s territorial waters. In recent days, Iran has twice attacked vessels going through a route near the Omani side. Pakistan, a key mediator, has said talks would resume Tuesday between the U.S. and Iran on the terms of their interim deal. The Trump administration on Sunday said nothing has been canceled and technical talks are on track for the coming days. Talks include arrangements around the strait, the removal of a U.S. blockade on Iranian ports and sanctions on Iran, and the future of Iran’s stockpile of highly enriched uranium. The two sides have 60 days from their signing of the memorandum of understanding earlier this month to work out details. Continued conflict in Lebanon threatens the agreement, which says fighting must end on all fronts before certain issues can be discussed. Strikes target Gulf states hosting US military Iran’s paramilitary Revolutionary Guard claimed responsibility for the attacks in Bahrain and Kuwait. Kuwait, which hosts a major U.S. military base, said air defenses intercepted Iranian drones and two missiles just after the U.S. strikes in Iran. There were no reports of injuries or damage. Bahrain said the Iranian strikes damaged a residential building near the international airport and no one was killed. Bahrain is home to the U.S. Navy’s 5th Fleet. The damaged building was not near its headquarters. Bahrain’s Foreign Ministry denounced what it called “a dangerous escalation that reveals that what Tehran is doing is not a passing act, nor an isolated incident, but rather a deliberate approach and a systematic pattern of repeated aggression.” Later on Sunday, Qatar said a civilian had been killed, and another person was hurt, by shrapnel related to “military operations in the area” after a vessel didn’t return at its scheduled time on Saturday. It did not give details. Trump accuses Iran of violating ceasefire The U.S. military said it struck Iranian military “surveillance infrastructure, communication systems, air defense sites, drone storage facilities and minelayer capabilities” following an attack on a ship on Saturday. The Panamanian-flagged tanker Kiku carried crude oil for the state-run energy company of Qatar, another key mediator. U.S. President Donald Trump on social media accused Iran of violating the deal and warned of a point where the U.S. may “be forced to militarily complete the job.” “If that happens, the Islamic Republic of Iran will no longer exist!” Trump wrote. The exchanges of fire began when an Iranian drone struck a merchant vessel off Oman on Thursday and the U.S. military retaliated. Ship traffic on the strait had increased over the past 72 hours, “despite the elevated threat environment,” the multinational maritime body overseen by the U.S. Navy said Sunday, adding that “U.S.-assisted commercial transits continued uninterrupted.” It said 89 such transits had been made, below the historical average of 138 vessels a day. Iran calls for new ‘conflict control unit’ in Lebanon Last week, Israel and Lebanon signed a framework agreement to end the latest fighting between Israel and the Iranian-backed Hezbollah militant group, which began two days after the Iran war started when Hezbollah fired at Israel. Israel has responded with an invasion of southern Lebanon and it has said it will not withdraw until Hezbollah is disarmed. The agreement did not include Iran or Hezbollah, which has criticized it and rejected calls to disarm. On Sunday, Iran’s foreign minister again said the U.S. must force Israel to halt attacks and withdraw. Israel occupies around 600 square kilometers (231 square miles) in southern Lebanon, which it says it needs as a security buffer. Sporadic clashes have continued, and Hezbollah’s leader said Saturday that the group would continue fi
+
+
+===== DOC 10 aae13ad23aa3938055061afbac009a07 =====
+Israel moves to formally recognize Armenian WWI deaths as a genocide
+Israel moves to formally recognize Armenian WWI deaths as a genocide TEL AVIV, Israel (AP) — Israel’s Cabinet unanimously approved a proposal on Sunday to designate violence against Armenians by the Ottoman Empire during World War I as a genocide. The step, which still needs approval in Parliament, reflects deteriorating ties between Israel and Turkey. Turkey has fiercely lobbied to prevent countries from officially recognizing the mass deaths of Armenians around 1915 as a genocide, even as Armenians have pushed for it. Historians estimate that up to 1.5 million Armenians were killed by Ottoman Turks around the time of World War I, an event widely viewed by scholars as the first genocide of the 20th century. Turkey denies that the deaths constituted genocide, saying the toll has been inflated and that those killed were victims of civil war and unrest. For years, Israel never officially broached the subject for fear of angering Turkey, but that relationship has soured over the past two decades, especially as the most recent wars in Gaza, Lebanon and Iran have dragged on. “Despite the extensive and unambiguous historical documentation, the Armenian Genocide remains to this day the subject of an institutionalized campaign of denial and minimization, including a manipulative rewriting of history, mainly by the Turkish government,” said Israeli Foreign Minister Gideon Saar, who brought the decision to the government. He noted that Israeli leaders, including Prime Minister Benjamin Netanyahu, have previously described the violence against Armenians as a genocide. But it has never been formally recognized in a vote by Israel’s Knesset. “It is never too late to do the right thing,” Saar said Sunday, calling it a “moral and historical duty.” He noted that 32 countries, including the United States, Syria and Lebanon, have also classified the violence as a genocide. It was not immediately known when Sunday’s decision, approved unanimously by Israel’s Cabinet, would go to the parliament for approval. Turkey called Israel’s move a “politically motivated” step meant to distract from the country’s own actions against Palestinians. “The Israeli government, which systematically persecutes the Palestinian people in full view of the world and is being tried at the International Court of Justice for genocide against the people of Gaza, aims to cover up its own crimes,” the Turkish Foreign Ministry said in a statement. “This malicious attempt, which disregards legal and historical facts, reveals the predicament of Netanyahu and his accomplices, who have arrest warrants against them in connection with the investigation into crimes committed against Palestinians at the International Criminal Court,” the statement added. Israel and Turkey were once close allies, but relations soured during the rise of Turkey’s Islamist President Recep Tayyip Erdogan, leading Israel to reconsider its position. Israel has faced repeated accusations, including from the United Nations and Turkey, that its offensive in Gaza amounts to genocide. Israel, founded in the wake of the Holocaust, denies the accusations. Israel launched the war in response to Hamas’ Oct. 7, 2023, attack. Gaza’s Health Ministry, part of the Hamas government, says over 73,000 people have been killed, roughly half of them women and children. Israel says it does not target civilians and accuses Hamas of using civilians as human shields. Last week, a team of independent experts commissioned by the United Nations accused Israel of deliberately shooting children in Gaza and repeated accusations that Israel has carried out a genocide. Israel called the report a “libelous sham.”
+
+
+===== DOC 12 b1d369ca2471f45a916170eecda582f8 =====
+Iran Update Special Report, June 28, 2026
+The Institute for the Study of War (ISW) and The Critical Threats Project (CTP) at the American Enterprise Institute are publishing daily updates to provide analysis on the war with Iran. The updates cover events from the past 24-hour period. Key Takeaways Toplines Iran has continued to attack US forces in the region to try to deter the United States from undermining Iranian efforts to control the Strait of Hormuz. An Iranian drone struck the Panama-flagged M/T Kiku on June 27.[1] US military aircraft targeted Iranian military surveillance infrastructure, communications systems, air defense sites, drone storage facilities, and mine-laying capabilities in response.[2] The Islamic Revolutionary Guards Corps (IRGC) Navy then released a statement that threatened US bases in the region.[3] The IRGC launched drone and ballistic missile attacks targeting the US Fifth Fleet Naval Base in Bahrain and the Ali Al Salem Airbase in Kuwait on June 28.[4] Bahraini air defenses intercepted several projectiles, but the Iranian attack destroyed a residential building, according to Bahrain’s Interior Ministry.[5] These strikes are likely intended to deter the United States from continuing to undermine Iranian efforts to control the strait by signaling to the United States that Iran will attack US forces in response to US strikes on Iran that seek to reduce Iran’s ability to threaten international shipping. Iranian officials have continued to emphasize after the recent exchange of fire that Iran intends to assert sovereignty over the strait. Iranian Foreign Affairs Minister Abbas Araghchi stated on June 28 that Iran is “solely responsible” for managing the Strait of Hormuz under the US-Iran memorandum of understanding (MoU).[6] The fifth article of the MoU explicitly states that Iran must engage in dialogue with Oman and the Persian Gulf littoral states to determine the “future administration” of the strait.[7] Iranian Artesh Spokesperson Mohammad Akraminia separately stated on June 28 that Iran seeks to use control of the strait to strengthen its regional power, not just to collect tolls.[8] ISW-CTP has previously assessed that Iran is prioritizing securing recognized control over the strait over collecting tolls.[9] Iran’s strikes may also reflect an Iranian effort to dissuade the Gulf states from resisting Iranian control over the strait. Iran may have intended for its strikes to signal to Gulf states that Iran will respond with force to any Gulf opposition to its control of the strait, amid recent Gulf resistance to Iranian management of the waterway. The Gulf Cooperation Council (GCC) and the United States explicitly rejected on June 25 any Iranian attempts to assert control over the strait, including by charging tolls.[10] Omani officials told CNN on June 28 that Oman opposes any mandatory fees or tolls in the Strait of Hormuz, citing international freedom of navigation.[11] Iranian media and officials have adopted a harsher tone toward Gulf countries in recent days, likely in response to these countries’ opposition to Iranian management of the strait. Iran’s English-language media outlet published an article on June 26 in which it criticized the Gulf states and claimed that these countries are attempting to “conceal” the reality that Iran has established a new “regional balance” with its control over the strait, for example.[12] Iran is also threatening to suspend negotiations as part of its efforts to deter the United States from challenging Iranian sovereignty over the strait. The IRGC Navy stated on June 27 that US strikes on Iran violated the ceasefire and “will result in the complete halt of all diplomatic processes.”[13] Iran may calculate that threatening to stop negotiations could alter US decision-making, given that US officials have repeatedly stated that they seek to resolve key nuclear issues with Iran. Iran previously suspended negotiations with the United States prior to the signing of the MoU in order to try to compel the United States to pressure Israel to halt operations against Hezbollah.[14] The Israeli government confirmed the locations of two “pilot zones” where the Lebanese Armed Forces (LAF) will backfill the Israel Defense Forces (IDF) in southern Lebanon as part of the June 26 trilateral framework agreement.[15] Israeli Prime Minister Benjamin Netanyahu displayed a map of two zones located on opposite banks of the Litani River during a press conference on June 27.[16] The northern pilot zone includes territory surrounding Zawtar el Gharbiyeh, Nabatieh District, and the southern pilot zone includes territory surrounding Ghandouriyeh and Froun, Bint Jbeil District. The June 26 framework agreement’s second and third clauses require the LAF to assume responsibility for security in pilot zones after it disarms and dismantles armed groups in those areas.[17] Both of the announced pilot zones lie beyond the IDF’s “anti-tank line,” which would likely reduce the risk of Hezbollah launching attacks on Isr
+
+
+
+codex
+The remaining ambiguity is limited to a couple of borderline articles. I’m checking those now so the output stays conservative and only includes directly supported market facts.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+for i in [4,9]:
+    with open('all_batch_003.jsonl') as f:
+        for j,line in enumerate(f,1):
+            if j==i:
+                obj=json.loads(line)
+                print(f\"===== DOC {i} =====\")
+                print(obj['title'])
+                print(obj['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 4 =====
+Eustáquio's foot delivers late strike for Canada’s first World Cup knockout win
+Eustáquio’s foot delivers late strike for Canada’s first World Cup knockout win Eustáquio’s foot delivers late strike for Canada’s first World Cup knockout win INGLEWOOD, Calif. (AP) — The tension kept building between two teams making their first appearance in a World Cup knockout match. With no goals on the scoreboard, the minutes ticked down with extra time looming. Then Stephen Eustáquio scored in the second minute of second-half stoppage time, and Canada beat South Africa 1-0 on Sunday. “I shot with everything I had,” Eustáquio said. The party was on, for red-clad fans in the stands at SoFi Stadium and at watch parties across Canada, one of three World Cup hosts. “Overall, it’s pretty much a perfect knockout performance,” right back Alistair Johnston said. Hockey dominates Canada in the winter months. Now, summer belongs to the men’s national soccer team. The country’s previous best men’s international result was winning CONCACAF Gold Cup championships in 1985 and 2000. The women’s Olympic team won gold at the 2020 Tokyo Games. “For Canadian sports history, it’s going to be a moment where you’re going to kind of know where you were when that moment happened,” Johnston said. “That’s something that is not lost on us. We know that not only are we writing history in Canadian soccer, but in Canadian sport, and that’s a magical thing.” Just when it looked like 30 minutes of extra time was coming, Johnston’s pass to the right side was cleared to the edge of the box and found Eustáquio, who drilled a clean strike into the bottom corner. “It’s just a moment of magic and something just comes over your body,” Johnston said. “You see Steph sprinting away and just the whole team sprinting. It’s one of those moments that you’ll never forget.” Eustáquio became a Canadian hero in Los Angeles, where he played about 10 miles away in downtown for the MLS club LAFC. The 29-year-old midfielder was born in Canada and in his younger days played for Portugal, where his late parents were from. Eustáquio suffered back-to-back devastating blows when his mother died from brain cancer in 2023 and his father died of a heart attack in 2024. He remains close with his brother, Mauro, a former player and a coach in the Canadian Premier League. “I couldn’t think of a more deserving human being in a group of incredible human beings, maybe Steph is the most deserving to have a moment like that,” coach Jesse Marsch said. “So I’m really happy for him. I think from somewhere his parents are looking down and they saw that.” In 2019, Eustáquio committed to play for the Canadian national team. “Today, we have to enjoy the fact that we made everybody back home proud,” he said. “I am over the moon.” In the next moment, Eustáquio was quick to come down to Earth. “I don’t want to say that the job is finished,” he said. “We have to be humble, we have to recover well and we know that in six days we’re going to have a very tough team.” Next up, Canada plays either the Netherlands or Morocco in Houston on July 4. “We’re going to get a chance now at a true Goliath next weekend,” Johnston said, “and that’s something that we’re all extremely excited about.” Eustáquio couldn’t see the clock to know about how much time was left. Even during the hydration breaks, he wasn’t sure. “There was a little bit of frustration knowing that we didn’t score and they were probably going to score if they kept pushing,” he said, “but Jesse was just trying to remain calm, tell the team to keep pushing.” The Canadians got a boost when their star player, Alphonso Davies, removed his substitute bib and entered in the 75th minute. He hadn’t played in a World Cup match since injuring his hamstring in May with Bayern Munich in a Champions League semifinal. Eustáquio had served as captain in Davies’ absence during the group-stage matches. “We have a special group. We feel like we are brothers,” Eustáquio said. “When we fight for each other, when we play for each other, special things like this can happen.” ___
+===== DOC 9 =====
+Why can’t India’s government build a decent website?
+Why can’t India’s government build a decent website? Clunky online experiences reveal the failures of Indian officialdom Before you read beyond this paragraph, grab a glass of water and 1,000mg of paracetamol. Walk over to your laptop—the supercomputer in your hand is not up to the task—and make yourself comfortable. Now navigate to indianvisaonline.gov.in and see if you can figure out how to apply for a visa. If you succeeded, welcome back, and apologies. Several questions are probably fighting for space in your addled brain. Let’s take them in turn. The answer to the first is no, the government of India does not hate foreign visitors. Its online services for Indian citizens—railway ticketing, voter registration, income-tax filings—are just as hostile. Those are among the better ones.
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+for i in [3,12]:
+    with open('all_batch_003.jsonl') as f:
+        for j,line in enumerate(f,1):
+            if j==i:
+                obj=json.loads(line)
+                text=obj['body_text']
+                for needle in ['oil','gas','sanction','sanctions','toll','traffic','138','89']:
+                    if needle.lower() in text.lower():
+                        print('DOC',i,'contains',needle)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 3 contains oil
+DOC 3 contains gas
+DOC 3 contains sanction
+DOC 3 contains sanctions
+DOC 3 contains traffic
+DOC 3 contains 138
+DOC 3 contains 89
+DOC 12 contains toll
+
+codex
+I have the extraction set. I’m writing `all_facts_003.jsonl` now with conservative, document-by-document facts only where the title/body explicitly supports them, then I’ll validate the file and count.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+facts_by_doc = {
+    '8be6dda385a432d2f85801129580b302': [
+        {
+            'claim': 'The European Banking Authority said its June 26 consultation paper would allow final penalties of up to 12.5% of annual turnover for significant asset-referenced token issuers and 10% for significant e-money token issuers, or two times the profits generated by the violation.',
+            'subject': 'European Banking Authority',
+            'predicate': 'policy_action',
+            'object': 'significant token issuers',
+            'direction': 'up',
+            'magnitude': '12.5% of annual turnover; 10% of annual turnover; or two times the profits generated by the violation',
+            'time': 'June 26',
+            'cause': None,
+            'entities': ['European Banking Authority', 'European Union', 'Markets in Crypto-Assets'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'By July 1, cryptocurrency firms must secure formal licenses from national regulators to legally offer services or market stablecoins in the European Union.',
+            'subject': 'European Union',
+            'predicate': 'policy_action',
+            'object': 'cryptocurrency firms',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'July 1',
+            'cause': None,
+            'entities': ['European Union', 'Markets in Crypto-Assets'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Binance said it will halt onboarding new EU users and limit certain services for EU-based accounts effective July 1 after failing to secure MiCA authorization and withdrawing its license application in Greece.',
+            'subject': 'Binance',
+            'predicate': 'corporate_action',
+            'object': 'EU users and EU-based accounts',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'July 1',
+            'cause': 'Binance failed to secure MiCA authorization after withdrawing its license application in Greece.',
+            'entities': ['Binance', 'European Union', 'Greece', 'Markets in Crypto-Assets'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Binance recorded "'$1.96 billion in daily net outflows on Wednesday, followed by $2.52 billion and $1.46 billion in net outflows over the next two days, after its withdrawal announcement.'"',
+            'subject': 'Binance',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$1.96 billion; $2.52 billion; $1.46 billion in net outflows'"',
+            'time': 'Wednesday and the following two days',
+            'cause': 'its withdrawal announcement',
+            'entities': ['Binance'],
+            'confidence': 0.95,
+        },
+    ],
+    '8da028863fe065d78d109aeef22ec117': [
+        {
+            'claim': 'The Bank for International Settlements said the global economy faces pressure points from the sustainability of the AI boom, financial vulnerabilities, strained public finances, and the return of inflation.',
+            'subject': 'Bank for International Settlements',
+            'predicate': 'statement',
+            'object': 'global economy',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Bank for International Settlements', 'global economy', 'artificial intelligence'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Bank for International Settlements said record-high public debt and the growing role of highly leveraged hedge funds are creating a new sovereign-financial stability nexus and increasing financial stability risks.',
+            'subject': 'Bank for International Settlements',
+            'predicate': 'statement',
+            'object': 'financial system',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'record-high public debt and the growing role of highly leveraged hedge funds',
+            'entities': ['Bank for International Settlements', 'hedge funds', 'sovereign debt'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Bank for International Settlements said the closure of the Strait of Hormuz triggered a supply crisis in energy and other raw materials earlier this year.',
+            'subject': 'Strait of Hormuz',
+            'predicate': 'supply_change',
+            'object': 'energy and other raw materials',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'earlier this year',
+            'cause': 'the closure of the Strait of Hormuz',
+            'entities': ['Bank for International Settlements', 'Strait of Hormuz', 'energy', 'raw materials'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'The Bank for International Settlements said oil prices had fallen significantly as geopolitical tensions eased, although the disruption from the Strait of Hormuz could continue to affect the outlook.',
+            'subject': 'Oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'significant',
+            'time': '2026-06-28',
+            'cause': 'easing geopolitical tensions',
+            'entities': ['Bank for International Settlements', 'Oil', 'Strait of Hormuz'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'The Bank for International Settlements said near-record public debt and higher interest rates are straining fiscal positions in many economies and leaving governments with less room to respond to future recessions or crises.',
+            'subject': 'Governments in many economies',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'near-record public debt and higher interest rates',
+            'entities': ['Bank for International Settlements', 'governments', 'interest rates', 'public debt'],
+            'confidence': 0.97,
+        },
+    ],
+    '8eca244085c823af2da4b851292058c2': [
+        {
+            'claim': 'Iranian Foreign Minister Abbas Araghchi said Tehran must govern the Strait of Hormuz, which once carried a fifth of the world\\'s oil and natural gas.',
+            'subject': 'Iran',
+            'predicate': 'statement',
+            'object': 'Strait of Hormuz',
+            'direction': 'na',
+            'magnitude': 'a fifth of the world\\'s oil and natural gas',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Iran', 'Abbas Araghchi', 'Strait of Hormuz', 'oil', 'natural gas'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The U.S.-overseen maritime body said 89 U.S.-assisted commercial transits had been made through the Strait of Hormuz, below the historical average of 138 vessels a day.',
+            'subject': 'Strait of Hormuz',
+            'predicate': 'event',
+            'object': 'commercial shipping',
+            'direction': 'down',
+            'magnitude': '89 transits versus 138 vessels a day historically',
+            'time': 'Sunday',
+            'cause': 'the elevated threat environment',
+            'entities': ['Strait of Hormuz', 'United States Navy'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The Panamanian-flagged tanker Kiku was carrying crude oil for Qatar\\'s state-run energy company when it was attacked on Saturday.',
+            'subject': 'M/T Kiku',
+            'predicate': 'event',
+            'object': 'QatarEnergy',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'Saturday',
+            'cause': None,
+            'entities': ['M/T Kiku', 'QatarEnergy', 'Qatar', 'crude oil'],
+            'confidence': 0.95,
+        },
+    ],
+    '93e5458e3de8c56d7ceac16c261f2365': [],
+    '9aec170d841789cfd567609508b40799': [
+        {
+            'claim': 'The Independent Community Bankers of America said the Clarity Act could let crypto companies offer rewards or incentives for customers transferring or using stablecoins.',
+            'subject': 'Clarity Act',
+            'predicate': 'policy_action',
+            'object': 'crypto companies and stablecoin users',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Independent Community Bankers of America', 'Clarity Act', 'stablecoins', 'crypto companies'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'The Independent Community Bankers of America warned that stablecoin incentives could drain "'$1.3tn of deposits from community banks.'"',
+            'subject': 'U.S. community banks',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$1.3tn'"',
+            'time': '2026-06-28',
+            'cause': 'stablecoin rewards and incentives under the Clarity Act',
+            'entities': ['Independent Community Bankers of America', 'U.S. community banks', 'stablecoins', 'Clarity Act'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The Independent Community Bankers of America warned that the deposit drain could deprive small businesses and farmers of "'$850bn of loans that are primarily funded by customer savings.'"',
+            'subject': 'Small businesses and farmers',
+            'predicate': 'forecast',
+            'object': 'community bank lending',
+            'direction': 'down',
+            'magnitude': '"'$850bn'"',
+            'time': '2026-06-28',
+            'cause': 'a projected drain of deposits from community banks',
+            'entities': ['Independent Community Bankers of America', 'small businesses', 'farmers', 'community banks'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Guaranty Bank & Trust said "'$40,000 had flowed out of customer accounts into crypto investments over the past 90 days.'"',
+            'subject': 'Guaranty Bank & Trust',
+            'predicate': 'other',
+            'object': 'crypto investments',
+            'direction': 'down',
+            'magnitude': '"'$40,000'"',
+            'time': 'past 90 days',
+            'cause': 'customer transfers into crypto investments',
+            'entities': ['Guaranty Bank & Trust', 'crypto investments'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Guaranty Bank & Trust said allowing stablecoin issuers or exchanges to pay interest or rewards would accelerate deposit outflows from community banks.',
+            'subject': 'Community bank deposits',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'stablecoin issuers or exchanges paying interest or rewards',
+            'entities': ['Guaranty Bank & Trust', 'community banks', 'stablecoin issuers', 'crypto exchanges'],
+            'confidence': 0.95,
+        },
+    ],
+    'a3c5327eb400568a693009828d6a2ea6': [
+        {
+            'claim': 'Invesco found that one-third of 144 surveyed sovereign wealth funds and central banks plan to increase gold holdings.',
+            'subject': 'Gold',
+            'predicate': 'demand_change',
+            'object': 'sovereign wealth funds and central banks',
+            'direction': 'up',
+            'magnitude': 'one-third of 144 surveyed institutions',
+            'time': 'Monday',
+            'cause': 'a diversification drive away from dollar-denominated assets',
+            'entities': ['Invesco', 'Gold', 'sovereign wealth funds', 'central banks', 'U.S. dollar'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Invesco found that 61% of central bank respondents said U.S. debt levels negatively affect the dollar\\'s long-term reserve-currency status, up from 20% in 2024.',
+            'subject': 'U.S. dollar',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '61%, up from 20% in 2024',
+            'time': 'Monday',
+            'cause': 'U.S. debt levels',
+            'entities': ['Invesco', 'U.S. dollar', 'central banks', 'United States debt'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Invesco found that 29% of respondents expect the dollar\\'s reserve role to be weaker in five years, versus 12% in 2022.',
+            'subject': 'U.S. dollar',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '29% versus 12% in 2022',
+            'time': 'in five years',
+            'cause': None,
+            'entities': ['Invesco', 'U.S. dollar', 'sovereign wealth funds', 'central banks'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The article said the dollar has risen around 3% this year, partly on safe-haven demand during the U.S.-Israeli conflict with Iran.',
+            'subject': 'U.S. dollar',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'around 3%',
+            'time': 'this year',
+            'cause': 'safe-haven demand during the U.S.-Israeli conflict with Iran',
+            'entities': ['U.S. dollar', 'United States', 'Israel', 'Iran'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Invesco found that 80% of respondents identified energy security and energy transition infrastructure as the most credible resilience investments.',
+            'subject': 'Energy security and energy transition infrastructure',
+            'predicate': 'demand_change',
+            'object': 'sovereign investors',
+            'direction': 'up',
+            'magnitude': '80% of respondents',
+            'time': 'Monday',
+            'cause': 'resilience investment priorities',
+            'entities': ['Invesco', 'energy security', 'energy transition infrastructure', 'sovereign wealth funds', 'central banks'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Invesco said infrastructure had reached 9% of sovereign wealth fund assets in 2026.',
+            'subject': 'Infrastructure',
+            'predicate': 'demand_change',
+            'object': 'sovereign wealth fund assets',
+            'direction': 'up',
+            'magnitude': '9% of sovereign wealth fund assets',
+            'time': '2026',
+            'cause': None,
+            'entities': ['Invesco', 'infrastructure', 'sovereign wealth funds'],
+            'confidence': 0.96,
+        },
+    ],
+    'a4dd2d05612a746f9e72d7b9c5dd27a5': [
+        {
+            'claim': 'Bitcoin was down roughly 18.5% in June and was heading for its worst monthly loss since mid-2022.',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '18.5%',
+            'time': 'June',
+            'cause': None,
+            'entities': ['Bitcoin'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Analyst Fleh said Bitcoin could rally toward "'$75,000 in July.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$75,000'"',
+            'time': 'July',
+            'cause': 'a large concentration of short liquidation levels above the current price',
+            'entities': ['Bitcoin', 'Binance'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'The article said the strongest visible Binance BTC/USDT liquidity cluster was near "'$67,645, with about $247.39 million in liquidation leverage and roughly $2.26 billion in cumulative short liquidation leverage.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'other',
+            'object': 'Binance BTC/USDT market',
+            'direction': 'na',
+            'magnitude': '"'$67,645; $247.39 million; $2.26 billion'"',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Bitcoin', 'Binance', 'BTC/USDT'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The article said Bitcoin has returned an average gain of 7.6% in July.',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '7.6% on average',
+            'time': 'July',
+            'cause': None,
+            'entities': ['Bitcoin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The article said Bitcoin has averaged a 10.3% gain in July during U.S. midterm-election years.',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '10.3% average gain',
+            'time': 'July during U.S. midterm-election years',
+            'cause': None,
+            'entities': ['Bitcoin', 'United States'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The article said a bear flag breakdown raises the odds of a Bitcoin decline toward "'$55,000 in July unless Bitcoin quickly reclaims the 200-day SMA.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$55,000'"',
+            'time': 'July',
+            'cause': 'a bear flag breakdown and failure to reclaim the 200-day SMA',
+            'entities': ['Bitcoin'],
+            'confidence': 0.95,
+        },
+    ],
+    'a91a2af74c03bf3e723d456cfd53f571': [
+        {
+            'claim': 'The Bank for International Settlements said the rapid expansion of stablecoins risks fragmenting the global monetary system and weakening sovereign monetary control.',
+            'subject': 'Stablecoins',
+            'predicate': 'statement',
+            'object': 'global monetary system',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'the rapid expansion of stablecoins',
+            'entities': ['Bank for International Settlements', 'stablecoins'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Bank for International Settlements said the stablecoin market was approximately "'$316 billion.'"',
+            'subject': 'Stablecoin market',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$316 billion'"',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Bank for International Settlements', 'stablecoin market'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Bank for International Settlements said that a significant migration from commercial bank deposits into private digital tokens could reduce bank funding and constrain credit to the real economy.',
+            'subject': 'Commercial bank deposits',
+            'predicate': 'forecast',
+            'object': 'private digital tokens',
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'migration into private digital tokens',
+            'entities': ['Bank for International Settlements', 'commercial bank deposits', 'stablecoins'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Bank for International Settlements said growing use of dollar-denominated stablecoins in weaker-currency economies could weaken monetary sovereignty, reduce bank intermediation, and increase exposure to volatile cross-border capital flows.',
+            'subject': 'Dollar-denominated stablecoins',
+            'predicate': 'statement',
+            'object': 'weaker-currency economies',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'stablecoin dollarization',
+            'entities': ['Bank for International Settlements', 'dollar-denominated stablecoins', 'emerging market economies'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Bank for International Settlements said public blockchains such as Bitcoin and Ethereum struggle to meet requirements for scalability, legal accountability, and settlement finality for systemically important financial infrastructure.',
+            'subject': 'Bitcoin and Ethereum',
+            'predicate': 'statement',
+            'object': 'systemically important financial infrastructure',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'distributed validation and the lack of a central governance structure',
+            'entities': ['Bank for International Settlements', 'Bitcoin', 'Ethereum', 'public blockchains'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Bank for International Settlements urged policymakers to advance tokenized commercial bank deposits and tokenized central bank money on regulated infrastructure as a safer alternative to stablecoins.',
+            'subject': 'Bank for International Settlements',
+            'predicate': 'policy_action',
+            'object': 'tokenized commercial bank deposits and tokenized central bank money',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'stablecoins and public blockchains fall short of the requirements for sound money',
+            'entities': ['Bank for International Settlements', 'tokenized commercial bank deposits', 'central bank money', 'stablecoins'],
+            'confidence': 0.96,
+        },
+    ],
+    'a9d934981ec5a4f4afc2580071ec0432': [],
+    'aae13ad23aa3938055061afbac009a07': [],
+    'b1627b3ce98d55c0c11dce3bc8bad0ae': [
+        {
+            'claim': 'Liz Webster said about £400 per animal has been wiped off the price she can get for beef cattle because cheaper meat is arriving from Australia under a post-Brexit trade deal.',
+            'subject': 'UK beef cattle',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'about £400 per animal',
+            'time': '2026-06-28',
+            'cause': 'cheaper Australian meat arriving under a post-Brexit trade deal',
+            'entities': ['United Kingdom', 'Australia', 'beef cattle', 'Brexit'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'A study published last year found that the quantity of farmed exports to the European Union had fallen by 47%, the value by 35%, and the variety by a third.',
+            'subject': 'UK farmed exports to the European Union',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '47% in quantity; 35% in value; one-third in variety',
+            'time': 'last year',
+            'cause': 'Brexit-related trade friction with the European Union',
+            'entities': ['United Kingdom', 'European Union', 'Brexit'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'National Farmers\\' Union analysis published earlier this year found that poultry exports fell 38%, beef exports 24%, lamb exports 14%, and dairy exports 16%.',
+            'subject': 'UK agricultural exports',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'poultry 38%; beef 24%; lamb 14%; dairy 16%',
+            'time': 'earlier this year',
+            'cause': 'Brexit',
+            'entities': ['National Farmers\\' Union', 'United Kingdom', 'poultry', 'beef', 'lamb', 'dairy', 'Brexit'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'A 2023 study found that Brexit had already added £7bn to food prices for UK consumers.',
+            'subject': 'UK food prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '£7bn',
+            'time': '2023',
+            'cause': 'Brexit',
+            'entities': ['United Kingdom', 'Brexit', 'food prices'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The article said the farm budget in England is about £2.3bn a year, roughly the same as before Brexit, but it has not grown with inflation.',
+            'subject': 'England farm budget',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': 'about £2.3bn a year',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['England', 'farm budget', 'Brexit'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The article said only about half of farmers in England receive payments now.',
+            'subject': 'Farmers in England',
+            'predicate': 'other',
+            'object': 'farm payments',
+            'direction': 'down',
+            'magnitude': 'about half',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['England', 'farmers', 'farm payments'],
+            'confidence': 0.95,
+        },
+    ],
+    'b1d369ca2471f45a916170eecda582f8': [
+        {
+            'claim': 'An Iranian drone struck the Panama-flagged M/T Kiku on June 27.',
+            'subject': 'M/T Kiku',
+            'predicate': 'event',
+            'object': 'Iran',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'June 27',
+            'cause': None,
+            'entities': ['M/T Kiku', 'Iran'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The Gulf Cooperation Council and the United States rejected on June 25 any Iranian attempt to assert control over the Strait of Hormuz, including by charging tolls.',
+            'subject': 'Gulf Cooperation Council and United States',
+            'predicate': 'policy_action',
+            'object': 'Iranian control of the Strait of Hormuz',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'June 25',
+            'cause': None,
+            'entities': ['Gulf Cooperation Council', 'United States', 'Iran', 'Strait of Hormuz'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Omani officials said on June 28 that Oman opposes any mandatory fees or tolls in the Strait of Hormuz, citing international freedom of navigation.',
+            'subject': 'Oman',
+            'predicate': 'policy_action',
+            'object': 'mandatory fees or tolls in the Strait of Hormuz',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'June 28',
+            'cause': 'international freedom of navigation',
+            'entities': ['Oman', 'Strait of Hormuz'],
+            'confidence': 0.97,
+        },
+    ],
+}
+
+in_path = Path('all_batch_003.jsonl')
+out_path = Path('all_facts_003.jsonl')
+
+docs = 0
+total_facts = 0
+with in_path.open() as f_in, out_path.open('w') as f_out:
+    for line in f_in:
+        obj = json.loads(line)
+        facts = facts_by_doc[obj['doc_id']]
+        total_facts += len(facts)
+        docs += 1
+        out = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        f_out.write(json.dumps(out, ensure_ascii=True) + '\\n')
+
+print(f'{docs} docs processed, {total_facts} total facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 docs processed, 44 total facts
+
+codex
+The output file is written. I’m doing a final validation pass now to confirm line count, JSON validity, and the fact total before I close.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_facts_003.jsonl')
+docs=0
+facts=0
+with p.open() as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        assert set(obj)=={'doc_id','title','facts'}
+        docs+=1
+        facts+=len(obj['facts'])
+print(docs, facts)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 44
+
+exec
+/bin/zsh -lc 'wc -l all_facts_003.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_003.jsonl
+
+codex
+12 docs processed, 44 total facts
+tokens used
+44,332
+12 docs processed, 44 total facts

@@ -1,0 +1,888 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc0-4fc2-7541-9c36-1692bf0fe80e
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_043.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_043.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_043.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:15:29.046039Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m going to inspect `all_batch_043.jsonl` to confirm the schema and size, then I’ll generate `all_facts_043.jsonl` directly from that file only.
+exec
+/bin/zsh -lc 'wc -l all_batch_043.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_043.jsonl
+
+exec
+/bin/zsh -lc "sed -n '1,3p' all_batch_043.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "15dd18d4e974dcdf2d2a3b264b726ade", "source_name": "CNBC Top News", "published_date": "2026-06-30", "url": "https://www.cnbc.com/2026/06/30/small-cap-stocks-enjoy-best-first-half-since-1991-as-ai-trade-expands.html", "title": "Small-cap stocks enjoy their best first half in 35 years. Here's what's driving it", "body_text": "Small-cap U.S. stocks are capping off one of their strongest first halves in decades. But this is not your ordinary small-cap boom led by traditional businesses linked to the economic cycle. This run, like the one going on with their larger-cap peers, has been driven by the rapid build-out of artificial intelligence infrastructure, as spending spreads beyond the largest technology companies to a broader network of suppliers. Investors believe the small-stock rally can broaden out beyond tech and continue, as long as interest rates stay in check. The Russell 2000 Index has surged more than 21% this year, putting the benchmark on track for its best first-half performance since 1991. The advance marks a sharp turnaround after years of underperformance versus large-cap peers. \"It's both a valuation catch-up story and a fundamental story,\" said Amy Zhang, portfolio manager at Alger. \"The valuation gap was so wide that a truck can drive through it. At the same time, fundamentals are improving in small-caps and I think that's why it's causing the broadening trade.\" Semiconductor and semiconductor equipment companies have been the biggest winners, underscoring how the AI investment boom is rippling through the broader market. Chip-related companies account for 16 of the Russell 2000's 50 best-performing stocks this year, including Aehr Test Systems, Ichor Holdings and MaxLinear, which have all rallied more than 400%. Rather than competing directly with industry leaders like Nvidia, many of these smaller companies are benefiting from rising demand across the AI supply chain. As chipmakers and cloud providers ramp up spending on AI infrastructure, suppliers of semiconductor equipment, components and connectivity solutions are seeing the gains trickle down, amplifying revenue and earnings growth for companies with much smaller market capitalizations. \"I think a significant part of the small-cap story is tied to AI,\" Zhang said. \"The impact of AI investment trickles down from large-cap leaders to small-cap companies. The effect will be more amplified for small-cap companies, in terms of revenue and probability growth.\" More than just AI While AI has been a key driver of the rally, strategists say the small-cap rebound has been supported by a broader set of fundamental tail winds and can continue. \"Small-cap leadership has been notable amid the mega-cap-driven bull market, although small caps have meaningful exposure to semiconductors and technology hardware,\" said Adam Turnquist, chief technical strategist at LPL Financial. \"Building fundamental strength has also helped offset headwinds from higher rates.\" Consensus forecasts for Russell 2000 companies' 2026 earnings growth have climbed to 38% from about 23% at the start of the year, according to LPL, reflecting growing optimism that profit growth is broadening beyond the largest technology companies. Turnquist also pointed to several other catalysts that could continue to support the asset class, including small-caps' greater exposure to the U.S. economy, expectations for increased merger and acquisition activity — particularly in the pharmaceutical and biotechnology industries — and tax incentives designed to encourage capital investment. Higher rates a threat? The biggest threat to the small-cap rally may be the same force that held the group back for years: higher interest rates. The Federal Reserve next meets July 28-29, with traders pricing in about a 30% chance of a rate increase, according to CME Group's FedWatch tool. By September, markets see more than a 60% probability of at least one quarter-point hike. Higher borrowing costs pose a particular challenge for smaller companies, which generally carry more floating-rate debt and face greater refinancing needs than their large-cap peers. Bank of America estimates that every additional 25 basis point hike would reduce Russell 2000 operating earnings by about 2%. \"This could challenge the expected 4Q profits acceleration (and sentiment) in small caps, which have the most refi risk,\" Bank of America strategists said in a note. Even so, many investors believe the worst of the tightening cycle is over. The Fed raised interest rates by a cumulative 500 basis points between March 2022 and mid-2023, one of the most aggressive hiking campaigns in decades. \"We're probably close to peak inflation and peak rates,\" Zhang said. \"We had significant headwind the last five years, and I think the headwind is going to abate and turning into a tail wind.\" — CNBC's Deena Zaidi contributed to this article."}
+{"doc_id": "162d8a4aedf85cf552313c911079f227", "source_name": "FXStreet News", "published_date": "2026-06-30", "url": "https://www.fxstreet.com/news/pound-sterling-price-news-and-forecast-gbp-usd-holds-firm-as-political-stability-offsets-uk-growth-miss-202606301627", "title": "Pound Sterling Price News and Forecast: GBP/USD holds firm as political stability offsets UK growth miss | FXStreet", "body_text": "British Pound holds firm as political stability offsets UK growth miss The Pound Sterling advances 0.11% on Tuesday, even though UK data showed the economy is slowing, while the latest US jobs report showed that the number of vacancies rose in May, according to the US Bureau of Labour Statistics. The GBP/USD trades at 1.3270. Read More... British Pound holds below 1.3250 after a downward revision of UK GDP The British Pound (GBP) is giving away previous gains against the US Dollar (USD) on Tuesday, weighed by the downward revision of the UK’s Q1 Gross Domestic Product (GDP) data. The GBP/USD pair is trading just above session highs at 1.3222 at the time of writing after failing to break above the top of last week’s trading range, at the 1.3270 area. Read More... British Pound drifts lower below 1.3250 on steady BoE rate path, traders await US jobs data The GBP/USD pair loses traction to around 1.3240 during the Asian trading hours on Tuesday. A potential rate hike from the US Federal Reserve (Fed) provides some support to the US Dollar (USD) against the British Pound (GBP). The US ADP employment data and the US Nonfarm Payrolls (NFP) data will take center stage later this week. Read More... Author Composed of a group of economic journalists and FX experts, the FXStreet content team produces and oversees all content published on FXStreet. It provides a purely journalistic approach to the Forex market."}
+{"doc_id": "17a98927c64c164f370d757a733e648d", "source_name": "Yahoo Finance", "published_date": "2026-06-30", "url": "https://finance.yahoo.com/healthcare/articles/uncy-stock-clocks-worst-day-213420598.html", "title": "UNCY Stock Clocks Worst Day In A Year — Analysts Keep Buy Ratings Despite ‘5-12 Month Delay’ In Drug Approval", "body_text": "UNCY Stock Clocks Worst Day In A Year — Analysts Keep Buy Ratings Despite ‘5-12 Month Delay’ In Drug Approval - The company was seeking approval for the drug to treat hyperphosphatemia in patients with chronic kidney disease on dialysis. - Both B. Riley and H.C. Wainwright kept their 'Buy' ratings on the stock following the FDA rejection. - Unicycive said that it is in active engagement with the FDA. Shares of Unicycive Therapeutics Inc. (UNCY) clocked their worst day in over a year on Tuesday after the company announced that the U.S. Food and Drug Administration has again refused to approve its drug oxylanthanum carbonate (OLC), sparking mixed reactions from Wall Street. UNCY stock closed down 39% and fell a further 9% after-hours. Analysts Maintain 'Buy' Ratings Despite Delays B. Riley maintained its 'Buy' rating and $22 price target on the stock. The firm noted that the FDA's rejection relates solely to third-party manufacturing issues rather than clinical safety or efficacy, with no additional data requests. While delayed, overall commercial opportunity and cash runway remain unchanged, the analyst stated. H.C. Wainwright, meanwhile, lowered its price target to $15 from $22 while keeping a 'Buy' rating. The firm sees potential launch delays of 5-12 months, but also emphasized that the FDA raised no new concerns on clinical efficacy or safety. FDA Issues UNCY Second Rejection Unicycive said on Tuesday that the FDA refused approval for OLC to treat hyperphosphatemia in patients with chronic kidney disease on dialysis, citing the same third-party manufacturing deficiencies identified in the prior rejection letter issued in June 2025. \"The FDA has not raised any concerns regarding clinical efficacy or safety data, and no additional data was requested from Unicycive,\" the company said. It added that the application had been resubmitted based on continued progress by the vendor in resolving deficiencies identified last year. The agency has not yet inspected the third-party vendor as part of the resubmitted application review, it noted. \"We remain confident in the efficacy and safety of OLC. We are in active and ongoing discussion with the FDA regarding label and packaging, and we are optimistic that there will be a successful inspection of the third-party manufacturing vendor and that we will be able to expeditiously resubmit the NDA,\" CEO Shalabh Gupta said. How Did UNCY Retail Traders React? On Stocktwits, retail sentiment around UNCY stock stayed in the 'extremely bullish' territory over the past 24 hours, while message volume remained at 'extremely high' levels."}
+
+codex
+I’ve confirmed there are 12 documents. Next I’m pulling a compact index of all titles and sources so I can extract facts document by document without touching anything outside this batch file.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_batch_043.jsonl')
+for i,line in enumerate(p.read_text().splitlines(),1):
+    obj=json.loads(line)
+    print(f\"{i}\\t{obj['doc_id']}\\t{obj['source_name']}\\t{obj['published_date']}\\t{obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1	15dd18d4e974dcdf2d2a3b264b726ade	CNBC Top News	2026-06-30	Small-cap stocks enjoy their best first half in 35 years. Here's what's driving it
+2	162d8a4aedf85cf552313c911079f227	FXStreet News	2026-06-30	Pound Sterling Price News and Forecast: GBP/USD holds firm as political stability offsets UK growth miss | FXStreet
+3	17a98927c64c164f370d757a733e648d	Yahoo Finance	2026-06-30	UNCY Stock Clocks Worst Day In A Year — Analysts Keep Buy Ratings Despite ‘5-12 Month Delay’ In Drug Approval
+4	17c3d181147ce8f4a35b04b09a7304f9	The Block	2026-06-30	TD Cowen slashes Strategy target to $260 on bitcoin outlook, calls new capital framework 'constructive'
+5	1802722f8df00e0e8b9a20480bfcf2bc	The Block	2026-06-30	Kalshi hit with 14-day restraining order in Michigan, blocking sports prediction markets in state
+6	18fb5c510048d12a6184785f9a26cd49	SCMP News	2026-06-30	China-Canada trade thaw sours as Beijing levies penalties for dumping pea starch
+7	19ba99793342ff99fbaaa60253614466	Nikkei Asia	2026-06-30	Indonesia's Gojek co-founder Nadiem Makarim jailed for 10 years for graft
+8	1a18f6e4817bb2c231f25c0202b20241	FXStreet News	2026-06-30	Danish Krone: Nationalbanken tolerance for weaker krone – Nordea | FXStreet
+9	1a1f3100b33b86052aacbcfbc7c651e4	Investing.com Forex	2026-06-30	U.S. yields rise, euro yields fall ahead of Sintra speeches, jobs data By Investing.com
+10	1b7986d627e9c73c1cb7ec98aae7687d	FXStreet News	2026-06-30	BoJ’s Sato: De-escalation of Middle East conflict is welcome move, uncertainty remains | FXStreet
+11	1ba0e7485547e40a568fb21ecfa5a5a4	Metal.com (SMM)	2026-06-30	Guangdong Superconducting Cable Co., Ltd. invites you to participate in the 2026 SMM (2nd) Northern Wire and Cable Industry Conference
+12	1bb5d4bf827fce588a830021bdf594a1	ForexLive	2026-06-30	BOJ board tilts more hawkish on paper, but dovish dissent count could double | investingLive
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json, textwrap
+from pathlib import Path
+for i,line in enumerate(Path('all_batch_043.jsonl').read_text().splitlines(),1):
+    obj=json.loads(line)
+    print(f\"\\n=== DOC {i} | {obj['doc_id']} ===\")
+    print(obj['title'])
+    print(obj['body_text'][:5000])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+=== DOC 1 | 15dd18d4e974dcdf2d2a3b264b726ade ===
+Small-cap stocks enjoy their best first half in 35 years. Here's what's driving it
+Small-cap U.S. stocks are capping off one of their strongest first halves in decades. But this is not your ordinary small-cap boom led by traditional businesses linked to the economic cycle. This run, like the one going on with their larger-cap peers, has been driven by the rapid build-out of artificial intelligence infrastructure, as spending spreads beyond the largest technology companies to a broader network of suppliers. Investors believe the small-stock rally can broaden out beyond tech and continue, as long as interest rates stay in check. The Russell 2000 Index has surged more than 21% this year, putting the benchmark on track for its best first-half performance since 1991. The advance marks a sharp turnaround after years of underperformance versus large-cap peers. "It's both a valuation catch-up story and a fundamental story," said Amy Zhang, portfolio manager at Alger. "The valuation gap was so wide that a truck can drive through it. At the same time, fundamentals are improving in small-caps and I think that's why it's causing the broadening trade." Semiconductor and semiconductor equipment companies have been the biggest winners, underscoring how the AI investment boom is rippling through the broader market. Chip-related companies account for 16 of the Russell 2000's 50 best-performing stocks this year, including Aehr Test Systems, Ichor Holdings and MaxLinear, which have all rallied more than 400%. Rather than competing directly with industry leaders like Nvidia, many of these smaller companies are benefiting from rising demand across the AI supply chain. As chipmakers and cloud providers ramp up spending on AI infrastructure, suppliers of semiconductor equipment, components and connectivity solutions are seeing the gains trickle down, amplifying revenue and earnings growth for companies with much smaller market capitalizations. "I think a significant part of the small-cap story is tied to AI," Zhang said. "The impact of AI investment trickles down from large-cap leaders to small-cap companies. The effect will be more amplified for small-cap companies, in terms of revenue and probability growth." More than just AI While AI has been a key driver of the rally, strategists say the small-cap rebound has been supported by a broader set of fundamental tail winds and can continue. "Small-cap leadership has been notable amid the mega-cap-driven bull market, although small caps have meaningful exposure to semiconductors and technology hardware," said Adam Turnquist, chief technical strategist at LPL Financial. "Building fundamental strength has also helped offset headwinds from higher rates." Consensus forecasts for Russell 2000 companies' 2026 earnings growth have climbed to 38% from about 23% at the start of the year, according to LPL, reflecting growing optimism that profit growth is broadening beyond the largest technology companies. Turnquist also pointed to several other catalysts that could continue to support the asset class, including small-caps' greater exposure to the U.S. economy, expectations for increased merger and acquisition activity — particularly in the pharmaceutical and biotechnology industries — and tax incentives designed to encourage capital investment. Higher rates a threat? The biggest threat to the small-cap rally may be the same force that held the group back for years: higher interest rates. The Federal Reserve next meets July 28-29, with traders pricing in about a 30% chance of a rate increase, according to CME Group's FedWatch tool. By September, markets see more than a 60% probability of at least one quarter-point hike. Higher borrowing costs pose a particular challenge for smaller companies, which generally carry more floating-rate debt and face greater refinancing needs than their large-cap peers. Bank of America estimates that every additional 25 basis point hike would reduce Russell 2000 operating earnings by about 2%. "This could challenge the expected 4Q profits acceleration (and sentiment) in small caps, which have the most refi risk," Bank of America strategists said in a note. Even so, many investors believe the worst of the tightening cycle is over. The Fed raised interest rates by a cumulative 500 basis points between March 2022 and mid-2023, one of the most aggressive hiking campaigns in decades. "We're probably close to peak inflation and peak rates," Zhang said. "We had significant headwind the last five years, and I think the headwind is going to abate and turning into a tail wind." — CNBC's Deena Zaidi contributed to this article.
+
+=== DOC 2 | 162d8a4aedf85cf552313c911079f227 ===
+Pound Sterling Price News and Forecast: GBP/USD holds firm as political stability offsets UK growth miss | FXStreet
+British Pound holds firm as political stability offsets UK growth miss The Pound Sterling advances 0.11% on Tuesday, even though UK data showed the economy is slowing, while the latest US jobs report showed that the number of vacancies rose in May, according to the US Bureau of Labour Statistics. The GBP/USD trades at 1.3270. Read More... British Pound holds below 1.3250 after a downward revision of UK GDP The British Pound (GBP) is giving away previous gains against the US Dollar (USD) on Tuesday, weighed by the downward revision of the UK’s Q1 Gross Domestic Product (GDP) data. The GBP/USD pair is trading just above session highs at 1.3222 at the time of writing after failing to break above the top of last week’s trading range, at the 1.3270 area. Read More... British Pound drifts lower below 1.3250 on steady BoE rate path, traders await US jobs data The GBP/USD pair loses traction to around 1.3240 during the Asian trading hours on Tuesday. A potential rate hike from the US Federal Reserve (Fed) provides some support to the US Dollar (USD) against the British Pound (GBP). The US ADP employment data and the US Nonfarm Payrolls (NFP) data will take center stage later this week. Read More... Author Composed of a group of economic journalists and FX experts, the FXStreet content team produces and oversees all content published on FXStreet. It provides a purely journalistic approach to the Forex market.
+
+=== DOC 3 | 17a98927c64c164f370d757a733e648d ===
+UNCY Stock Clocks Worst Day In A Year — Analysts Keep Buy Ratings Despite ‘5-12 Month Delay’ In Drug Approval
+UNCY Stock Clocks Worst Day In A Year — Analysts Keep Buy Ratings Despite ‘5-12 Month Delay’ In Drug Approval - The company was seeking approval for the drug to treat hyperphosphatemia in patients with chronic kidney disease on dialysis. - Both B. Riley and H.C. Wainwright kept their 'Buy' ratings on the stock following the FDA rejection. - Unicycive said that it is in active engagement with the FDA. Shares of Unicycive Therapeutics Inc. (UNCY) clocked their worst day in over a year on Tuesday after the company announced that the U.S. Food and Drug Administration has again refused to approve its drug oxylanthanum carbonate (OLC), sparking mixed reactions from Wall Street. UNCY stock closed down 39% and fell a further 9% after-hours. Analysts Maintain 'Buy' Ratings Despite Delays B. Riley maintained its 'Buy' rating and $22 price target on the stock. The firm noted that the FDA's rejection relates solely to third-party manufacturing issues rather than clinical safety or efficacy, with no additional data requests. While delayed, overall commercial opportunity and cash runway remain unchanged, the analyst stated. H.C. Wainwright, meanwhile, lowered its price target to $15 from $22 while keeping a 'Buy' rating. The firm sees potential launch delays of 5-12 months, but also emphasized that the FDA raised no new concerns on clinical efficacy or safety. FDA Issues UNCY Second Rejection Unicycive said on Tuesday that the FDA refused approval for OLC to treat hyperphosphatemia in patients with chronic kidney disease on dialysis, citing the same third-party manufacturing deficiencies identified in the prior rejection letter issued in June 2025. "The FDA has not raised any concerns regarding clinical efficacy or safety data, and no additional data was requested from Unicycive," the company said. It added that the application had been resubmitted based on continued progress by the vendor in resolving deficiencies identified last year. The agency has not yet inspected the third-party vendor as part of the resubmitted application review, it noted. "We remain confident in the efficacy and safety of OLC. We are in active and ongoing discussion with the FDA regarding label and packaging, and we are optimistic that there will be a successful inspection of the third-party manufacturing vendor and that we will be able to expeditiously resubmit the NDA," CEO Shalabh Gupta said. How Did UNCY Retail Traders React? On Stocktwits, retail sentiment around UNCY stock stayed in the 'extremely bullish' territory over the past 24 hours, while message volume remained at 'extremely high' levels.
+
+=== DOC 4 | 17c3d181147ce8f4a35b04b09a7304f9 ===
+TD Cowen slashes Strategy target to $260 on bitcoin outlook, calls new capital framework 'constructive'
+TD Cowen slashes Strategy target to $260 on bitcoin outlook, calls new capital framework 'constructive' Quick Take - TD Cowen cut its price target on Strategy to $260 from $400, citing a lower bitcoin price forecast. - The bank now projects bitcoin will end 2026 around $100,000, down from a prior forecast of roughly $140,000, driving the bulk of the target cut independent of Monday’s capital structure announcement. We'd love your feedback. TD Cowen cut its price target on Strategy to $260 from $400, a roughly 35% reduction, while maintaining its Buy rating and describing the company's newly unveiled Digital Credit Capital Framework as "incrementally constructive" for credit visibility and capital flexibility. Analysts led by Lance Vitanza and Jonnathan Navarrete made it clear that the target cut stems from a revised bitcoin (BTC) price forecast rather than Strategy's framework announcement on Monday. TD Cowen's price target implies more than 200% upside from Strategy's $92.68 closing price on Monday, a gap the analysts acknowledged "may seem out of context" given the size of the required move. TD Cowen also projects bitcoin will reach approximately $100,000 by the end of 2026, down from a prior estimate of roughly $140,000, and around $135,000 by the end of 2027, down from $190,000. The bank left its projections for the number of bitcoins Strategy will acquire unchanged and kept its earnings multiple steady at 3x. USD reserve rebuilt to $2.55 billion Strategy's framework introduces a board-approved USD reserve policy, a revised STRC dividend approach, repurchase authorizations for both preferred shares and common stock, and a formal bitcoin monetization program, according to the note. TD Cowen said the announcement largely codifies dynamics the firm had already modeled in a May 7 note, including preferred-led financing and the selective use of bitcoin sales to support dividend payments while maintaining net accumulation over time. Strategy's USD reserve has been fully rebuilt to $2.55 billion, the analysts said, after the company issued more than 12 million shares of common stock over the past week while purchasing zero bitcoins. TD Cowen called the move a step toward restoring investor confidence in the company's ability to weather an extended bitcoin downturn. The firm now targets a minimum reserve equal to at least 12 months of preferred dividends and interest expense, with current coverage exceeding 17 months, or roughly 26 months, including authorized bitcoin monetization capacity. A shift toward two-way capital allocation Strategy authorized up to $1 billion in preferred stock repurchases and $1 billion in MSTR share buybacks, a shift TD Cowen described as a move from one-way share issuance toward active capital structure optimization. The analysts said this introduces a potential mechanism for the company to arbitrage pricing dislocations across its capital stack, though execution will depend on market conditions and management discipline. The bitcoin monetization program caps potential sales at $1.25 billion, with proceeds earmarked for the USD reserve, according to the note. TD Cowen said the program does not represent a strategic shift, since it had already assumed Strategy would make selective bitcoin sales to support dividends when appropriate. The framework instead formalizes that flexibility alongside equity issuance and preferred financing as an explicitly authorized and bounded capital tool. STRC dividend hike aimed at stabilizing the discount On STRC specifically, TD Cowen said the new 12% dividend rate, raised from 11.5%, reinforces that the security is being actively managed as an instrument to anchor its trading price near the $100 par value, rather than functioning purely as a funding vehicle. The bank called the change a "modestly positive step" toward improving price stability and investor confidence in the preferred stock, which has traded as much as 26% below par in recent weeks amid bitcoin's price decline, The Block has reported. Disclaimer: The Block is an independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a majority investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange Bitget is an anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective, impactful, and timely information about the crypto industry. Here are our current financial disclosures. © 2026 The Block. All Rights Reserved. This article is provided for informational purposes only. It is not offered or intended to be used as legal, tax, investment, financial, or other advice.
+
+=== DOC 5 | 1802722f8df00e0e8b9a20480bfcf2bc ===
+Kalshi hit with 14-day restraining order in Michigan, blocking sports prediction markets in state
+Kalshi hit with 14-day restraining order in Michigan, blocking sports prediction markets in state Quick Take - A Michigan judge issued a temporary restraining order against Kalshi, blocking the platform from offering sports-related event contracts in the state. - Jurisdiction over prediction market platforms is an ongoing dispute between the CFTC and multiple state regulators. We'd love your feedback. The state of Michigan issued a temporary restraining order on Kalshi, barring the prediction market platform from offering sports-related event contracts in the U.S. state. Ingham County Circuit Court Judge Rosemarie E. Aquilina issued the order on Monday, according to a statement from Attorney General Dana Nessel. The temporary restraining order lasts for 14 days, meaning that it will remain in effect until July 13. The order also stipulates that the court would fine Kalshi $120,000 for each day it does not comply with the geo-fencing requirements it imposes. "Our gambling laws exist to protect Michiganders from unlicensed, predatory operations, and failing to comply with them carries serious legal consequences," Nessel said in the statement. The restraining order comes after the Western District of Michigan court granted Nessel's motion to remand the state's lawsuit against Kalshi back to the state court. Kalshi had attempted to remove the case to the federal level. Michigan authorities filed a lawsuit against Kalshi in March, claiming that the federally regulated prediction market platform has violated the state's Lawful Sports Betting Act by offering sports event contracts. The authorities view the contracts as unlicensed gambling activity. The Block has reached out to Kalshi for comment. Federal v. State The latest developments are part of a wider clash between state and federal regulators on jurisdiction over prediction markets. Over a dozen U.S. states have issued enforcement orders against Kalshi, Polymarket US and other platforms under the same pretense — that they are offering unlicensed sports betting products. The platforms and the Commodity Futures Trading Commission argue that these products are cleared for nationwide availability, as federal jurisdiction preempts state law. The agency, along with the prediction market companies, have actively fought back against state-level actions, suing different states to establish solid federal oversight of the industry. Despite the legal disputes, Kalshi's monthly volume has been growing consistently from July 2025. Kalshi has attracted more than $30 billion in volume so far this month, which is a 79% increase from May, according to The Block's data dashboard. Rival Polymarket and its U.S. platform have also seen growths in volume, likely attributable to the ongoing World Cup 2026. However, the gap between Kalshi and Polymarket has widened over the past few months. Disclaimer: The Block is an independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a majority investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange Bitget is an anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective, impactful, and timely information about the crypto industry. Here are our current financial disclosures. © 2026 The Block. All Rights Reserved. This article is provided for informational purposes only. It is not offered or intended to be used as legal, tax, investment, financial, or other advice.
+
+=== DOC 6 | 18fb5c510048d12a6184785f9a26cd49 ===
+China-Canada trade thaw sours as Beijing levies penalties for dumping pea starch
+China-Canada trade thaw falters as Beijing levies penalties for dumping pea starch Beijing imposes cash deposits on imports of the widely used agricultural product ahead of Ottawa’s decision on Chinese-made steel racks Beijing has issued a preliminary verdict finding that pea-starch products imported from Canada were dumped in China, following Ottawa’s anti-dumping investigation into Chinese-made steel racks. “Relevant authorities have made a preliminary determination that imported pea-starch products originating in Canada have been dumped,” the Ministry of Commerce said in a statement on Tuesday. “The dumping acts have caused material damage to the domestic pea-starch industry.” Starting on Wednesday, importers bringing pea starch from Canada must post cash deposits equivalent to 73.5 per cent of the goods’ customs-assessed value. Commerce authorities launched the anti-dumping probe in August following a complaint filed by six domestic pea starch manufacturers. Pea starch is primarily used in the food industry as a stabiliser to improve product consistency and texture. The move comes as Ottawa proceeds with the anti-dumping investigation that authorities initiated in April, targeting steel-rack imports from manufacturers based in or shipping goods from China.
+
+=== DOC 7 | 19ba99793342ff99fbaaa60253614466 ===
+Indonesia's Gojek co-founder Nadiem Makarim jailed for 10 years for graft
+CrimeIndonesia's Gojek co-founder Nadiem Makarim jailed for 10 years for graft Ex-education minister also fined $45m in case that has roiled investor confidence in nation A supporter gives a rose to Nadiem Makarim, Indonesia's former education minister and co-founder of ride-hailing firm Gojek, as he arrives at a Jakarta court on Tuesday to hear the verdict in his corruption case. Makarim was sentenced to 10 years in prison and fined $45 million. © Reuters JAKARTA -- Former Indonesian Education Minister Nadiem Makarim on Tuesday was sentenced to 10 years in jail and fined 810 billion rupiah ($45.3 million) after being convicted of corruption in relation to the procurement of laptops under a national education digitalization program, in a case widely been seen as a political prosecution that is undermining investor confidence in the country.
+
+=== DOC 8 | 1a18f6e4817bb2c231f25c0202b20241 ===
+Danish Krone: Nationalbanken tolerance for weaker krone – Nordea | FXStreet
+Nordea strategists examine EUR/DKK trading at its weakest level since the Euro’s introduction and argues Nationalbanken may have quietly shifted its de facto intervention band. They highlight Denmark’s much stronger fundamentals versus the Euro area and notes that the FX spot is above historic intervention levels, suggesting reduced concern about a weaker Danish krone and a more symmetric band. De facto band questioned "The EUR/DKK FX spot is at its weakest level since the EUR was introduced in 1999. Historically, the central bank would have intervened in the FX market by now and - if that wasn't enough to strengthen the krone - raised its policy rate independent of the ECB (or the Bundesbank before that). But fundamentals have changed and so, perhaps, has the central bank's intervention policies." "Since mid-2025, EUR/DKK has constantly been trading above the central parity. According to our assessment this is partly due to lower demand for DKK among non-financial Danish companies due to a substantial increase in foreign direct investments as well as more DKK liquidity in the system." "However, contrary to previous periods, this upward pressure in EUR/DKK has (at least up until now) not been met with intervention from Nationalbanken. This implies that, in our assessment, Nationalbanken today is significantly less concerned about a weakening of the Danish krone against the euro compared to previously. This has happened because the fundamental balances in the Danish economy have developed markedly more favorably relative to the euro area." "In this article we have argued that the central bank has good reasons to change its de facto intervention band if it so wishes. Whether this is actually the case, we'll only learn over the coming years by looking at the FX spot vs actual interventions, as the central bank does not comment on its intervention policies. Perhaps the de facto band need not be strictly symmetrical, but if the central bank wants to make this change, it has more than enough arguments to do so." (This article was created with the help of an Artificial Intelligence tool and reviewed by an editor.) Author The FXStreet Insights Team is a group of journalists that handpicks selected market observations published by renowned experts. The content includes notes by commercial as well as additional insights by internal and external analysts.
+
+=== DOC 9 | 1a1f3100b33b86052aacbcfbc7c651e4 ===
+U.S. yields rise, euro yields fall ahead of Sintra speeches, jobs data By Investing.com
+S&P 500 and Nasdaq post best quarter since 2020, Dow notches best H1 in five years Investing.com -U.S. Treasury yields held largely unchanged on Tuesday, capping a highly volatile quarter defined by a drastic repricing of Federal Reserve monetary policy and intense geopolitical crosscurrents in energy markets. Eurozone short-dated government bond yields, meanwhile, fell on as investors positioned themselves for a barrage of economic indicators and crucial central bank speeches at the European Central Bank’s annual forum in Sintra, Portugal. The two-year U.S. Treasury yield which closely tracks short-term interest rate expectations, hovered steadily near 4.12%, while the benchmark 10-year Treasury yield held flat at 4.39%. The two-year German government bond yield, which is highly sensitive to changes in ECB interest rate expectations, slipped to 2.52%. Yields move inversely to prices. In contrast, the longer-dated 10-year German bund yield - the benchmark for the single-currency bloc - remained largely unchanged at 2.89%, hovering near four-month lows. Volatile quarter sees yields retrace from war-driven highs The steadying of yields rounds out a quarter of structural shift in the fixed-income landscape. At the start of the year, financial markets were pricing in a series of rate cuts, fuelled by expectations that inflation would steadily glide back to the central bank’s 2% target. However, that outlook underwent a complete inversion over the first half of the year. Stubborn core inflation gauges - which climbed back to 3.4% - coupled with a consistently robust labour market and resilient consumer spending, forced an aggressive macro repricing. Instead of monetary easing, futures markets have swung to price in two interest rate hikes by the end of the year, with a growing probability that the Fed will resume its tightening cycle as early as September. The fixed-income market was further complicated this quarter by military conflict involving Iran, which sent global crude oil and energy benchmarks soaring. Fears of systemic supply shocks through the Strait of Hormuz briefly drove long-dated Treasury yields to multi-year highs as investors braced for severe energy-driven inflationary pressures. Central bank rhetoric, Sintra under the microscope Monetary policy also takes centre stage as the European Central Bank’s annual forum in Sintra, Portugal, continues. Markets will be parsing remarks from ECB Chief Economist Philip Lane, alongside Executive Board members Isabel Schnabel and Frank Elderson, for clues on the future path of Eurozone interest rates. Schnabel, widely regarded as the ECB’s most prominent policy hawk, has repeatedly warned against easing restrictive policy too quickly. Her stance highlights a widening rift within the central bank as inflation pressures begin to normalize alongside stabilizing energy costs. Markets currently see at least one more rate hike by the ECB. The three-day Sintra event will culminate in a highly anticipated policy panel featuring newly appointed Federal Reserve Chairman Kevin Warsh - marking his first major international appearance since taking the helm of the U.S. central bank - alongside Bank of England Governor Andrew Bailey and Bank of Canada Governor Tiff Macklem. Inflation figures from France and Germany are due later today, while data for the eurozone is due on Wednesday. U.S. Job openings and labor turnover survey (JOLTS) were due at 1000 ET today, while non-farm payrolls is due on Thursday.
+
+=== DOC 10 | 1b7986d627e9c73c1cb7ec98aae7687d ===
+BoJ’s Sato: De-escalation of Middle East conflict is welcome move, uncertainty remains | FXStreet
+Japanese Prime Minister (PM) Sanae Takaichi's administration newly appointed Bank of Japan (BoJ) board member, Ayano Sato, said in his scheduled press conference during the European trading session on Tuesday that the de-escalation of the Middle East conflict is welcome news for the economy, but uncertainty surrounding the economic outlook remains intact. Additional remarks Will scrutinise impact of middle east developments on Japan's economy, prices. Firms more actively raising wages, prices so impact of weak Yen on inflation may be bigger than in past. Weak yen gives boost to exports but pushes up import prices, leading to lower real household income. Important for fiscal, monetary policies to each play their roles. Monetary policy should focus on inflation, while fiscal policy should focus on addressing impact on households, firms. Won't comment on specific FX levels. Short-term, volatile FX moves undesirable. FX moves should be determined reflecting fundamentals. Need to watch both downside risks to growth and upside risks to inflation, Important to scrutinise whether recent inflation is temporary, cost-driven price rises or more sustained, demand-driven inflation. Market reaction No immediate reaction is seen in the Japanese Yen (JPY) after the introductory speech by BoJ's Sato. At press time, USD/JPY trades 0.22% higher to near 162.30. Bank of Japan FAQs The Bank of Japan (BoJ) is the Japanese central bank, which sets monetary policy in the country. Its mandate is to issue banknotes and carry out currency and monetary control to ensure price stability, which means an inflation target of around 2%. The Bank of Japan embarked in an ultra-loose monetary policy in 2013 in order to stimulate the economy and fuel inflation amid a low-inflationary environment. The bank’s policy is based on Quantitative and Qualitative Easing (QQE), or printing notes to buy assets such as government or corporate bonds to provide liquidity. In 2016, the bank doubled down on its strategy and further loosened policy by first introducing negative interest rates and then directly controlling the yield of its 10-year government bonds. In March 2024, the BoJ lifted interest rates, effectively retreating from the ultra-loose monetary policy stance. The Bank’s massive stimulus caused the Yen to depreciate against its main currency peers. This process exacerbated in 2022 and 2023 due to an increasing policy divergence between the Bank of Japan and other main central banks, which opted to increase interest rates sharply to fight decades-high levels of inflation. The BoJ’s policy led to a widening differential with other currencies, dragging down the value of the Yen. This trend partly reversed in 2024, when the BoJ decided to abandon its ultra-loose policy stance. A weaker Yen and the spike in global energy prices led to an increase in Japanese inflation, which exceeded the BoJ’s 2% target. The prospect of rising salaries in the country – a key element fuelling inflation – also contributed to the move. Author Sagar Dua is associated with the financial markets from his college days. Along with pursuing post-graduation in Commerce in 2014, he started his markets training with chart analysis.
+
+=== DOC 11 | 1ba0e7485547e40a568fb21ecfa5a5a4 ===
+Guangdong Superconducting Cable Co., Ltd. invites you to participate in the 2026 SMM (2nd) Northern Wire and Cable Industry Conference
+The northern region is a core hub of China's wire and cable industry. Drawing on its industrial heritage, entire industry chain support, and favorable policies from Beijing-Tianjin-Hebei coordinated development, it has established a complete industrial cluster integrating raw material processing, wire and cable production, new material R&D, and intelligent equipment manufacturing. The annual output value of the regional wire and cable industry has surpassed 100 billion yuan, with a solid industrial foundation and broad market potential. will be held on July 23-24, 2026 at the Crowne Plaza Qingdao Jinshui, Shandong. The conference will focus on three major themes: industrial synergy, green intelligence, and globalization. SMM, in partnership with Guangdong Superconducting Cable Co., Ltd., invites merchants from across the entire industry chain to gather, explore industry opportunities, and promote the quality upgrade of the northern wire and cable industry. Click to attend. We look forward to meeting you at the conference. Guangdong Superconducting Cable Co., Ltd. is located in Zengcheng District, Guangzhou. It is a specialized cable manufacturer integrating R&D, production, and sales, primarily engaged in various conductor, wire, and power cable products. The company relies on advanced automated production equipment, mature and stable manufacturing processes, comprehensive detection instruments and standardized detection procedures, complemented by a modern enterprise management system and a full-process closed-loop quality control system, to achieve full-chain quality control from raw material incoming inspection, production processing to finished product delivery, thereby solidifying the foundation of product quality. The business scope covers: wire and cable manufacturing, non-ferrous metal rolling processing, production and sales of metal materials, metal wire ropes and their products, as well as wholesale and retail of wire and cable, electrical equipment, power distribution switch control devices, hardware products, and building decoration materials—spanning the entire industry chain. This meets procurement needs across multiple fields such as power engineering, construction engineering, industrial and mining support, and dealer supply. The company adheres to the quality policy of "guaranteeing operation standards through strict management, forging product quality through excellent processes, and always centering on customer needs." It upholds the business philosophy of customer first, integrity and pragmatism, continuous improvement, and concerted efforts. Committed to technological iteration and product innovation, it strives to build a modern cable benchmark enterprise with superior quality, innovation-driven, and continuous advancement, consistently providing cost-effective cable products and one-stop supporting solutions to cooperative clients both in and outside China. SMM Conference Contact
+
+=== DOC 12 | 1bb5d4bf827fce588a830021bdf594a1 ===
+BOJ board tilts more hawkish on paper, but dovish dissent count could double | investingLive
+The appointment raises the prospect of two dissenting votes against future rate hike proposals, a structural shift that could slow the pace of BOJ tightening even as the broader nine-member board retains a hawkish lean. Yen sensitivity to BOJ rhetoric is likely to increase ahead of Sato's July 30-31 policy debut, with her 5pm press conference today watched closely for early signals on her stance. The departure of Tamura and Takata, the board's most hawkish members, in July next year adds a further point of uncertainty to the tightening trajectory, since their term expiry could shift the board's balance independently of any near-term appointments. Markets will weigh Takaichi's evident preference for monetary caution, tied to the funding costs of her government's investment agenda, against the BOJ's own stated readiness to tighten further in response to energy-driven price pressures. --- Reuters reports Japan's government appointed Ayano Sato, seen as dovish, to the BOJ board, the second Takaichi appointee after Asada, raising the prospect of two dissenters against future rate hikes. Earlier: Summary: - Japan's government appointed Ayano Sato, a 57-year-old former academic seen as an advocate of loose monetary policy, to the Bank of Japan's board - Sato is the second board member appointed under Prime Minister Sanae Takaichi, following Toichiro Asada, who voted against the BOJ's June rate hike decision - Sato replaces Junko Nakagawa, who had joined the board's two most hawkish members in proposing a rate increase in April - Nomura's Mari Iwashita said Sato's appointment raises the likelihood that future rate hike proposals from the BOJ chair could draw two dissenting votes - Naoki Tamura and Hajime Takata, seen as the board's most hawkish members, will see their terms expire in July next year, adding further uncertainty to the board's future composition - Sato's debut policy meeting is scheduled for July 30-31, where the board is expected to hold rates steady but issue fresh growth and inflation forecasts - The BOJ raised rates to a 31-year high in June and signalled readiness to tighten further in response to energy-driven price pressures from the Middle East conflict and a weak yen Japan's government appointed Ayano Sato, seen as an advocate of loose monetary policy, to the Bank of Japan's policy board on Tuesday, Reuters reported, adding a second voice for caution to a board otherwise focused on containing inflationary pressure from the Middle East conflict and a weak yen. Sato, a 57-year-old former academic, is the second board appointee under Prime Minister Sanae Takaichi, following Toichiro Asada, who broke with the majority to vote against the BOJ's decision to raise rates in June. Her appointment puts a reflationist voice alongside Asada on a nine-member board that has otherwise leaned hawkish in recent months as it weighs the inflationary impact of higher import costs and energy price pressure stemming from the Iran conflict. Mari Iwashita, executive rates strategist at Nomura Securities, said the addition of Sato means any future rate hike proposal from the BOJ chair now carries a real prospect of drawing two dissenting votes rather than one. She added, however, that the board's balance would not be dramatically skewed in a dovish direction, since two of the most hawkish members would remain in place until next July. Those two hawks, Naoki Tamura and Hajime Takata, made an unsuccessful push for a rate increase back in April, alongside Sato's predecessor on the board, Junko Nakagawa. Both Tamura and Takata are due to see their terms expire in July next year, a development that introduces an additional layer of uncertainty into the board's medium-term composition and policy lean, independent of the near-term appointment dynamics now in play. Sato is scheduled to hold a press conference at 5pm Tokyo time on Tuesday, which will be closely scrutinised for early signals on whether she intends to align with Asada in pushing back against further tightening. Her formal policy debut comes at the July 30-31 meeting, where the BOJ is widely expected to hold rates steady but will publish updated quarterly growth and inflation forecasts that should offer clearer signals on the likely timing of the next move. The appointment comes against the backdrop of a BOJ that raised rates to a 31-year high in June, a landmark step in its broader policy normalisation effort, while signalling readiness to tighten further as it focuses on taming price pressures linked to the Iran-driven energy shock. At the same time, there remains genuine uncertainty over the pace of any future hikes, with Takaichi's administration having signalled caution over policy moves that could raise the cost of funding its flagship investment programmes, a tension that Sato's appointment is likely to sharpen rather than resolve.
+
+codex
+I have enough context now. I’m writing the output file directly with document-by-document facts, keeping each claim atomic and strictly tied to the title and body text.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_043.jsonl')
+output_path = Path('all_facts_043.jsonl')
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        \"claim\": claim,
+        \"subject\": subject,
+        \"predicate\": predicate,
+        \"object\": object_,
+        \"direction\": direction,
+        \"magnitude\": magnitude,
+        \"time\": time,
+        \"cause\": cause,
+        \"entities\": entities,
+        \"confidence\": confidence,
+    }
+
+facts_by_doc = {
+    \"15dd18d4e974dcdf2d2a3b264b726ade\": [
+        fact(
+            \"The Russell 2000 Index has surged more than 21% this year.\",
+            \"Russell 2000 Index\",
+            \"price_move\",
+            None,
+            \"up\",
+            \"more than 21%\",
+            \"this year\",
+            None,
+            [\"Russell 2000 Index\"],
+            0.99,
+        ),
+        fact(
+            \"The Russell 2000 is on track for its best first-half performance since 1991.\",
+            \"Russell 2000 Index\",
+            \"event\",
+            None,
+            \"up\",
+            None,
+            \"first half of 2026\",
+            \"The index has surged more than 21% this year.\",
+            [\"Russell 2000 Index\"],
+            0.95,
+        ),
+        fact(
+            \"The small-cap rally has been driven by the rapid build-out of artificial intelligence infrastructure as spending spreads beyond the largest technology companies to a broader network of suppliers.\",
+            \"U.S. small-cap stocks\",
+            \"price_move\",
+            None,
+            \"up\",
+            None,
+            \"2026-06-30\",
+            \"The rapid build-out of artificial intelligence infrastructure and broader supplier spending.\",
+            [\"U.S. small-cap stocks\", \"Artificial intelligence\"],
+            0.93,
+        ),
+        fact(
+            \"Chip-related companies account for 16 of the Russell 2000's 50 best-performing stocks this year.\",
+            \"Russell 2000 Index\",
+            \"other\",
+            \"Chip-related companies\",
+            \"na\",
+            \"16 of 50\",
+            \"this year\",
+            None,
+            [\"Russell 2000 Index\"],
+            0.96,
+        ),
+        fact(
+            \"Aehr Test Systems, Ichor Holdings and MaxLinear have all rallied more than 400% this year.\",
+            \"Aehr Test Systems; Ichor Holdings; MaxLinear\",
+            \"price_move\",
+            None,
+            \"up\",
+            \"more than 400%\",
+            \"this year\",
+            None,
+            [\"Aehr Test Systems\", \"Ichor Holdings\", \"MaxLinear\"],
+            0.97,
+        ),
+        fact(
+            \"Consensus forecasts for Russell 2000 companies' 2026 earnings growth have climbed to 38% from about 23% at the start of the year.\",
+            \"Russell 2000 companies\",
+            \"forecast\",
+            None,
+            \"up\",
+            \"to 38% from about 23%\",
+            \"2026\",
+            None,
+            [\"Russell 2000 Index\"],
+            0.95,
+        ),
+        fact(
+            \"Bank of America estimates that every additional 25 basis point Fed rate hike would reduce Russell 2000 operating earnings by about 2%.\",
+            \"Russell 2000 companies\",
+            \"forecast\",
+            \"Federal Reserve\",
+            \"down\",
+            \"about 2% per 25 basis point hike\",
+            \"2026-06-30\",
+            \"Higher borrowing costs from additional Federal Reserve rate hikes.\",
+            [\"Russell 2000 Index\", \"Bank of America\", \"Federal Reserve\"],
+            0.92,
+        ),
+    ],
+    \"162d8a4aedf85cf552313c911079f227\": [
+        fact(
+            \"The Pound Sterling advanced 0.11% on Tuesday and GBP/USD traded at 1.3270.\",
+            \"GBP/USD\",
+            \"price_move\",
+            \"US Dollar\",
+            \"up\",
+            \"0.11%\",
+            \"Tuesday\",
+            \"Political stability offset a UK growth miss.\",
+            [\"British Pound\", \"US Dollar\", \"GBP/USD\"],
+            0.94,
+        ),
+        fact(
+            \"The British Pound was weighed by a downward revision of the UK's first-quarter GDP data, with GBP/USD trading at 1.3222 at the time of writing.\",
+            \"GBP/USD\",
+            \"price_move\",
+            \"US Dollar\",
+            \"down\",
+            None,
+            \"2026-06-30\",
+            \"A downward revision of UK first-quarter GDP.\",
+            [\"British Pound\", \"US Dollar\", \"GBP/USD\", \"United Kingdom\"],
+            0.91,
+        ),
+        fact(
+            \"GBP/USD lost traction to around 1.3240 during Asian trading hours.\",
+            \"GBP/USD\",
+            \"price_move\",
+            \"US Dollar\",
+            \"down\",
+            None,
+            \"Tuesday Asian trading hours\",
+            None,
+            [\"British Pound\", \"US Dollar\", \"GBP/USD\"],
+            0.9,
+        ),
+        fact(
+            \"A potential Federal Reserve rate hike provided support to the US Dollar against the British Pound.\",
+            \"US Dollar\",
+            \"price_move\",
+            \"British Pound\",
+            \"up\",
+            None,
+            \"2026-06-30\",
+            \"A potential Federal Reserve rate hike.\",
+            [\"US Dollar\", \"British Pound\", \"Federal Reserve\"],
+            0.9,
+        ),
+    ],
+    \"17a98927c64c164f370d757a733e648d\": [
+        fact(
+            \"Unicycive Therapeutics shares closed down 39% and fell a further 9% after-hours on Tuesday.\",
+            \"Unicycive Therapeutics\",
+            \"price_move\",
+            None,
+            \"down\",
+            \"39% and a further 9% after-hours\",
+            \"Tuesday\",
+            \"The FDA again refused to approve oxylanthanum carbonate.\",
+            [\"Unicycive Therapeutics\", \"Oxylanthanum carbonate\", \"U.S. Food and Drug Administration\"],
+            0.99,
+        ),
+        fact(
+            \"The U.S. Food and Drug Administration again refused to approve Unicycive's oxylanthanum carbonate to treat hyperphosphatemia in patients with chronic kidney disease on dialysis.\",
+            \"U.S. Food and Drug Administration\",
+            \"policy_action\",
+            \"Unicycive Therapeutics\",
+            \"down\",
+            None,
+            \"Tuesday\",
+            \"The FDA cited the same third-party manufacturing deficiencies identified in the prior rejection letter issued in June 2025.\",
+            [\"U.S. Food and Drug Administration\", \"Unicycive Therapeutics\", \"Oxylanthanum carbonate\"],
+            0.98,
+        ),
+        fact(
+            \"B. Riley maintained its Buy rating and "'$22 price target on Unicycive.",
+            "B. Riley",
+            "statement",
+            "Unicycive Therapeutics",
+            "flat",
+            "$22",
+            "2026-06-30",
+            None,
+            ["B. Riley", "Unicycive Therapeutics"],
+            0.97,
+        ),
+        fact(
+            "H.C. Wainwright lowered its price target on Unicycive to $15 from $22 while keeping a Buy rating.",
+            "H.C. Wainwright",
+            "statement",
+            "Unicycive Therapeutics",
+            "down",
+            "$15 from $22",
+            "2026-06-30",
+            "The firm sees potential launch delays of 5-12 months.",
+            ["H.C. Wainwright", "Unicycive Therapeutics"],
+            0.97,
+        ),
+        fact(
+            "H.C. Wainwright said Unicycive'"'s drug launch could be delayed by 5-12 months.\",
+            \"Unicycive Therapeutics\",
+            \"forecast\",
+            \"Oxylanthanum carbonate\",
+            \"down\",
+            \"5-12 months\",
+            \"2026-06-30\",
+            \"The FDA again refused to approve the drug.\",
+            [\"Unicycive Therapeutics\", \"Oxylanthanum carbonate\", \"H.C. Wainwright\"],
+            0.93,
+        ),
+    ],
+    \"17c3d181147ce8f4a35b04b09a7304f9\": [
+        fact(
+            \"TD Cowen cut its price target on Strategy to "'$260 from $400.",
+            "TD Cowen",
+            "statement",
+            "Strategy",
+            "down",
+            "$260 from $400",
+            "2026-06-30",
+            "A lower bitcoin price forecast.",
+            ["TD Cowen", "Strategy", "Bitcoin"],
+            0.99,
+        ),
+        fact(
+            "TD Cowen projects bitcoin will end 2026 at approximately $100,000, down from a prior forecast of roughly $140,000.",
+            "Bitcoin",
+            "forecast",
+            None,
+            "down",
+            "$100,000 from roughly $140,000",
+            "end of 2026",
+            None,
+            ["Bitcoin", "TD Cowen"],
+            0.98,
+        ),
+        fact(
+            "TD Cowen projects bitcoin will reach around $135,000 by the end of 2027, down from $190,000.",
+            "Bitcoin",
+            "forecast",
+            None,
+            "down",
+            "$135,000 from $190,000",
+            "end of 2027",
+            None,
+            ["Bitcoin", "TD Cowen"],
+            0.97,
+        ),
+        fact(
+            "Strategy'"'s USD reserve has been rebuilt to "'$2.55 billion after the company issued more than 12 million common shares over the past week while purchasing zero bitcoins.",
+            "Strategy",
+            "corporate_action",
+            None,
+            "up",
+            "$2.55 billion",
+            "over the past week",
+            "The company issued more than 12 million common shares and purchased zero bitcoins.",
+            ["Strategy", "Bitcoin"],
+            0.96,
+        ),
+        fact(
+            "Strategy authorized up to $1 billion in preferred stock repurchases and $1 billion in MSTR share buybacks.",
+            "Strategy",
+            "corporate_action",
+            None,
+            "na",
+            "$1 billion and $1 billion",
+            "2026-06-30",
+            None,
+            ["Strategy", "MSTR"],
+            0.98,
+        ),
+        fact(
+            "Strategy'"'s bitcoin monetization program caps potential sales at "'$1.25 billion.",
+            "Strategy",
+            "corporate_action",
+            "Bitcoin",
+            "na",
+            "$1.25 billion",
+            "2026-06-30",
+            None,
+            ["Strategy", "Bitcoin"],
+            0.96,
+        ),
+        fact(
+            "Strategy raised the STRC dividend rate to 12% from 11.5%.",
+            "Strategy",
+            "corporate_action",
+            "STRC",
+            "up",
+            "12% from 11.5%",
+            "2026-06-30",
+            None,
+            ["Strategy", "STRC"],
+            0.97,
+        ),
+    ],
+    "1802722f8df00e0e8b9a20480bfcf2bc": [
+        fact(
+            "A Michigan judge issued a temporary restraining order blocking Kalshi from offering sports-related event contracts in the state.",
+            "Michigan",
+            "policy_action",
+            "Kalshi",
+            "down",
+            None,
+            "Monday",
+            None,
+            ["Michigan", "Kalshi"],
+            0.99,
+        ),
+        fact(
+            "The temporary restraining order against Kalshi lasts 14 days and remains in effect until July 13.",
+            "Kalshi",
+            "policy_action",
+            "Michigan",
+            "down",
+            "14 days",
+            "until July 13",
+            None,
+            ["Kalshi", "Michigan"],
+            0.98,
+        ),
+        fact(
+            "The court ordered that Kalshi would be fined $120,000 for each day it does not comply with the geofencing requirements.",
+            "Kalshi",
+            "policy_action",
+            "Michigan",
+            "down",
+            "$120,000 per day",
+            "2026-06-30",
+            "Noncompliance with the court'"'s geofencing requirements.\",
+            [\"Kalshi\", \"Michigan\"],
+            0.97,
+        ),
+        fact(
+            \"Kalshi has attracted more than "'$30 billion in volume so far this month, up 79% from May.",
+            "Kalshi",
+            "demand_change",
+            None,
+            "up",
+            "more than $30 billion, up 79% from May",
+            "this month",
+            None,
+            ["Kalshi"],
+            0.95,
+        ),
+    ],
+    "18fb5c510048d12a6184785f9a26cd49": [
+        fact(
+            "China'"'s Ministry of Commerce issued a preliminary determination that pea-starch products imported from Canada were dumped in China.\",
+            \"China\",
+            \"sanction\",
+            \"Canada\",
+            \"down\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"China\", \"Canada\", \"Ministry of Commerce of the People's Republic of China\", \"Pea starch\"],
+            0.99,
+        ),
+        fact(
+            \"China said the dumping of Canadian pea starch caused material damage to the domestic pea-starch industry.\",
+            \"China\",
+            \"statement\",
+            \"Canadian pea starch imports\",
+            \"down\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"China\", \"Canada\", \"Pea starch\"],
+            0.96,
+        ),
+        fact(
+            \"Starting on Wednesday, importers of pea starch from Canada must post cash deposits equal to 73.5% of the goods' customs-assessed value.\",
+            \"China\",
+            \"sanction\",
+            \"Canadian pea starch imports\",
+            \"down\",
+            \"73.5% of customs-assessed value\",
+            \"Starting on Wednesday\",
+            \"China's preliminary dumping determination.\",
+            [\"China\", \"Canada\", \"Pea starch\"],
+            0.99,
+        ),
+        fact(
+            \"China launched its anti-dumping probe into Canadian pea starch in August after a complaint filed by six domestic pea starch manufacturers.\",
+            \"China\",
+            \"event\",
+            \"Canadian pea starch imports\",
+            \"na\",
+            None,
+            \"August\",
+            \"A complaint filed by six domestic pea starch manufacturers.\",
+            [\"China\", \"Canada\", \"Pea starch\"],
+            0.95,
+        ),
+    ],
+    \"19ba99793342ff99fbaaa60253614466\": [
+        fact(
+            \"Former Indonesian education minister and Gojek co-founder Nadiem Makarim was sentenced to 10 years in jail on Tuesday.\",
+            \"Nadiem Makarim\",
+            \"event\",
+            None,
+            \"na\",
+            \"10 years\",
+            \"Tuesday\",
+            \"He was convicted of corruption related to laptop procurement under a national education digitalization program.\",
+            [\"Nadiem Makarim\", \"Gojek\", \"Indonesia\"],
+            0.99,
+        ),
+        fact(
+            \"Nadiem Makarim was fined 810 billion rupiah, equivalent to "'$45.3 million.",
+            "Nadiem Makarim",
+            "event",
+            None,
+            "na",
+            "810 billion rupiah ($45.3 million)",
+            "Tuesday",
+            "He was convicted of corruption related to laptop procurement under a national education digitalization program.",
+            ["Nadiem Makarim", "Indonesia"],
+            0.98,
+        ),
+        fact(
+            "The corruption case has been seen as undermining investor confidence in Indonesia.",
+            "Indonesia",
+            "statement",
+            None,
+            "down",
+            None,
+            "2026-06-30",
+            "The prosecution of Nadiem Makarim in the corruption case.",
+            ["Indonesia", "Nadiem Makarim"],
+            0.88,
+        ),
+    ],
+    "1a18f6e4817bb2c231f25c0202b20241": [
+        fact(
+            "Nordea strategists said Nationalbanken may have become more tolerant of a weaker Danish krone.",
+            "Danmarks Nationalbank",
+            "statement",
+            "Danish krone",
+            "down",
+            None,
+            "2026-06-30",
+            "Denmark'"'s stronger fundamentals relative to the euro area.\",
+            [\"Danmarks Nationalbank\", \"Danish krone\", \"Nordea\", \"Euro area\"],
+            0.93,
+        ),
+        fact(
+            \"EUR/DKK is at its weakest level since the euro was introduced in 1999.\",
+            \"EUR/DKK\",
+            \"price_move\",
+            None,
+            \"up\",
+            None,
+            \"2026-06-30\",
+            None,
+            [\"EUR/DKK\", \"Euro\", \"Danish krone\"],
+            0.97,
+        ),
+        fact(
+            \"Since mid-2025, EUR/DKK has constantly traded above the central parity.\",
+            \"EUR/DKK\",
+            \"price_move\",
+            None,
+            \"up\",
+            None,
+            \"Since mid-2025\",
+            \"Lower demand for DKK among non-financial Danish companies due to a substantial increase in foreign direct investments and more DKK liquidity in the system.\",
+            [\"EUR/DKK\", \"Danish krone\", \"Nordea\"],
+            0.95,
+        ),
+        fact(
+            \"Nordea said Nationalbanken has not met the recent upward pressure in EUR/DKK with foreign-exchange intervention.\",
+            \"Danmarks Nationalbank\",
+            \"policy_action\",
+            \"EUR/DKK\",
+            \"flat\",
+            None,
+            \"up until now\",
+            None,
+            [\"Danmarks Nationalbank\", \"EUR/DKK\", \"Nordea\"],
+            0.92,
+        ),
+    ],
+    \"1a1f3100b33b86052aacbcfbc7c651e4\": [
+        fact(
+            \"The S&P 500 and Nasdaq posted their best quarter since 2020, while the Dow recorded its best first half in five years.\",
+            \"S&P 500; Nasdaq; Dow Jones Industrial Average\",
+            \"price_move\",
+            None,
+            \"up\",
+            None,
+            \"quarter ended 2026-06-30\",
+            None,
+            [\"S&P 500\", \"Nasdaq\", \"Dow Jones Industrial Average\"],
+            0.9,
+        ),
+        fact(
+            \"The two-year U.S. Treasury yield hovered near 4.12% on Tuesday.\",
+            \"U.S. 2-year Treasury yield\",
+            \"price_move\",
+            None,
+            \"flat\",
+            \"4.12%\",
+            \"Tuesday\",
+            None,
+            [\"U.S. Treasury\"],
+            0.98,
+        ),
+        fact(
+            \"The 10-year U.S. Treasury yield held at 4.39% on Tuesday.\",
+            \"U.S. 10-year Treasury yield\",
+            \"price_move\",
+            None,
+            \"flat\",
+            \"4.39%\",
+            \"Tuesday\",
+            None,
+            [\"U.S. Treasury\"],
+            0.98,
+        ),
+        fact(
+            \"The two-year German government bond yield fell to 2.52%.\",
+            \"Germany 2-year government bond yield\",
+            \"price_move\",
+            None,
+            \"down\",
+            \"2.52%\",
+            \"Tuesday\",
+            \"Investors positioned for economic data and central bank speeches at the ECB's Sintra forum.\",
+            [\"Germany\", \"European Central Bank\"],
+            0.98,
+        ),
+        fact(
+            \"The 10-year German bund yield remained near 2.89% and hovered close to four-month lows.\",
+            \"Germany 10-year bund yield\",
+            \"price_move\",
+            None,
+            \"flat\",
+            \"2.89%\",
+            \"Tuesday\",
+            None,
+            [\"Germany\"],
+            0.96,
+        ),
+        fact(
+            \"Futures markets have swung to price in two Federal Reserve interest rate hikes by the end of the year.\",
+            \"Federal Reserve\",
+            \"forecast\",
+            None,
+            \"up\",
+            \"two interest rate hikes\",
+            \"by the end of the year\",
+            \"Core inflation climbed back to 3.4%, the labor market remained robust, and consumer spending stayed resilient.\",
+            [\"Federal Reserve\", \"United States\"],
+            0.95,
+        ),
+        fact(
+            \"Markets currently see at least one more ECB rate hike.\",
+            \"European Central Bank\",
+            \"forecast\",
+            None,
+            \"up\",
+            \"at least one more rate hike\",
+            \"2026-06-30\",
+            None,
+            [\"European Central Bank\"],
+            0.93,
+        ),
+    ],
+    \"1b7986d627e9c73c1cb7ec98aae7687d\": [
+        fact(
+            \"BoJ board member Ayano Sato said the de-escalation of the Middle East conflict is welcome news for the economy, but uncertainty over the economic outlook remains.\",
+            \"Ayano Sato\",
+            \"statement\",
+            None,
+            \"na\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"Ayano Sato\", \"Bank of Japan\", \"Japan\"],
+            0.97,
+        ),
+        fact(
+            \"Sato said firms are raising wages and prices more actively, so the impact of a weak yen on inflation may be bigger than in the past.\",
+            \"Ayano Sato\",
+            \"statement\",
+            \"Japanese yen\",
+            \"up\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"Ayano Sato\", \"Bank of Japan\", \"Japanese yen\", \"Japan\"],
+            0.96,
+        ),
+        fact(
+            \"Sato said a weak yen boosts exports but raises import prices and lowers real household income.\",
+            \"Japanese yen\",
+            \"statement\",
+            None,
+            \"down\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"Ayano Sato\", \"Japanese yen\", \"Japan\"],
+            0.97,
+        ),
+        fact(
+            \"USD/JPY traded 0.22% higher near 162.30 after Sato's introductory speech.\",
+            \"USD/JPY\",
+            \"price_move\",
+            \"Japanese yen\",
+            \"up\",
+            \"0.22%\",
+            \"2026-06-30\",
+            None,
+            [\"USD/JPY\", \"Japanese yen\", \"US Dollar\"],
+            0.95,
+        ),
+    ],
+    \"1ba0e7485547e40a568fb21ecfa5a5a4\": [
+        fact(
+            \"The northern China wire and cable industry's annual output value has surpassed 100 billion yuan.\",
+            \"Northern China wire and cable industry\",
+            \"other\",
+            None,
+            \"up\",
+            \"100 billion yuan\",
+            \"2026-06-30\",
+            None,
+            [\"China\", \"wire and cable industry\"],
+            0.87,
+        ),
+    ],
+    \"1bb5d4bf827fce588a830021bdf594a1\": [
+        fact(
+            \"Japan's government appointed Ayano Sato to the Bank of Japan's board on Tuesday.\",
+            \"Japan\",
+            \"policy_action\",
+            \"Bank of Japan\",
+            \"na\",
+            None,
+            \"Tuesday\",
+            None,
+            [\"Japan\", \"Ayano Sato\", \"Bank of Japan\"],
+            0.99,
+        ),
+        fact(
+            \"Ayano Sato's appointment raises the prospect that future BOJ rate hike proposals could draw two dissenting votes instead of one.\",
+            \"Bank of Japan\",
+            \"forecast\",
+            None,
+            \"down\",
+            \"two dissenting votes instead of one\",
+            \"future\",
+            \"Ayano Sato is seen as dovish and joins Toichiro Asada, who voted against the BOJ's June rate hike.\",
+            [\"Bank of Japan\", \"Ayano Sato\", \"Toichiro Asada\"],
+            0.94,
+        ),
+        fact(
+            \"The BOJ is expected to hold rates steady at its July 30-31 meeting.\",
+            \"Bank of Japan\",
+            \"forecast\",
+            None,
+            \"flat\",
+            None,
+            \"July 30-31\",
+            None,
+            [\"Bank of Japan\"],
+            0.95,
+        ),
+        fact(
+            \"The BOJ raised rates to a 31-year high in June.\",
+            \"Bank of Japan\",
+            \"policy_action\",
+            None,
+            \"up\",
+            \"31-year high\",
+            \"June\",
+            None,
+            [\"Bank of Japan\"],
+            0.98,
+        ),
+        fact(
+            \"The BOJ signalled readiness to tighten further in response to energy-driven price pressures from the Middle East conflict and a weak yen.\",
+            \"Bank of Japan\",
+            \"statement\",
+            None,
+            \"up\",
+            None,
+            \"June\",
+            \"Energy-driven price pressures from the Middle East conflict and a weak yen.\",
+            [\"Bank of Japan\", \"Japanese yen\"],
+            0.97,
+        ),
+    ],
+}
+
+docs = []
+for line in input_path.read_text().splitlines():
+    obj = json.loads(line)
+    docs.append(obj)
+
+with output_path.open('w', encoding='utf-8') as f:
+    total_facts = 0
+    for obj in docs:
+        facts = facts_by_doc.get(obj['doc_id'], [])
+        total_facts += len(facts)
+        out = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        f.write(json.dumps(out, ensure_ascii=False) + '\\n')
+
+print(f\"docs processed: {len(docs)}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 55
+
+codex
+The output file is written. I’m doing a quick structural check on `all_facts_043.jsonl` to make sure it has 12 lines and valid JSON objects in order.
+exec
+/bin/zsh -lc 'wc -l all_facts_043.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_043.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_facts_043.jsonl')
+for i,line in enumerate(p.read_text().splitlines(),1):
+    obj=json.loads(line)
+    assert 'doc_id' in obj and 'title' in obj and 'facts' in obj
+print('json ok')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+json ok
+
+codex
+Wrote [all_facts_043.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_043.jsonl) from `all_batch_043.jsonl` only.
+
+`docs processed: 12, total facts: 55`
+tokens used
+29,863
+Wrote [all_facts_043.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_043.jsonl) from `all_batch_043.jsonl` only.
+
+`docs processed: 12, total facts: 55`

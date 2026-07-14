@@ -1,0 +1,15 @@
+{"id": "A-boj-chain", "query": "Why has the Bank of Japan signalled readiness to tighten policy further?", "exclude": {"endpoint": ["boj", "bank of japan"], "cause": ["energy", "middle east"]}}
+{"id": "A-btc-chain", "query": "Why did Bitcoin fall below 60,000 dollars?", "exclude": {"endpoint": ["bitcoin fell", "bitcoin dropped"], "cause": ["strikes", "hormuz"]}}
+{"id": "A-gas-chain", "query": "Why did benchmark gas contracts rise?", "exclude": {"endpoint": ["gas contracts", "gas prices"], "cause": ["attacks", "ras laffan", "cargo vessels"]}}
+{"id": "A-fuel-chain", "query": "Why are retail fuel prices climbing in Central Asia?", "exclude": {"endpoint": ["tajikistan", "central asia"], "cause": ["persian gulf", "hormuz"]}}
+{"id": "A-rba-chain", "query": "Why did markets pare back expectations for further Reserve Bank of Australia tightening?", "exclude": {"endpoint": ["rba", "reserve bank of australia"], "cause": ["brent"]}}
+{"id": "N-inflation", "query": "Why has inflation risen well above central banks' targets?", "exclude": {"endpoint": ["inflation"], "cause": ["energy prices", "hormuz"]}}
+{"id": "N-ether", "query": "Why did Ether fall about 8 percent over the past week?", "exclude": {"endpoint": ["ether fell", "ether dropped"], "cause": ["dollar", "yen"]}}
+{"id": "N-coinbase", "query": "Why did Coinbase stock fall almost 5 percent?", "exclude": {"endpoint": ["coinbase"], "cause": ["bitcoin"]}}
+{"id": "N-dollar-war", "query": "Why has the US dollar risen about 3 percent this year?", "exclude": {"endpoint": ["dollar 3%", "lift the dollar"], "cause": ["war with iran", "u.s.-israeli"]}}
+{"id": "N-russia-fuel", "query": "Why will Russia import more fuel and accelerate refinery repairs?", "exclude": {"endpoint": ["russia will import", "import more fuel"], "cause": ["attacks on oil facilities", "fuel deficit"]}}
+{"id": "N-crude-ceasefire", "query": "Why did crude oil prices edge lower late in the window?", "exclude": {"endpoint": ["crude oil prices edged lower", "crude oil prices"], "cause": ["ceasefire"]}}
+{"id": "N-usdjpy-gap", "query": "Why is USD/JPY holding near multi-decade highs?", "exclude": {"endpoint": ["usd/jpy"], "cause": ["policy gap", "federal reserve and the bank of japan"]}}
+{"id": "N-japan-china", "query": "Why did Japan say it would take countermeasures against China?", "exclude": {"endpoint": ["japan"], "cause": ["export controls", "export curbs"]}}
+{"id": "N-copper", "query": "Why is copper forecast to push toward 15,000 dollars per metric ton?", "exclude": {"endpoint": ["copper"], "cause": ["industrial upturn", "mine supply", "us-china"]}}
+{"id": "N-nasdaq-ipo", "query": "Why did Nasdaq lead global IPO proceeds in the first half of 2026?", "exclude": {"endpoint": ["nasdaq"], "cause": ["spacex", "ai wave", "technology company listings"]}}

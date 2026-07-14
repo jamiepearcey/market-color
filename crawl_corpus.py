@@ -168,6 +168,37 @@ def parse_dt(value: Any) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
+# Full publication TIMESTAMP from page metadata. trafilatura's `date` is
+# date-only (htmldate), which floors every article to midnight — useless for
+# intraday event studies. Pages almost always carry the real time in JSON-LD
+# or meta tags; scan those directly (pure regex, priority order).
+_TS_PATTERNS = [
+    r'"datePublished"\s*:\s*"([^"]{8,40})"',
+    r'<meta[^>]+property=["\']article:published_time["\'][^>]+content=["\']([^"\']{8,40})["\']',
+    r'<meta[^>]+content=["\']([^"\']{8,40})["\'][^>]+property=["\']article:published_time["\']',
+    r'<meta[^>]+name=["\']parsely-pub-date["\'][^>]+content=["\']([^"\']{8,40})["\']',
+    r'<meta[^>]+itemprop=["\']datePublished["\'][^>]+content=["\']([^"\']{8,40})["\']',
+    r'<meta[^>]+name=["\'](?:sailthru\.date|pubdate|dc\.date\.issued)["\'][^>]+content=["\']([^"\']{8,40})["\']',
+    r'<time[^>]+datetime=["\']([^"\']{8,40})["\']',
+]
+
+
+def extract_pub_ts(html: str) -> datetime | None:
+    """Best full timestamp (with time-of-day) from HTML metadata, else None."""
+    head = html[:200_000]
+    best = None
+    for pat in _TS_PATTERNS:
+        for m in re.finditer(pat, head, re.I):
+            dt = parse_dt(m.group(1))
+            if dt is None or not (2000 <= dt.year <= 2100):
+                continue
+            has_time = (dt.hour, dt.minute, dt.second) != (0, 0, 0)
+            if has_time:
+                return dt
+            best = best or dt
+    return best
+
+
 def clean_text(text: Any) -> str:
     if not text:
         return ""
@@ -519,7 +550,14 @@ async def fetch_and_extract(
     body = clean_text(rec.get("text")) if rec else ""
     title = clean_text(rec.get("title")) if rec else ""
     author = (clean_text(rec.get("author")) or None) if rec else None
-    pub_dt = parse_dt(rec.get("date")) if rec else None
+    meta_dt = extract_pub_ts(resp.text)
+    traf_dt = parse_dt(rec.get("date")) if rec else None
+    # prefer a timestamp with time-of-day; trafilatura's is date-only
+    pub_dt = meta_dt if meta_dt is not None else traf_dt
+    if (pub_dt is not None and traf_dt is not None
+            and pub_dt.date() != traf_dt.date()
+            and (pub_dt.hour, pub_dt.minute) == (0, 0)):
+        pub_dt = traf_dt  # dateless meta match disagreeing on day: distrust it
     pub_dt = pub_dt or hint_dt
     estimated = pub_dt is None
     if pub_dt is None:
@@ -571,11 +609,15 @@ def write_corpus(out_root: Path, articles: list[Article]) -> dict[str, int]:
         path = part_dir / "part-000.parquet"
         if _HAVE_PARQUET and path.exists():
             try:
-                prev = pq.read_table(path).to_pylist()
+                # ParquetFile: raw read, no hive partition-column inference
+                prev = pq.ParquetFile(path).read().to_pylist()
                 seen = {r["doc_id"] for r in rows}
                 rows.extend(r for r in prev if r["doc_id"] not in seen)
-            except Exception:
-                pass
+            except Exception as exc:  # merging failed: ABORT this partition
+                print(f"  [write] REFUSING to overwrite {path}: cannot read "
+                      f"existing rows ({exc})", file=sys.stderr)
+                written[date] = -1
+                continue
         if _HAVE_PARQUET:
             pq.write_table(pa.Table.from_pylist(rows), path)
         else:

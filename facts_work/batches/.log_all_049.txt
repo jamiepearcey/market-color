@@ -1,0 +1,641 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc2-73f6-7232-8d77-0692ee0415cd
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_049.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_049.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_049.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:17:49.510547Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_049.jsonl` to confirm the document structure and content patterns, then I’ll extract the facts and write `all_facts_049.jsonl` in the same order.
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc 'wc -l all_batch_049.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_049.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_049.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj = json.loads(line)
+        print('DOC', i)
+        print(obj.keys())
+        print(obj['doc_id'])
+        print(obj['title'][:200])
+        print(obj['body_text'][:700].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+2c783217566f6c27c7067990655a9e8f
+Kalshi Sports Markets Banned in Michigan as Temporary Blackout Takes Effect - Decrypt
+In brief - A Michigan judge barred Kalshi from offering sports prediction markets in the state for 14 days. - The court said the markets could cause irreparable harm, particularly to young users, while the case proceeds. - The ruling is the latest clash in the nationwide fight over whether prediction markets offer illegal gambling. Kalshi has blocked all users in Michigan from accessing sports-related wagers, following a key ruling against the prediction market platform in state court. On Monday, a circuit court judge in Ingham County issued a temporary restraining order temporarily prohibiting Kalshi from offering sports markets in the state for 14 days. The ban, requested by state regulato
+---
+DOC 2
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+2c7e6e9c9e0534af8fcc239f0a67320a
+Return of the ‘greybeards’: AI backfired – so Ford had to rehire humans
+Name: “Greybeards.” Age: There’s a clue in the name. I’m thinking old, and probably male? Most likely. Certainly human, that’s the main thing. Are ZZ Top back on the road? No … Actually, yes! But this isn’t about them. Who is it about then? Veteran engineers, working for Ford Motor Company in the US. Oh dear, I think I know how this story goes: hundreds of longstanding workers get laid off because of automation and artificial intelligence … That kinda was how the story was going; the company has 5,000 fewer workers than it did in 2020. Recently, though, there’s been an unexpected twist. Ooh, I love those, go on. Over the past three years, the company has hired 350 veteran engineers – known a
+---
+DOC 3
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+2cf61c693aee315d69d218b23779e1db
+Hoffman & Hoffman Enters Florida Market with Acquisition of Aeromechanical, LLC
+Expansion into Gulf Breeze, FL, marks Hoffman & Hoffman's first presence in the Gulf Coast market. GREENSBORO, N.C., June 30, 2026 /PRNewswire/ -- Hoffman & Hoffman, an employee-owned HVAC equipment representative headquartered in Greensboro, NC, has acquired Aeromechanical, LLC, a respected commercial HVAC provider based in Gulf Breeze, FL. This marks Hoffman & Hoffman's first expansion into Florida, building on the company's Southeastern footprint as it invests in customer relationships and new opportunities across the Gulf Coast. Hoffman & Hoffman and Aeromechanical share a common foundation: a belief that strong customer relationships and technical excellence go hand in hand. Hoffman & H
+---
+
+codex
+The batch has 12 documents. I’ve confirmed the schema and I’m scanning all titles and bodies now to separate actual market facts from opinion or non-market content before writing the output file.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_049.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj = json.loads(line)
+        body = obj['body_text'].replace('\\n',' ')
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['source_name']}\")
+        print(obj['title'])
+        print(body[:1000])
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 2c783217566f6c27c7067990655a9e8f | 2026-06-30 | Decrypt
+Kalshi Sports Markets Banned in Michigan as Temporary Blackout Takes Effect - Decrypt
+In brief - A Michigan judge barred Kalshi from offering sports prediction markets in the state for 14 days. - The court said the markets could cause irreparable harm, particularly to young users, while the case proceeds. - The ruling is the latest clash in the nationwide fight over whether prediction markets offer illegal gambling. Kalshi has blocked all users in Michigan from accessing sports-related wagers, following a key ruling against the prediction market platform in state court. On Monday, a circuit court judge in Ingham County issued a temporary restraining order temporarily prohibiting Kalshi from offering sports markets in the state for 14 days. The ban, requested by state regulators, takes hold as Kalshi and Michigan continue to battle over the regulatory fate of prediction markets—which state regulators across the country contend amount to illegal gambling operations, and the platforms, joined by the Trump administration, argue are swaps regulated at the federal level by th
+---
+2. 2c7e6e9c9e0534af8fcc239f0a67320a | 2026-06-30 | Guardian Business
+Return of the ‘greybeards’: AI backfired – so Ford had to rehire humans
+Name: “Greybeards.” Age: There’s a clue in the name. I’m thinking old, and probably male? Most likely. Certainly human, that’s the main thing. Are ZZ Top back on the road? No … Actually, yes! But this isn’t about them. Who is it about then? Veteran engineers, working for Ford Motor Company in the US. Oh dear, I think I know how this story goes: hundreds of longstanding workers get laid off because of automation and artificial intelligence … That kinda was how the story was going; the company has 5,000 fewer workers than it did in 2020. Recently, though, there’s been an unexpected twist. Ooh, I love those, go on. Over the past three years, the company has hired 350 veteran engineers – known as “greybeards” (or “graybeards” if you’re reading this in the US) – made up of former Ford employees and workers from suppliers. Excellent news! Why, though? I’m guessing it’s not because – despite the threat from the massive acceleration going on in the Chinese automotive industry – Ford has sudden
+---
+3. 2cf61c693aee315d69d218b23779e1db | 2026-06-30 | Yahoo Finance
+Hoffman & Hoffman Enters Florida Market with Acquisition of Aeromechanical, LLC
+Expansion into Gulf Breeze, FL, marks Hoffman & Hoffman's first presence in the Gulf Coast market. GREENSBORO, N.C., June 30, 2026 /PRNewswire/ -- Hoffman & Hoffman, an employee-owned HVAC equipment representative headquartered in Greensboro, NC, has acquired Aeromechanical, LLC, a respected commercial HVAC provider based in Gulf Breeze, FL. This marks Hoffman & Hoffman's first expansion into Florida, building on the company's Southeastern footprint as it invests in customer relationships and new opportunities across the Gulf Coast. Hoffman & Hoffman and Aeromechanical share a common foundation: a belief that strong customer relationships and technical excellence go hand in hand. Hoffman & Hoffman brings nearly 80 years of experience representing leading HVAC manufacturers and supporting complex projects across the Southeast, while Aeromechanical contributes deep familiarity with Gulf Coast applications and a portfolio of specialized air distribution products tailored to the region's n
+---
+4. 2d57a8f89b934239697ffe70e73bf454 | 2026-06-30 | AP Top News
+Fire at petrochemical plant in eastern India injures at least 20 people
+Fire at petrochemical plant in eastern India injures at least 20 people Fire at petrochemical plant in eastern India injures at least 20 people NEW DELHI (AP) — A fire at a petrochemical plant in eastern India injured at least 20 people, five of them critically, police said. The blaze broke out Tuesday in a naphtha pipeline at a facility operated by Haldia Petrochemicals and quickly spread to nearby homes in West Bengal’s Purba Medinipur district, about 130 kilometers (80 miles) southwest of the state capital, Kolkata. Firefighters used 12 fire engines to bring the blaze under control, while the injured were rescued and taken to nearby hospitals, police said. The injured included plant workers and at least two security guards. Video from the scene showed firefighters dousing the blaze with water as thick black smoke rose from the burning pipeline. Naphtha is a highly flammable petroleum product used in the production of fuels and other chemicals. The cause of the fire was not immediate
+---
+5. 2d770e68d0fbaa226f5032695ed10bc6 | 2026-06-30 | SCMP News
+Self-flying jets, drones, no-crew subs: UK lays out new defence plan
+UK lays out defence plan with drones, self-flying fighter jets, no-crew submarines While PM Keir Starmer says ‘cutting-edge capabilities’ will help to deter threats, critics say the rising defence budget should be even higher Self-flying fighter jets, uncrewed submarines and drones are at the centre of Britain’s future military under a defence plan announced on Tuesday that reflects a world of conflicts transformed by technology. Prime Minister Keir Starmer – who is expected to leave office next month after losing the support of MPs – unveiled his long-delayed Defence Investment Plan. Defence spending will increase to nearly £80 billion (US$105.85 billion) a year by 2029, putting it on a path to hit three per cent of GDP on military expenditure. The defence plan is a road map for how the UK will increase military spending to Nato’s target of 3.5 per cent of GDP by 2035. Nato Secretary General Mark Rutte welcomed Britain’s plan. “Stronger UK defence makes us all safer. This is a good st
+---
+6. 2e0e8aab47453913f37b42c5643d6a0d | 2026-06-30 | ForexLive
+The USDJPY squeeze higher continues. | investingLive
+The USDJPY has broken above the 2024 high near 161.95/97 (depending on the data source), and the breakout has been accompanied by strong buying momentum. The pair initially surged to 162.399 before rotating lower, but buyers stepped in at 162.04—just 7 to 9 pips above the breakout area—confirming the old resistance level as new support. Later in the North American session, the pair pushed to a fresh high of 162.508 before another sharp pullback took the price to 162.025. Once again, buyers quickly entered, driving the pair back above 162.30, where it has remained firmly supported. The rebound has since extended to a new intraday high of 162.656 as London and European traders head for the exits, highlighting the market's underlying bullish bias. From a longer-term perspective, the next major upside target comes in near the November 1986 high at 164.50. A sustained move above that level would open the door for an even stronger upside extension and could trigger another wave of momentum b
+---
+7. 2e18171da48a67c8d4fb8526d85250c7 | 2026-06-30 | The Block
+MetaMask unveils all-in-one Money Account offerings users up to 4% APY on mUSD holdings
+MetaMask unveils all-in-one Money Account offerings users up to 4% APY on mUSD holdings Quick Take - MetaMask’s self-custodial Money Account will enable users to generate returns on their holdings in an account also plugged into MetaMask Card for spending and the wider MetaMask wallet for other onchain services. - The product has tapped Monad as its “home chain,” and will initially use Morpho vaults to generate yield. We'd love your feedback. MetaMask has launched Money Account, a new self-custodial feature inside its wallet that turns stablecoin balances into a productive, all-in-one financial account. The product was built on Monad, which will serve as its "home chain." According to Tuesday's announcement, Money Account will enable users to earn up to 4% variable APY on their mUSD, MetaMask’s native stablecoin, through a simple deposit, with no staking, lock-ups, or manual actions required. The balances are also connected to the Mastercard-powered MetaMask Card, so users can spend do
+---
+8. 2e248d0efbcaef220eb81fec7714d3ad | 2026-06-30 | SCMP News
+Recruitment woes force HKU student publication Undergrad to close pages after 74 years
+The Hong Kong University Students’ Union publication Undergrad, founded more than 70 years ago and one of the city’s longest-running campus news outlets, has ceased operations after failing to recruit enough members to form a new editorial board. In a statement on Sunday, the student union’s 2025 editorial committee said it had twice attempted since last September to recruit members for this year’s board, but in vain. As a result, the publication stopped operating with immediate effect. “Today, Undergrad’s historical role in society has come to an end,” said the committee’s statement, which was posted on various social media platforms. “This is not something to lament with sorrow, but simply the natural ebb and flow of history.” It added that “the times are always calling, and the media of a new era may emerge in ways yet unknown”. The outgoing committee said that over the decades, Undergrad had “actively promoted discussion on campus and in society while quietly observing and recordin
+---
+9. 2e70965a9127f257ac9a16eb53c3a7f2 | 2026-06-30 | ForexLive
+ECB may see a case for July move on a negative June inflation surprise - report | investingLive
+The report says that recent inflation developments has further taken pressure off the ECB for a move in July, although there is still a case to be made if the June numbers are "nasty". According to the sources cited, all with direct knowledge of the situation, policymakers were surprised by how quickly oil prices have eased in the past two weeks especially. As such, they believe that the normalisation of the energy market is already well underway. Given the circumstances, a rate hike in September remains the more likely scenario for now but the sources note that the June inflation data tomorrow will still carry significant weight. One of the sources said that if the headline figure does fall back from 3.2% "as markets now anticipate it would", then waiting until September will be the better option. However, a negative upside surprise would strengthen the case for a follow up move in July. Well, we will already get a bit of a taste of what to expect from today with Germany, France, and 
+---
+10. 2e8e2b97596e047086da784993e52f90 | 2026-06-30 | Cointelegraph
+Bitmine ETH Buys Overshadowed By $345M ETF Outflow
+Bitmine Ether buys eclipsed by $345M ETH ETF $345M outflows: Is sub $1.5K next? Tokenization and RWA TVL growth highlight Ethereum’s fundamentals, but stagnant DApps and spot ETF outflows keep the pressure on ETH price. Key takeaways: - The Spot Ether ETF outflows overwhelmed BitMine’s ETH accumulation, raising the chance of a drop below the $1,500 support. - Falling DApps revenue and weak staking yields highlight limited ecosystem incentives despite tokenization potential. Ether (ETH) has failed to sustain prices above $1,600 since Thursday, following the broader cryptocurrency market's downtrend. Lower oil prices created a positive tone that fueled investors’ hopes for more expansionist monetary policy. That setup favors stocks and pushes bond yields higher. Traders now fear that ETH will not hold the $1,500 support level for long. Spot Ether ETF outflows void the impact of accumulation from Ether treasury companies. ETH/USD (orange) vs. Total crypto market cap (blue). Source: Tradin
+---
+11. 2ecb1e4dd9c4909de6c0f148eafd723d | 2026-06-30 | FXStreet News
+AUD/USD Price Forecast: Likely extend decline below 0.6830 | FXStreet
+The Australian Dollar (AUD) reflects a mixed performance against its major currency peers during the European trading session on Tuesday, following the release of the Reserve Bank of Australia (RBA) monetary policy meeting minutes. Australian Dollar Price Today The table below shows the percentage change of Australian Dollar (AUD) against listed major currencies today. Australian Dollar was the strongest against the Swiss Franc. | USD | EUR | GBP | JPY | CAD | AUD | NZD | CHF | | |---|---|---|---|---|---|---|---|---| | USD | 0.20% | 0.11% | 0.19% | 0.15% | 0.17% | -0.07% | 0.20% | | | EUR | -0.20% | -0.07% | -0.02% | -0.08% | -0.04% | -0.29% | -0.01% | | | GBP | -0.11% | 0.07% | 0.06% | 0.00% | 0.06% | -0.19% | 0.07% | | | JPY | -0.19% | 0.02% | -0.06% | -0.05% | -0.04% | -0.25% | -0.01% | | | CAD | -0.15% | 0.08% | -0.00% | 0.05% | 0.00% | -0.21% | 0.04% | | | AUD | -0.17% | 0.04% | -0.06% | 0.04% | -0.00% | -0.21% | 0.05% | | | NZD | 0.07% | 0.29% | 0.19% | 0.25% | 0.21% | 0.21% | 0.
+---
+12. 2ed0ccb53f4e2a2e11ea8f4364fc45eb | 2026-06-30 | Al Jazeera
+At least 14 children killed after roof of Pakistan tuition centre collapses
+At least 14 schoolchildren have been killed after the roof of a tutoring centre in the eastern Pakistani city of Lahore collapsed, according to officials. A teacher and eight other children were injured and being treated at a hospital, while police said the owner of the centre and another person had been arrested. Recommended Stories list of 3 items- list 1 of 3Pakistan says its security forces killed 29 fighters along Afghan border - list 2 of 3Three security personnel killed in attack in Pakistan’s Karachi - list 3 of 3Pakistan issues nationwide alert over fears of heavy rains, floods Medical sources said the children killed in the collapse were aged between around four and 12, according to the AFP news agency. Senior police official Faisal Kamran said rescuers were searching through the rubble after receiving reports that more children could be trapped beneath the debris, the Reuters news agency reported. He added the centre was housed in an ageing building and that the roof of an u
+---
+
+codex
+I’ve identified a few documents that are clearly non-market and a few that need closer reading because they mix narrative with actual checkable company, policy, or price claims. I’m pulling full text for those now so the output stays strictly tied to explicit statements.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids = {1,2,5,7,9,10,11}
+with open('all_batch_049.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        if i in ids:
+            obj = json.loads(line)
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:', obj['title'])
+            print(obj['body_text'])
+            print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 1 2c783217566f6c27c7067990655a9e8f =====
+TITLE: Kalshi Sports Markets Banned in Michigan as Temporary Blackout Takes Effect - Decrypt
+In brief - A Michigan judge barred Kalshi from offering sports prediction markets in the state for 14 days. - The court said the markets could cause irreparable harm, particularly to young users, while the case proceeds. - The ruling is the latest clash in the nationwide fight over whether prediction markets offer illegal gambling. Kalshi has blocked all users in Michigan from accessing sports-related wagers, following a key ruling against the prediction market platform in state court. On Monday, a circuit court judge in Ingham County issued a temporary restraining order temporarily prohibiting Kalshi from offering sports markets in the state for 14 days. The ban, requested by state regulators, takes hold as Kalshi and Michigan continue to battle over the regulatory fate of prediction markets—which state regulators across the country contend amount to illegal gambling operations, and the platforms, joined by the Trump administration, argue are swaps regulated at the federal level by the CFTC. In order to grant Michigan’s motion for a temporary restraining order, Judge Rosemarie Aquilina had to find the state would suffer irreparable harm if Kalshi was allowed to continue offering sports-related prediction markets as the case proceeded. She ultimately did. “Michigan and its most vulnerable citizens are suffering and will continue to suffer immediate and irreparable harm absent relief from being exploited by Kalshi's sports betting operation masquerading as an investment opportunity,” Aquilina ruled. She added the company, by offering prediction markets to customers as young as 18, risked inflicting “profound” levels of “irreparable harm on Michigan's youth,” and “takes advantage of serious mental health issues” without providing the resources required of licensed gambling operations. As of Tuesday afternoon, Michigan users on social media reported being unable to access sports wagers on the Kalshi app. "It's no surprise that we disagree with the state's decision and will fight it in court,” a Kalshi spokesperson said in a statement shared with Decrypt. “In the meantime, we're implementing restrictions.” Michigan Attorney General Dana Nessel celebrated the restraining order, pledging to continue the fight against Kalshi and all other prediction market platforms operating in the state. “We remain committed to enforcing a level playing field for all gambling platforms in Michigan and ensuring that companies cannot evade accountability or exploit consumers under the guise of a prediction market,” she said in a statement. Kalshi previously faced a similar temporary ban in Nevada, and another in Massachusetts. The war over prediction market regulation continues to weave through state and federal courts across the country, and is likely to ultimately be decided by the U.S. Supreme Court.
+
+===== DOC 2 2c7e6e9c9e0534af8fcc239f0a67320a =====
+TITLE: Return of the ‘greybeards’: AI backfired – so Ford had to rehire humans
+Name: “Greybeards.” Age: There’s a clue in the name. I’m thinking old, and probably male? Most likely. Certainly human, that’s the main thing. Are ZZ Top back on the road? No … Actually, yes! But this isn’t about them. Who is it about then? Veteran engineers, working for Ford Motor Company in the US. Oh dear, I think I know how this story goes: hundreds of longstanding workers get laid off because of automation and artificial intelligence … That kinda was how the story was going; the company has 5,000 fewer workers than it did in 2020. Recently, though, there’s been an unexpected twist. Ooh, I love those, go on. Over the past three years, the company has hired 350 veteran engineers – known as “greybeards” (or “graybeards” if you’re reading this in the US) – made up of former Ford employees and workers from suppliers. Excellent news! Why, though? I’m guessing it’s not because – despite the threat from the massive acceleration going on in the Chinese automotive industry – Ford has suddenly discovered its charitable side? No. It’s more about doing the things that AI proved to be a bit rubbish at. AI replaced with human beings, man bites dog! Go on! Not quite replaced. But they discovered that the hundreds of AI-powered cameras they were using, including for design and manufacturing checks, were prone to pitfalls. Because? To quote Ford’s vice president of vehicle hardware engineering, Charles Poon: “Artificial intelligence is a fantastic tool, but it’s only as good as the information you use to train it.” Hmm, now who would have that kind of knowhow and experience, I wonder? “Over prior years, we didn’t pay as much attention as we should have to the experience of our most knowledgeable engineers that have been with us through many product cycles,” Poon said. “Who have been with us through many product cycles”, Mr Poon – they’re people, remember. True. With facial hair to prove it. So the AI gets chucked on the scrapheap and the “greybeards” come back through the factory gates, singing, like elves … In the fairytale version maybe. And in the real version? A combination of the two. Ford said that AI is very important to quality gains, “and that, in tandem with deep technical expertise, is what’s needed”. Yeah, until all that expertise has been successfully transferred to the machines. And the human becomes redundant. Not just from work, but existentially. Argggghhh! Do say: “Pssst! Yes, you, comrade greybeard. Let’s teach this one wrong, introduce a few glitches, so there may even be a few jobs left for our kids …” Don’t say: “Wait, who are these cars of the future even for? Our robot overlords?”
+
+===== DOC 5 2d770e68d0fbaa226f5032695ed10bc6 =====
+TITLE: Self-flying jets, drones, no-crew subs: UK lays out new defence plan
+UK lays out defence plan with drones, self-flying fighter jets, no-crew submarines While PM Keir Starmer says ‘cutting-edge capabilities’ will help to deter threats, critics say the rising defence budget should be even higher Self-flying fighter jets, uncrewed submarines and drones are at the centre of Britain’s future military under a defence plan announced on Tuesday that reflects a world of conflicts transformed by technology. Prime Minister Keir Starmer – who is expected to leave office next month after losing the support of MPs – unveiled his long-delayed Defence Investment Plan. Defence spending will increase to nearly £80 billion (US$105.85 billion) a year by 2029, putting it on a path to hit three per cent of GDP on military expenditure. The defence plan is a road map for how the UK will increase military spending to Nato’s target of 3.5 per cent of GDP by 2035. Nato Secretary General Mark Rutte welcomed Britain’s plan. “Stronger UK defence makes us all safer. This is a good step towards reaching the 3.5% of GDP on defence agreed in The Hague last year,” wrote Rutte on X.
+
+===== DOC 7 2e18171da48a67c8d4fb8526d85250c7 =====
+TITLE: MetaMask unveils all-in-one Money Account offerings users up to 4% APY on mUSD holdings
+MetaMask unveils all-in-one Money Account offerings users up to 4% APY on mUSD holdings Quick Take - MetaMask’s self-custodial Money Account will enable users to generate returns on their holdings in an account also plugged into MetaMask Card for spending and the wider MetaMask wallet for other onchain services. - The product has tapped Monad as its “home chain,” and will initially use Morpho vaults to generate yield. We'd love your feedback. MetaMask has launched Money Account, a new self-custodial feature inside its wallet that turns stablecoin balances into a productive, all-in-one financial account. The product was built on Monad, which will serve as its "home chain." According to Tuesday's announcement, Money Account will enable users to earn up to 4% variable APY on their mUSD, MetaMask’s native stablecoin, through a simple deposit, with no staking, lock-ups, or manual actions required. The balances are also connected to the Mastercard-powered MetaMask Card, so users can spend down their funds from a yield-bearing account, as well as MetaMask’s other trading offerings for swaps, perps, and prediction markets. "For too long, the crypto experience has been fragmented; one place to trade, another to earn, another to spend," Consensys CEO Joe Lubin said in the statement. "People build their wealth inside MetaMask, but until now they couldn't keep it working here." The move comes amid a wave of products looking to turn stablecoin balances into productive holdings. State Street, for instance, recently launched a SWEEP fund that lets investors "sweep" stablecoins into a yield-bearing tokenized fund. MetaMask’s solution is particularly geared toward preventing further liquidity fragmentation, considering that MetaMask is one of the most-used Ethereum-centered wallets. Users will now be able to keep funds in mUSD to generate returns in a wallet they were likely already using. Further, the announcement notes, users will be able to convert supported stablecoins, including USDC, USDT, DAI, aUSDC, aUSDT, and aDAI on supported chains to mUSD “at 1:1 parity with no conversion fees.” Users can also purchase mUSD via debit or credit card or Apple Pay. mUSD launched in September 2025 and currently has a market cap of $32 million, according to its website. The token, issued on Ethereum and Consensys' Linea Layer 2, reached a top market cap of over $100 million shortly after launch, according to Dune data. MetaMask’s Money Account will generate its yield via DeFi vaults, initially on Morpho, with plans to expand to Aave. The announcement notes Veda built the vault infrastructure and Steakhouse Financial is serving as risk curator. "This is what consumer stablecoin adoption at scale looks like: a product built for daily spend, with savings and yield integrated and the complexity handled under the hood," Monad Foundation co-founder Keone Hon said. Monad is a high-performance, fully EVM-compatible Layer 1 blockchain designed to support Ethereum-like smart contracts while achieving 10,000 transactions per second (TPS), 400ms block times, and sub-second finality with near-zero fees. The blockchain launched in November 2025. MetaMask, while primarily focused on Ethereum, has increasingly gone multi-chain, including native integrations for Solana and Bitcoin. In an October 2025 interview with The Block, Lubin confirmed Consensys is still planning to launch a MASK token. The wallet has also ramped up its consumer-focused release schedule in recent months. Earlier this month, the team unveiled a major Agent Wallet release, providing AI agents access to Ethereum, and earlier this year integrated tokenized U.S. stocks, ETFs, and commodities via Ondo Global Markets. Disclaimer: The Block is an independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a majority investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange Bitget is an anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective, impactful, and timely information about the crypto industry. Here are our current financial disclosures. © 2026 The Block. All Rights Reserved. This article is provided for informational purposes only. It is not offered or intended to be used as legal, tax, investment, financial, or other advice.
+
+===== DOC 9 2e70965a9127f257ac9a16eb53c3a7f2 =====
+TITLE: ECB may see a case for July move on a negative June inflation surprise - report | investingLive
+The report says that recent inflation developments has further taken pressure off the ECB for a move in July, although there is still a case to be made if the June numbers are "nasty". According to the sources cited, all with direct knowledge of the situation, policymakers were surprised by how quickly oil prices have eased in the past two weeks especially. As such, they believe that the normalisation of the energy market is already well underway. Given the circumstances, a rate hike in September remains the more likely scenario for now but the sources note that the June inflation data tomorrow will still carry significant weight. One of the sources said that if the headline figure does fall back from 3.2% "as markets now anticipate it would", then waiting until September will be the better option. However, a negative upside surprise would strengthen the case for a follow up move in July. Well, we will already get a bit of a taste of what to expect from today with Germany, France, and Italy all reporting inflation numbers for June later. That will set the tone on what to expect for the overall Eurozone estimate tomorrow. Looking to market pricing, traders are pricing in ~34% odds of a move in July with that nearly doubling by the time we get to September. Another full 25 bps rate hike is fully priced in by the time we get to October, with ~30 bps of rate hikes priced in by year-end.
+
+===== DOC 10 2e8e2b97596e047086da784993e52f90 =====
+TITLE: Bitmine ETH Buys Overshadowed By $345M ETF Outflow
+Bitmine Ether buys eclipsed by $345M ETH ETF $345M outflows: Is sub $1.5K next? Tokenization and RWA TVL growth highlight Ethereum’s fundamentals, but stagnant DApps and spot ETF outflows keep the pressure on ETH price. Key takeaways: - The Spot Ether ETF outflows overwhelmed BitMine’s ETH accumulation, raising the chance of a drop below the $1,500 support. - Falling DApps revenue and weak staking yields highlight limited ecosystem incentives despite tokenization potential. Ether (ETH) has failed to sustain prices above $1,600 since Thursday, following the broader cryptocurrency market's downtrend. Lower oil prices created a positive tone that fueled investors’ hopes for more expansionist monetary policy. That setup favors stocks and pushes bond yields higher. Traders now fear that ETH will not hold the $1,500 support level for long. Spot Ether ETF outflows void the impact of accumulation from Ether treasury companies. ETH/USD (orange) vs. Total crypto market cap (blue). Source: TradingView Ether price has declined 31% since May and underperformed the total cryptocurrency market capitalization by 8% over that period. US-listed Ether ETFs saw $345 million in net outflows since June 17, which more than offset the $182 million in ETH accumulation from BitMine Immersion (BMNR US) and Sharplink (SBET US) during the same period. Regulatory setbacks, AI competition and weak Ethereum onchain metrics Several factors appear to have held back investor appetite, including regulatory uncertainty in the United States. Meanwhile, the stock market continues to draw attention thanks to strong earnings and lower inflation expectations. The Digital Asset Market CLARITY Act has awaited a Senate vote since May 15. The bill ends regulation-by-enforcement and clarifies which tokens count as securities. Yet it has faced pushback from lawmakers over provisions regarding stablecoin yields and anti-money-laundering standards. Democratic lawmakers voiced ethical concerns about the Trump family’s ties to crypto and its role in the World Liberty Financial platform. Most view the CLARITY Act as a positive catalyst for the decentralized finance (DeFi) sector. So ongoing uncertainty around approval hurts institutional demand for ETH. The artificial intelligence sector now competes with blockchain for data processing as cloud providers deliver services through agentic architectures. Enterprise software leader SAP (SAP DE) has integrated autonomous, modular AI agents natively across multi-vendor clouds, enabling peer-to-peer collaboration. Ether investors also feel disappointment from stagnant Ethereum network fees and decentralized applications (DApps) revenues. As a result, ETH supply becomes inflationary, staking yields remain limited, and fewer incentives exist for ecosystem growth, since part of DApps' revenue flows back to users. Ethereum monthly network chain fees vs. DApps revenue, USD. Source: DefiLlama Ethereum network fees reached only $10.7 million in June, down from $24.4 million in April. DApps revenue hit $51.7 million in June, down from $64.8 million two months earlier. Top contributors included Sky (formerly Maker) at $12.7 million, Titan Builder at $7.2 million, and Chainlink at $4.6 million. Ethereum supporters argue that tokenization remains in its early innings. The long-term growth potential should create enough blockchain demand to support a much higher ETH valuation. Related: Ether treasury Sharplink bought $62.4M ETH last week Ethereum real world assets (RWA) active market capitalization, USD. Source: DefiLlama While real world assets (RWA) show real promise, the $14.5 billion in tokenized market cap on Ethereum has yet to spark meaningful DeFi activity. With a 2.7% staking yield and weak onchain metrics, the odds of ETH breaking below $1,500 remain in play. More on the subject
+
+===== DOC 11 2ecb1e4dd9c4909de6c0f148eafd723d =====
+TITLE: AUD/USD Price Forecast: Likely extend decline below 0.6830 | FXStreet
+The Australian Dollar (AUD) reflects a mixed performance against its major currency peers during the European trading session on Tuesday, following the release of the Reserve Bank of Australia (RBA) monetary policy meeting minutes. Australian Dollar Price Today The table below shows the percentage change of Australian Dollar (AUD) against listed major currencies today. Australian Dollar was the strongest against the Swiss Franc. | USD | EUR | GBP | JPY | CAD | AUD | NZD | CHF | | |---|---|---|---|---|---|---|---|---| | USD | 0.20% | 0.11% | 0.19% | 0.15% | 0.17% | -0.07% | 0.20% | | | EUR | -0.20% | -0.07% | -0.02% | -0.08% | -0.04% | -0.29% | -0.01% | | | GBP | -0.11% | 0.07% | 0.06% | 0.00% | 0.06% | -0.19% | 0.07% | | | JPY | -0.19% | 0.02% | -0.06% | -0.05% | -0.04% | -0.25% | -0.01% | | | CAD | -0.15% | 0.08% | -0.00% | 0.05% | 0.00% | -0.21% | 0.04% | | | AUD | -0.17% | 0.04% | -0.06% | 0.04% | -0.00% | -0.21% | 0.05% | | | NZD | 0.07% | 0.29% | 0.19% | 0.25% | 0.21% | 0.21% | 0.24% | | | CHF | -0.20% | 0.01% | -0.07% | 0.00% | -0.04% | -0.05% | -0.24% | The heat map shows percentage changes of major currencies against each other. The base currency is picked from the left column, while the quote currency is picked from the top row. For example, if you pick the Australian Dollar from the left column and move along the horizontal line to the US Dollar, the percentage change displayed in the box will represent AUD (base)/USD (quote). The RBA policy minutes of the June meeting showed that policymakers are worried about higher inflationary pressures and downside growth risks in the wake of the Middle East conflicts and stated that the central bank won’t hesitate to raise interest rates to ensure price stability. However, the signing of the memorandum of understanding (MoU) between the United States (US) and Iran has eased Middle East risks. Meanwhile, strength in the US Dollar amid caution ahead of the US Nonfarm Payrolls (NFP) data for June is also hurting the pair. At press time, the US Dollar Index (DXY), which gauges the Greenback’s value against six major currencies, trades 0.2% higher to near 101.36. In Tuesday’s session, investors will focus on the US JOLTS Job Openings data for May, which will be published at 14:00 GMT. AUD/USD technical analysis AUD/USD trades lower at around 0.6875, maintaining a bearish near-term bias as the price holds below the 20-period exponential moving average (EMA) at 0.6990. The pair has been sliding steadily, and the EMA now acts as immediate overhead supply, hinting that rebounds are likely to be capped while this barrier remains intact. The Relative Strength Index (14) sits deep in oversold territory near 26, which suggests selling pressure is stretched but not yet signaling a confirmed reversal. On the topside, initial resistance is located at the 20-day EMA around 0.6990, and a sustained break above this level would be needed to ease the current downside pressure and open the way for a corrective recovery towards 0.7100. Looking down, the pair could extend its decline towards 0.6800 and the January 7 high of 0.6766 if it drops below the March 30 low of 0.6833. (The technical analysis of this story was written with the help of an AI tool.) Economic Indicator RBA Meeting Minutes The minutes of the Reserve Bank of Australia meetings are published two weeks after the interest rate decision. The minutes give a full account of the policy discussion, including differences of view. They also record the votes of the individual members of the Committee. Generally speaking, if the RBA is hawkish about the inflationary outlook for the economy, then the markets see a higher possibility of a rate increase, and that is positive for the AUD. Read more.Last release: Tue Jun 30, 2026 01:30 Frequency: Weekly Actual: - Consensus: - Previous: - Source: Reserve Bank of Australia The Reserve Bank of Australia (RBA) publishes the minutes of its monetary policy meeting two weeks after the interest rate decision is announced. It provides a detailed record of the discussions held between the RBA’s board members on monetary policy and economic conditions that influenced their decision on adjusting interest rates and/or bond buys, significantly impacting the AUD. The minutes also reveal considerations on international economic developments and the exchange rate value. Author Sagar Dua is associated with the financial markets from his college days. Along with pursuing post-graduation in Commerce in 2014, he started his markets training with chart analysis.
+
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids = {3,4,6}
+with open('all_batch_049.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        if i in ids:
+            obj = json.loads(line)
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:', obj['title'])
+            print(obj['body_text'])
+            print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 3 2cf61c693aee315d69d218b23779e1db =====
+TITLE: Hoffman & Hoffman Enters Florida Market with Acquisition of Aeromechanical, LLC
+Expansion into Gulf Breeze, FL, marks Hoffman & Hoffman's first presence in the Gulf Coast market. GREENSBORO, N.C., June 30, 2026 /PRNewswire/ -- Hoffman & Hoffman, an employee-owned HVAC equipment representative headquartered in Greensboro, NC, has acquired Aeromechanical, LLC, a respected commercial HVAC provider based in Gulf Breeze, FL. This marks Hoffman & Hoffman's first expansion into Florida, building on the company's Southeastern footprint as it invests in customer relationships and new opportunities across the Gulf Coast. Hoffman & Hoffman and Aeromechanical share a common foundation: a belief that strong customer relationships and technical excellence go hand in hand. Hoffman & Hoffman brings nearly 80 years of experience representing leading HVAC manufacturers and supporting complex projects across the Southeast, while Aeromechanical contributes deep familiarity with Gulf Coast applications and a portfolio of specialized air distribution products tailored to the region's needs. Together, the companies will deliver a broader range of solutions backed by a united, service‑driven team. "Aeromechanical has built its business on being a trusted resource for customers along the Gulf Coast," said Brian Carstens, President of Aeromechanical, LLC. "Joining Hoffman & Hoffman allows us to keep that focus while adding more tools, more support, and more ways to solve problems. We're combining our strengths to deliver a better experience for the customers we serve." Aeromechanical will continue operating from its Gulf Breeze location with the same leadership team and the same commitment to delivering results. Customers will continue to work with the Aeromechanical people they know, while benefiting from access to Hoffman & Hoffman's broader resources and expertise. "Aeromechanical has a great passion for serving customers. Our goal with this partnership is to strengthen both organizations, creating more value for customers," said Jim Mangini, President of Hoffman & Hoffman, Inc. "Aeromechanical's local relationships, knowledge of the Gulf Coast, and its commitment to service are a perfect fit with Hoffman & Hoffman. By combining our expertise, we're not changing who either company is — we're raising the ceiling on what both companies can achieve." About Aeromechanical, LLC Aeromechanical, LLC is based in Gulf Breeze, Florida, and provides air distribution and HVAC solutions to customers along the Gulf Coast. The company is recognized for its specialized product knowledge, responsive support, and focus on helping contractors, engineers, and facility stakeholders deliver reliable, efficient systems.
+
+===== DOC 4 2d57a8f89b934239697ffe70e73bf454 =====
+TITLE: Fire at petrochemical plant in eastern India injures at least 20 people
+Fire at petrochemical plant in eastern India injures at least 20 people Fire at petrochemical plant in eastern India injures at least 20 people NEW DELHI (AP) — A fire at a petrochemical plant in eastern India injured at least 20 people, five of them critically, police said. The blaze broke out Tuesday in a naphtha pipeline at a facility operated by Haldia Petrochemicals and quickly spread to nearby homes in West Bengal’s Purba Medinipur district, about 130 kilometers (80 miles) southwest of the state capital, Kolkata. Firefighters used 12 fire engines to bring the blaze under control, while the injured were rescued and taken to nearby hospitals, police said. The injured included plant workers and at least two security guards. Video from the scene showed firefighters dousing the blaze with water as thick black smoke rose from the burning pipeline. Naphtha is a highly flammable petroleum product used in the production of fuels and other chemicals. The cause of the fire was not immediately known. Haldia Petrochemicals said in a statement it was investigating the incident.
+
+===== DOC 6 2e0e8aab47453913f37b42c5643d6a0d =====
+TITLE: The USDJPY squeeze higher continues. | investingLive
+The USDJPY has broken above the 2024 high near 161.95/97 (depending on the data source), and the breakout has been accompanied by strong buying momentum. The pair initially surged to 162.399 before rotating lower, but buyers stepped in at 162.04—just 7 to 9 pips above the breakout area—confirming the old resistance level as new support. Later in the North American session, the pair pushed to a fresh high of 162.508 before another sharp pullback took the price to 162.025. Once again, buyers quickly entered, driving the pair back above 162.30, where it has remained firmly supported. The rebound has since extended to a new intraday high of 162.656 as London and European traders head for the exits, highlighting the market's underlying bullish bias. From a longer-term perspective, the next major upside target comes in near the November 1986 high at 164.50. A sustained move above that level would open the door for an even stronger upside extension and could trigger another wave of momentum buying. What would hurt the bullish bias is now? If the price cannot moved below the 161.92 up to 162.04 (see yellow area on the chart), and stay below, the sellers are not winning. That would be the first target. Below that, and the 100 hour MA and the 200 hour MA at 161.87 and 161.66 respectively would need to be broken and stay broken to break the back of the buyers. The squeeze is still on for the USDJPY. Yes, there may be a fast move lower at some point from intervention, but until then and until the aforementioned support target levels are broken, shorts will feel the pain.
+
+
+codex
+I have enough context to write the batch. I’m generating the JSONL directly from the 12 documents now, keeping the original order and leaving `facts` empty where the article doesn’t contain explicit market-relevant claims.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from collections import OrderedDict
+
+facts_by_id = {
+  '2c783217566f6c27c7067990655a9e8f': [
+    {
+      'claim': 'A Michigan circuit court judge temporarily barred Kalshi from offering sports prediction markets in the state for 14 days.',
+      'subject': 'Kalshi',
+      'predicate': 'policy_action',
+      'object': 'sports prediction markets in Michigan',
+      'direction': 'down',
+      'magnitude': '14 days',
+      'time': '2026-06-30',
+      'cause': 'A Michigan judge found the state would suffer irreparable harm if Kalshi continued offering the markets while the case proceeds.',
+      'entities': ['Kalshi', 'Michigan'],
+      'confidence': 0.98
+    },
+    {
+      'claim': 'Kalshi blocked users in Michigan from accessing sports-related wagers after the court ruling.',
+      'subject': 'Kalshi',
+      'predicate': 'corporate_action',
+      'object': 'Michigan users',
+      'direction': 'down',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': 'A Michigan court issued a temporary restraining order against Kalshi sports markets in the state.',
+      'entities': ['Kalshi', 'Michigan'],
+      'confidence': 0.96
+    }
+  ],
+  '2c7e6e9c9e0534af8fcc239f0a67320a': [
+    {
+      'claim': 'Ford Motor Company has 5,000 fewer workers than it did in 2020.',
+      'subject': 'Ford Motor Company',
+      'predicate': 'corporate_action',
+      'object': None,
+      'direction': 'down',
+      'magnitude': '5,000 fewer workers',
+      'time': 'since 2020',
+      'cause': None,
+      'entities': ['Ford Motor Company'],
+      'confidence': 0.86
+    },
+    {
+      'claim': 'Over the past three years, Ford Motor Company hired 350 veteran engineers, including former Ford employees and workers from suppliers.',
+      'subject': 'Ford Motor Company',
+      'predicate': 'corporate_action',
+      'object': 'veteran engineers',
+      'direction': 'up',
+      'magnitude': '350',
+      'time': 'over the past three years',
+      'cause': 'Ford said AI-powered cameras used for design and manufacturing checks were prone to pitfalls and needed deeper technical expertise.',
+      'entities': ['Ford Motor Company'],
+      'confidence': 0.89
+    }
+  ],
+  '2cf61c693aee315d69d218b23779e1db': [
+    {
+      'claim': 'Hoffman & Hoffman acquired Aeromechanical, LLC.',
+      'subject': 'Hoffman & Hoffman',
+      'predicate': 'deal_or_contract',
+      'object': 'Aeromechanical, LLC',
+      'direction': 'up',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['Hoffman & Hoffman', 'Aeromechanical, LLC'],
+      'confidence': 0.99
+    },
+    {
+      'claim': 'The acquisition gives Hoffman & Hoffman its first expansion into Florida and its first presence in the Gulf Coast market.',
+      'subject': 'Hoffman & Hoffman',
+      'predicate': 'corporate_action',
+      'object': 'Florida and the Gulf Coast market',
+      'direction': 'up',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': 'Hoffman & Hoffman acquired Aeromechanical, LLC.',
+      'entities': ['Hoffman & Hoffman', 'Aeromechanical, LLC', 'Florida'],
+      'confidence': 0.95
+    }
+  ],
+  '2d57a8f89b934239697ffe70e73bf454': [
+    {
+      'claim': 'A fire at a naphtha pipeline in a Haldia Petrochemicals facility in eastern India injured at least 20 people, including five critically.',
+      'subject': 'Haldia Petrochemicals',
+      'predicate': 'event',
+      'object': 'naphtha pipeline at its facility',
+      'direction': 'na',
+      'magnitude': 'at least 20 injured; five critically',
+      'time': 'Tuesday',
+      'cause': None,
+      'entities': ['Haldia Petrochemicals', 'India'],
+      'confidence': 0.95
+    }
+  ],
+  '2d770e68d0fbaa226f5032695ed10bc6': [
+    {
+      'claim': 'The UK defence plan says defence spending will increase to nearly £80 billion a year by 2029.',
+      'subject': 'United Kingdom',
+      'predicate': 'policy_action',
+      'object': 'defence spending',
+      'direction': 'up',
+      'magnitude': 'nearly £80 billion a year',
+      'time': 'by 2029',
+      'cause': 'The government announced a Defence Investment Plan.',
+      'entities': ['United Kingdom'],
+      'confidence': 0.97
+    },
+    {
+      'claim': 'The UK defence plan puts military expenditure on a path to 3% of GDP and is a road map to Nato’s 3.5% of GDP target by 2035.',
+      'subject': 'United Kingdom',
+      'predicate': 'policy_action',
+      'object': 'military expenditure',
+      'direction': 'up',
+      'magnitude': '3% of GDP; 3.5% of GDP by 2035',
+      'time': 'by 2035',
+      'cause': 'The government announced a Defence Investment Plan.',
+      'entities': ['United Kingdom', 'NATO'],
+      'confidence': 0.95
+    }
+  ],
+  '2e0e8aab47453913f37b42c5643d6a0d': [
+    {
+      'claim': 'USD/JPY broke above the 2024 high near 161.95 to 161.97 and later rose to a new intraday high of 162.656.',
+      'subject': 'USD/JPY',
+      'predicate': 'price_move',
+      'object': 'Japanese yen',
+      'direction': 'up',
+      'magnitude': '162.656',
+      'time': '2026-06-30',
+      'cause': 'The breakout was accompanied by strong buying momentum.',
+      'entities': ['USD/JPY', 'Japanese yen', 'US dollar'],
+      'confidence': 0.97
+    },
+    {
+      'claim': 'The article says the next major upside target for USD/JPY is near the November 1986 high at 164.50.',
+      'subject': 'USD/JPY',
+      'predicate': 'forecast',
+      'object': None,
+      'direction': 'up',
+      'magnitude': '164.50',
+      'time': 'longer-term',
+      'cause': 'USD/JPY broke above the 2024 high and buyers repeatedly defended the breakout area as support.',
+      'entities': ['USD/JPY'],
+      'confidence': 0.9
+    }
+  ],
+  '2e18171da48a67c8d4fb8526d85250c7': [
+    {
+      'claim': 'MetaMask launched Money Account, a new self-custodial feature inside its wallet.',
+      'subject': 'MetaMask',
+      'predicate': 'corporate_action',
+      'object': 'Money Account',
+      'direction': 'up',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['MetaMask', 'Money Account'],
+      'confidence': 0.99
+    },
+    {
+      'claim': 'MetaMask said Money Account lets users earn up to 4% variable APY on mUSD holdings.',
+      'subject': 'mUSD',
+      'predicate': 'forecast',
+      'object': 'Money Account users',
+      'direction': 'up',
+      'magnitude': 'up to 4% variable APY',
+      'time': '2026-06-30',
+      'cause': 'Money Account generates yield through DeFi vaults, initially on Morpho.',
+      'entities': ['MetaMask', 'mUSD', 'Morpho'],
+      'confidence': 0.96
+    },
+    {
+      'claim': 'MetaMask built Money Account on Monad, which will serve as its home chain.',
+      'subject': 'MetaMask',
+      'predicate': 'corporate_action',
+      'object': 'Monad',
+      'direction': 'na',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['MetaMask', 'Monad'],
+      'confidence': 0.97
+    },
+    {
+      'claim': 'The announcement says supported stablecoins including USDC, USDT and DAI can be converted to mUSD at 1:1 parity with no conversion fees.',
+      'subject': 'mUSD',
+      'predicate': 'corporate_action',
+      'object': 'supported stablecoins',
+      'direction': 'na',
+      'magnitude': '1:1 parity with no conversion fees',
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['mUSD', 'USDC', 'USDT', 'DAI'],
+      'confidence': 0.95
+    },
+    {
+      'claim': 'The article says mUSD currently has a market cap of "'$32 million.'"',
+      'subject': 'mUSD',
+      'predicate': 'other',
+      'object': None,
+      'direction': 'na',
+      'magnitude': '"'$32 million'"',
+      'time': 'currently',
+      'cause': None,
+      'entities': ['mUSD'],
+      'confidence': 0.92
+    }
+  ],
+  '2e248d0efbcaef220eb81fec7714d3ad': [],
+  '2e70965a9127f257ac9a16eb53c3a7f2': [
+    {
+      'claim': 'According to sources cited in the report, recent inflation developments have taken pressure off the ECB for a rate move in July.',
+      'subject': 'European Central Bank',
+      'predicate': 'statement',
+      'object': 'July rate move',
+      'direction': 'down',
+      'magnitude': None,
+      'time': '2026-06-30',
+      'cause': 'ECB policymakers were surprised by how quickly oil prices had eased in the previous two weeks and believed energy market normalization was underway.',
+      'entities': ['European Central Bank', 'oil'],
+      'confidence': 0.88
+    },
+    {
+      'claim': 'According to the report, a rate hike in September remains more likely than a move in July for the ECB.',
+      'subject': 'European Central Bank',
+      'predicate': 'forecast',
+      'object': None,
+      'direction': 'up',
+      'magnitude': None,
+      'time': 'September',
+      'cause': 'Recent easing in oil prices has reduced pressure for a July move.',
+      'entities': ['European Central Bank', 'oil'],
+      'confidence': 0.86
+    },
+    {
+      'claim': 'The report says traders were pricing about a 34% chance of an ECB move in July, with odds nearly doubling by September.',
+      'subject': 'European Central Bank',
+      'predicate': 'forecast',
+      'object': None,
+      'direction': 'up',
+      'magnitude': '~34% odds in July',
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['European Central Bank'],
+      'confidence': 0.93
+    },
+    {
+      'claim': 'The report says a full 25 basis point ECB rate hike was fully priced by October, with about 30 basis points of hikes priced by year-end.',
+      'subject': 'European Central Bank',
+      'predicate': 'forecast',
+      'object': None,
+      'direction': 'up',
+      'magnitude': '25 bps by October; ~30 bps by year-end',
+      'time': 'by October and year-end',
+      'cause': None,
+      'entities': ['European Central Bank'],
+      'confidence': 0.94
+    }
+  ],
+  '2e8e2b97596e047086da784993e52f90': [
+    {
+      'claim': 'Ether failed to sustain prices above "'$1,600 since Thursday.'"',
+      'subject': 'Ether',
+      'predicate': 'price_move',
+      'object': 'US dollar',
+      'direction': 'down',
+      'magnitude': '"'$1,600'"',
+      'time': 'since Thursday',
+      'cause': 'The broader cryptocurrency market was in a downtrend.',
+      'entities': ['Ether', 'US dollar'],
+      'confidence': 0.95
+    },
+    {
+      'claim': 'Ether price declined 31% since May and underperformed the total cryptocurrency market capitalization by 8% over that period.',
+      'subject': 'Ether',
+      'predicate': 'price_move',
+      'object': 'total cryptocurrency market capitalization',
+      'direction': 'down',
+      'magnitude': '31%; 8%',
+      'time': 'since May',
+      'cause': None,
+      'entities': ['Ether'],
+      'confidence': 0.97
+    },
+    {
+      'claim': 'US-listed Ether ETFs recorded "'$345 million in net outflows since June 17.'"',
+      'subject': 'US-listed Ether ETFs',
+      'predicate': 'demand_change',
+      'object': 'Ether',
+      'direction': 'down',
+      'magnitude': '"'$345 million'"',
+      'time': 'since June 17',
+      'cause': None,
+      'entities': ['US-listed Ether ETFs', 'Ether'],
+      'confidence': 0.98
+    },
+    {
+      'claim': 'BitMine Immersion and Sharplink accumulated "'$182 million in Ether since June 17.'"',
+      'subject': 'BitMine Immersion and Sharplink',
+      'predicate': 'corporate_action',
+      'object': 'Ether',
+      'direction': 'up',
+      'magnitude': '"'$182 million'"',
+      'time': 'since June 17',
+      'cause': None,
+      'entities': ['BitMine Immersion', 'Sharplink', 'Ether'],
+      'confidence': 0.97
+    },
+    {
+      'claim': 'Ethereum network fees were "'$10.7 million in June, down from $24.4 million in April.'"',
+      'subject': 'Ethereum',
+      'predicate': 'demand_change',
+      'object': 'network fees',
+      'direction': 'down',
+      'magnitude': '"'$10.7 million from $24.4 million'"',
+      'time': 'June',
+      'cause': None,
+      'entities': ['Ethereum'],
+      'confidence': 0.96
+    },
+    {
+      'claim': 'Ethereum DApps revenue was "'$51.7 million in June, down from $64.8 million two months earlier.'"',
+      'subject': 'Ethereum',
+      'predicate': 'demand_change',
+      'object': 'DApps revenue',
+      'direction': 'down',
+      'magnitude': '"'$51.7 million from $64.8 million'"',
+      'time': 'June',
+      'cause': None,
+      'entities': ['Ethereum'],
+      'confidence': 0.96
+    },
+    {
+      'claim': 'Ethereum real world assets had a tokenized market capitalization of "'$14.5 billion.'"',
+      'subject': 'Ethereum',
+      'predicate': 'other',
+      'object': 'real world assets',
+      'direction': 'na',
+      'magnitude': '"'$14.5 billion'"',
+      'time': '2026-06-30',
+      'cause': None,
+      'entities': ['Ethereum'],
+      'confidence': 0.93
+    }
+  ],
+  '2ecb1e4dd9c4909de6c0f148eafd723d': [
+    {
+      'claim': 'The RBA June meeting minutes said policymakers were concerned about higher inflationary pressures and downside growth risks because of Middle East conflicts.',
+      'subject': 'Reserve Bank of Australia',
+      'predicate': 'statement',
+      'object': None,
+      'direction': 'na',
+      'magnitude': None,
+      'time': 'June meeting minutes',
+      'cause': 'Middle East conflicts',
+      'entities': ['Reserve Bank of Australia', 'Australia', 'Middle East'],
+      'confidence': 0.95
+    },
+    {
+      'claim': 'The RBA June meeting minutes said the central bank will not hesitate to raise interest rates to ensure price stability.',
+      'subject': 'Reserve Bank of Australia',
+      'predicate': 'statement',
+      'object': 'interest rates',
+      'direction': 'up',
+      'magnitude': None,
+      'time': 'June meeting minutes',
+      'cause': 'To ensure price stability.',
+      'entities': ['Reserve Bank of Australia', 'Australia'],
+      'confidence': 0.95
+    },
+    {
+      'claim': 'The US Dollar Index was up 0.2% to near 101.36 during the session.',
+      'subject': 'US Dollar Index',
+      'predicate': 'price_move',
+      'object': None,
+      'direction': 'up',
+      'magnitude': '0.2% to near 101.36',
+      'time': '2026-06-30',
+      'cause': 'Investors were cautious ahead of the June US nonfarm payrolls data.',
+      'entities': ['US Dollar Index', 'US dollar'],
+      'confidence': 0.96
+    },
+    {
+      'claim': 'AUD/USD traded around 0.6875 and the article said the pair could extend its decline toward 0.6800 and 0.6766 if it falls below 0.6833.',
+      'subject': 'AUD/USD',
+      'predicate': 'forecast',
+      'object': None,
+      'direction': 'down',
+      'magnitude': '0.6800 and 0.6766',
+      'time': '2026-06-30',
+      'cause': 'US dollar strength and caution ahead of US nonfarm payrolls were hurting the pair.',
+      'entities': ['AUD/USD', 'Australian dollar', 'US dollar'],
+      'confidence': 0.93
+    }
+  ],
+  '2ed0ccb53f4e2a2e11ea8f4364fc45eb': []
+}
+
+input_path = 'all_batch_049.jsonl'
+output_path = 'all_facts_049.jsonl'
+count_docs = 0
+count_facts = 0
+with open(input_path) as fin, open(output_path, 'w') as fout:
+    for line in fin:
+        obj = json.loads(line)
+        facts = facts_by_id.get(obj['doc_id'])
+        if facts is None:
+            raise KeyError(f\"Missing facts for doc_id {obj['doc_id']}\")
+        out = OrderedDict([
+            ('doc_id', obj['doc_id']),
+            ('title', obj['title']),
+            ('facts', facts),
+        ])
+        fout.write(json.dumps(out, ensure_ascii=True) + '\\n')
+        count_docs += 1
+        count_facts += len(facts)
+print(f'{count_docs} docs processed, {count_facts} total facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 docs processed, 31 total facts
+
+codex
+12 docs processed, 31 total facts
+tokens used
+39,837
+12 docs processed, 31 total facts

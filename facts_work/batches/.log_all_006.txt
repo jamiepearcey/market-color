@@ -1,0 +1,994 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fac-f711-7b23-bf99-c9b2448b8228
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_006.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_006.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_006.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:54:21.778557Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_006.jsonl` to confirm the schema and content patterns, then I’ll generate `all_facts_006.jsonl` directly from that file only.
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc 'wc -l all_batch_006.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_006.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print('DOC',i)
+        print(obj.keys())
+        print(obj['doc_id'])
+        print(obj['title'][:300])
+        print(obj['body_text'][:800].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+049082b706256a07176af2f5c7b0a5bb
+My Nasdaq analysis today sees bulls are better but this is not yet a breakout | investingLive
+Nasdaq futures analysis today: NQ repair is constructive, but 29,760 still matters Nasdaq futures are showing a mild bullish repair today, but not a confirmed bullish takeover yet. My blended NQ read is +2 / +10, with medium confidence, because the 30-minute chart shows higher value migration and price remains above the key 29,670 area, but the shorter-term structure shows that buyers have not yet accepted above 29,745-29,760. Key takeaways for Nasdaq traders today - Current NQ bias: Bullish repair, but not full bullish control. - Prediction score: +2 / +10, meaning buyers have a mild edge, but still need confirmation. - Main upside gate: 29,745-29,760. This area was tested and rejected for now. - Bull-bear pivot: 29,670-29,685. Holding this area keeps the repair alive. - Main downside ris
+---
+DOC 2
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+05d505be1cbcc41dfc4d26122a91b501
+Can NATO Pull Off a Dull Summit?
+Can NATO Pull Off a Dull Summit? European countries are hoping that Erdogan can keep Trump from causing chaos. Welcome to FP Free Week. To celebrate America’s 250th birthday, our entire site is completely unlocked this week only. Enjoy the article. U.S. President Donald Trump revels in his reputation as a disruptor. Europe has typically been on the receiving end. Cozying up to Russian President Vladimir Putin, calling for the seizure of Greenland, slapping arbitrary tariffs on the European Union, forging alliances with insurgent parties and politicians on the far right, threatening to punish NATO allies for not backing the United States against Iran—there has been no shortage of drama in trans-Atlantic relations since he took office last January. But as NATO’s annual summit in Ankara, Turk
+---
+DOC 3
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+069803fbe283cc6edf0a7fbeb71f4747
+Sixty-six years on: The promise of DRC independence remains unfulfilled
+Bunia, Democratic Republic of the Congo – It was Thursday, June 30, 1960, when Belgian and Congolese dignitaries gathered at the Palais de la Nation in Kinshasa, then known as Leopoldville, for a ceremony marking the end of more than seven decades of colonial rule. On that day, King Baudouin I formally declared the independence of the Democratic Republic of the Congo (DRC). Outside, Kinshasa’s streets filled with scenes of jubilation as long-awaited freedom was proclaimed, albeit reluctantly, by the Belgian colonial administration. “It was unintentionally that the Belgians had declared the DRC’s independence. Many people in Belgian circles believed that the country should gain its independence around the 1980s. Generally speaking, they wanted to continue exploiting our country’s natural re
+---
+
+codex
+I’ve confirmed there are 12 documents. Next I’m scanning all titles and source/date metadata so I can separate market-bearing items from non-market narrative pieces before extracting facts.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i:02d}\\t{obj['doc_id']}\\t{obj['published_date']}\\t{obj['source_name']}\\t{obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+01	049082b706256a07176af2f5c7b0a5bb	2026-06-29	ForexLive	My Nasdaq analysis today sees bulls are better but this is not yet a breakout | investingLive
+02	05d505be1cbcc41dfc4d26122a91b501	2026-06-29	Foreign Policy	Can NATO Pull Off a Dull Summit?
+03	069803fbe283cc6edf0a7fbeb71f4747	2026-06-29	Al Jazeera	Sixty-six years on: The promise of DRC independence remains unfulfilled
+04	06ed9d75a79b3c7cf15bac79099a4904	2026-06-29	FXStreet News	Singapore Dollar: Consolidates near recent lows against US Dollar – UOB | FXStreet
+05	0700e949ce25fcf039a5d83ee9a98e05	2026-06-29	BBC Business	Hollywood director Carl Rinsch gets two and half years in prison for defrauding Netflix
+06	074b4b0abc8f8b07162ca3be619d65f5	2026-06-29	Nikkei Asia	Takaichi and Modi to agree on supporting ammonia production
+07	07e482a766e44439c464d30d429e20c2	2026-06-29	AP Top News	Nvidia's AI chip sales in China stall, as local chipmakers like Huawei take the lead
+08	08012417589cf84e7afa80f910628a10	2026-06-29	FXStreet News	Micron claws its way back to positive territory after deep sell-off | FXStreet
+09	09ab082de6c7ae3b992da4fc86eba999	2026-06-29	FXStreet News	Silver Price Forecast: XAG stays below $60 as death cross threat looms | FXStreet
+10	09db722a8faad64682eb6abf5aadcc44	2026-06-29	AP Top News	Serena Williams' return at Wimbledon is 'the ticket to have' for the grass-court Grand Slam
+11	0cb5187f8e497e62a3f6617e84161e1d	2026-06-29	Metal.com (SMM)	Guangdong Chuanhong Invites You to the 2026 SMM (3rd) South China Non-ferrous Metals Annual Conference - Shanghai Metals Market (SMM)
+12	0d85db986184582cc436d829cc2ced91	2026-06-29	AP Top News	Virginia to allow recreational marijuana to be sold in retail stores beginning in 2027
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        text=(obj['title']+' '+obj['body_text']).lower()
+        keys=['stock','shares','oil','gold','bond','yield','rate','tariff','sanction','opec','fed','ecb','boe','boj','inflation','gdp','export','import','production','forecast','acquisition','deal','contract','earnings','revenue','profit','nasdaq','s&p','dow','bitcoin','crypto','nato']
+        hits=[k for k in keys if k in text]
+        print(f\"{i:02d}: {', '.join(hits[:12])}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+01: rate, import, nasdaq, dow
+02: yield, rate, tariff, deal, nato
+03: stock, rate
+04: dow
+05: rate, fed, production, deal, crypto
+06: production
+07: rate, export, import, production, revenue, dow
+08: stock, shares, rate, fed, production, profit, nasdaq
+09: gold, yield, rate, inflation, forecast, dow
+10: 
+11: export, import, revenue, profit, dow
+12: rate, fed, revenue
+
+codex
+Several items look non-market or only tangential. I’m pulling the full text for the likely relevant documents now so I can keep the output strict and avoid inventing facts from commentary pieces.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json, textwrap
+relevant={1,4,6,7,8,9,12}
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i not in relevant: continue
+        obj=json.loads(line)
+        print(f\"\\n===== DOC {i} {obj['doc_id']} =====\")
+        print(obj['title'])
+        print('DATE', obj['published_date'], 'SOURCE', obj['source_name'])
+        print(textwrap.fill(obj['body_text'][:5000].replace('\\n',' '), width=120))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+===== DOC 1 049082b706256a07176af2f5c7b0a5bb =====
+My Nasdaq analysis today sees bulls are better but this is not yet a breakout | investingLive
+DATE 2026-06-29 SOURCE ForexLive
+Nasdaq futures analysis today: NQ repair is constructive, but 29,760 still matters Nasdaq futures are showing a mild
+bullish repair today, but not a confirmed bullish takeover yet. My blended NQ read is +2 / +10, with medium confidence,
+because the 30-minute chart shows higher value migration and price remains above the key 29,670 area, but the shorter-
+term structure shows that buyers have not yet accepted above 29,745-29,760. Key takeaways for Nasdaq traders today -
+Current NQ bias: Bullish repair, but not full bullish control. - Prediction score: +2 / +10, meaning buyers have a mild
+edge, but still need confirmation. - Main upside gate: 29,745-29,760. This area was tested and rejected for now. - Bull-
+bear pivot: 29,670-29,685. Holding this area keeps the repair alive. - Main downside risk: A sustained move below 29,580
+would weaken the bullish repair case. What is the main Nasdaq futures story today? The 30-minute chart shows the bigger
+auction story. NQ rejected the lower 29,375-29,400 area, repaired through 29,500, then built a higher accepted shelf
+around 29,670. That is constructive. Sellers had a real opportunity to keep price below value after the earlier
+liquidation, but they failed to create sustained lower acceptance. That is one of the main reasons I am not treating
+this as a bearish chart. The shorter-term intraday view adds an important warning. NQ repaired from around 29,280 to
+almost 29,760, and value started migrating higher from the 29,480-29,530 area toward 29,630-29,725. That confirms a real
+repair, not just one isolated bounce. But the first serious push into 29,745-29,760 did not hold. Price rotated back
+toward 29,685, which means the market has not yet accepted the higher zone. That is why my read is +2 / +10, not +4 or
++5. The repair is real, but the breakout has not been confirmed. Why the Nasdaq futures score is only +2 today The
+30-minute chart alone looked more constructive because price reclaimed the 29,670 point of control area and remained
+above VWAP. However, the faster intraday structure shows a problem: the upper value gate near 29,745-29,760 was tested,
+but buyers did not hold it. Instead of accepting above that area, price rotated back inside value. On my -10 to +10
+scale, +2 means a mild bullish edge. It is constructive, but not strong enough to treat as a clean bullish breakout
+without confirmation above the next key level. Nasdaq futures support and resistance levels to watch | Nasdaq futures
+zone | Why it matters | |---|---| | 29,745-29,760 | Main upside gate. Tested and rejected for now. Needs acceptance to
+upgrade the bullish case. | | 29,783-29,800 | Next upside confirmation zone if 29,760 accepts. | | 29,720-29,725 |
+Latest upper high-volume area and rejected breakout shelf. Important intraday friction. | | 29,670-29,685 | Current
+bull-bear pivot. Holding above this area keeps the repair alive. | | 29,640-29,650 | First support shelf. Losing it
+would weaken the repair. | | 29,580 | VWAP area and bigger repair support. | | 29,520-29,525 | Deeper value support and
+repair invalidation area. | | 29,480-29,500 | Earlier accumulation and repair shelf. A return here would suggest the
+upper repair failed. | What does “acceptance” mean for Nasdaq traders? Acceptance means price is not only touching a
+level, but spending time above it, building value there, and defending pullbacks. That distinction matters today. NQ
+touched the upper gate near 29,745-29,760, but the market did not accept above it. A quick touch can be a trap.
+Acceptance would require price to hold above that zone and start treating it as new value. That is why 29,760 is the
+important upside confirmation level. Where is the best accumulation evidence? The best accumulation evidence is not at
+the highs. It is lower, around 29,380-29,530, where the market repeatedly failed to accept lower and then migrated value
+upward. The later acceptance around 29,650-29,670 is also constructive because it shows the repair was not immediately
+erased. At the highs, the read is different. The 29,745-29,760 area currently looks more like supply or failed breakout
+absorption. Buyers tried to push above it, but they have not yet converted that zone into accepted higher value. What
+would make this Nasdaq futures analysis more bullish? I would upgrade the NQ read toward +4 to +5 / +10 if price
+reclaims 29,745-29,760, holds above it, and starts building value in the 29,750-29,785 area. A clean push through
+29,783-29,800 with hold quality would suggest the repair is turning into a stronger bullish takeover attempt. The key
+phrase is “hold quality.” I do not only want to see a quick spike above resistance. I want to see price stay above it,
+defend pullbacks, and begin treating that higher zone as valid value. What would weaken or invalidate the bullish
+repair? I would downgrade the read toward neutral if 29,670 is lost and not quickly reclaimed. I would downgrade toward
+-1 to -2 / +10 if price accepts below the 29,580 VWAP area. That
+
+===== DOC 4 06ed9d75a79b3c7cf15bac79099a4904 =====
+Singapore Dollar: Consolidates near recent lows against US Dollar – UOB | FXStreet
+DATE 2026-06-29 SOURCE FXStreet News
+United Overseas Bank’s (UOB) Quek Ser Leang notes USD/SGD slipped to 1.2929 before recovering, with intraday price
+action still seen as range trading. For the day, the pair is expected to stay between 1.2930 and 1.2960. On a 1–3 week
+horizon, the bank keeps a constructive Dollar view while stressing that a break below 1.2925 would cap recent strength
+near 1.2991. Range holds as upside momentum eases "24-HOUR VIEW: When USD was at 1.2965 last Friday, we indicated that
+“the current price movements are likely part of a range-trading phase,” and we expected USD to “trade between 1.2950 and
+1.2980.” We did not expect USD to dip to a low of 1.2929. USD recovered from the low to close -0.16% lower at 1.2949.
+Despite the decline, there is no clear increase in downward momentum, and USD is unlikely to weaken much further. Today,
+USD is more likely to trade between 1.2930 and 1.2960." "1-3 WEEKS VIEW: Tracking our positive view from the middle of
+the month, we highlighted the following last Friday (26 Jun, spot at 1.2965): “Upward momentum has eased somewhat, and
+USD needs to build on its gain soon, or a breach of 1.2925 (‘strong support’ level) would indicate that the 1.2991 high
+seen two days ago is the extent of the current USD strength.” USD subsequently dipped to a low of 1.2929. While upward
+momentum continues to ease, we will maintain our view as long as 1.2925 (no change in ‘strong support’ level) continues
+to hold" (This article was created with the help of an Artificial Intelligence tool and reviewed by an editor.) Author
+The FXStreet Insights Team is a group of journalists that handpicks selected market observations published by renowned
+experts. The content includes notes by commercial as well as additional insights by internal and external analysts.
+
+===== DOC 6 074b4b0abc8f8b07162ca3be619d65f5 =====
+Takaichi and Modi to agree on supporting ammonia production
+DATE 2026-06-29 SOURCE Nikkei Asia
+TOKYO -- Japan and India are set to agree on funding a hydrogen and ammonia production project by Japan's IHI and
+India's ACME Group later this week when Indian Prime Minister Narendra Modi hosts counterpart Sanae Takaichi, Nikkei
+learned on Monday. Japan's IHI and India's ACME to join $3bn initiative as leaders deepen energy ties Japanese Prime
+Minister Sanae Takaichi will visit India this week to meet with her counterpart, Narendra Modi. Japan is set to
+subsidize ammonia production in India. (Source photos by Sae Kamae and Ken Suzuki) TOKYO -- Japan and India are set to
+agree on funding a hydrogen and ammonia production project by Japan's IHI and India's ACME Group later this week when
+Indian Prime Minister Narendra Modi hosts counterpart Sanae Takaichi, Nikkei learned on Monday.
+
+===== DOC 7 07e482a766e44439c464d30d429e20c2 =====
+Nvidia's AI chip sales in China stall, as local chipmakers like Huawei take the lead
+DATE 2026-06-29 SOURCE AP Top News
+Nvidia’s AI chip sales in China stall, as local chipmakers like Huawei take the lead Nvidia’s AI chip sales in China
+stall, as local chipmakers like Huawei take the lead HONG KONG (AP) — In the race between the U.S. and China to develop
+artificial intelligence, the battle over hardware and computing power is heating up as Chinese companies like Huawei
+overtake global industry leaders like Nvidia in their home market. Jensen Huang, the CEO of computer chip giant Nvidia,
+was mobbed by onlookers as he hit the streets for the “zhajiangmian” noodles while visiting Beijing during U.S.
+President Donald Trump’s May summit with Chinese leader Xi Jinping. But his celebrity status has not translated into
+success in selling Nvidia’s advanced chips in China. Controls imposed by Washington on exports of advanced technology
+due to national security concerns initially stalled sales of Nvidia’s advanced H200 AI chips there. By the time Huang
+won a reprieve, with Trump agreeing to their sale, Beijing had switched to encouraging use of domestically designed
+chips made by local rivals led by Huawei. Huang has acknowledged that the U.S. has lost its edge in China’s advanced AI
+chips market as Chinese competitors have become “giants.” “Well, we were in China for 30 years, and before the export
+control banned Nvidia out of China we had about 95% market share, and so we were competing just fine,” he said in a
+recent interview with The Associated Press. “We have to have, number one, make sure that we have national security and
+that we protect our nation, but we also simultaneously should go and compete and grow our technology industry and
+maximize our exports,” he said. Among Chinese chipmakers, Huawei leads Since the U.S. in 2019 excluded Huawei, and later
+China in general, from buying some of the world’s most powerful computer chips and chipmaking machinery, Chinese
+semiconductor makers have rushed to become self-sufficient, developing their own chips and knowhow. Santa Clara,
+California-based Nvidia and its main rival AMD, or Advanced Micro Devices, dominate in the U.S. AI chip sector and much
+of the global market, but Huawei has made big inroads in China as Chinese AI companies like DeepSeek drive a push for
+improved chip performance and cost-effectiveness. A report by Bernstein, a global equity research and brokerage firm,
+estimated that Nvidia had about a 40% market share in China’s AI chips market in 2025, roughly matched by Huawei.
+Bernstein has predicted Nvidia’s market share will shrink to around 8% this year, while Huawei’s will likely grow to
+about 50%. Nvidia “has definitely lost significant ground to Huawei, which (now) leads domestically,” said Antonia
+Hmaidi, with the Mercator Institute for China Studies who focuses on semiconductors. By some measures, Huawei’s most
+advanced commercial AI chips, the Ascend 950 series, can be seen as roughly comparable to Nvidia’s H200, considered in
+the industry to be among Nvidia’s most powerful products, according to industry analysts. “China now believes in its own
+self-sufficiency and supply capabilities,” said He Hui, director of semiconductor research at research and advisory firm
+Omdia. Last September, Huawei also said it was rolling out some of the world’s most powerful AI computing clusters,
+combining the power of thousands of chips like its global rivals, despite having to rely on Chinese-made semiconductors
+due to the U.S. export controls. Asked at a recent event about how Huawei’s chip technology compares its rivals’,
+including in the United States, He Tingbo, head of Huawei’s semiconductor business, said: “We have found pretty good
+solutions.” “Who can walk faster? Huawei or other companies? I don’t know the answer,” she said. “I think only time will
+tell.” Nvidia is still vital for Chinese AI The semiconductor supply chain is global and no single country can build an
+advanced AI chip on its own. Demand still exceeds available supply in China when it comes to AI chips, said Rui Ma,
+founder of Tech Buzz China. Several recent cases linked to smuggling Nvidia’s AI chips into China to circumvent export
+controls show the appetite for its technology. Nvidia designs the world’s most powerful AI chips. To make them, it
+relies on Dutch company ASML’s extreme ultraviolet lithography, or EUV, machines, which rely on U.S, components and
+technologies. Taiwan chipmaking giant TSMC uses those machines to make a large share of Nvidia’s top AI chips at its
+fabrication plants. China is barred from buying Nvidia’s most powerful AI chips or ASML chipmaking EUV machines.
+Huawei’s high-performance chips lag behind Nvidia’s most advanced technologies in many areas. Cutting edge technologies
+in China such as training AI models like DeepSeek’s still rely on Nvidia AI chips, analysts say. Chinese universities
+and other big tech companies also want chips like the H200, in part for research and development. Nvidia’s global sales
+are still expanding as AI demand surges. The company expects around $
+
+===== DOC 8 08012417589cf84e7afa80f910628a10 =====
+Micron claws its way back to positive territory after deep sell-off | FXStreet
+DATE 2026-06-29 SOURCE FXStreet News
+Micron Technology (MU) stock recovered back to positive territory by the close on Monday after selling off as much as
+9.6% in the first hour of the morning session. The culprit for the heavy sell-off was multi-pronged. First, SK Hynix and
+Samsung Electronics, Micron's South Korean competitors in the memory chip industry, both sold off after announcing
+enormous investments in new production factories. Then news emerged that Micron was facing a class-action lawsuit
+alleging that it had been involved in price fixing. But the stock market swelled on Monday, leading to a steady
+accumulation of Micron's shares. The NASDAQ Composite surged over 2% as buyers bought into the Magnificent 7's recent
+weakness. South Korean supply announcement follows DRAM price-fixing lawsuit A class-action lawsuit filed on Thursday,
+June 25, in a California federal court alleges that Samsung Electronics, SK Hynix, and Micron Technology coordinated to
+restrict DRAM supply and push prices sharply higher during the AI boom. Indeed, all three companies have seen their
+profits and margins swell over the past year as the ongoing data center buildout requires immense amounts of memory
+semiconductors. In particular, the lawsuit claims that the three companies all uniformly reduced production of these
+chips as they transitioned to producing higher-margin high-bandwidth memory (HBM) chips used in AI data centers. By
+their own admission, all three companies very publicly shifted their focus to HBM chips, but it's not clear that they
+illegally coordinated on this impulse. Logically, companies will be drawn to higher-margin product lines. The lawsuit
+contends that it was systematic price manipulation, pointing to DRAM prices that have skyrocketed by 500% to 700% over
+the past four years. Separately, the government of South Korea announced that it was launching a half-trillion Dollar
+public-private investment to expand semiconductor production. SK Hynix and Samsung Electronics will each break ground on
+two semiconductor fabs in the southwest of the nation. While funding will come from the state, much of the $518 billion
+will be invested directly from the two companies' coffers alongside suppliers. President Lee Jae Myung led the
+announcement. "We must secure the core elements of AI faster than any other country," the President said.
+"Semiconductors, physical AI, and AI data centers are the triple axis for our great leap forward." While Micron is also
+building a new fab in Japan, the news out of South Korea means plenty of supply will arrive over the next few years that
+could put a lid on the ever increasing prices for memory chips. But that supply won't arrive in time to arrest heavy
+near-term demand. According to investment bank Jefferies, memory prices could rise another 40%-50% next quarter and
+30%-40% more in the following quarter. Micron technical analysis Micron stock sank to an intraday low of $1,023 in the
+morning session before closing up 0.9% at $1,142 at the close. In total, it amounted to more than a 10% swing in
+Monday's market cap. Once again, Micron found support near its lower trendline of the price channel that it has traded
+within since May 1. This is similar activity to May 19, June 9, and June 24. This leads traders to believe that the
+rally is not yet over. The 20-day Simple Moving Average (SMA) is also closely tracking the lower trendline, providing it
+with more significance. For a major pullback to occur, Micron stock would need to close below the trendline, in which
+case it would immediately fall into the volume shelf between $960 and $1,000. A break there would allow Micron to dip
+toward long-term resistance-turned-support at $818, which coincides with the 200-day SMA. But bulls will see the long
+lower wick from Monday's candle as a sign that the pressure is mostly upward. The top trendline has them expecting a run
+above $1,400 is coming next. Premium You have reached your limit of 3 free articles for this month. Start your
+subscription and get access to all our original articles. Author
+
+===== DOC 9 09ab082de6c7ae3b992da4fc86eba999 =====
+Silver Price Forecast: XAG stays below $60 as death cross threat looms | FXStreet
+DATE 2026-06-29 SOURCE FXStreet News
+Silver (XAG/USD) price treads water, losing over 1.50% on Monday as the white metal is poised to end June down over
+22.50% after tumbling below $60.00 per troy ounce. The rise in US Treasury yields, the strength of the US Dollar, and
+the lack of a geopolitical risk premium keep the non-yielding metal under pressure. XAG/USD Price Forecast: Technical
+Outlook Silver is consolidating in the $55.70-$59.57 range, with buyers unable to reclaim the $60.00 level. Worth noting
+that the 50-day Simple Moving Average (SMA) at $72.61 approaches the 200-day SMA at $69.64, about to form a ‘death-
+cross.’ This would cement the case that sellers are in charge and that further losses lie ahead. From a momentum
+standpoint, the Relative Strength Index (RSI) aims lower, closing in on oversold territory. Hence, the path of least
+resistance is downwards. If XAG/USD dives below $57.00, it clears the path to challenge the December 9, 2025, low of
+$56.49, followed by the October 17, 2025, high of $54.46. Once cleared, the next support is the November 21, 2025, daily
+low of $48.63. For a bullish reversal, buyers must clear the $60.00 mark, ahead of testing the 200-day SMA at $69.64.
+XAG/USD Price Chart – Daily Silver FAQs Silver is a precious metal highly traded among investors. It has been
+historically used as a store of value and a medium of exchange. Although less popular than Gold, traders may turn to
+Silver to diversify their investment portfolio, for its intrinsic value or as a potential hedge during high-inflation
+periods. Investors can buy physical Silver, in coins or in bars, or trade it through vehicles such as Exchange Traded
+Funds, which track its price on international markets. Silver prices can move due to a wide range of factors.
+Geopolitical instability or fears of a deep recession can make Silver price escalate due to its safe-haven status,
+although to a lesser extent than Gold's. As a yieldless asset, Silver tends to rise with lower interest rates. Its moves
+also depend on how the US Dollar (USD) behaves as the asset is priced in dollars (XAG/USD). A strong Dollar tends to
+keep the price of Silver at bay, whereas a weaker Dollar is likely to propel prices up. Other factors such as investment
+demand, mining supply – Silver is much more abundant than Gold – and recycling rates can also affect prices. Silver is
+widely used in industry, particularly in sectors such as electronics or solar energy, as it has one of the highest
+electric conductivity of all metals – more than Copper and Gold. A surge in demand can increase prices, while a decline
+tends to lower them. Dynamics in the US, Chinese and Indian economies can also contribute to price swings: for the US
+and particularly China, their big industrial sectors use Silver in various processes; in India, consumers’ demand for
+the precious metal for jewellery also plays a key role in setting prices. Silver prices tend to follow Gold's moves.
+When Gold prices rise, Silver typically follows suit, as their status as safe-haven assets is similar. The Gold/Silver
+ratio, which shows the number of ounces of Silver needed to equal the value of one ounce of Gold, may help to determine
+the relative valuation between both metals. Some investors may consider a high ratio as an indicator that Silver is
+undervalued, or Gold is overvalued. On the contrary, a low ratio might suggest that Gold is undervalued relative to
+Silver. Author
+
+===== DOC 12 0d85db986184582cc436d829cc2ced91 =====
+Virginia to allow recreational marijuana to be sold in retail stores beginning in 2027
+DATE 2026-06-29 SOURCE AP Top News
+Virginia to allow recreational marijuana to be sold in retail stores beginning in 2027 RICHMOND, Va. (AP) — Five years
+after becoming the first Southern state to legalize possession of marijuana, Virginia has approved a legal way to sell
+it to recreational users. State budget legislation enacted Monday will allow up to 350 cannabis shops to open across
+Virginia beginning July 1, 2027. The move marks the latest expansion of access to the drug — which remains illegal at
+the federal level — through state-level policymaking. “Virginia legalized adult possession years ago, but without a
+regulated retail market, we left the illicit market to fill the gap,” state Sen. Lashrecse Aird, a Democrat and
+legislative leader on the issue, said in a statement earlier this month. “This compromise gives us a smarter and safer
+path forward — one that protects consumers, keeps products tested and accurately labeled, and creates a legal
+marketplace that is affordable and accessible enough to actually compete.” Here’s what to know about Virginia’s new law,
+the long process of enabling retail sales and how the state’s changes fit into the national picture: Virginia’s law
+allows new stores, higher possession limit Virginia already had a medical marijuana program that allowed patients to
+purchase the drug through dispensaries. Now, state regulators will begin accepting applications for retail licenses on
+Feb. 1, ahead of the July 1, 2027, start date for recreational sales to adults 21 and older. The law increases the
+state’s possession limit from 1 ounce to 2 ounces (28 grams to 57 grams) and it will continue to allow people to
+cultivate a small number of plants at home. The state will levy an excise tax on top of its sales tax, and that mix is
+expected to generate about $51 million in revenue for the state in the program’s first year, according to legislative
+budget documents. Advocates of legalization are heralding the changes Democrats have driven the state’s push toward
+legalization and recreational retail sales. They have cast the issue as a matter of equity after state data found Black
+Virginians were disproportionately policed and convicted of using marijuana. Only a sliver of the state’s Republican
+lawmakers have backed legalization, and many have raised public safety and health concerns. Legalization advocates have
+generally cheered Virginia’s legislation, though many objected to a provision increasing the civil fine for public
+consumption, arguing it could again lead to disproportionate enforcement based on race. Chelsea Higgs Wise, a grassroots
+organizer whose group Marijuana Justice was among those that called on Democratic Gov. Abigail Spanberger to rethink the
+increased fine, said the legislation was still an exciting development after years of uncertainty. For the past five
+years, “Adults that want to reasonably consume have been confused, rightfully so,” she said. Virginia is an outlier in
+the South Marijuana is legal in most U.S. states for either medicinal or recreational use, with about half allowing it
+for recreational use, according to the Marijuana Policy Project, which advocates for legalization and tracks policy
+developments around the country. Virginia remains an outlier in the South for its permissive approach. Federal laws are
+at odds with state changes Despite the fact that nearly all states permit some form of cannabis use, the U.S. government
+maintains its longstanding prohibition on the drug. But in a major policy shift, the Trump administration in April
+announced it was reclassifying state-licensed medical marijuana as a less dangerous drug and accelerating the process
+for a broader reclassification. How Virginia got here During the 2010s, Virginia gradually expanded access to marijuana
+for medical treatment. Then, in 2021, Virginia became the first Southern state to legalize marijuana with the passage of
+a law that allowed adults 21 and over to possess and cultivate the drug. But lawmakers didn’t fully enact a framework
+for retail sales outside of the state’s medical marijuana program. Partisan control of Virginia government flipped in
+November 2021, and the issue stalled out for years. In 2024, Republican Gov. Glenn Youngkin vetoed a bill that would
+have established recreational retail sales. Spanberger, who assumed office in January 2026, pledged support during her
+winning campaign for legislation setting up a retail market. While the governor did veto Democratic legislation that
+emerged from this year’s legislative session, she eventually worked out a compromise with lawmakers. Those provisions
+were rolled into a state budget bill that reached final passage Monday and now becomes law, according to the governor’s
+office, after lawmakers accepted all of Spanberger’s amendments.
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json, textwrap
+remaining={2,3,5,10,11}
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i not in remaining: continue
+        obj=json.loads(line)
+        print(f\"\\n===== DOC {i} {obj['doc_id']} =====\")
+        print(obj['title'])
+        print('DATE', obj['published_date'], 'SOURCE', obj['source_name'])
+        print(textwrap.fill(obj['body_text'][:3500].replace('\\n',' '), width=120))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+===== DOC 2 05d505be1cbcc41dfc4d26122a91b501 =====
+Can NATO Pull Off a Dull Summit?
+DATE 2026-06-29 SOURCE Foreign Policy
+Can NATO Pull Off a Dull Summit? European countries are hoping that Erdogan can keep Trump from causing chaos. Welcome
+to FP Free Week. To celebrate America’s 250th birthday, our entire site is completely unlocked this week only. Enjoy the
+article. U.S. President Donald Trump revels in his reputation as a disruptor. Europe has typically been on the receiving
+end. Cozying up to Russian President Vladimir Putin, calling for the seizure of Greenland, slapping arbitrary tariffs on
+the European Union, forging alliances with insurgent parties and politicians on the far right, threatening to punish
+NATO allies for not backing the United States against Iran—there has been no shortage of drama in trans-Atlantic
+relations since he took office last January. But as NATO’s annual summit in Ankara, Turkey, on July 7-8 draws near, it’s
+becoming increasingly obvious that an equilibrium has emerged. European leaders have learned how to handle Trump.
+Trump’s haphazard efforts to reshape continental order have yielded only partial results. As a result, the trans-
+Atlantic alliance has degenerated into a partnership of convenience, but it is a partnership all the same. U.S.
+President Donald Trump revels in his reputation as a disruptor. Europe has typically been on the receiving end. Cozying
+up to Russian President Vladimir Putin, calling for the seizure of Greenland, slapping arbitrary tariffs on the European
+Union, forging alliances with insurgent parties and politicians on the far right, threatening to punish NATO allies for
+not backing the United States against Iran—there has been no shortage of drama in trans-Atlantic relations since he took
+office last January. But as NATO’s annual summit in Ankara, Turkey, on July 7-8 draws near, it’s becoming increasingly
+obvious that an equilibrium has emerged. European leaders have learned how to handle Trump. Trump’s haphazard efforts to
+reshape continental order have yielded only partial results. As a result, the trans-Atlantic alliance has degenerated
+into a partnership of convenience, but it is a partnership all the same. A lot of that has to do with Ukraine. Trump’s
+initial push for a quick deal with Putin, a fellow strongman, went nowhere. The reasons are well known. They include
+Russia’s strategy of using negotiations as a fig leaf for securing its maximalist objectives, all the way to de facto
+ending Ukraine’s existence as an independent state, and Ukrainian President Volodymyr Zelensky’s refusal to cede the
+remainder of Donetsk. The Kremlin has reason to be disappointed, as Trump did not deliver on his initial promise.
+Ukraine, meanwhile, has turned the tables thanks to its edge in drone technology, carrying out strikes on Moscow and St.
+Petersburg. That’s why Zelensky is now interested in a cease-fire that would involve freezing the front line, as he
+could have some leverage over Russia. Europeans are onboard: They are talking about direct negotiations with Putin. They
+supported Kyiv through the worst of times, notably Zelensky’s disastrous encounter with Trump and Vice President J.D.
+Vance in the Oval Office last February. From Europeans’ perspective, their sustained effort to cajole and bribe the
+United States—with pledges to ramp up defense spending, buy U.S. weapons, deploy a peacekeeping force through a
+coalition of the willing, consent to tariff hikes, and bankroll Ukraine—is paying off. Trump is siding with the
+perceived winner, in this case Ukraine, as he invariably does. His tone on Zelensky has
+
+===== DOC 3 069803fbe283cc6edf0a7fbeb71f4747 =====
+Sixty-six years on: The promise of DRC independence remains unfulfilled
+DATE 2026-06-29 SOURCE Al Jazeera
+Bunia, Democratic Republic of the Congo – It was Thursday, June 30, 1960, when Belgian and Congolese dignitaries
+gathered at the Palais de la Nation in Kinshasa, then known as Leopoldville, for a ceremony marking the end of more than
+seven decades of colonial rule. On that day, King Baudouin I formally declared the independence of the Democratic
+Republic of the Congo (DRC). Outside, Kinshasa’s streets filled with scenes of jubilation as long-awaited freedom was
+proclaimed, albeit reluctantly, by the Belgian colonial administration. “It was unintentionally that the Belgians had
+declared the DRC’s independence. Many people in Belgian circles believed that the country should gain its independence
+around the 1980s. Generally speaking, they wanted to continue exploiting our country’s natural resources,” Akramm
+Tumsifu, a researcher specialising in the history of the DRC in the Great Lakes region, told Al Jazeera. He says
+Baudouin I’s “paternalistic” speech reflected Belgium’s desire to maintain its influence over the Congo. “For 80 years,
+Belgium has sent the best of its sons to your land. Firstly, to liberate the Congo Basin from the odious slave trade
+that was decimating its populations. Then, to bring together ethnic groups that were once enemies but were now preparing
+to form, together, the largest independent state in Africa,” King Baudouin I told the Congolese elite. Dany Kayeye, a
+Congolese historian based in Goma, believes the speech reflected disdain, given the inhuman treatment endured under
+colonial rule. “To such an extent that Joseph Kasavubu, who was to become the first president of independent Congo,
+relied on the favour of the Belgians to lead the country; he had opted for a diplomatic and institutional discourse,
+full of moderation towards the colonists,” recalls Kayeye. “At a time when the voices of the Congolese were silenced and
+their hopes ignored, someone with real character was needed to stand up to the whites, who were treated as gods,” he
+told Al Jazeera. Lumumba’s defiance Patrice Émery Lumumba was the Congo’s first prime minister and a leading figure in
+the independence movement. A charismatic nationalist and founder of the Mouvement National Congolais (MNC), he became
+one of the most outspoken critics of Belgian rule. Lumumba argued for full sovereignty and an end to what he called
+colonial exploitation and racial injustice. His rhetoric and mass appeal made him central to independence in 1960 and a
+symbol of anti-colonial struggle across Africa. According to Kayeye, Lumumba had not been scheduled to speak at the
+ceremony. “It may have been due to his radicalisation and his outspokenness that Lumumba had not been scheduled to
+address the audience that day. Against all expectations, Lumumba surprised those in the room by delivering a memorable
+speech,” he says. In his address, Lumumba spoke of the beatings, racial discrimination and oppression suffered under
+colonial rule, insisting independence had been won through struggle. “We endured injustices and blows that we had to
+suffer morning, noon and night simply because we were Black,” Lumumba declared. “We endured excruciating suffering; we
+were ostracised for our political views or religious beliefs, exiled in our own homeland; our fate was truly worse than
+death itself.” The speech angered Belgian officials and underscored tensions surrounding the transfer of power, marking
+an early sign of strained post-independence relations, according to Tumsifu. Unfulfilled pr
+
+===== DOC 5 0700e949ce25fcf039a5d83ee9a98e05 =====
+Hollywood director Carl Rinsch gets two and half years in prison for defrauding Netflix
+DATE 2026-06-29 SOURCE BBC Business
+- Published A Hollywood director convicted of defrauding Netflix of $11m (£8.3m) last year has been sentenced to two and
+a half years in prison. Carl Erik Rinsch was accused of using Netflix funds intended to complete a science fiction
+series to buy cars, cryptocurrency and other luxuries for himself. The 48-year-old, best known for the 2013 film 47
+Ronin, was convicted of federal fraud and money laundering for misusing funds. Rinsch faced up to 90 years in prison,
+but was expected to receive a lighter sentence. Judge Jay Rakoff also sentenced Rinsch to three years of supervised
+release, $11m in forfeitures, and a $700 fine. Speaking to the court before the judge issued his sentence, Rinsch
+apologised and said he accepted responsibility for his crimes. "Today's sentence sends a deterrent message: Fraud will
+not be tolerated," US Attorney Jay Clayton said in a statement. Prosecutors said Netflix gave Rinsch roughly $55m for
+the unfinished sci-fi show, initially named White Horse, including $11m he told them he needed to complete production.
+Instead, prosecutors said, he put the money in a personal account where he invested it and lost half within a couple of
+months. He put funds into cryptocurrency, and spent money on lavish purchases such as Rolls Royce cars and mattresses
+costing hundreds of thousands of dollars, according to prosecutors. During his one-week trial in New York, several
+Netflix executives were called to testify, saying they only agreed to one season of the show, which Rinsch failed to
+deliver. Rinsch took the stand as well - a rare move for a defendant in a criminal case - claiming the situation was a
+misunderstanding and he believed the money was meant to keep the show going during the pandemic. The New York Times
+reported, external that friends and colleagues described Rinsch as growing increasingly erratic shortly after he signed
+the Netflix deal. The outlet reported that he believed he could predict lightning strikes and volcanic eruptions and
+knew about a "secret transmission mechanism" for Covid-19.
+
+===== DOC 10 09db722a8faad64682eb6abf5aadcc44 =====
+Serena Williams' return at Wimbledon is 'the ticket to have' for the grass-court Grand Slam
+DATE 2026-06-29 SOURCE AP Top News
+Serena Williams’ return at Wimbledon is ‘the ticket to have’ for the grass-court Grand Slam Serena Williams’ return at
+Wimbledon is ‘the ticket to have’ for the grass-court Grand Slam LONDON (AP) — Anticipation is building at Wimbledon for
+Serena Williams’ first singles match in nearly four years. The 44-year-old Williams is scheduled to play an opponent
+less than half her age, 20-year-old Maya Joint of Australia, in the third match Tuesday on Centre Court — the patch of
+grass where the American standout won seven of her 23 Grand Slam singles titles. “I think everyone’s feeling the same
+way: Cannot wait to be watching Serena back on Centre Court again,” Sally Bolton, the chief executive of the All England
+Club, said Monday. Wimbledon organizers took the unusual step of holding up an eighth and final wild card spot for
+Williams until she accepted the invitation at almost the last possible moment the weekend before qualifying began. “We
+were all sitting there sort of quietly keeping our fingers crossed that that’s what would happen,” Bolton said when
+asked by The Associated Press how anxious the club was while Williams pondered her decision. “She is such an icon of the
+sport and particularly here at the championship she’s one of our most special champions,” Bolton added. “So it really
+will be the ticket to have tomorrow when she walks back on Centre Court.” Whether it was related to Williams or not, the
+queue (line) of would-be-spectators camping out overnight for the daily batches of Wimbledon tickets on offer had
+reached 10,000 people by Monday morning. “We are advising people if they haven’t already set off to travel, not to
+travel because the queue is effectively full,” Bolton said. “By comparison to last year, it is really busy.” Williams
+will also play doubles with older sister Venus Williams later in the week. Since Serena last won Wimbledon a decade ago,
+eight different women have won the title. “It was needed a wee bit to kind of reinvent the women’s game,” said Lauren
+Byrne, a 26-year-old spectator at Wimbledon from near Dublin. “She’s definitely going to bring a bit more excitement
+back.” Added Byrne’s father, Anthony: “It’s just great to see her. She still has the appetite, hasn’t she, to play at
+this level? … Age isn’t a barrier.” Gibran Chenia, a London resident who described himself as “50-plus,” called Williams
+“a legend. “And if she’s half as good as she was, she is going to be great for tennis,” Chenia said. “It’s great to have
+legends back.” ___ AP tennis: https://apnews.com/hub/tennis
+
+===== DOC 11 0cb5187f8e497e62a3f6617e84161e1d =====
+Guangdong Chuanhong Invites You to the 2026 SMM (3rd) South China Non-ferrous Metals Annual Conference - Shanghai Metals Market (SMM)
+DATE 2026-06-29 SOURCE Metal.com (SMM)
+As the global green transition and the "dual carbon" goals gain further momentum, the non-ferrous metal industry is
+accelerating its low-carbon, smart, and high-end upgrade. South China, as a core industrial cluster, features a complete
+industry chain, outstanding resource endowments, and strong policy support, generating robust development momentum.
+Hosted by SMM, the is scheduled to be held in Nanning, Guangxi, from September 9 to 11. Focusing on five key
+topics—price trends, market outlook, trade environment, policy direction, and low-carbon technologies—the conference
+will create a high-end exchange and cooperation platform for the industry. Guangdong Chuanhong Industrial Co., Ltd.
+cordially invites colleagues from all sectors to gather in Nanning, participate in this grand event, jointly promote
+technological innovation and industrial transformation, help enterprises seize opportunities and address challenges, and
+drive the high-quality development of the non-ferrous metal industry. Click the to sign up now! Guangdong Chuanhong
+Industrial Co., Ltd. is mainly engaged in import and export trade and domestic trade. Founded in 2016, the company
+primarily sells aluminum ingots, aluminum billets, and other metal raw materials. After a decade of development,
+Guangdong Chuanhong has built a professional, high-caliber, and experienced marketing team, with core members each
+having over 10 years of experience in the industry. In 2025, the company achieved sales revenue of approximately 5.5
+billion yuan and has been ranked among the top 100 enterprises in Foshan for consecutive years. The company adheres to a
+business philosophy of honoring commitments and prioritizing integrity, provides clients with high-quality and efficient
+services, has earned widespread praise and trust, established stable and sound business relationships with a broad
+client base, and gradually built a strong reputation in the industry. In terms of operations, the company has abandoned
+the old mindset of capturing market share solely through volume and price. It focuses on profitability, and economies of
+scale will be reflected in profitability. It manages the enterprise with a business approach suited to the new era,
+injecting new momentum into its development. At present, the company's aluminum products are involved in fields such as
+new energy PV, NEVs, real estate construction, high-speed rail, furniture, home appliances, and mobile phone
+manufacturing, maintaining long-term stable partnerships. A decade of forging ahead, the original aspiration remains
+steadfast. Guangdong Chuanhong Industrial has always stayed true to its principle of operating with integrity, built on
+a professional team and efficient services, and has advanced steadily in the aluminum metal trade track. Looking ahead,
+Guangdong Chuanhong will continue to focus on core tracks such as new energy and high-end manufacturing, driving
+synergistic growth in scale and profitability with a new-era business philosophy. Contact Information Business Director
+Cui Haobin 15989030027 Business Manager Mai Zhihao 13702434933 Business Manager Peng Peng 17765607610 Business Manager
+Chen Weijun 13250077779 Business Manager Lu Haojian 13924853105 SMM Conference Contact Ding Weiquan 18029344837
+
+codex
+I’ve narrowed the set. I’m checking one truncated AP chip story before writing the output so I don’t miss an explicit sales/share figure buried later in the article.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_006.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i==7:
+            obj=json.loads(line)
+            text=obj['body_text']
+            idx=text.find('The company expects around')
+            print(text[idx:idx+1200] if idx"'!=-1 else text[-1500:])
+PY' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+The company expects around $91 billion of revenue in May-July, up from nearly $82 billion in the previous quarter, excluding any data center compute revenue from China. Nvidia’s latest annual revenue was almost $216 billion, while Huawei’s was $126 billion for a comparable period. Huawei is catching up DeepSeek, the fast-growing Chinese rival of OpenAI’s ChatGPT or Anthropic’s Claude, said that its latest V4 AI model rolled out in April was adapted for Huawei’s advanced Ascend chips. Paul Triolo, a partner at DGA-Albright Stonebridge Group, said it is likely there is “significant effort going into collaboration between DeepSeek and Huawei” to train future DeepSeek models on domestic hardware. That shows how Chinese-made chips can potentially replace Nvidia ones, said Phelix Lee, an analyst at Morningstar. But he added that, “We don’t expect an abrupt switch toward (Huawei’s) Ascend.” Nvidia engineered its H20 chips, stripping down their computing power, so they could be sold to China without violating U.S. restrictions. Up to last year, it was still selling H20 chips in China, although shipments were gradually declining, said Brady Wang, a Taipei-based semiconductor analyst with Co
+
+codex
+I have the fact set. I’m writing `all_facts_006.jsonl` now with conservative, sentence-level claims only, then I’ll report the document and fact counts.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_006.jsonl')
+output_path = Path('all_facts_006.jsonl')
+
+facts_by_doc = {
+    '049082b706256a07176af2f5c7b0a5bb': [
+        {
+            'claim': 'Nasdaq futures showed a mild bullish repair rather than a confirmed bullish breakout on 2026-06-29, with the analysis score at +2 / +10.',
+            'subject': 'Nasdaq futures',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '+2 / +10',
+            'time': '2026-06-29',
+            'cause': 'The 30-minute chart showed higher value migration and price remained above the 29,670 area, but buyers did not gain acceptance above 29,745-29,760.',
+            'entities': ['Nasdaq futures'],
+            'confidence': 0.82,
+        },
+        {
+            'claim': 'Nasdaq futures tested the 29,745-29,760 upside zone and were rejected there on 2026-06-29.',
+            'subject': 'Nasdaq futures',
+            'predicate': 'price_move',
+            'object': '29,745-29,760 upside zone',
+            'direction': 'down',
+            'magnitude': '29,745-29,760',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Nasdaq futures'],
+            'confidence': 0.84,
+        },
+    ],
+    '05d505be1cbcc41dfc4d26122a91b501': [
+        {
+            'claim': 'Since taking office in January, President Donald Trump has slapped tariffs on the European Union.',
+            'subject': 'United States',
+            'predicate': 'policy_action',
+            'object': 'European Union',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'since January 2026',
+            'cause': None,
+            'entities': ['United States', 'European Union', 'Donald Trump'],
+            'confidence': 0.78,
+        },
+        {
+            'claim': 'European leaders have pledged to ramp up defense spending.',
+            'subject': 'Europe',
+            'predicate': 'policy_action',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'European leaders were seeking to cajole and bribe the United States.',
+            'entities': ['Europe', 'United States'],
+            'confidence': 0.72,
+        },
+        {
+            'claim': 'European leaders have pledged to buy U.S. weapons.',
+            'subject': 'Europe',
+            'predicate': 'deal_or_contract',
+            'object': 'United States',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'European leaders were seeking to cajole and bribe the United States.',
+            'entities': ['Europe', 'United States'],
+            'confidence': 0.72,
+        },
+    ],
+    '069803fbe283cc6edf0a7fbeb71f4747': [],
+    '06ed9d75a79b3c7cf15bac79099a4904': [
+        {
+            'claim': 'USD/SGD slipped to 1.2929 before recovering to close 0.16% lower at 1.2949.',
+            'subject': 'USD/SGD',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '-0.16%',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['USD/SGD', 'United Overseas Bank'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'United Overseas Bank expects USD/SGD to trade between 1.2930 and 1.2960 for the day.',
+            'subject': 'USD/SGD',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': '1.2930-1.2960',
+            'time': '2026-06-29',
+            'cause': 'The bank said there was no clear increase in downward momentum.',
+            'entities': ['USD/SGD', 'United Overseas Bank'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'United Overseas Bank maintained a constructive U.S. dollar view over a one-to-three-week horizon as long as 1.2925 holds in USD/SGD.',
+            'subject': 'U.S. dollar',
+            'predicate': 'forecast',
+            'object': 'Singapore dollar',
+            'direction': 'up',
+            'magnitude': '1.2925 support',
+            'time': '1-3 weeks',
+            'cause': 'Upward momentum had eased somewhat but the 1.2925 strong support level had not been breached.',
+            'entities': ['U.S. dollar', 'Singapore dollar', 'USD/SGD', 'United Overseas Bank'],
+            'confidence': 0.88,
+        },
+    ],
+    '0700e949ce25fcf039a5d83ee9a98e05': [],
+    '074b4b0abc8f8b07162ca3be619d65f5': [
+        {
+            'claim': 'Japan and India are set to agree later that week on funding a hydrogen and ammonia production project by IHI and ACME Group.',
+            'subject': 'Japan',
+            'predicate': 'deal_or_contract',
+            'object': 'India',
+            'direction': 'na',
+            'magnitude': '"'$3bn'"',
+            'time': 'later this week',
+            'cause': None,
+            'entities': ['Japan', 'India', 'IHI', 'ACME Group'],
+            'confidence': 0.86,
+        },
+        {
+            'claim': 'Japan is set to subsidize ammonia production in India.',
+            'subject': 'Japan',
+            'predicate': 'policy_action',
+            'object': 'India',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'later this week',
+            'cause': None,
+            'entities': ['Japan', 'India'],
+            'confidence': 0.84,
+        },
+    ],
+    '07e482a766e44439c464d30d429e20c2': [
+        {
+            'claim': 'Nvidia\\'s AI chip sales in China have stalled.',
+            'subject': 'Nvidia',
+            'predicate': 'demand_change',
+            'object': 'China',
+            'direction': 'flat',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'U.S. export controls initially stalled H200 sales and Beijing shifted to encouraging domestically designed chips led by Huawei.',
+            'entities': ['Nvidia', 'China', 'Huawei', 'United States'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Jensen Huang said Nvidia had about 95% market share in China before export controls banned the company out of China.',
+            'subject': 'Nvidia',
+            'predicate': 'statement',
+            'object': 'China AI chips market',
+            'direction': 'na',
+            'magnitude': 'about 95%',
+            'time': 'before export controls',
+            'cause': None,
+            'entities': ['Nvidia', 'China', 'Jensen Huang'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Bernstein estimated that Nvidia had about a 40% share of China\\'s AI chips market in 2025 and Huawei had a roughly matching share.',
+            'subject': 'Nvidia',
+            'predicate': 'statement',
+            'object': 'China AI chips market',
+            'direction': 'down',
+            'magnitude': 'about 40%',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Nvidia', 'Huawei', 'China', 'Bernstein'],
+            'confidence': 0.87,
+        },
+        {
+            'claim': 'Bernstein predicted Nvidia\\'s share of China\\'s AI chips market will shrink to around 8% this year while Huawei\\'s share will likely grow to about 50%.',
+            'subject': 'Nvidia',
+            'predicate': 'forecast',
+            'object': 'China AI chips market',
+            'direction': 'down',
+            'magnitude': 'around 8%',
+            'time': 'this year',
+            'cause': None,
+            'entities': ['Nvidia', 'Huawei', 'China', 'Bernstein'],
+            'confidence': 0.87,
+        },
+        {
+            'claim': 'Nvidia expects around "'$91 billion of revenue in May-July, up from nearly $82 billion in the previous quarter, excluding any data center compute revenue from China.'"',
+            'subject': 'Nvidia',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'around "'$91 billion'"',
+            'time': 'May-July',
+            'cause': None,
+            'entities': ['Nvidia', 'China'],
+            'confidence': 0.94,
+        },
+    ],
+    '08012417589cf84e7afa80f910628a10': [
+        {
+            'claim': 'Micron stock fell as much as 9.6% in early trading before recovering to close up 0.9% at "'$1,142 after hitting an intraday low of $1,023.'"',
+            'subject': 'Micron Technology',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'up 0.9% at "'$1,142 after a 9.6% intraday drop'"',
+            'time': '2026-06-29',
+            'cause': 'The sell-off followed South Korean supply expansion news and a class-action lawsuit alleging price fixing, before broader market gains lifted the stock.',
+            'entities': ['Micron Technology', 'SK Hynix', 'Samsung Electronics', 'NASDAQ Composite'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'A class-action lawsuit filed on June 25 alleges that Samsung Electronics, SK Hynix, and Micron Technology coordinated to restrict DRAM supply and push prices sharply higher during the AI boom.',
+            'subject': 'Micron Technology',
+            'predicate': 'corporate_action',
+            'object': 'Samsung Electronics and SK Hynix',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'June 25',
+            'cause': None,
+            'entities': ['Micron Technology', 'Samsung Electronics', 'SK Hynix', 'DRAM'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'The lawsuit says DRAM prices have skyrocketed by 500% to 700% over the past four years.',
+            'subject': 'DRAM',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '500% to 700%',
+            'time': 'the past four years',
+            'cause': 'The lawsuit alleges systematic price manipulation and coordinated supply restrictions.',
+            'entities': ['DRAM', 'Micron Technology', 'Samsung Electronics', 'SK Hynix'],
+            'confidence': 0.84,
+        },
+        {
+            'claim': 'South Korea announced a "'$518 billion public-private investment to expand semiconductor production.'"',
+            'subject': 'South Korea',
+            'predicate': 'production_change',
+            'object': 'semiconductor industry',
+            'direction': 'up',
+            'magnitude': '"'$518 billion'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['South Korea', 'SK Hynix', 'Samsung Electronics'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'SK Hynix and Samsung Electronics will each break ground on two semiconductor fabs in southwest South Korea.',
+            'subject': 'SK Hynix',
+            'predicate': 'production_change',
+            'object': 'South Korea',
+            'direction': 'up',
+            'magnitude': 'two semiconductor fabs each',
+            'time': '2026-06-29',
+            'cause': 'South Korea announced a "'$518 billion public-private investment to expand semiconductor production.'"',
+            'entities': ['SK Hynix', 'Samsung Electronics', 'South Korea'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Jefferies said memory prices could rise another 40%-50% next quarter and 30%-40% in the following quarter.',
+            'subject': 'memory prices',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '40%-50% next quarter and 30%-40% in the following quarter',
+            'time': 'next quarter and the following quarter',
+            'cause': 'Supply expansion will not arrive in time to arrest heavy near-term demand.',
+            'entities': ['memory prices', 'Jefferies'],
+            'confidence': 0.9,
+        },
+    ],
+    '09ab082de6c7ae3b992da4fc86eba999': [
+        {
+            'claim': 'Silver fell more than 1.50% on Monday and was on track to end June down more than 22.50% after dropping below "'$60.00 per troy ounce.'"',
+            'subject': 'Silver',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'over 1.50% on Monday and over 22.50% in June',
+            'time': 'Monday and June 2026',
+            'cause': 'Rising U.S. Treasury yields, a stronger U.S. dollar, and the lack of a geopolitical risk premium pressured the non-yielding metal.',
+            'entities': ['Silver', 'U.S. Treasury yields', 'U.S. dollar'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Silver was consolidating in the "'$55.70-$59.57 range with buyers unable to reclaim the $60.00 level.'"',
+            'subject': 'Silver',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': '"'$55.70-$59.57'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Silver'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'FXStreet said silver could face further losses because the 50-day SMA at "'$72.61 was approaching the 200-day SMA at $69.64 to form a death cross.'"',
+            'subject': 'Silver',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '50-day SMA at "'$72.61 and 200-day SMA at $69.64'"',
+            'time': '2026-06-29',
+            'cause': 'The 50-day SMA was approaching the 200-day SMA and RSI was moving toward oversold territory.',
+            'entities': ['Silver', 'FXStreet'],
+            'confidence': 0.86,
+        },
+    ],
+    '09db722a8faad64682eb6abf5aadcc44': [],
+    '0cb5187f8e497e62a3f6617e84161e1d': [
+        {
+            'claim': 'The 2026 SMM South China Non-ferrous Metals Annual Conference is scheduled to be held in Nanning, Guangxi, from September 9 to 11.',
+            'subject': '2026 SMM South China Non-ferrous Metals Annual Conference',
+            'predicate': 'event',
+            'object': 'Nanning, Guangxi',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'September 9 to 11, 2026',
+            'cause': None,
+            'entities': ['Shanghai Metals Market', 'Nanning', 'Guangxi'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'Guangdong Chuanhong Industrial said it achieved sales revenue of approximately 5.5 billion yuan in 2025.',
+            'subject': 'Guangdong Chuanhong Industrial Co., Ltd.',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'na',
+            'magnitude': 'approximately 5.5 billion yuan',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Guangdong Chuanhong Industrial Co., Ltd.'],
+            'confidence': 0.88,
+        },
+    ],
+    '0d85db986184582cc436d829cc2ced91': [
+        {
+            'claim': 'Virginia budget legislation will allow up to 350 cannabis shops to open beginning July 1, 2027.',
+            'subject': 'Virginia',
+            'predicate': 'policy_action',
+            'object': 'cannabis retail market',
+            'direction': 'up',
+            'magnitude': 'up to 350 cannabis shops',
+            'time': 'July 1, 2027',
+            'cause': None,
+            'entities': ['Virginia'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Virginia regulators will begin accepting applications for retail cannabis licenses on February 1, 2027.',
+            'subject': 'Virginia',
+            'predicate': 'policy_action',
+            'object': 'retail cannabis licenses',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'February 1, 2027',
+            'cause': None,
+            'entities': ['Virginia'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Virginia\\'s new law increases the marijuana possession limit from 1 ounce to 2 ounces.',
+            'subject': 'Virginia',
+            'predicate': 'policy_action',
+            'object': 'marijuana possession limit',
+            'direction': 'up',
+            'magnitude': 'from 1 ounce to 2 ounces',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Virginia'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Virginia expects the excise-tax and sales-tax mix on legal cannabis sales to generate about "'$51 million in revenue in the program'"\\'s first year.',
+            'subject': 'Virginia',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'about "'$51 million'"',
+            'time': 'the program\\'s first year',
+            'cause': 'The state will levy an excise tax on top of its sales tax.',
+            'entities': ['Virginia'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'In April, the Trump administration announced that it was reclassifying state-licensed medical marijuana as a less dangerous drug and accelerating a broader reclassification process.',
+            'subject': 'United States',
+            'predicate': 'policy_action',
+            'object': 'state-licensed medical marijuana',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'April 2026',
+            'cause': None,
+            'entities': ['United States', 'Trump administration'],
+            'confidence': 0.92,
+        },
+    ],
+}
+
+docs = []
+with input_path.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+
+with output_path.open('w') as out:
+    total_facts = 0
+    for obj in docs:
+        facts = facts_by_doc.get(obj['doc_id'], [])
+        total_facts += len(facts)
+        rec = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        out.write(json.dumps(rec, ensure_ascii=False) + '\\n')
+
+print(f\"docs processed: {len(docs)}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 31
+
+codex
+docs processed: 12, total facts: 31
+tokens used
+44,167
+docs processed: 12, total facts: 31

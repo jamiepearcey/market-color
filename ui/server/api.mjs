@@ -24,6 +24,8 @@ import {
 import { ingestAdhoc, triggerDailyRun } from "./orchestrator.mjs";
 import { generateReport } from "./reports.mjs";
 import { chatReady } from "./chat-core.mjs";
+import { entityFacts, getGraph } from "./graph.mjs";
+import { listBriefs, readBrief } from "./briefs.mjs";
 
 async function qdrantReady() {
   const url = process.env.QDRANT_URL || "http://localhost:6333";
@@ -42,7 +44,9 @@ const ok = (json, status = 200) => ({ status, json });
 const err = (message, status = 400) => ({ status, json: { error: message } });
 
 export async function handleApi(method, pathname, body) {
-  const parts = pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean); // e.g. ["desks","5"]
+  const url = new URL(pathname, "http://api.local"); // pathname may carry ?query
+  const q = url.searchParams;
+  const parts = url.pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean); // e.g. ["desks","5"]
   const [resource, id, sub] = parts;
 
   try {
@@ -124,7 +128,41 @@ export async function handleApi(method, pathname, body) {
       }
     }
 
-    void sub;
+    // --- graph (transmission map from the Qdrant facts) ---
+    if (resource === "graph") {
+      if (method === "GET" && id === "entity") {
+        const name = (q.get("name") || "").trim();
+        if (!name) return err("name is required");
+        return ok(await entityFacts(name, q.get("desk")?.trim() || null));
+      }
+      if (method === "GET" && !id) {
+        const since = q.get("since")?.trim() || null;
+        const until = q.get("until")?.trim() || null;
+        for (const [k, v] of [["since", since], ["until", until]]) {
+          if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) return err(`${k} must be YYYY-MM-DD`);
+        }
+        const num = (v, dflt) => (v && Number.isFinite(Number(v)) ? Number(v) : dflt);
+        return ok(
+          await getGraph({
+            desk: q.get("desk")?.trim() || null,
+            since,
+            until,
+            minWeight: num(q.get("min_weight"), 1),
+            maxNodes: num(q.get("max_nodes"), 150),
+          }),
+        );
+      }
+    }
+
+    // --- briefs (rendered per-desk daily notes under data/briefs/) ---
+    if (resource === "briefs") {
+      if (method === "GET" && !id) return ok(listBriefs());
+      if (method === "GET" && id && sub) {
+        const brief = readBrief(id, sub);
+        return brief ? ok(brief) : err("not found", 404);
+      }
+    }
+
     return err(`no route for ${method} /api/${parts.join("/")}`, 404);
   } catch (e) {
     return err(String(e?.message || e), 500);

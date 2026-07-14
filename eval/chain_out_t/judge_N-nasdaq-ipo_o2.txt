@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did Nasdaq lead global IPO proceeds in the first half of 2026?
+
+ANSWER A:
+The context does not directly state that Nasdaq led global IPO proceeds, so this can only be answered partially. The strongest supporting evidence is that SpaceX completed an $87.5 billion IPO in the second quarter of 2026 — described as the largest IPO ever — and its ticker (SPCX.O) indicates a Nasdaq listing [5][2]. A single offering of that unprecedented scale would plausibly have concentrated a large share of global IPO proceeds on Nasdaq during the first half [5]. However, the context does not provide any ranking of global IPO proceeds by exchange, total H1 2026 proceeds figures, or a direct comparison against other venues (e.g., NYSE or India's upcoming Jio/NSE listings [4]), so the claim that Nasdaq "led" cannot be fully confirmed from these items.
+
+ANSWER B:
+The context does not directly explain why Nasdaq led global IPO proceeds in the first half of 2026. The only relevant data point is that June featured "the launch of the record-busting SpaceX IPO" [2], a large listing that would have contributed substantially to Nasdaq's proceeds. Beyond that single reference, the provided items do not state that Nasdaq led global IPO proceeds, nor do they quantify Nasdaq's IPO totals or compare them against other exchanges. Notably, some of the largest upcoming listings mentioned—India's NSE ($3.3bn) and Jio (~$4bn)—are set for other markets and are still pending rather than completed [4]. To answer the question fully, I would need data on Nasdaq's aggregate H1 2026 IPO proceeds, a ranking versus other global exchanges, and the specific drivers (e.g., listing pipeline, sector mix, or pricing conditions) behind that lead—none of which is present in the context.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

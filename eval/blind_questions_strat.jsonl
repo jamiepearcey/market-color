@@ -1,0 +1,23 @@
+{"id": "A-boj-chain", "category": "chain", "query": "Why has the Bank of Japan signalled readiness to tighten policy further?", "exclude": {"endpoint": ["boj", "bank of japan"], "cause": ["energy", "middle east"]}}
+{"id": "A-btc-chain", "category": "chain", "query": "Why did Bitcoin fall below 60,000 dollars?", "exclude": {"endpoint": ["bitcoin fell", "bitcoin dropped"], "cause": ["strikes", "hormuz"]}}
+{"id": "A-gas-chain", "category": "chain", "query": "Why did benchmark gas contracts rise?", "exclude": {"endpoint": ["gas contracts", "gas prices"], "cause": ["attacks", "ras laffan", "cargo vessels"]}}
+{"id": "A-fuel-chain", "category": "chain", "query": "Why are retail fuel prices climbing in Central Asia?", "exclude": {"endpoint": ["tajikistan", "central asia"], "cause": ["persian gulf", "hormuz"]}}
+{"id": "A-rba-chain", "category": "chain", "query": "Why did markets pare back expectations for further Reserve Bank of Australia tightening?", "exclude": {"endpoint": ["rba", "reserve bank of australia"], "cause": ["brent"]}}
+{"id": "B-supply-drivers", "category": "agg", "query": "Summarize the main supply-side drivers moving commodity markets this window, organized by market."}
+{"id": "B-dollar-drivers", "category": "agg", "query": "What were the main drivers of US dollar strength this window, and which currencies were most affected?"}
+{"id": "B-cb-tightening", "category": "agg", "query": "Which central banks signalled tightening this window, and what drove each of them?"}
+{"id": "B-hormuz-effects", "category": "agg", "query": "List the distinct market effects of the Strait of Hormuz disruption across different asset classes."}
+{"id": "B-crypto-week", "category": "agg", "query": "Summarize the week's major crypto developments and the stated cause of each."}
+{"id": "C-big-movers", "category": "screen", "query": "Which individual stocks moved more than 20 percent this window, and why in each case?"}
+{"id": "C-extremes", "category": "screen", "query": "Which assets hit multi-year or record extremes this window, and what drove each?"}
+{"id": "C-pivots", "category": "screen", "query": "Which companies announced major strategic pivots or restructurings this window, and why?"}
+{"id": "C-forecast-changes", "category": "screen", "query": "Which institutions cut or raised major forecasts this window, and on what grounds?"}
+{"id": "C-restrictions", "category": "screen", "query": "Which governments imposed new trade or export restrictions this window, and why?"}
+{"id": "D-hormuz-evolution", "category": "pivot", "query": "How did the Strait of Hormuz shipping situation evolve over the window, from the initial disruption to the latest status?"}
+{"id": "D-fed-shift", "category": "pivot", "query": "How did expectations for Federal Reserve policy shift across the window, and what drove the change?"}
+{"id": "D-oil-arc", "category": "pivot", "query": "Trace the arc of oil prices across the window: the moves in each phase and the drivers of each."}
+{"id": "D-yen-arc", "category": "pivot", "query": "How did the Japanese yen's situation develop across the window, including any policy response?"}
+{"id": "E-att", "category": "control", "query": "Why did AT&T stock drop about 4.5 percent?"}
+{"id": "E-amex-stablecoin", "category": "control", "query": "Why did American Express join the Open USD stablecoin initiative?"}
+{"id": "E-ucits", "category": "control", "query": "Why did UCITS funds record record net sales in 2025?"}
+{"id": "E-eni-libya", "category": "control", "query": "Why did natural gas recovery improve at the Bahr Essalam field in Libya?"}

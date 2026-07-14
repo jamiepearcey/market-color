@@ -1,0 +1,14 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why will Russia import more fuel and accelerate refinery repairs?
+
+ANSWER A:
+Russia faces persistent domestic fuel supply problems—queues at gas stations and shortages of certain gasoline grades—after Ukrainian drone strikes on refineries cut fuel production [1][2], with some refineries temporarily offline because they were hit by drone attacks [8]. Gasoline inventories have fallen to 1.7 million tons, down 4% year-on-year, and are being drawn down to stabilize supply, while refining capacity is already running at maximum [3]. To ease this shortfall, Moscow is considering keeping a zero import-duty rate on gasoline, which would encourage more fuel imports [3], and is relying on damaged refineries being restored so that fuel production exceeds June levels as early as July [3][8].
+
+Missing: the context does not explicitly state that Russia will "import more fuel" (it only mentions weighing whether to extend a zero import-duty on gasoline [3]) or that it will "accelerate refinery repairs" as such—these are inferences from the outage and inventory data rather than directly stated commitments.
+
+ANSWER B:
+Russia faces persistent domestic fuel supply problems—queues at gas stations and shortages of some gasoline grades—caused by refinery outages from Ukrainian drone strikes on its energy infrastructure [1][2][18]. Key refining capacity has been knocked offline, including Norsi, Russia's fourth-largest refinery and second-largest petrol producer, which suspended operations after a drone attack, and other refineries temporarily halted by strikes [7][16]. To close the resulting supply gap, Moscow is turning to imports—Novak said Russia will decide whether to extend a zero import-duty rate on gasoline—and Putin said he would speed repairs to refineries hit by Ukraine [3][14]. In short, both moves are responses to the shortages and reduced fuel production stemming from the strikes on refineries [11][14]. The context ties these measures to the outages but does not give specific import volumes or a repair timeline, so the scale of the planned imports and accelerated repairs is missing.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

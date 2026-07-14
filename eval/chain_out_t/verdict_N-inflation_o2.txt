@@ -1,0 +1,3 @@
+VERDICT: A
+
+Answer A traces more distinct, attributed links in the causal chain (energy transmission, AI demand, full-employment slack, fiscal-risk shocks lifting expectations, second-round effects) with specific grounding, while B covers a narrower subset of the same mechanisms.

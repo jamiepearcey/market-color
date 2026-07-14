@@ -1,0 +1,584 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1faf-ca68-7233-8db5-3c254b96439b
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_011.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_011.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_011.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:57:26.911835Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_011.jsonl` to determine its structure and then I’ll generate `all_facts_011.jsonl` directly from those records, preserving order and extracting only explicit market-relevant facts.
+exec
+/bin/zsh -lc 'wc -l all_batch_011.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_011.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_011.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj=json.loads(line)
+        print('DOC', i, sorted(obj.keys()))
+        print('TITLE:', obj.get('title'))
+        print('BODY:', (obj.get('body_text') or '')[:800].replace('\\n',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Israeli troops face resistance from residents as they push into a town in Syria
+BODY: Israeli troops face resistance from residents as they push into a town in Syria Israeli troops face resistance from residents as they push into a town in Syria ABDIN, Syria (AP) — As Israeli troops and vehicles entered the town of Abdin in southern Syria, residents blocked the roads with rocks, and some young men and boys threw stones to push back the military patrol. Tensions in this part of the country created by a buffer zone occupied by Israeli forces have flared into violence in recent days, leaving residents anxious that more escalation is coming. Residents of Abdin, located near a U.N.-patrolled buffer zone now controlled by Israeli troops, tried to resist against a military incursion Sunday. Residents said Israeli troops fired warnings shots at walls and between the angry protester
+
+DOC 2 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Six books to understand the financial crisis of 2007-09
+BODY: Six books to understand the financial crisis of 2007-09 From fly-on-the-wall accounts to philosophical musings “FINANCIAL TRANSACTIONS are a series of promises,” we reflected in 2009, as the aftershocks of the global financial crisis rippled across the world economy. Trust, gradually accumulated, pushes markets forward, but as the crash made clear, “honest failure is even more corrosive of trust than outright criminality”. Financial journalists, economists and philosophers have pored over that failure—how it happened, how it shattered public trust and how the world eventually recovered. Our book recommendations highlight some of the sharpest reflections on the crisis and its aftermath. Every crisis needs a fly-on-the-wall account of how the calamitous events unfolded. Here the author flits
+
+DOC 3 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction
+BODY: Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction NEW YORK (AP) — A self-exiled billionaire Chinese business tycoon once believed to be among China’s wealthiest men was sentenced Monday to 30 years in a U.S. prison for a massive financial fraud that a federal judge said cost over 1,000 people worldwide hundreds of millions of dollars. Guo Wengui, who fled China a decade ago and reinvented himself as a U.S.-based Communist Party critic, was sentenced in a Manhattan courtroom packed with his supporters by Judge Analisa Torres. She said he “preyed on those seeking to bring Democracy to China,” taking their money so he could live lavishly. Before he was sentenced,
+
+
+codex
+The batch is small, so I’m enumerating all 12 documents and reading each relevant article closely enough to keep the extraction precise rather than over-generate from generic prose.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_011.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['source_name']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 2dc0bd9647b87ea284c06fee224b8ff0 | 2026-06-29 | AP Top News | Israeli troops face resistance from residents as they push into a town in Syria
+2. 2df7e6656a38c67d2e8738cc15ada632 | 2026-06-29 | The Economist - Finance & Economics | Six books to understand the financial crisis of 2007-09
+3. 2f469523931b1bb2a669515927170130 | 2026-06-29 | AP Top News | Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction
+4. 2f5835df8baf65c14f98d3f2ec582fe8 | 2026-06-29 | BBC World | World Cup 2026: South Korea football coach quits as President Lee calls for probe
+5. 2faac897f3e66d6156cfed0ae747631a | 2026-06-29 | ForexLive | The share price of Nvidia and Micron are both testing/breaking key support targets | investingLive
+6. 2fb7fb5fee4574b6420cb09ee86f4501 | 2026-06-29 | AP Top News | Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case
+7. 3213b600f0a5298472e92a740fe8a41f | 2026-06-29 | Al Jazeera | Israeli attacks kill eight people in Gaza and a teenager in the West Bank
+8. 327b6111c3e0395dfc10bc203fbed463 | 2026-06-29 | FXStreet News | How Kevin Warsh upended the game plan for Gold | FXStreet
+9. 333ae99398e61a9c1d3147e1051b596f | 2026-06-29 | Al Jazeera | Marco Rubio meets Libyan commander as US pushes to resolve Libya crisis
+10. 341302447a96c76b9dd152d55cf12d88 | 2026-06-29 | Yahoo Finance | BitMEX CEO And CFO Resign From The Crypto Exchange
+11. 369092ecb952ce01009f41b3b656ed0d | 2026-06-29 | Cointelegraph | The self-custody market is set to triple, and MiCA just pulled the timeline forward
+12. 370c7f63255b93094dcb903abf2dddfe | 2026-06-29 | AP Top News | Comcast plans to split into two public companies by spinning off NBCUniversal and Sky
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_011.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj=json.loads(line)
+        body=(obj.get('body_text') or '').replace('\\n',' ')
+        print(f\"===== DOC {i}: {obj['title']} =====\")
+        print(body[:2200])
+        print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 1: Israeli troops face resistance from residents as they push into a town in Syria =====
+Israeli troops face resistance from residents as they push into a town in Syria Israeli troops face resistance from residents as they push into a town in Syria ABDIN, Syria (AP) — As Israeli troops and vehicles entered the town of Abdin in southern Syria, residents blocked the roads with rocks, and some young men and boys threw stones to push back the military patrol. Tensions in this part of the country created by a buffer zone occupied by Israeli forces have flared into violence in recent days, leaving residents anxious that more escalation is coming. Residents of Abdin, located near a U.N.-patrolled buffer zone now controlled by Israeli troops, tried to resist against a military incursion Sunday. Residents said Israeli troops fired warnings shots at walls and between the angry protesters, before firing artillery rounds at the village. No one was harmed in the exchange, but most residents fled, and most were still too afraid to return on Monday. Many fear that there will now be more intense incursions and raids following the skirmish. “They come into the village regularly, every few days,” said resident Mohammad al-Hassan, standing not far from a group of children looking at an exploded shell. “They come in armored 4x4 vehicles, they roam around the village and search some houses, they knock on doors and if people don’t answer the door they break it down and enter the houses. Women and children start screaming, it’s a terrifying thing, them coming here.” Israel says it needs buffer zones to prevent attacks Israel seized control of a U.N.-patrolled buffer zone in southern Syria in December 2024, following the ouster of former Syrian President Bashar Assad in an insurgent offensive. Israeli officials initially described the move as temporary to protect their borders from militant groups, but more recently top Israeli officials have said they plan to occupy the buffer zone in Syria indefinitely. The Israeli military presence in southern Syria is part of a shift to a more aggressive strategy by Israel after the deadly October 2023 Hamas-led attacks in southern Israel. The Israeli military took over large portions of Gaza as part of a broad invasion, and later seiz
+
+
+===== DOC 2: Six books to understand the financial crisis of 2007-09 =====
+Six books to understand the financial crisis of 2007-09 From fly-on-the-wall accounts to philosophical musings “FINANCIAL TRANSACTIONS are a series of promises,” we reflected in 2009, as the aftershocks of the global financial crisis rippled across the world economy. Trust, gradually accumulated, pushes markets forward, but as the crash made clear, “honest failure is even more corrosive of trust than outright criminality”. Financial journalists, economists and philosophers have pored over that failure—how it happened, how it shattered public trust and how the world eventually recovered. Our book recommendations highlight some of the sharpest reflections on the crisis and its aftermath. Every crisis needs a fly-on-the-wall account of how the calamitous events unfolded. Here the author flits between the offices of Bear Stearns and Lehman Brothers, the corridors of the Treasury Department and the halls of Congress. His reconstruction of events is compelling, colourful and comprehensive. At the centre of the action is Hank Paulson, the treasury secretary, who at the height of the crisis was barely sleeping, losing weight and suffering from shingles—a condition that seemed to flare whenever events took a turn for the worse. More than a chronicle of the financial crisis, this is a human drama, with officials, CEOs and central bankers operating under enormous pressure and improvising with trillions of dollars on the line.
+
+
+===== DOC 3: Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction =====
+Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction Self-exiled Chinese billionaire Guo Wengui gets 30 years in US prison for fraud conviction NEW YORK (AP) — A self-exiled billionaire Chinese business tycoon once believed to be among China’s wealthiest men was sentenced Monday to 30 years in a U.S. prison for a massive financial fraud that a federal judge said cost over 1,000 people worldwide hundreds of millions of dollars. Guo Wengui, who fled China a decade ago and reinvented himself as a U.S.-based Communist Party critic, was sentenced in a Manhattan courtroom packed with his supporters by Judge Analisa Torres. She said he “preyed on those seeking to bring Democracy to China,” taking their money so he could live lavishly. Before he was sentenced, Guo protested his treatment in jail, saying he was taken to the hospital early Monday. He disputed a prosecutor’s portrayal of him as a malingerer faking illness, saying he repeatedly vomited as he was returned to jail before being brought to court. “When I came here, I said: ‘I have a tummy ache, I need to go to the bathroom, I don’t feel well,’” Guo said through an interpreter of his courthouse arrival. Later, Guo wiped his mouth repeatedly with a tissue. He only briefly addressed the criminal case, defending his intentions by saying in reference to the Chinese Communist Party: “The reason I came to the U.S. was to destroy the CCP.” The judge, in sentencing him, read snippets of letters she received from victims who described losing their life savings and feeling severely anxious and shamed and having family members turn on them for their poor investment choice. Torres said Guo “takes no responsibility for his actions and instead insists incredibly his conduct caused no loss and harmed no one.” She said he “has called upon supporters to harass and intimidate those who dare to speak out against him.” The judge ordered Guo to forfeit $889 million in restitution. Wei Chen, a victim who testified at trial, told Torres that Guo’s fraud “destroyed my life” and that of her family. As Guo left the courtroom after the sentencing, supporters applauded and shouted toward him. Before hi
+
+
+===== DOC 4: World Cup 2026: South Korea football coach quits as President Lee calls for probe =====
+- Published Hong Myung-bo has resigned as head coach of South Korea's men's national football team after they failed to advance to the World Cup knockout stage. The team had hoped they could still qualify for the next round of the tournament as one of the best third-placed teams, but that hope was quashed on Saturday. The early exit has prompted widespread criticism at home, with President Lee Jae Myung calling for an investigation into reasons behind the team's disappointing performance. Hong apologised to fans on Sunday and said the responsibility "rests entirely with me as head coach". Ranked 32nd in FIFA's men's rankings and led by star player Son Heung-min, South Korea recorded two losses and one win at the World Cup, finishing behind Mexico and South Africa, who are ranked 15th and 60th respectively. Criticism had mounted quickly after the team's last match with South Africa on Thursday, which South Korea lost 1-0. The defeat left them third in Group A. It still gave them hope to qualify for the next round under a new rule introduced with this tournament's expansion from 32 to 48 teams, which allows the eight best third-placed teams in the group stage to progress to the knockout round. But on Saturday, they were knocked out because of the other teams' final scores. Fans blame Hong, who has been coaching the team for the past two years. On Monday, the national team's official fan club Red Devils issued a statement calling on Hong to "kneel before the entire nation and leave the football world forever". Announcing his resignation at a news conference in Mexico on Sunday, Hong said that "we didn't deliver the results that our fans expected". "Even though I am leaving the national team, I am not abandoning Korean football altogether," Hong said. "I will cheer for the national team from the bottom of my heart and hope that the team will be trusted and loved by the people once again." The announcement came after President Lee said that he felt "not just confusion but utter bewilderment at the unexpected outcome". In a post on X, Lee said that the early exit of the team "appears to be a failure of organisation and personnel". "When favouritism and cronyism take p
+
+
+===== DOC 5: The share price of Nvidia and Micron are both testing/breaking key support targets | investingLive =====
+Shares of Nvidia and Micron are both trading lower today, putting key technical support levels under pressure. For Nvidia, the stock opened higher and tested its 100-day moving average at $196.36, reaching a session high of $196.18—just shy of that key resistance level. Buyers leaned and quickly turned into sellers, driving the stock lower toward its 200-day moving average at $190.72. The decline briefly pushed below that support, reaching a low of $189.80, before buyers stepped back in. The rebound has lifted the stock back to around $191.90, placing the price once again between its two major moving averages and providing some near-term relief. Even so, the technical picture remains fragile. Staying below the 100-day moving average keeps sellers in control, while a sustained break below the 200-day moving average would strengthen the bearish case and likely invite additional downside pressure. Nevertheless, a battle is on between the two key MA levels. For Micron, it has also struggled throughout the early day's trading. After opening near the highs of the day at $1,128.70, the stock rotated sharply lower, falling to a session low of $1,023.65. The decline briefly pushed the shares below Wednesday's pre-earnings closing price of $1,048.50 and below the 100-hour moving average at $1,048.33. Those levels are significant because they represent the market's attempt to fully retrace the post-earnings rally despite Micron's strong earnings beat and upbeat guidance. Since then, buyers have regained some footing, lifting the stock back above both levels to around $1,055. Like Nvidia, Micron bulls are attempting to blunt the sellers' momentum and reestablish the uptrend. The key level to watch remains the 100-hour moving average, currently at $1,048.41. A move back below that level could shift the focus toward the rising 200-hour moving average at $964.97, however unlikely that may seem given the earnings numbers last week. Conversely, if buyers can hold above the 100-hour moving average, today's failed breakdown could be viewed as a bear trap and serve as a launching pad for another push higher.
+
+
+===== DOC 6: Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case =====
+Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case WASHINGTON (AP) — The Supreme Court on Monday rejected a push by President Donald Trump to throw out a jury’s $5 million finding that he sexually abused the writer E. Jean Carroll at a New York City department store in the mid-1990s and later defamed her. The high court declined to take up the case in a brief, unexplained order, as is typical. There were no noted dissents. Trump also plans to appeal another $83.3 million verdict awarded to Carroll by a different jury after a second defamation trial, his lawyers have said. The decision comes as the court hands down its biggest opinions, including a ruling that expands his firing power over the federal bureaucracy with the exception of the Federal Reserve. Trump called the decision to pass on the Carroll case “surprising” in a social media post, and he said he would continue to fight the defamation claims. “This Case is really against the United States of America, and all it stands for,” he wrote. AP Washington correspondent Sagar Meghani reports the Supreme Court is denying President Trump’s bid to throw out a $5 million sexual assault verdict against him. Trump’s lawyers had argued that allegations leading to the verdict were propped up by “highly inflammatory” evidentiary rulings, including those that allowed the testimony of two other women who accused Trump of sexual abuse decades ago. Trump has denied all three women’s allegations. Trump’s attorneys argued the judge broke federal evidence rules in the case. They framed it as a distraction from Trump’s unique duties as president, though the verdict came before his return to the White House. “This mistreatment of a President cannot be allowed to stand,” Attorney Justin D. Smith wrote in court documents. Trump, a Republican, has since nominated Smith to be an appeals court judge. His lawyers called the case “Liberal Lawfare” in a statement on Monday. Carroll’s lawyers had urged the justices to pass on the case. They argued that the women’s testimony was relevant beca
+
+
+===== DOC 7: Israeli attacks kill eight people in Gaza and a teenager in the West Bank =====
+Israeli attacks have killed at least eight Palestinians including two children in Gaza, and a 15-year-old boy in the occupied West Bank. An Israeli drone attacked the Wadi al-Salqa bridge on al-Baraka Street in central Gaza on Monday morning, killing eight-year-old Malik Wael Abu Shaweesh, as well as Ali Fayez Isbaitan and Hassan Salman al-Hanajra, the Wafa news agency reported. Recommended Stories list of 3 items- list 1 of 3Israel kills four Palestinians in Gaza as attacks on tents continue - list 2 of 3Will Andy Burnham mark a shift in the UK’s Gaza policy? - list 3 of 3Is the Israeli military deliberately targeting children in Gaza? In a separate incident, a displaced twenty-three year old woman and her one-year old daughter were killed when their tent was hit by an Israeli attack in the al-Mawasi neighbourhood in Khan Younis in southern Gaza. Another Israeli strike in the town of Qarara, north west of Khan Younis, killed a thirty-one year old man, according to Nasser Medical Complex, and two people were killed when an Israeli strike hit a tent sheltering displaced Palestinians along the coastal area of Khan Younis. In the West Bank, 15-year-old Ahmad Jawad Jaber died on the way to hospital after being shot in the chest and head during an Israeli raid on the Umm al-Sharayit neighbourhood in el-Bireh, near Ramallah, the Palestinian health ministry said. Laila Ghannam, the governor of Ramallah and el-Bireh, was among the mourners at the Palestine Medical Complex where the teenager’s body was taken. “Today, we witnessed a clear-cut execution in broad daylight,” Ghannam told AFP. She said his killing was “a disgrace to all institutions who claim to uphold democracy and human rights”. Israeli rights group B’Tselem issued a report on Monday saying Israeli forces have killed 241 Palestinian children and teenagers in the West Bank since October 7, 2023. “The widespread, unprecedented killing of Palestinian children and teenagers in the West Bank is the result of a broader Israeli policy that enables the killing of Palestinians with virtually no accountability,” said B’Tselem Executive Director Yuli Novak. Israeli authorities have refused to return some of the childr
+
+
+===== DOC 8: How Kevin Warsh upended the game plan for Gold | FXStreet =====
+Something is breaking inside the Federal Reserve's new strategy, signaling a massive regime change for macro markets. Under the leadership of newly appointed Fed Chair Kevin Warsh, the traditional framework of forward guidance and predictable rate paths could be dismantled soon. For Gold traders, this structural shake-up means the historical inverse correlation between real interest rates and Gold is officially back, forcing a market repricing. A regime change at the Federal Reserve It wasn't just a chair swap. This wasn’t just replacing a challenged Jerome Powell with a fresh face in Kevin Warsh: It was a system swap. For over a decade, markets operated on a simple framework. The Fed would telegraph its intentions through something called forward guidance. You had the Summary of Economic Projections – every FOMC member forecasting where they expected inflation, employment, and GDP to go. Within it, you had the dot plot – every FOMC member publishing where they expected rates to go. You had the policy statement, carefully worded, obsessively parsed. You had press conferences after every meeting. And above all, you had predictability. That entire structure is now gone. Kevin Warsh didn't walk in and tweak Powell's system; he aims to dismantle it. He announced that he will create task forces – five of them: each one assessing Communication, Balance Sheet, Data, Productivity and Jobs, and an Inflation Framework review. These aren't just advisory panels. They will provide the new inputs that the Fed will follow. Warsh also chose not to provide his interest-rate expectations in the dot plot. No more published rate path from the most powerful person in the room. He wants flexibility and agility – words that sound more Silicon Valley than Washington, DC. The statement? Cut down to half the length, from over 300 words to just about 150. What about press conferences? They could be gone, or not. He may only speak when he decides he has something to say. More unpredictability. All this takes us back to the Alan Greenspan era, 25 years ago. Warsh admires Greenspan. Again, history repeats itself. Before the Global Financial Crisis made the Fed commit to carefully dictating a
+
+
+===== DOC 9: Marco Rubio meets Libyan commander as US pushes to resolve Libya crisis =====
+US Secretary of State Marco Rubio has met a top official from the self-styled Libyan National Army (LNA), which backs the government in eastern Libya and is competing for power with the internationally recognised authorities in the capital, Tripoli. The talks between Rubio and Deputy Commander Saddam Haftar on Monday come amid Washington’s deepening involvement in attempting to resolve the political crisis in the North African country. Recommended Stories list of 3 items- list 1 of 3Four Gaza aid flotilla activists released from Libya detention - list 2 of 3US push for unified Libyan government tests Tripoli factions - list 3 of 3EU targets Somalia with visa curbs as president pushes back on returns The US State Department, in a statement, said Rubio and Haftar “discussed ongoing Libyan-led efforts to unify the country’s military, economic, and political institutions” and the “possible avenues for cooperation to advance unity and peace in Libya”. “The Secretary expressed appreciation for the efforts of Libyan leaders to overcome divisions and move toward unity,” the statement added. “The United States will remain at the forefront of diplomatic efforts to support Libyan unity and create the conditions for a democratically elected government able to lead Libya forward.” In April, the US helped broker an agreement for unified spending between the two competing governments in Libya. The deal covered wages for public sector employees and the National Oil Corporation. The US is also pushing to establish military cooperation between the governments in eastern and western Libya. Last year, forces loyal to both governments participated in joint drills with the US military in the central coastal city of Sirte. Libya descended into chaos and civil strife after a NATO-backed armed uprising toppled longtime leader Muammar Gaddafi in 2011. The current fractured governance traces back to 2014, when Libyans elected a new legislative body, dubbed the House of Representatives, with a low turnout amid clashes between armed groups. A top court in Tripoli declared the House of Representatives, which had moved to eastern Libya after armed groups took over Tripoli, invalid. But the le
+
+
+===== DOC 10: BitMEX CEO And CFO Resign From The Crypto Exchange =====
+Cryptocurrency exchange BitMEX has lost its chief executive officer (CEO) and chief financial officer (CFO) in a wave of executive resignations. Privately held BitMEX, which is a crypto derivatives exchange, said its Chief Growth Officer has also left the company effective immediately. BitMEX is a troubled exchange that announced earlier this year that it was putting itself up for sale. However, no buyers have emerged for the company. More From Cryptoprowl: Now, CEO Stephan Lutz, CFO Ina Steiner, and Chief Growth Officer Raphael Polansky have left BitMEX. The company said that former Chief Operating Officer (COO) Peter Wilkinson has taken over as CEO in the wake of the executive departures. The crypto exchange was co-founded in 2014 by entrepreneur and social media influencer Arthur Hayes. In 2020, BitMEX was accused of failing to implement adequate anti-money laundering measures and later pleaded guilty to the charges. Hayes and other executives at BitMEX resigned after the U.S. brought criminal charges against the company. The latest round of executive departures comes as BitMEX tries to streamline its operations and costs and appear more attractive to prospective buyers. As a private company, BitMEX's stock does not trade on a public exchange.
+
+
+===== DOC 11: The self-custody market is set to triple, and MiCA just pulled the timeline forward =====
+The self-custody market is set to triple, and MiCA just pulled the timeline forward NGRAVE recorded a 34% increase in sales over the week of June 24 to 27, as the July 1 MiCA compliance deadline drew closer and European users moved to secure their assets ahead of it. Wavre, Belgium – NGRAVE recorded a 34% increase in sales over the week of June 24 to 27, as the July 1 MiCA compliance deadline drew closer and European users moved to secure their assets ahead of it. It is a local signal of a much larger structural shift: across independent research, the hardware wallet market is projected to triple by 2031, with MiCA named as one of the key catalysts. The pattern repeats with every major exchange failure or regulatory event: a measurable and durable migration of assets out of exchange custody and into self-custody. FTX proved it at scale. MiCA is proving it again, this time inside a regulated environment, with a fixed deadline and millions of European users making the decision in real time. The market in numbers Hardware wallets have grown for years, but the structural shift is now being formally written into industry forecasts for the first time. Across several independent 2026 studies, the picture is consistent: - $720M – $957M Estimated size of the global market in 2026 Mordor Intelligence, Market Research Future, Research and Markets. - ~25% CAGR Projected growth rate through 2031 Mordor Intelligence 25.6%, Straits Research 24.3%, Market Research Future 23.6%. - $2.25B – $3.44B Projected market size by 2031–2032 Across five independent research models. The directional consensus is unambiguous: the market will roughly triple over five years, driven by three forces, regulatory pressure that requires cold storage infrastructure, ongoing exchange security failures, and a steady shift in retail investor behavior toward true ownership of assets. Europe stands out as the second largest market in the world, roughly 28 to 30% of global demand, with MiCA explicitly named as a structural catalyst (Market Research Future, 2026; Mordor Intelligence, 2026). The FTX template: what happens after a custody event The move into self-custody after major shocks is well documented,
+
+
+===== DOC 12: Comcast plans to split into two public companies by spinning off NBCUniversal and Sky =====
+Comcast plans to split into two public companies by spinning off NBCUniversal and Sky NEW YORK (AP) — Communications giant Comcast is planning to split itself into two: one media-centered business that would include brands like NBCUniversal and Sky and a separate company focused on broadband and wireless services. In a Monday announcement, Comcast said the breakup will put both of these operations in a better position to pursue their own priorities and growth. The move arrives as communications companies continue to wrestle with years of cord-cutting, and shifting habits in how consumers now buy subscriptions for anything from their phone plans to streaming budgets more broadly. “The world is changing faster than ever,” Comcast Chairman and co-CEO Brian Roberts said on a Monday call — adding that it “has become clear” the company’s technology and media businesses each “have compelling opportunities in front of them that are distinct in nature and best pursued with dedicated focus.” Upon the spinoff’s completion, both businesses would become their own publicly-traded companies. Comcast said it expects to complete the process in about a year, pending regulatory approvals and a final greenlight from its board. That means consumers shouldn’t feel immediate impacts. But a host of major brands currently sit under Comcast’s umbrella — from internet and wireless provider Xfinity to streaming platform Peacock, NBC News and Universal Studios. And analysts are eyeing what those businesses could look like farther down the road. What could be in store for NBCUniversal and Comcast “In the short term, bundles, pricing, and distribution will likely hold,” said Mike Proulx, a vice president and research director at market research firm Forrester. For NBCUniversal — set to head the media-centered company Comcast is spinning off — the split in itself carries little effect on its current business, he noted, and is “more to do with what it becomes longer term.” Proulx is bracing for future acquisitions in this space, adding that “Comcast is following a playbook we have already seen.” He pointed to Warner Bros. Discovery, which announced its own intention to split just last June — be
+
+
+
+codex
+A few of these are clearly non-market or only opinion-driven, so I’m pulling full text for the borderline cases to avoid claiming forecasts or policy moves that the article doesn’t actually state as facts.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids=[5,8,10,11,12]
+with open('all_batch_011.jsonl') as f:
+    docs=list(f)
+for i in ids:
+    obj=json.loads(docs[i-1])
+    print(f\"===== DOC {i}: {obj['title']} =====\")
+    print(obj['body_text'])
+    print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 5: The share price of Nvidia and Micron are both testing/breaking key support targets | investingLive =====
+Shares of Nvidia and Micron are both trading lower today, putting key technical support levels under pressure. For Nvidia, the stock opened higher and tested its 100-day moving average at $196.36, reaching a session high of $196.18—just shy of that key resistance level. Buyers leaned and quickly turned into sellers, driving the stock lower toward its 200-day moving average at $190.72. The decline briefly pushed below that support, reaching a low of $189.80, before buyers stepped back in. The rebound has lifted the stock back to around $191.90, placing the price once again between its two major moving averages and providing some near-term relief. Even so, the technical picture remains fragile. Staying below the 100-day moving average keeps sellers in control, while a sustained break below the 200-day moving average would strengthen the bearish case and likely invite additional downside pressure. Nevertheless, a battle is on between the two key MA levels. For Micron, it has also struggled throughout the early day's trading. After opening near the highs of the day at $1,128.70, the stock rotated sharply lower, falling to a session low of $1,023.65. The decline briefly pushed the shares below Wednesday's pre-earnings closing price of $1,048.50 and below the 100-hour moving average at $1,048.33. Those levels are significant because they represent the market's attempt to fully retrace the post-earnings rally despite Micron's strong earnings beat and upbeat guidance. Since then, buyers have regained some footing, lifting the stock back above both levels to around $1,055. Like Nvidia, Micron bulls are attempting to blunt the sellers' momentum and reestablish the uptrend. The key level to watch remains the 100-hour moving average, currently at $1,048.41. A move back below that level could shift the focus toward the rising 200-hour moving average at $964.97, however unlikely that may seem given the earnings numbers last week. Conversely, if buyers can hold above the 100-hour moving average, today's failed breakdown could be viewed as a bear trap and serve as a launching pad for another push higher.
+
+
+===== DOC 8: How Kevin Warsh upended the game plan for Gold | FXStreet =====
+Something is breaking inside the Federal Reserve's new strategy, signaling a massive regime change for macro markets. Under the leadership of newly appointed Fed Chair Kevin Warsh, the traditional framework of forward guidance and predictable rate paths could be dismantled soon. For Gold traders, this structural shake-up means the historical inverse correlation between real interest rates and Gold is officially back, forcing a market repricing. A regime change at the Federal Reserve It wasn't just a chair swap. This wasn’t just replacing a challenged Jerome Powell with a fresh face in Kevin Warsh: It was a system swap. For over a decade, markets operated on a simple framework. The Fed would telegraph its intentions through something called forward guidance. You had the Summary of Economic Projections – every FOMC member forecasting where they expected inflation, employment, and GDP to go. Within it, you had the dot plot – every FOMC member publishing where they expected rates to go. You had the policy statement, carefully worded, obsessively parsed. You had press conferences after every meeting. And above all, you had predictability. That entire structure is now gone. Kevin Warsh didn't walk in and tweak Powell's system; he aims to dismantle it. He announced that he will create task forces – five of them: each one assessing Communication, Balance Sheet, Data, Productivity and Jobs, and an Inflation Framework review. These aren't just advisory panels. They will provide the new inputs that the Fed will follow. Warsh also chose not to provide his interest-rate expectations in the dot plot. No more published rate path from the most powerful person in the room. He wants flexibility and agility – words that sound more Silicon Valley than Washington, DC. The statement? Cut down to half the length, from over 300 words to just about 150. What about press conferences? They could be gone, or not. He may only speak when he decides he has something to say. More unpredictability. All this takes us back to the Alan Greenspan era, 25 years ago. Warsh admires Greenspan. Again, history repeats itself. Before the Global Financial Crisis made the Fed commit to carefully dictating all its thinking to the markets, the Fed used to work like this: short statements, short pressers, and just focus on the data. The only thing different from the Greenspan era is that inflation is now surging. But think about what all that means. Markets have spent a decade learning how to read the Fed: entire trading desks, hedge fund strategies, macro newsletters, and analysis tools are built around Fed-watching. And that edge just evaporated. The market's first reaction said everything: violent repricing. Something broke inside the market’s structure. Gold crashed. The US Dollar surged. Stocks topped. All led by 2-year Treasury yields moving up – which is the market saying: we no longer expect a rate cut coming soon. Rather, expect a hike. Why is the Gold and real rates correlation back Kevin Warsh basically turned the Fed upside down – under his leadership, the FOMC will likely publish reduced statements, provide no forward guidance, and he might even bypass press conferences after meetings. But what does this mean for the markets going forward? And more specifically, what does it mean for Gold traders? Now here's where most retail traders get this wrong, because the misunderstanding is expensive. People say Gold goes up when rates go down. That's only half true. And the half they're missing is what's going to cost them. Gold doesn't move with nominal interest rates. It moves with real interest rates – that's nominal rates adjusted for inflation. When real rates are negative, holding Gold has no opportunity cost. You're not giving up yield by owning a bar of metal. But when real rates turn positive and rise – when you can earn real purchasing power from holding US Treasuries – Gold becomes expensive to hold. Historically, the correlation is tight, and it's inverse. The relationship between Gold and the real yield on 10-year Treasuries is very strong. Now look at what happened over the past two years. That correlation broke. Gold skyrocketed even as real interest rates stayed elevated – because the market had a new driver: a crisis of confidence in the US Dollar itself. Trump is trying to fire the Fed chair, tariff chaos, fiscal deficits, and geopolitical noise. Gold wasn't trading on rates – it was trading on the US Dollar's lack of credibility. Here's what Warsh might have changed. Gold peaked the day before Trump nominated him as the new Fed chair, last January. Coincidence? Don’t think so. Macroeconomics is back to work. The Gold-real rates relationship is back. And that data is telling you something very clear: gold is not cheap here. It’s still trading above $4,000, a level that was not reached until October 2025. The political and economic contradiction facing Warsh The first market assumption on Warsh might have been that he’s an inflation hawk, and that’s why Gold is down. But there's tension at the heart of the Fed – and it's the thing that makes this so tradeable. Warsh was appointed by Trump. And Trump wants lower rates. He's been vocal about it for years – lower rates to stimulate consumption, reduce the cost of US government debt, keep the economy moving. Jerome Powell refused for months, and Trump went after him publicly, relentlessly. But when Warsh held rates and gave zero hints of a cut? The US President was quiet. He said Warsh is "guided by what he wants" – and just added that higher rates "keep the country down." That's not pressure. That's patience, at least for now. But look at the dot plot that the FOMC released on June 17. The little dots represent the current vision of each member of the Federal Open Market Committee. These are the people who decide monetary policy. Nine of eighteen members see higher rates by year-end. Core PCE is now projected at 3.6% – up from 2.7% previously. The committee is hawkish. The data is hawkish. And there is a simple reason why they are: the energy shock from the Middle East conflict. Rising Oil prices are the visible part. But the delayed effects – jet fuel, petrochemicals, natural gas, fertilizers, helium – feed into goods inflation in Q2, Q3, and Q4. The pipeline is full. The higher inflation prints are coming. So, how long can Trump wait until he’s unsettled again about what’s going on at the Fed? Warsh is caught between a rock and a hard place. He needs and wants to get inflation down – he's said it plainly: "Inflation is a choice. You bet it is." But his political principal wants rates cut. And something, eventually, will have to break. The genius – or the danger – of his new system is that it gives him maximum cover. No chair dot to defend. No forward guidance to walk back. Private data delivered by task forces that outside analysts can't fully scrutinize. A thin paper trail. He can change course from one meeting to the next and justify it as data-driven agility. Whether that's a feature or a bug depends on how much you trust him. Shifting strategy: Trading the data, not the Fed Trump nominated Warsh for his lower-rate stance, but in his first meeting, the new Fed chair sounded like an inflation hawk, and the market sold off. What's the actual trade here? Stop trying to read the Fed; they’re not going to tell you what they will do. Trade the data instead. Every economic print between now and the next FOMC decision is the event. Front-end Treasury yields and the US Dollar are your leading indicators. Right now, both are signaling a rate hike by October – CME Group’s FedWatch tool is pricing it at a 60% implied probability of fed funds rates above the current 3.50%-3.75% range. That backdrop is not friendly to Gold. Not here, not at these levels, above $4,000. But here's the trap to avoid. Not all the data is the same. Don't trade headline CPI. Headline inflation may well decline if oil keeps pulling back. That's a head-fake. Instead, Warsh gave us a clue back in April, during his confirmation hearing. He said he prefers to look at inflation with “trimmed averages.” “Trimmed-mean averages” are alternative inflation measures released by regional Fed banks, such as the Cleveland Fed's 16% Trimmed Mean CPI and the Dallas Fed's PCE inflation rate. These figures exclude extreme readings above the 92nd percentile and below the 8th percentile, resulting in a much lower variance and smoother trends. In the context of an Oil shock like the current one, this might mean less weightage on skyrocketing energy prices. Does this mean lower inflation rates than the headline and core readings? Is this actually dovish, then? It could be. President Trump wants lower rates, and Warsh might find some room to deliver them if he can ignore the undeniable spike in headline inflation imported from the Middle East. So, circle CPI and PCE inflation releases on your economic calendar, but don’t focus on headline numbers. Instead, dig deeper into the data that Warsh and the FOMC members will scrutinize. If these Trimmed-Mean measures come in hot, the rate hike odds climb further, real yields push higher, and Gold has another leg down. If these surprise to the downside, you'll get a relief bounce. Still, something will have to break. The Gold bull narrative was based on a Fed that was going to cut. Right now, that Fed doesn't exist. And we don’t know if it will. For almost two years, gold traded on fear – fear of dollar debasement, fear of fiscal collapse, fear that the US was losing its grip on global credibility. That fear trade was real, and it worked. But all trades eventually end. They end when something changes structurally. And what has changed is this: the Fed now has a chair who won't tell markets what to expect. So, markets are back to what worked in the past. Real rates are rising. The US Dollar is finding its footing. And that historical chart between real yields and Gold is back in play. Game over for the gold bulls – at least for this chapter. Watch the data. Trade the prints, not the promises. (This article was created with the help of an Artificial Intelligence tool and reviewed by an editor.) Author Residing in Mumbai (India), Dhwani is a Senior Analyst and Manager of the Asian session at FXStreet. She has over 10 years of experience in analyzing and covering the global financial markets, with specialization in Forex and commodities markets.
+
+
+===== DOC 10: BitMEX CEO And CFO Resign From The Crypto Exchange =====
+Cryptocurrency exchange BitMEX has lost its chief executive officer (CEO) and chief financial officer (CFO) in a wave of executive resignations. Privately held BitMEX, which is a crypto derivatives exchange, said its Chief Growth Officer has also left the company effective immediately. BitMEX is a troubled exchange that announced earlier this year that it was putting itself up for sale. However, no buyers have emerged for the company. More From Cryptoprowl: Now, CEO Stephan Lutz, CFO Ina Steiner, and Chief Growth Officer Raphael Polansky have left BitMEX. The company said that former Chief Operating Officer (COO) Peter Wilkinson has taken over as CEO in the wake of the executive departures. The crypto exchange was co-founded in 2014 by entrepreneur and social media influencer Arthur Hayes. In 2020, BitMEX was accused of failing to implement adequate anti-money laundering measures and later pleaded guilty to the charges. Hayes and other executives at BitMEX resigned after the U.S. brought criminal charges against the company. The latest round of executive departures comes as BitMEX tries to streamline its operations and costs and appear more attractive to prospective buyers. As a private company, BitMEX's stock does not trade on a public exchange.
+
+
+===== DOC 11: The self-custody market is set to triple, and MiCA just pulled the timeline forward =====
+The self-custody market is set to triple, and MiCA just pulled the timeline forward NGRAVE recorded a 34% increase in sales over the week of June 24 to 27, as the July 1 MiCA compliance deadline drew closer and European users moved to secure their assets ahead of it. Wavre, Belgium – NGRAVE recorded a 34% increase in sales over the week of June 24 to 27, as the July 1 MiCA compliance deadline drew closer and European users moved to secure their assets ahead of it. It is a local signal of a much larger structural shift: across independent research, the hardware wallet market is projected to triple by 2031, with MiCA named as one of the key catalysts. The pattern repeats with every major exchange failure or regulatory event: a measurable and durable migration of assets out of exchange custody and into self-custody. FTX proved it at scale. MiCA is proving it again, this time inside a regulated environment, with a fixed deadline and millions of European users making the decision in real time. The market in numbers Hardware wallets have grown for years, but the structural shift is now being formally written into industry forecasts for the first time. Across several independent 2026 studies, the picture is consistent: - $720M – $957M Estimated size of the global market in 2026 Mordor Intelligence, Market Research Future, Research and Markets. - ~25% CAGR Projected growth rate through 2031 Mordor Intelligence 25.6%, Straits Research 24.3%, Market Research Future 23.6%. - $2.25B – $3.44B Projected market size by 2031–2032 Across five independent research models. The directional consensus is unambiguous: the market will roughly triple over five years, driven by three forces, regulatory pressure that requires cold storage infrastructure, ongoing exchange security failures, and a steady shift in retail investor behavior toward true ownership of assets. Europe stands out as the second largest market in the world, roughly 28 to 30% of global demand, with MiCA explicitly named as a structural catalyst (Market Research Future, 2026; Mordor Intelligence, 2026). The FTX template: what happens after a custody event The move into self-custody after major shocks is well documented, and FTX remains the clearest case. Within days of the November 11, 2022 bankruptcy, Trezor reported a 300% jump in sales, and Ledger called November 2022 the best month in its history. On-chain data from Glassnode showed the volume of bitcoin held on exchanges fall from roughly 2.3 million to 2.0 million BTC over three months, a durable withdrawal of assets from custody that held long after the acute phase passed. The logic is robust: a shock event forces users to confront a custodial risk they had previously accepted passively, and a meaningful cohort makes the final decision to move into self-custody. That cohort does not come back. The assets that moved into hardware wallets after FTX stayed there. The self-custody cohort is permanent, not cyclical. Why MICA is the bigger catalyst FTX was a fraud event, and it created urgency through fear, unevenly across markets. MiCA is a regulatory event: it is clearer, it moves more slowly, and it affects every exchange user in a defined geography at once, regardless of which exchange they use. The four million European Binance users estimated to be displaced before July 1 did not choose this moment. The regulatory calendar set it for them. That produces a different and more durable buyer cohort. Users have days, not hours: they compare wallets, read migration guides, and make a considered rather than panicked decision. Panic buyers after FTX sometimes returned to exchanges once the fear faded. Those who moved their assets after understanding the structural argument tend to stay. Where the growth comes from Demand is also accelerating at the institutional layer: Mordor Intelligence projects institutional purchasing to grow at 26.9% CAGR, slightly ahead of retail. MiCA custody provisions, together with updated OCC and FDIC guidance in the US, are turning the hardware wallet from an optional security best practice into regulatory compliance infrastructure, and compliance decisions produce recurring purchases. Penetration, meanwhile, remains low. Even in mature European markets, most retail holders have never used a hardware wallet. That gap is the market. The thesis of not your keys, not your coins has been confirmed by Mt. Gox, Celsius, FTX, Bybit, and now by MiCA’s impact on exchange authorization. The question is not whether self-custody will grow, but how quickly the remainder of the market converts, and which event triggers the next inflection. The NGRAVE view “This is the most significant self-custody moment since FTX. The MiCA deadline has created a clear, time-bound event that is already changing behavior across European markets, and our own 34% increase over the week of June 24 to 27 is direct evidence of it,” – said Roy Blackstone, CEO of NGRAVE. From here, the trajectory is clear. MiCA will continue to mature, more exchanges will face authorization problems, and institutional demand for compliant cold storage will grow as European banks enter crypto custody. The projected growth of the market to 2 to 3.4 billion USD by 2031 is not built on optimism. It is built on a pattern that has repeated often enough to be called a structural trend: regulatory and security shocks irreversibly turn exchange custody users into self-custody users, and those users do not return. MiCA is the latest example. It will not be the last. Press сontact Benedikt Raets, Head of Community Engagement About NGRAVE NGRAVE is a digital asset security company founded in Belgium in 2018. Its flagship product, the NGRAVE ZERO, is a fully air-gapped hardware wallet, with no USB, Bluetooth, or Wi-Fi, certified to EAL7, which NGRAVE states is the highest security assurance level ever awarded to a consumer financial product. The company’s GRAPHENE provides a fireproof, waterproof, and cryptographically split steel backup for recovery phrases, and the NGRAVE LIQUID app supports portfolio management and swaps. Designed and built in Europe, NGRAVE focuses on giving individuals and institutions full self-custody of their crypto assets without compromising on security. For more information, visit ngrave.io.
+
+
+===== DOC 12: Comcast plans to split into two public companies by spinning off NBCUniversal and Sky =====
+Comcast plans to split into two public companies by spinning off NBCUniversal and Sky NEW YORK (AP) — Communications giant Comcast is planning to split itself into two: one media-centered business that would include brands like NBCUniversal and Sky and a separate company focused on broadband and wireless services. In a Monday announcement, Comcast said the breakup will put both of these operations in a better position to pursue their own priorities and growth. The move arrives as communications companies continue to wrestle with years of cord-cutting, and shifting habits in how consumers now buy subscriptions for anything from their phone plans to streaming budgets more broadly. “The world is changing faster than ever,” Comcast Chairman and co-CEO Brian Roberts said on a Monday call — adding that it “has become clear” the company’s technology and media businesses each “have compelling opportunities in front of them that are distinct in nature and best pursued with dedicated focus.” Upon the spinoff’s completion, both businesses would become their own publicly-traded companies. Comcast said it expects to complete the process in about a year, pending regulatory approvals and a final greenlight from its board. That means consumers shouldn’t feel immediate impacts. But a host of major brands currently sit under Comcast’s umbrella — from internet and wireless provider Xfinity to streaming platform Peacock, NBC News and Universal Studios. And analysts are eyeing what those businesses could look like farther down the road. What could be in store for NBCUniversal and Comcast “In the short term, bundles, pricing, and distribution will likely hold,” said Mike Proulx, a vice president and research director at market research firm Forrester. For NBCUniversal — set to head the media-centered company Comcast is spinning off — the split in itself carries little effect on its current business, he noted, and is “more to do with what it becomes longer term.” Proulx is bracing for future acquisitions in this space, adding that “Comcast is following a playbook we have already seen.” He pointed to Warner Bros. Discovery, which announced its own intention to split just last June — before becoming a takeover target that erupted into a messy tug-of-war between Netflix and Skydance-owned Paramount. Paramount eventually became victorious, and is now edging closer to closing its $81 billion buyout of Warner’s entire company. Comcast executives have appeared to so far dismiss the possibility of heading toward a similar fate. When asked on Monday’s call whether investors should view the separation as a step toward “potential strategic transactions” for either business, Roberts said: “Absolutely not.” His co-CEO Mike Cavanagh — who is set to become the chief executive of the NBCUniversal spinoff — echoed that sentiment. Cavanagh reiterated plans to “build and invest for growth” with more freedom as a standalone business. Still, analysts like Proulx speculate that even if NBCUniversal doesn’t become a takeover target, “it’ll likely be the company doing the acquiring.” “As it stands, traditional TV is dying, and Peacock alone isn’t enough to compete at scale against the biggest streaming services,” Proulx said via email. “One way or the other, NBCU’s entertainment business will look different within the next couple of years.” This isn’t the first spinoff for Comcast Like other companies, Comcast in recent years has shifted its business emphasis away from traditional cable toward streaming and other sources of revenue, such as its movie studio, theme parks and home wireless and internet services. Comcast will become two separate publicly traded companies. The AP’s Mike Hempen reports. NBCUniversal includes that theme parks division, Universal film and television studios, NBC and Telemundo networks, Peacock, and Bravo — and with the spinoff, European media business Sky will also be part of that portfolio led by Cavanagh. Meanwhile, Philadelphia-based Comcast will continue providing internet services to residential and business customers. Comcast’s former Chief Financial Officer Michael Angelakis will become the CEO of that company following its separation. Comcast has split off assets before. Monday’s move arrives just months after the company officially completed its separation of Versant Media Group — which, as first announced in November 2024, is the new home of networks like USA, Oxygen, E!, SYFY and Golf Channel, as well as CNBC and MSNBC (now MS NOW). Movie ticketing platform Fandango and the Rotten Tomatoes movie rating site were also included. Once the latest split is complete, Comcast shareholders will own shares in both Comcast and NBCUniversal. Comcast expects to keep a stake of up to 19.9% ownership position in NBCUniversal for up to one year after the spinoff is complete. Comcast jumped more than 6% as of midday trading following Monday’s announcement. Shares still are down over 10% since the start of 2026.
+
+
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids=[6,9]
+with open('all_batch_011.jsonl') as f:
+    docs=list(f)
+for i in ids:
+    obj=json.loads(docs[i-1])
+    print(f\"===== DOC {i}: {obj['title']} =====\")
+    print(obj['body_text'])
+    print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 6: Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case =====
+Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case Supreme Court rejects Trump’s push to toss $5 million verdict in E. Jean Carroll sexual abuse case WASHINGTON (AP) — The Supreme Court on Monday rejected a push by President Donald Trump to throw out a jury’s $5 million finding that he sexually abused the writer E. Jean Carroll at a New York City department store in the mid-1990s and later defamed her. The high court declined to take up the case in a brief, unexplained order, as is typical. There were no noted dissents. Trump also plans to appeal another $83.3 million verdict awarded to Carroll by a different jury after a second defamation trial, his lawyers have said. The decision comes as the court hands down its biggest opinions, including a ruling that expands his firing power over the federal bureaucracy with the exception of the Federal Reserve. Trump called the decision to pass on the Carroll case “surprising” in a social media post, and he said he would continue to fight the defamation claims. “This Case is really against the United States of America, and all it stands for,” he wrote. AP Washington correspondent Sagar Meghani reports the Supreme Court is denying President Trump’s bid to throw out a $5 million sexual assault verdict against him. Trump’s lawyers had argued that allegations leading to the verdict were propped up by “highly inflammatory” evidentiary rulings, including those that allowed the testimony of two other women who accused Trump of sexual abuse decades ago. Trump has denied all three women’s allegations. Trump’s attorneys argued the judge broke federal evidence rules in the case. They framed it as a distraction from Trump’s unique duties as president, though the verdict came before his return to the White House. “This mistreatment of a President cannot be allowed to stand,” Attorney Justin D. Smith wrote in court documents. Trump, a Republican, has since nominated Smith to be an appeals court judge. His lawyers called the case “Liberal Lawfare” in a statement on Monday. Carroll’s lawyers had urged the justices to pass on the case. They argued that the women’s testimony was relevant because the allegations were similar and that Judge Lewis Kaplan’s decisions were in line with others around the country. “This question is not worthy of review,” wrote attorney Roberta Kaplan, who is not related to the judge. Monday’s decision affirms the jury’s verdict will stand, she said in a statement Monday. “His multiple efforts to appeal that verdict have all failed and today’s ruling ends his quest to avoid accountability for his actions,” she said. Carroll, a longtime advice columnist and former TV talk show host, testified at a 2023 trial that Trump turned a friendly encounter in spring 1996 into a violent attack in the dressing room at Bergdorf Goodman, a luxury retailer across the street from Trump Tower in Manhattan. The jury also found Trump liable for defaming Carroll when he denied her allegation in 2022. The Associated Press does not identify people who say they have been sexually assaulted unless they come forward publicly, as Carroll has done. Trump has successfully fended off other hefty court judgments, including a New York civil fraud penalty of over $500 million thrown out by a New York appeals court. The Supreme Court also granted him broad immunity from criminal prosecution in 2024, though it later narrowly rejected his bid to halt sentencing in his New York hush money case. ___ Associated Press writers Jennifer Peltz in New York and Michelle Price in Washington contributed to this report. ___ Follow the AP’s coverage of the U.S. Supreme Court at https://apnews.com/hub/us-supreme-court.
+
+
+===== DOC 9: Marco Rubio meets Libyan commander as US pushes to resolve Libya crisis =====
+US Secretary of State Marco Rubio has met a top official from the self-styled Libyan National Army (LNA), which backs the government in eastern Libya and is competing for power with the internationally recognised authorities in the capital, Tripoli. The talks between Rubio and Deputy Commander Saddam Haftar on Monday come amid Washington’s deepening involvement in attempting to resolve the political crisis in the North African country. Recommended Stories list of 3 items- list 1 of 3Four Gaza aid flotilla activists released from Libya detention - list 2 of 3US push for unified Libyan government tests Tripoli factions - list 3 of 3EU targets Somalia with visa curbs as president pushes back on returns The US State Department, in a statement, said Rubio and Haftar “discussed ongoing Libyan-led efforts to unify the country’s military, economic, and political institutions” and the “possible avenues for cooperation to advance unity and peace in Libya”. “The Secretary expressed appreciation for the efforts of Libyan leaders to overcome divisions and move toward unity,” the statement added. “The United States will remain at the forefront of diplomatic efforts to support Libyan unity and create the conditions for a democratically elected government able to lead Libya forward.” In April, the US helped broker an agreement for unified spending between the two competing governments in Libya. The deal covered wages for public sector employees and the National Oil Corporation. The US is also pushing to establish military cooperation between the governments in eastern and western Libya. Last year, forces loyal to both governments participated in joint drills with the US military in the central coastal city of Sirte. Libya descended into chaos and civil strife after a NATO-backed armed uprising toppled longtime leader Muammar Gaddafi in 2011. The current fractured governance traces back to 2014, when Libyans elected a new legislative body, dubbed the House of Representatives, with a low turnout amid clashes between armed groups. A top court in Tripoli declared the House of Representatives, which had moved to eastern Libya after armed groups took over Tripoli, invalid. But the legislative body did not dissolve. Instead, it backed a rival government in the east, which was then supported by the LNA, formed by Khalifa Haftar, Saddam’s father. The older Haftar had served as a senior officer in the Libyan army under Gaddafi, but he defected and moved to the US in 1990 after he was captured by Chadian forces during fighting between Chad and Libya. He has been the de facto ruler of eastern Libya since his LNA consolidated power in the region after 2016. In 2019, the LNA mounted a campaign to capture Tripoli. It reached the capital, but its gains were quickly rolled back by forces loyal to the internationally recognised government. A ceasefire between the two sides was reached in 2020, but the country remained divided between the two governments and clashes continued to regularly break out across Libya. Saddam Haftar, who is the heir apparent to lead the LNA after his father, has been meeting with top officials across the region and the world in recent weeks, including Egypt’s defence minister and French President Emmanuel Macron. The administration of US President Donald Trump has deepened Washington’s diplomatic efforts in the oil-rich North African country, with White House adviser Massad Boulos leading an initiative to unify the two competing governments. Boulos told Al Hadath TV on Friday that the Libyan sides would be invited to Washington, DC, to sign a final agreement in the presence of Trump, should one be reached. “The United States will continue its efforts to support the Libyan people, who have suffered 15 years of war and division,” Boulos said in a social media post.
+
+
+
+codex
+I’ve got the extraction set defined. Next step is writing `all_facts_011.jsonl`, validating that it has 12 output rows in input order, and checking the fact count against the generated file.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_011.jsonl')
+output_path = Path('all_facts_011.jsonl')
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+records = []
+with input_path.open() as f:
+    docs = [json.loads(line) for line in f]
+
+facts_by_doc = {
+    '2dc0bd9647b87ea284c06fee224b8ff0': [],
+    '2df7e6656a38c67d2e8738cc15ada632': [],
+    '2f469523931b1bb2a669515927170130': [],
+    '2f5835df8baf65c14f98d3f2ec582fe8': [],
+    '2faac897f3e66d6156cfed0ae747631a': [
+        fact(
+            'Nvidia shares traded lower on June 29, falling from a session high of "'$196.18 to a session low of $189.80 before rebounding to around $191.90.'"',
+            'Nvidia',
+            'price_move',
+            None,
+            'down',
+            '"'$196.18 to $189.80'"',
+            '2026-06-29',
+            'The stock failed to hold near its 100-day moving average at "'$196.36 and sellers drove it toward its 200-day moving average at $190.72.'"',
+            ['Nvidia'],
+            0.95,
+        ),
+        fact(
+            'Micron shares traded lower on June 29, falling from an opening level near "'$1,128.70 to a session low of $1,023.65 before recovering to around $1,055.'"',
+            'Micron',
+            'price_move',
+            None,
+            'down',
+            '"'$1,128.70 to $1,023.65'"',
+            '2026-06-29',
+            None,
+            ['Micron'],
+            0.94,
+        ),
+    ],
+    '2fb7fb5fee4574b6420cb09ee86f4501': [],
+    '3213b600f0a5298472e92a740fe8a41f': [],
+    '327b6111c3e0395dfc10bc203fbed463': [
+        fact(
+            'Federal Reserve Chair Kevin Warsh announced five task forces to assess Communication, Balance Sheet, Data, Productivity and Jobs, and the Inflation Framework.',
+            'Federal Reserve',
+            'policy_action',
+            None,
+            'na',
+            'five task forces',
+            '2026-06-29',
+            None,
+            ['Federal Reserve', 'Kevin Warsh'],
+            0.78,
+        ),
+        fact(
+            'Kevin Warsh did not provide his interest-rate expectations in the Fed dot plot.',
+            'Kevin Warsh',
+            'policy_action',
+            'Federal Reserve dot plot',
+            'na',
+            None,
+            '2026-06-29',
+            None,
+            ['Kevin Warsh', 'Federal Reserve'],
+            0.76,
+        ),
+        fact(
+            'The Federal Open Market Committee dot plot released on June 17 showed that nine of 18 members saw higher rates by year-end.',
+            'Federal Open Market Committee',
+            'forecast',
+            'federal funds rate',
+            'up',
+            'nine of 18 members',
+            'June 17',
+            None,
+            ['Federal Open Market Committee', 'Federal Reserve'],
+            0.84,
+        ),
+        fact(
+            'The Federal Open Market Committee projected core PCE at 3.6%, up from 2.7% previously.',
+            'Federal Open Market Committee',
+            'forecast',
+            'core PCE inflation',
+            'up',
+            '3.6%, up from 2.7%',
+            '2026-06-29',
+            None,
+            ['Federal Open Market Committee', 'Federal Reserve'],
+            0.83,
+        ),
+        fact(
+            \"CME Group's FedWatch tool priced a 60% implied probability of fed funds rates above the current 3.50%-3.75% range by October.\",
+            'CME Group FedWatch',
+            'forecast',
+            'federal funds rate',
+            'up',
+            '60% implied probability',
+            'by October',
+            None,
+            ['CME Group', 'Federal Reserve'],
+            0.82,
+        ),
+    ],
+    '333ae99398e61a9c1d3147e1051b596f': [
+        fact(
+            'US Secretary of State Marco Rubio met Libyan National Army Deputy Commander Saddam Haftar on June 29 to discuss efforts to unify Libya\\'s military, economic, and political institutions.',
+            'United States',
+            'event',
+            'Libyan National Army',
+            'na',
+            None,
+            '2026-06-29',
+            'Washington is deepening its effort to resolve Libya\\'s political crisis.',
+            ['United States', 'Libya', 'Marco Rubio', 'Saddam Haftar', 'Libyan National Army'],
+            0.9,
+        ),
+        fact(
+            'In April, the United States helped broker a unified spending agreement between Libya\\'s two competing governments that covered public-sector wages and the National Oil Corporation.',
+            'United States',
+            'deal_or_contract',
+            'Libya\\'s two competing governments',
+            'na',
+            None,
+            'April',
+            None,
+            ['United States', 'Libya', 'National Oil Corporation'],
+            0.91,
+        ),
+    ],
+    '341302447a96c76b9dd152d55cf12d88': [
+        fact(
+            'BitMEX said CEO Stephan Lutz, CFO Ina Steiner, and Chief Growth Officer Raphael Polansky left the crypto exchange effective immediately.',
+            'BitMEX',
+            'corporate_action',
+            None,
+            'na',
+            'effective immediately',
+            '2026-06-29',
+            None,
+            ['BitMEX', 'Stephan Lutz', 'Ina Steiner', 'Raphael Polansky'],
+            0.96,
+        ),
+        fact(
+            'Former BitMEX COO Peter Wilkinson took over as CEO after the executive departures.',
+            'BitMEX',
+            'corporate_action',
+            'Peter Wilkinson',
+            'na',
+            None,
+            '2026-06-29',
+            'The move followed the departures of BitMEX\\'s CEO, CFO, and Chief Growth Officer.',
+            ['BitMEX', 'Peter Wilkinson'],
+            0.95,
+        ),
+        fact(
+            'BitMEX announced earlier in 2026 that it was putting itself up for sale, but no buyers had emerged by June 29.',
+            'BitMEX',
+            'corporate_action',
+            None,
+            'na',
+            None,
+            'earlier this year',
+            None,
+            ['BitMEX'],
+            0.88,
+        ),
+    ],
+    '369092ecb952ce01009f41b3b656ed0d': [
+        fact(
+            'NGRAVE recorded a 34% increase in sales over the week of June 24 to 27 as the July 1 MiCA compliance deadline approached and European users moved to secure their assets ahead of it.',
+            'NGRAVE',
+            'demand_change',
+            None,
+            'up',
+            '34%',
+            'the week of June 24 to 27',
+            'The July 1 MiCA compliance deadline drew closer and European users moved to secure their assets ahead of it.',
+            ['NGRAVE', 'Markets in Crypto-Assets Regulation', 'Europe'],
+            0.92,
+        ),
+        fact(
+            'The global hardware wallet market was estimated at "'$720M to $957M in 2026 in the independent studies cited in the article.'"',
+            'global hardware wallet market',
+            'forecast',
+            None,
+            'na',
+            '"'$720M to $957M'"',
+            '2026',
+            None,
+            ['hardware wallet market'],
+            0.78,
+        ),
+        fact(
+            'The independent studies cited in the article projected the global hardware wallet market to grow at about 25% CAGR through 2031.',
+            'global hardware wallet market',
+            'forecast',
+            None,
+            'up',
+            '~25% CAGR',
+            'through 2031',
+            None,
+            ['hardware wallet market'],
+            0.79,
+        ),
+        fact(
+            'The independent studies cited in the article projected the global hardware wallet market at "'$2.25B to $3.44B by 2031-2032.'"',
+            'global hardware wallet market',
+            'forecast',
+            None,
+            'up',
+            '"'$2.25B to $3.44B'"',
+            '2031-2032',
+            None,
+            ['hardware wallet market'],
+            0.79,
+        ),
+        fact(
+            'Europe represents roughly 28% to 30% of global hardware wallet demand, according to the cited 2026 research.',
+            'Europe',
+            'other',
+            'global hardware wallet market',
+            'na',
+            '28% to 30%',
+            '2026',
+            None,
+            ['Europe', 'hardware wallet market'],
+            0.74,
+        ),
+    ],
+    '370c7f63255b93094dcb903abf2dddfe': [
+        fact(
+            'Comcast plans to split into two public companies by spinning off NBCUniversal and Sky into a media-centered business separate from its broadband and wireless operations.',
+            'Comcast',
+            'corporate_action',
+            'NBCUniversal and Sky',
+            'na',
+            None,
+            '2026-06-29',
+            'Comcast said the breakup would let each operation pursue distinct priorities and growth opportunities.',
+            ['Comcast', 'NBCUniversal', 'Sky'],
+            0.97,
+        ),
+        fact(
+            'Comcast said it expects to complete the spinoff in about a year, pending regulatory approvals and final board approval.',
+            'Comcast',
+            'forecast',
+            'NBCUniversal and Sky spinoff',
+            'na',
+            'about a year',
+            '2026-06-29',
+            'The timeline depends on regulatory approvals and a final greenlight from Comcast\\'s board.',
+            ['Comcast', 'NBCUniversal', 'Sky'],
+            0.95,
+        ),
+        fact(
+            'Comcast expects to retain an ownership stake of up to 19.9% in NBCUniversal for up to one year after the spinoff is complete.',
+            'Comcast',
+            'corporate_action',
+            'NBCUniversal',
+            'na',
+            'up to 19.9%',
+            'for up to one year after the spinoff is complete',
+            None,
+            ['Comcast', 'NBCUniversal'],
+            0.94,
+        ),
+        fact(
+            'Comcast shares rose more than 6% by midday trading after the company announced the split on June 29.',
+            'Comcast',
+            'price_move',
+            None,
+            'up',
+            'more than 6%',
+            '2026-06-29',
+            'The move followed Comcast\\'s announcement that it planned to split into two public companies.',
+            ['Comcast'],
+            0.96,
+        ),
+        fact(
+            'Comcast shares were still down over 10% since the start of 2026.',
+            'Comcast',
+            'price_move',
+            None,
+            'down',
+            'over 10%',
+            'since the start of 2026',
+            None,
+            ['Comcast'],
+            0.94,
+        ),
+    ],
+}
+
+for doc in docs:
+    records.append({
+        'doc_id': doc['doc_id'],
+        'title': doc['title'],
+        'facts': facts_by_doc[doc['doc_id']],
+    })
+
+with output_path.open('w') as f:
+    for rec in records:
+        f.write(json.dumps(rec, ensure_ascii=True) + '\\n')
+
+total_facts = sum(len(rec['facts']) for rec in records)
+print(f'docs processed: {len(records)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 22
+
+codex
+The file is written. I’m doing one quick validation pass on the output shape and order so the final result isn’t relying on the write step alone.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+inp = [json.loads(line) for line in Path('all_batch_011.jsonl').open()]
+out = [json.loads(line) for line in Path('all_facts_011.jsonl').open()]
+assert len(inp) == len(out) == 12
+assert [d['doc_id'] for d in inp] == [d['doc_id'] for d in out]
+for rec in out:
+    assert set(rec.keys()) == {'doc_id','title','facts'}
+    assert isinstance(rec['facts'], list)
+    for fact in rec['facts']:
+        assert set(fact.keys()) == {'claim','subject','predicate','object','direction','magnitude','time','cause','entities','confidence'}
+print('validated rows:', len(out), 'validated facts:', sum(len(r['facts']) for r in out))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+validated rows: 12 validated facts: 22
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_facts_011.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        rec = json.loads(line)
+        print(i, rec['doc_id'], len(rec['facts']))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1 2dc0bd9647b87ea284c06fee224b8ff0 0
+2 2df7e6656a38c67d2e8738cc15ada632 0
+3 2f469523931b1bb2a669515927170130 0
+4 2f5835df8baf65c14f98d3f2ec582fe8 0
+5 2faac897f3e66d6156cfed0ae747631a 2
+6 2fb7fb5fee4574b6420cb09ee86f4501 0
+7 3213b600f0a5298472e92a740fe8a41f 0
+8 327b6111c3e0395dfc10bc203fbed463 5
+9 333ae99398e61a9c1d3147e1051b596f 2
+10 341302447a96c76b9dd152d55cf12d88 3
+11 369092ecb952ce01009f41b3b656ed0d 5
+12 370c7f63255b93094dcb903abf2dddfe 5
+
+codex
+Wrote [all_facts_011.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_011.jsonl).
+
+docs processed: 12, total facts: 22
+tokens used
+32,282
+Wrote [all_facts_011.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_011.jsonl).
+
+docs processed: 12, total facts: 22

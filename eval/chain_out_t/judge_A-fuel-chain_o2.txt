@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why are retail fuel prices climbing in Central Asia?
+
+ANSWER A:
+The provided context does not contain any information specific to Central Asia—none of the items reference Central Asian countries, markets, or retail fuel prices in that region. The context instead documents fuel price dynamics in the United States [5][14][16][20], Germany [3][15][17], and broader Asian crude importers [2][6][13]. The dominant driver cited across these markets is the US-Israel war on Iran, which disrupted oil supplies and pushed petrol prices up since the February 28 strikes [5][14], compounded by uncertainty over the Strait of Hormuz and high freight costs for alternative supply [7][13]. However, I cannot answer the question as asked, because the context provides no data on Central Asia specifically—that regional information is missing entirely.
+
+ANSWER B:
+The provided context does not contain any item specifically about Central Asia or its retail fuel markets, so it cannot directly explain why retail fuel prices are climbing there. At most, the context describes broad upward pressures on global fuel prices that could plausibly spill into any region: petrol prices have surged since the US–Israel war on Iran, which disrupted oil supplies and created market uncertainty [5][14], and constrained Middle Eastern crude flows combined with high prices for alternative supply have kept import costs elevated across Asia [13]. Lingering uncertainty over the Strait of Hormuz's navigability and high freight costs have further deterred buyers and raised the cost of sourcing crude [7][15]. However, none of these items reference Central Asian countries, their domestic pricing, refining, taxes, or fuel distribution. Missing: any Central Asia–specific data on demand, supply, imports, currency, or policy needed to actually answer the question.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

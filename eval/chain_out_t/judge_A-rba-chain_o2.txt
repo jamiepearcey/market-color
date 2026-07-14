@@ -1,0 +1,14 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did markets pare back expectations for further Reserve Bank of Australia tightening?
+
+ANSWER A:
+Markets pared back expectations for further RBA tightening chiefly because three cash rate hikes delivered in 2026 had already tightened domestic financial conditions, with activity slowing broadly in line with the Bank's expectations [3]. The RBA minutes showed the Board now views policy as "somewhat restrictive" and is inclined to pause and assess, explicitly noting that the hurdle for near-term policy tightening is now higher [3][11]. Evidence that tightening was transmitting through the economy — a softening housing market and expected slowing in housing credit growth — reinforced this [3][6]. Cooling price data also helped, with consumer inflation easing to 4.0% YoY in May (from 4.2%) and consumer inflation expectations edging down to 5.5% (from 5.6%) [12][9]. Consistent with this, investors expected the RBA to hold at its August meeting and priced only about 10 basis points of tightening by year-end [1]. That said, the context notes the RBA retained an explicit tightening bias and had not ruled out another hike if inflation persists, so the paring back reflected a higher bar for further moves rather than a decisive end to the cycle [5][3].
+
+ANSWER B:
+Markets pared back expectations for further RBA tightening mainly because the three cash rate hikes delivered in 2026 had already tightened domestic financial conditions, with the subsequent slowing in activity running broadly in line with the Bank's expectations [3]. The RBA minutes showed the Board viewing policy as "somewhat restrictive" and inclined to pause and assess, explicitly noting that "the hurdle for near-term policy tightening is now higher," with the tightening starting to transmit through channels such as a softening housing market and slowing housing credit [3][9]. As a result, investors expect the RBA to keep policy unchanged at its August meeting and now price only about 10 basis points of tightening by year-end [1].
+
+One caveat: several context items point the other way — the RBA retained an explicit tightening bias and said rates could rise further to return inflation to target [8][2][10] — so the context frames the pared-back expectations as a shift toward patience rather than an outright end to the tightening cycle.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did Japan say it would take countermeasures against China?
+
+ANSWER A:
+The provided context does not state that Japan said it would take countermeasures against China, so that specific claim cannot be answered from these items. What the context shows is the reverse: China imposed the countermeasures, blacklisting four Japanese defense research institutes and adding 20 entities to its export control list plus 20 to a watch list [1][7][10]. Beijing framed these controls as a response to Japan's "accelerating remilitarisation and nuclear ambitions" [5][11], and the campaign escalated after Japanese PM Sanae Takaichi's November comment that a hypothetical Chinese attack on Taiwan could trigger a military response from Tokyo [3]. Missing: any statement of Japan announcing or justifying countermeasures against China — the only Japan-initiated actions referenced are currency-market interventions by its Ministry of Finance, which relate to yen weakness rather than to China [2][13][14].
+
+ANSWER B:
+The context does not contain any statement from Japan saying it would take countermeasures against China, so this question cannot be answered from the provided items. What the context does document is the reverse direction: China's measures against Japan and China's stated rationale — Beijing framed its blacklisting and export controls as a response to Japan's "accelerating remilitarisation and nuclear ambitions" [5][11], and had escalated pressure on Tokyo following PM Sanae Takaichi's November comment that a hypothetical Chinese attack on Taiwan could trigger a Japanese military response [3]. The context also notes Japan's separate readiness to intervene in currency markets via its Ministry of Finance, but that concerns the yen, not countermeasures against China [2]. Missing: any item quoting Japan announcing or justifying countermeasures against China.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

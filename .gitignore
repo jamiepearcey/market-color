@@ -18,6 +18,15 @@ qdrant_snapshots/
 config/*.generated.json
 data/tmp/
 
+# large generated artifacts (regenerate via the pipeline scripts)
+# ~240MB embeddings/transport matrices (.npy/.npz)
+receptors/data/
+# archive backup of data/news_corpus/
+data/news_corpus.zip
+# generated eval run outputs
+eval/*_out/
+eval/blind_*/
+
 # os / editor / logs
 .DS_Store
 *.log

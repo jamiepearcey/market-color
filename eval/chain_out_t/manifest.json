@@ -1,0 +1,166 @@
+[
+  {
+    "id": "A-boj-chain",
+    "query": "Why has the Bank of Japan signalled readiness to tighten policy further?",
+    "budget": 9800,
+    "excluded_docs": [
+      "119d88ae9a26e8e052bf88188001054e",
+      "1bb5d4bf827fce588a830021bdf594a1"
+    ],
+    "walk_lines": 12,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "A-btc-chain",
+    "query": "Why did Bitcoin fall below 60,000 dollars?",
+    "budget": 7944,
+    "excluded_docs": [
+      "b4e5024af48e2a0df7b94b05400c590e"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "A-gas-chain",
+    "query": "Why did benchmark gas contracts rise?",
+    "budget": 9435,
+    "excluded_docs": [
+      "956253239d462267f7091e0769d9c8b0",
+      "a8f2c7b7ab76f608b25b313c02414eac"
+    ],
+    "walk_lines": 8,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "A-fuel-chain",
+    "query": "Why are retail fuel prices climbing in Central Asia?",
+    "budget": 9898,
+    "excluded_docs": [
+      "e2234b9db9fbd54e06207b802dec6ef0"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "A-rba-chain",
+    "query": "Why did markets pare back expectations for further Reserve Bank of Australia tightening?",
+    "budget": 8546,
+    "excluded_docs": [
+      "1fa01116618cbd2435eaeb8e2dd1008d"
+    ],
+    "walk_lines": 8,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-inflation",
+    "query": "Why has inflation risen well above central banks' targets?",
+    "budget": 9799,
+    "excluded_docs": [
+      "2c71636e485ddb23dd5cac1cf6ef2838",
+      "4e2ad7406fd6d24d498fe7a03d1cb713",
+      "5c088799a4b37d1d140163903ef33392",
+      "709882961419731160ddbae7e7ac60f4",
+      "78ec2f5738bc30100197c37f72c736e0",
+      "ac899e404c816597c7f9ddd4d0af81ea",
+      "d0f3975dcd1047a5f8fe429760b87076",
+      "ef386e65b0d994eb027793648a7502fc",
+      "fa7815056016e4bb83c53a6fa2e6f53a",
+      "facfa053dc82ef84d2e17206746678ab"
+    ],
+    "walk_lines": 10,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-ether",
+    "query": "Why did Ether fall about 8 percent over the past week?",
+    "budget": 6726,
+    "excluded_docs": [
+      "0e4e94cc8efbad7b8518e0ba38260057"
+    ],
+    "walk_lines": 4,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-coinbase",
+    "query": "Why did Coinbase stock fall almost 5 percent?",
+    "budget": 6838,
+    "excluded_docs": [
+      "529feae625c584951b6382f3a3dd8774"
+    ],
+    "walk_lines": 4,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-dollar-war",
+    "query": "Why has the US dollar risen about 3 percent this year?",
+    "budget": 10123,
+    "excluded_docs": [
+      "480b8780fc7ba0c23d826a1b70b33b84"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-russia-fuel",
+    "query": "Why will Russia import more fuel and accelerate refinery repairs?",
+    "budget": 9822,
+    "excluded_docs": [
+      "e1aa31b26dec5e919437688fc583d39d"
+    ],
+    "walk_lines": 10,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-crude-ceasefire",
+    "query": "Why did crude oil prices edge lower late in the window?",
+    "budget": 8535,
+    "excluded_docs": [
+      "1344ba055f32df9723a9effb55a1812e",
+      "3e3876c40e956ea988a5e0058ab5b46a",
+      "a7e5309e90342e4d916c34d125548ee4"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-usdjpy-gap",
+    "query": "Why is USD/JPY holding near multi-decade highs?",
+    "budget": 9041,
+    "excluded_docs": [
+      "4c62cf7516256aee6ba471978a6ff8e0"
+    ],
+    "walk_lines": 10,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-japan-china",
+    "query": "Why did Japan say it would take countermeasures against China?",
+    "budget": 10321,
+    "excluded_docs": [
+      "6bf5e9357799a2ed7921b98cf3d474a5"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-copper",
+    "query": "Why is copper forecast to push toward 15,000 dollars per metric ton?",
+    "budget": 9710,
+    "excluded_docs": [
+      "76d1559c8930e6fa08a9475d8b45293f"
+    ],
+    "walk_lines": 6,
+    "v2_answer_reused": true
+  },
+  {
+    "id": "N-nasdaq-ipo",
+    "query": "Why did Nasdaq lead global IPO proceeds in the first half of 2026?",
+    "budget": 6937,
+    "excluded_docs": [
+      "8f828a708c690e0368ccca26e8d02b31",
+      "c2c320e753473220fb2b515f41f7f7a6"
+    ],
+    "walk_lines": 2,
+    "v2_answer_reused": true
+  }
+]

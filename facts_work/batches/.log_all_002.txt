@@ -1,0 +1,705 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fa9-fcd0-74d0-9115-0d9d39879022
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_002.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_002.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_002.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:51:09.418245Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m processing `all_batch_002.jsonl` locally and will first inspect the schema and a few representative documents so the extractor matches the file’s actual content before writing `all_facts_002.jsonl`.
+exec
+/bin/zsh -lc 'wc -l all_batch_002.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_002.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+path='all_batch_002.jsonl'
+with open(path) as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj=json.loads(line)
+        print(f'DOC {i}:')
+        for k in ['doc_id','source_name','published_date','title']:
+            print(f'{k}: {obj.get(k)}')
+        body=(obj.get('body_text') or '').replace('\\n',' ')
+        print('body_text:', body[:800])
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1:
+doc_id: 5ee418096dd11b83c41907635c533a6a
+source_name: AP Top News
+published_date: 2026-06-28
+title: Lauryn Hill honored, Janet Jackson stuns Teyana Taylor and Druski makes history at BET Awards
+body_text: Lauryn Hill honored, Janet Jackson stuns Teyana Taylor and Druski makes history at BET Awards Lauryn Hill honored, Janet Jackson stuns Teyana Taylor and Druski makes history at BET Awards LOS ANGELES (AP) — After watching a 20-minute tribute celebrating her groundbreaking career, Lauryn Hill surprised the BET Awards audience Sunday with an impromptu performance of her 1998 classic “Ex-Factor” after accepting the Living Legend Icon Award before closing the show with “Everything Is Everything.” Introduced by Ice Cube, the eight-time Grammy winner was honored with performances at Los Angeles’ Peacock Theater from SZA, Doechii, Lizzo, Queen Latifah, Common, her children Selah Marley and Zion Marley, who revisited songs from Hill’s stellar catalog while she stood smiling, singing along and appl
+---
+DOC 2:
+doc_id: 5fd711879df3f00b4a18c96862118df5
+source_name: AP Top News
+published_date: 2026-06-28
+title: 3 firefighters killed in Colorado as wildfires stoked by heat, wind rage across the West
+body_text: 3 firefighters killed in Colorado as wildfires stoked by heat, wind rage across the West 3 firefighters killed in Colorado as wildfires stoked by heat, wind rage across the West BEAVER, Utah (AP) — Blistering heat and strong winds Sunday stoked wildfires across the West after three firefighters were killed a day earlier in Colorado while battling a blaze along the state’s border with Utah. The National Weather Service said wildfire conditions “remain critical” across the Southwest, with risk high in the Four Corners region where Arizona, Colorado, New Mexico and Utah intersect. The agency warned of “extreme fire behavior” along the Utah-Colorado border, where “rapid fire growth is likely.” The firefighters were killed and two sustained burn injuries when they were overcome Saturday by flam
+---
+DOC 3:
+doc_id: 62edfd8468f11de57b223cd9cc6abffd
+source_name: Guardian Business
+published_date: 2026-06-28
+title: A US bus travel boom looks likely – but will Greyhounds ever be cool again?
+body_text: “It’s a grueling experience,” Greyhound bus enthusiast Miles Taylor explains. “You’re not treated very well. Everyone is yelling at you the entire time. When the bus is late, they blame you for it, like somehow you’ve done something wrong. You just get screamed at for wanting to know what’s going on, because no one says anything.” Taylor is obsessed with public transit. “I never really grew out of my little boy train phase,” the 26-year-old said. He works as a scheduler for Boston’s MBTA and runs a popular YouTube account documenting the bus trips he takes for fun in his spare time. Taylor traveled across the country by Greyhound twice; a Boston to Seattle route took 104 hours. But even he admits that America’s bus system is far from luxurious – or even comfortable. But for many it remains
+---
+
+codex
+The batch is small enough to do carefully. I’m checking all 12 titles first so I can separate market-relevant items from noise before extracting only text-supported claims.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+path='all_batch_002.jsonl'
+with open(path) as f:
+    for i, line in enumerate(f, 1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['source_name']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 5ee418096dd11b83c41907635c533a6a | AP Top News | 2026-06-28 | Lauryn Hill honored, Janet Jackson stuns Teyana Taylor and Druski makes history at BET Awards
+2. 5fd711879df3f00b4a18c96862118df5 | AP Top News | 2026-06-28 | 3 firefighters killed in Colorado as wildfires stoked by heat, wind rage across the West
+3. 62edfd8468f11de57b223cd9cc6abffd | Guardian Business | 2026-06-28 | A US bus travel boom looks likely – but will Greyhounds ever be cool again?
+4. 67326798fdf9b974a7c19869023bb4ea | BIS Press Releases | 2026-06-28 | Strengthening foundations for the future
+5. 684e702ea8deb2794f37c635ee652a78 | The Economist - Finance & Economics | 2026-06-28 | Donald Trump is kicking out Chinese firms and keeping their tech
+6. 698cd1a9305c701ec6c14610243944e5 | AP Top News | 2026-06-28 | Pakistan says ground operation and strikes along Afghan border killed 29 militants
+7. 712eb37be2971fd836545626006122fa | BIS Press Releases | 2026-06-28 | Anchoring trust in money: innovation beyond stablecoins
+8. 7316336a3b5b071840472ae1f7979eb6 | ISW - Understanding War | 2026-06-28 | Russian Offensive Campaign Assessment, June 28, 2026
+9. 7f7e1afe69f96b3955782eb682be0867 | BIS Press Releases | 2026-06-28 | I. Progress and peril
+10. 80f5d852d56c9f4038d196edf5dc5433 | AP Top News | 2026-06-28 | Photos show Pride around the world: Monthlong celebration ends with iconic US parades
+11. 850b28da0e88bd6adfb841ea6c0fbbf7 | The Economist - Finance & Economics | 2026-06-28 | Big oil’s secretive trading arms are having an extraordinary year
+12. 886d3f281dade4a2a769ae5ac00675cb | Cointelegraph | 2026-06-28 | Grayscale's Pandl Says Strategy's $3B Bitcoin Sale Could Restore Confidence
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids={3,4,5,7}
+with open('all_batch_002.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in ids:
+            obj=json.loads(line)
+            print(f'### DOC {i} {obj[\"doc_id\"]}')
+            print(obj['title'])
+            print(obj['body_text'][:7000].replace('\\n',' '))
+            print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+### DOC 3 62edfd8468f11de57b223cd9cc6abffd
+A US bus travel boom looks likely – but will Greyhounds ever be cool again?
+“It’s a grueling experience,” Greyhound bus enthusiast Miles Taylor explains. “You’re not treated very well. Everyone is yelling at you the entire time. When the bus is late, they blame you for it, like somehow you’ve done something wrong. You just get screamed at for wanting to know what’s going on, because no one says anything.” Taylor is obsessed with public transit. “I never really grew out of my little boy train phase,” the 26-year-old said. He works as a scheduler for Boston’s MBTA and runs a popular YouTube account documenting the bus trips he takes for fun in his spare time. Taylor traveled across the country by Greyhound twice; a Boston to Seattle route took 104 hours. But even he admits that America’s bus system is far from luxurious – or even comfortable. But for many it remains the only option. This week, the Wall Street Journal reported that Greyhound owes at least some of this uptick to the recent shuttering of Spirit Airlines. The low-cost carrier was once famously known as “the Greyhound of the skies”, shuttling passengers on the cheap, with absolutely no frills. According to the outlet, after Spirit closed, search activity for Greyhound rose 20% from the previous year. Greyhound routes that overlap with former Spirit flights have seen a 30% increase in passengers. We could be on the verge of a boom in bus travel. For most Americans, riding a Greyhound bus means abandoning many expectations of basic dignity. Passengers endure delays, and often have to wait for buses on the side of the road or at a dilapidated station. The onboard toilets rarely work and usually smell; the stranger sitting next to you may very well fall asleep on your shoulder. But in the US, a country that lags behind most developed nations for public transit infrastructure, intercity bus travel is one of the only affordable ways to get around without a car. Taylor calls Greyhound “kind of a last resort for folks”. Greyhound began as a seven-passenger car service shuttling Minnesota miners to and from work in 1914. The brand, and bus riding in general, was once a romanticised form of travel touted as an exciting way to view the American landscape. Frank Capra’s 1934 screwball comedy It Happened One Night featured its leads Clark Gable and Claudette Colbert falling in love on a Greyhound from Florida to New York. The shuttles were also a symbol of the civil rights movement, when activists rode buses into southern states to protest against racial segregation. But as plane travel became cheaper, Greyhound service became neglected – with stations and buses falling into disrepair. In the early 2000s, Greyhound had filed for bankruptcy twice. After changing hands a couple of times, the buses are now owned by the German brand Flix, which operates in more than 40 countries. After a storied history, the buses are now viewed by most Americans as a cheap, but incredibly unreliable, way to travel. But could that be changing? Researchers predict that bus ridership could grow 4% this year, eclipsing forecasts for the airline industry. Is there a way to make it an experience to enjoy, rather than one to endure? “The biggest driver [of this increase] is the current economics of the US,” said Kate Thompson, a vice-president at the travel search platform Wanderu. “The price of flights has increased year-to-date roughly 27%, whereas bus and train tickets have only increased around 4%. People are going to gravitate toward the average bus ticket price of $53 versus a $500 plane ticket.” Along with that, a growing number of Americans do not have driver’s licenses. Data from the Department of Transportation shows that the number of licensed 16-year-olds has dropped 27% since 2000. “We get this question all of the time: how can we make buses cool again?” Thompson said. “It comes down to comfortability. You need to be as comfortable as you would be on a flight.” There are bus lines that offer what Thompson calls “white glove” service, complete with onboard attendants and complimentary amenities. Greyhound, which was bought by FlixBus in 2021, is not one of those lines. Taylor, the bus enthusiast, shouted out some smaller, regional options. He likes Peter Pan, which runs along the north-east, and has been owned by the same family for almost a century. On a recent 500-mile ride from Provincetown to Washington DC – the company’s longest route – Taylor says that traffic delays kept him from making his connection in New York. “What was really nice is that they anticipated that I’d miss my second bus,” Taylor said. “When I got to the customer service desk, [the worker] handed me a new ticket on the next bus and said, ‘You must be Miles.’” Greyhound would never. A “new trend” in coach design, according to Fred Ferguson, president of the American Bus Association, is called two-and-one, which means that one side of the bus has two seats, and the other has just one, so solo travellers don’t have to rub thighs with a stranger. “That’s been a hugely popular change,” Ferguson said. “It’s given people more space and more room.” Greyhound is trying. In the past two years they have retired a lot of older vehicles, and brought new buses into the fleet – cutting the average age of their vehicles in half. “It’s really about updating buses to accommodate for what people expect nowadays,” said Thompson, the Wanderu VP. “A bus needs to be updated to the current state of the world. That means free wifi, enough space for your knees, and seatback tray tables.” Kai Boysan, CEO of Flix North America, the parent company of Flixbus and Greyhound, wrote in a statement that “The perception of bus travel has been rapidly changing over recent years.” He added that the company had “invested significantly in modernizing the bus travel experience”, adding “hundreds” of new buses across its fleet. “Passengers have access to amenities travelers expect, including free wifi, power outlets, real-time trip tracking, free luggage allowance, and spacious, comfortable seating designed for longer journeys.” Online reviews of Greyhound’s service suggest it’s taking a while for these changes to be felt across the country. The company currently has a 1.3 out of five-star rating on both Trip Advisor and Yelp. “Our bus broke down on the highway in nearly 90°F heat, and we were left sitting inside with little to no ventilation for hours,” one Trip Advisor user commented. Another wrote of being “left in the middle of nowhere” while attempting to travel from Virginia to Michigan. Yet another summed the experience up: “Greyhound should be paying their customers to ride.” There are also a number of high-profile incidents that have occurred on buses that dissuade some passengers from riding. Greyhound temporarily shut down operations in 2001, after a man slashed the throat of a driver, commandeered the bus, and drove into traffic, killing seven people (the driver survived). Seven years later, a man with schizophrenia attacked and killed another rider on a Canadian G
+
+
+### DOC 4 67326798fdf9b974a7c19869023bb4ea
+Strengthening foundations for the future
+Strengthening foundations for the future Speech by Mr Pablo Hernández de Cos, General Manager of the BIS, on the occasion of the Bank's Annual General Meeting, Basel, 28 June 2026. The speech introduces Chapters I and II of the BIS Annual Economic Report 2026. It casts the current outlook for the global economy as one of progress and peril. Global growth proved resilient in 2025 thanks to lower than expected effective tariffs, firms' adaptation to higher tariffs and optimism driven by artificial intelligence (AI). Yet the recent Middle East conflict has lifted inflation and uncertainty. Vulnerabilities include the return of inflation, the risk of an abrupt end to the AI investment boom, and stretched financial valuations. Moreover, high public debt and the rise of non-bank financial institutions tighten the fiscal-financial stability nexus, raising the risk of abrupt sovereign bond repricing and market dysfunction. This complicates monetary policy calibration and raises the likelihood of central bank market intervention. These challenges call for a firm commitment to price stability, rebuilding fiscal buffers, congruent regulation and temporary, targeted and easily reversible liquidity backstops.
+
+
+### DOC 5 684e702ea8deb2794f37c635ee652a78
+Donald Trump is kicking out Chinese firms and keeping their tech
+Donald Trump is kicking out Chinese firms and keeping their tech China’s stranded assets are creating a new class of American green-tech investors In a factory in Dallas, Texas, an American flag hangs from the ceiling. Beneath it some 1,200 workers and state-of-the-art robots churn out 20,000 solar panels a day, nearly a tenth of America’s total output. The location has a capacity of 5gw, meaning it makes enough solar modules each year to power 1m American homes. “Never bet against the United States’s engineering and innovation,” effuses Russell Gold, a senior executive at t1 Energy. But the facility was not always so star-spangled. Trina Solar, a Chinese giant, built the plant in 2024, before selling up just days after it entered operation. All over America, Chinese firms are divesting clean-energy assets at fire-sale prices: since 2025 almost $9bn of Chinese renewables investment in America has been cancelled, paused or sold to local investors, up from none in 2022 and 2023 (see chart). Some assets have traded at discounts of as much as 40%, according to a buyer. The sell-off has been triggered by a little-noticed change in America’s tax law last year meant to purge Chinese influence from the clean-energy sector. American investors are enjoying a windfall as they snap up assets from industry leaders. Whether a series of complicated and opaque transactions will reduce the country’s dependence on China is another matter.
+
+
+### DOC 7 712eb37be2971fd836545626006122fa
+Anchoring trust in money: innovation beyond stablecoins
+Anchoring trust in money: innovation beyond stablecoins Speech by Mr Frank Smets, Acting Head of Monetary and Economic Department and Head of Economic Analysis and Statistics, on the occasion of the Bank's Annual General Meeting, Basel, 28 June 2026. The monetary system is rapidly changing as digital innovation is reshaping the payments landscape, raising the question of how to preserve trust in money. Today's two-tier system, anchored in central bank money and sound institutions, has delivered that trust, ensuring money's singleness, elasticity and financial integrity. Stablecoins have emerged as new tokenised money-like instruments. Yet today's stablecoins feature weaknesses, such as deviations from par and fragmentation, and pose risks to financial integrity. Widespread stablecoin adoption could affect bank funding, credit provision, fiscal space and monetary policy. Risks include fire sales in money markets, capital flow volatility and liquidity strains. Cross-border use could spur dollarisation in some economies. Policy recommendations focus on two tracks: tighten safeguards around stablecoins and integrate tokenisation into the two-tier system anchored in central bank money.
+
+
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids={8,9,11,12}
+with open('all_batch_002.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in ids:
+            obj=json.loads(line)
+            print(f'### DOC {i} {obj[\"doc_id\"]}')
+            print(obj['title'])
+            print(obj['body_text'][:7000].replace('\\n',' '))
+            print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+### DOC 8 7316336a3b5b071840472ae1f7979eb6
+Russian Offensive Campaign Assessment, June 28, 2026
+Toplines Russian President Vladimir Putin used his speech to the ruling United Russia Party Congress on June 28 to project Russia’s strength, reinforce his resolve to achieve Russia’s objectives militarily, and reject diplomatic solutions to end his war in Ukraine. Putin claimed that Russia maintains sufficient strength, resources, and political will to resist external actors’ attempts to restrain Russia’s development.[1] Putin claimed that the West cannot strategically defeat Russia and cannot win on the battlefield. Putin alleged that Ukrainian forces are retreating along the entire frontline. Putin emphasized that Russia is ready to fight for its core interests and that it is the duty of the United Russia Party to do everything possible to ensure Russian victory. Putin claimed that Russia has always been strong and won due to its national unity and that all Russians support Russian forces on the frontlines.[2] Putin’s June 28 speech is only the latest attempt from the Kremlin to frame a Russian military victory in Ukraine as inevitable and the Ukrainian front as on the verge of collapsing.[3] The Kremlin continues to resort to such rhetorical lines to try to influence the West and Ukraine to give in to Russia’s demands, particularly as Russia’s battlefield performance continues to decline in 2026 and Russia’s ability to seize its objectives militarily is in question.[4] Putin vaguely acknowledged the effects that Ukraine’s long-range strike campaign is having on Russia but attempted to dismiss concerns and promote a facade of stability. Putin stated that Russia is going through a “difficult” and “fateful” time and that the Kremlin is aware of and responding to all problems related to external attempts to restrain Russia’s development.[5] Putin claimed that Ukraine is conducting “terrorist attacks” against Russian infrastructure — likely referring to Ukrainian strikes against Russian assets, including oil infrastructure. Putin reassured the Russian public that the Kremlin is taking appropriate measures to address Russia’s economic challenges and will ensure the security of Russia and Russian citizens. Putin claimed that Russia will fully implement its strategically significant development programs even as the Kremlin has to adjust some plans based on the “current situation.” Putin specifically claimed that the Kremlin will fulfill all its social obligations, likely to assuage concerns that the externalities caused by the war may impact social spending. Putin did not explicitly discuss Ukraine’s strike campaign against Russia or the wide-scale gasoline shortages experienced across the entire country, but Putin is likely subtly trying to portray himself as cognizant of the economic and social struggles Russia is facing.[6] The United Russia Party formally claimed to be Putin’s party for the first time since 2007. The United Russia Party published a campaign poster on June 28 that featured a drawing of Putin and the slogans, “United Russia is the president’s party,” and “Being for Putin is the bare minimum.”[7] Russian opposition source Meduza noted that this is the first time since 2007 that United Russia has declared itself “the president’s party.”[8] Meduza noted that the slogan on the poster features the Latin letter “Z,” which has become a common symbol for Russia’s war in Ukraine — linking support for United Russia and Putin to support for the war. Putin’s June 28 speech at the United Russia Congress likely intended to begin shaping the information space ahead of the September 2026 Russian State Duma elections, including doubling down on Russians’ commitment to the war in Ukraine.[9] The Kremlin’s decision to publicly tie Putin to the United Russia Party is notable and is likely intended to make it appear as if there is widespread popular support for Putin and his policies when the United Russia Party inevitably wins in the fall elections that will neither be free nor fair. United Russia’s top five State Duma candidates for the September 2026 State Duma elections are mostly long-standing Putin loyalists. Russian Security Council Deputy Chairperson and United Russia Chairperson Dmitry Medvedev announced on June 28 the top five leaders to represent United Russia in the September 2026 State Duma elections: Russian Foreign Minister Sergei Lavrov, Russian Yunarmia Chief of the General Staff Captain Vladislav Golovin, Moscow City Mayor Sergei Sobyanin, Kremlin-appointed Commissioner for Children’s Rights Maria Lvova-Belova, and Kremlin-coopted and Kremlin-awarded Russian milblogger Yevgeny Poddubny.[10] Medvedev stated that the top candidates should be people whom Russians know for their deeds and strong patriotism and who defend Russia’s sovereignty and national interests.[11] The official list only slightly differs from a purportedly leaked draft published in January 2026, which included Medvedev and Maryana Lysenko (a prominent Russian doctor who led City Clinical Hospital No. 52 and received the title of Hero of Labor for her work combatting the COVID-19 pandemic in Russia) instead of Lvova-Belova and Sobyanin.[12] The finalized list platforms figures that are Putin loyalists and hardline supporters of the war in Ukraine. The list is reflective of Putin’s political and ideological positions that all Russians should emulate. Key Takeaways We do not report in detail on Russian war crimes because these activities are well-covered in Western media and do not directly affect the military operations we are assessing and forecasting. We will continue to evaluate and report on the effects of these criminal activities on the Ukrainian military and the Ukrainian population and specifically on combat in Ukrainian urban areas. We utterly condemn Russian violations of the laws of armed conflict and the Geneva Conventions and crimes against humanity even though we do not describe them in these reports. Ukrainian Operations in the Russian Federation Ukrainian forces struck two oil refineries in Russia on the night of June 27 to 28. The Ukrainian General Staff reported that Ukrainian forces struck and started a fire at the Slavyansk Oil Refinery in Slavyansk-on-Kuban, Krasnodar Krai (roughly 300 kilometers from the frontline), one of the largest refineries in southern Russia.[13] Ukraine’s Unmanned Systems Forces (USF) reported that the refinery has an annual capacity of 5.2 million tons and that the overnight strikes started a fire near the refinery’s oil tank farm, oil products cargo area, and a primary oil processing unit.[14] The Ukrainian Security Service (SBU) tied the strike on the Slavyansk Refinery to Ukrainian President Volodymyr Zelensky’s recently announced 40-day intermediate- and long-range strike campaign to influence Russia to end the war in Ukraine.[15] Geolocated footage published on June 28 shows a fire near the refinery.[16] NASA Fire Information for Resource Management System (FIRMS) data from June 28 shows large-scale heat anomalies at the refinery, and the S
+
+
+### DOC 9 7f7e1afe69f96b3955782eb682be0867
+I. Progress and peril
+I. Progress and peril - Chapter I: Data behind the graphs - Press release: Global economic pressure points call for policy discipline: BIS Key takeaways - The global economy displayed surprising resilience despite successive shocks, from tariffs to the Middle East conflict. This was partly driven by optimism around progress in artificial intelligence (AI), which fuelled large AI-related investments and sustained accommodative financial conditions. - But the perils have grown with pressure points around risks of persistent inflation, the sustainability of AI-related investments, growing financial vulnerabilities and weakening fiscal positions. - Safeguarding price stability, restoring fiscal space, strengthening financial stability beyond the banking perimeter and structural reforms are key priorities. Discipline in each area expands the room the others have to act. Resilience tested The 12-month period under review falls into two phases. The first was one of surprising resilience. Global growth and trade held up despite the sharp tariff hikes, supported by easy financial conditions and strong artificial intelligence (AI)-related investment and sentiment. With a few exceptions, most notably the United States and China, inflation stabilised at, or was converging to targets, paving the way for policy easing in many jurisdictions. These benign macroeconomic conditions were, however, jolted by the conflict in the Middle East in late February 2026. In this second phase of the review period, the ensuing crisis of energy supply and other raw materials, following the historic closure of the Strait of Hormuz, cast shadows over the global outlook. A resilient start The global economy absorbed the sharp hikes in US tariffs during 2025 – the most significant disruption to the multilateral trading system in decades – with remarkably little damage. Global trade continued to expand, with merchandise volumes growing nearly 5% in the first half of 2025, despite skyrocketing trade policy uncertainty. Growth forecasts, initially cut sharply in response to tariff news especially for the United States, were subsequently revised upward to pre-April 2025 levels (Graph 1.A). The upward revisions were observed in both advanced economies (AEs) and emerging market economies (EMEs) (Graph 1.B). In China, robust exports helped sustain growth despite real estate overhang and subdued domestic demand. By end-2025, global growth ended up close to pre-tariff expectations. Reflecting this underlying resilience, analysts expected output to expand steadily across most jurisdictions, if slower than past averages (Graph 1.C). Three main factors can explain the relatively muted effects of tariffs. One is their smaller than expected size. Because of exemptions, trade agreements and measured responses from trading partners that averted escalation, the effective average US tariff rate stabilised at 10% in the second half of 2025, significantly lower than the peak announcement of more than 25% (Graph 2.A). Accounting for this lowers the global output loss by about a third from initial estimates (Graph 2.B, red bars). Second, trade realignment also mitigated the impact of tariffs. In the case of China, the sharp fall of US-bound exports was compensated by higher exports to other parts of Asia, reflecting substitution and transshipments (see Box A on the adaptability and potential vulnerability of global supply chains). Moreover, China's increased competitiveness in higher value added goods, whose exports grew by 13% in 2025, also helped propel its overall exports. Third, faced with the prospect of higher tariffs, firms adapted their trading strategies. Significant front-loading of trade before tariffs took effect cushioned both exporters and importers. At the same time, US firms accepted compressed margins, which temporarily limited the price pass-through. Estimates for US firms suggest those most affected by the tariffs absorbed about two thirds of the cost increases through lower profits, while only passing on one third to consumers (Graph 2.C). To manage higher trade policy uncertainty, firms may have delayed passing through higher import prices that would have been difficult to reverse. In addition to the tariffs' weakened effects, AI optimism provided an important tailwind to global growth through capital expenditure (capex) and associated intermediate goods trade. Capex in semiconductor purchases, data centre construction and expansion in power infrastructure surged in the United States, driven by the so-called hyperscalers (Graph 3.A). This spending provided impetus to aggregate investment, which became an important driver of growth surprises in the United States (Graph 3.B). The rest of the world, notably Asia, also benefited from demand spillovers through AI supply chain linkages, from semiconductors to data storage units and digital infrastructure (Box A). In China, investment rotated from the property sector to advanced manufacturing. In Europe, investment helped offset tepid consumption amid weak household confidence. Monetary policy easing provided further support to economic activity in this first phase. With benign growth and moderating inflation, most central banks had lowered interest rates from restrictive to near-neutral levels, where many have paused since late 2025. In a few exceptional cases, central banks hiked interest rates including in Japan due to low real interest rates, and in Australia and Colombia because of domestic inflationary pressures. Meanwhile, central bank balance sheets remained large in key jurisdictions. Accommodative financial conditions were also a key factor supporting growth during this phase. Financial conditions eased throughout 2025 (Graph 3.C), as the strong surge in global risk appetite fuelled by AI optimism dominated the effects of trade policy uncertainty. Global stocks enjoyed strong rallies on robust corporate earnings, led by major technology and AI-related stocks. Rising equity values, whose ratio to income has more than doubled since 2010, in turn supported household consumption through wealth effects. Corporate credit spreads continued to narrow in major jurisdictions, with robust primary issuance across the ratings spectrum and record volumes from AI-related firms. Investors' risk appetite was also evident in the private credit space, which contributed to the financing of AI infrastructure build-out. The conflict and its peril The start of the conflict in Iran in late February 2026 and subsequent escalation – including attacks on energy infrastructure across the Persian Gulf and the effective closure of the Strait of Hormuz – posed a renewed threat to the global outlook. In early March, the unprecedented blockade of the world's most critical energy chokepoint brought the Strait's traffic to a standstill (Graph 4.A). The supply disruption was historically large in terms of volumes lost, with a cut in crude oil flow of over 10 million barrels a day, equiv
+
+
+### DOC 11 850b28da0e88bd6adfb841ea6c0fbbf7
+Big oil’s secretive trading arms are having an extraordinary year
+Big oil’s secretive trading arms are having an extraordinary year Meet the corporate gamblers who never waste a good energy crisis Oil majors have two ways to make big money during an energy shock. One is to sell the hydrocarbons they pump and refine themselves. The other is to buy barrels that others produce and flog them to whoever wants them most. The third Gulf war has demonstrated just how important the latter has become as a source of profit for the industry—particularly in Europe. Trading used to be the majors’ dirty little secret for topping up returns. It is not little anymore. The volume of hydrocarbons traded by BP, Shell and TotalEnergies—equivalent to 40-50m barrels of oil per day—is five to ten times what they produce. Nor is the contribution to their profitability a rounding error. Our calculations suggest the trio’s trading arms could be on course to boost their average return on capital by nearly a third or more this year.
+
+
+### DOC 12 886d3f281dade4a2a769ae5ac00675cb
+Grayscale's Pandl Says Strategy's $3B Bitcoin Sale Could Restore Confidence
+Grayscale's Pandl says Strategy should sell $3B Bitcoin to restore confidence Grayscale's research head Zach Pandl said Strategy should sell $3 billion in Bitcoin to cover its cash obligations, but CryptoQuant argued the company has other ways to support STRC. Zach Pandl, head of research at Grayscale, said he hopes Strategy will sell at least $3 billion in Bitcoin to cover most of the company’s cash obligations for the next two years. In a Saturday X post, Pandl argued that the move may restore market confidence in the company's capital structure. Contrary to his hopes, Pandl said he expects a 50-basis-point increase to the dividend rate on Strategy’s preferred stock, STRC, adding roughly $100 million in annual obligations over two years. Pandl added that this scenario “probably does not help market confidence.” Strategy faces an annual preferred dividend obligation of approximately $1.2 billion, driven primarily by STRC. STRC is Strategy's flagship "digital credit" preferred stock designed to trade near its $100 par value, but has been sliding for weeks. On Friday, it fell to as low as $71.25, a 28.75% discount to par. Strategy’s common stock MSTR fared little better and closed Friday at $82.31, down 26.86% throughout the trading week. Pandl said he expects Strategy to raise STRC's dividend rate but hopes the company sells Bitcoin instead. Source: Zach Pandl Strategy's cash reserve under pressure Strategy is the world’s largest publicly-listed corporate Bitcoin holder, placing its 847,363 BTC stash and financing decisions under the industry’s microscope. According to Strategy’s latest 8-K filing with the US Securities and Exchange Commission, it acquired 520 Bitcoin for $34.9 million between June 15 and June 21. Blockchain analytics company CryptoQuant argued in a Tuesday report that Strategy should pause Bitcoin purchases and focus on replenishing its cash reserve, which is down 38% in 2026. Related: Bitcoin doesn't need Ethereum-style yield, says Strategy's Michael Saylor The 8-K filing also revealed that Strategy increased its US dollar reserve by $300 million to $1.4 billion. This leaves the company with roughly 14 months of dividend coverage, down sharply from what was once a seven-year cushion. Strategy said on Monday that it plans to continue replenishing its cash reserves to support the credit quality of its “digital credit” securities. Alternatives to a Bitcoin sale CryptoQuant added that the company has no obligation to sell Bitcoin to support STRC’s price, because it can deploy other methods to defend its stock, such as raising the current 11.5% dividend yield. Bitcoin advocate Samson Mow argued in a Monday X post that STRC has a built-in "self-repairing mechanism.” Once the stock falls below its $100 reference price, Strategy halts new ATM issuance, cutting off the supply of fresh shares. At the same time, a lower price mechanically boosts the yield for new buyers relative to what they paid, which Mow said should draw in fresh demand and pull the price back toward par over time. Source: Samson Mow Magazine: AI is banking the unbanked in Africa… faster than crypto More on the subject
+
+
+
+codex
+I’ve narrowed it to the finance, macro, energy, and crypto pieces. I’m reading the denser BIS and energy articles more closely now so the extracted claims stay atomic and text-grounded rather than broad summaries.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_002.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i==9:
+            obj=json.loads(line)
+            text=obj['body_text'].replace('\\n',' ')
+            for needle in ['over 10 million barrels a day','inflation','central banks had lowered interest rates','Global stocks enjoyed strong rallies','record volumes from AI-related firms']:
+                idx=text.find(needle)
+                print('\\nNEEDLE:', needle, 'IDX', idx)
+                if idx"'!=-1:
+                    print(text[max(0,idx-300):idx+900])
+PY' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+NEEDLE: over 10 million barrels a day IDX 6964
+ – posed a renewed threat to the global outlook. In early March, the unprecedented blockade of the world's most critical energy chokepoint brought the Strait's traffic to a standstill (Graph 4.A). The supply disruption was historically large in terms of volumes lost, with a cut in crude oil flow of over 10 million barrels a day, equivalent to 13% of normal supply (Graph 4.B). By comparison, supply losses in the 1970s energy crises were around 8%. That said, oil prices increased proportionally less than in previous crisis episodes, cushioned by oil reserve drawdown and market participants' conviction that the crisis would prove short-lived. The prolonged disruption to Strait of Hormuz traffic could have persistent global stagflationary effects, given the Strait's vital role. Past interruptions have weighed on global industrial production and lifted global inflation for a sustained period even after their resolution (Graph 4.C). Compounding the supply disruption this time was the severe lack of immediate substitutes. Bypassing the Strait of Hormuz offers only partial offsets – the Saudi East-West pipeline to Yanbu on the Red Sea can reroute five million barrels a day at most for expo
+
+NEEDLE: inflation IDX 528
+cks, from tariffs to the Middle East conflict. This was partly driven by optimism around progress in artificial intelligence (AI), which fuelled large AI-related investments and sustained accommodative financial conditions. - But the perils have grown with pressure points around risks of persistent inflation, the sustainability of AI-related investments, growing financial vulnerabilities and weakening fiscal positions. - Safeguarding price stability, restoring fiscal space, strengthening financial stability beyond the banking perimeter and structural reforms are key priorities. Discipline in each area expands the room the others have to act. Resilience tested The 12-month period under review falls into two phases. The first was one of surprising resilience. Global growth and trade held up despite the sharp tariff hikes, supported by easy financial conditions and strong artificial intelligence (AI)-related investment and sentiment. With a few exceptions, most notably the United States and China, inflation stabilised at, or was converging to targets, paving the way for policy easing in many jurisdictions. These benign macroeconomic conditions were, however, jolted by the conflict in 
+
+NEEDLE: central banks had lowered interest rates IDX 5220
+a, investment rotated from the property sector to advanced manufacturing. In Europe, investment helped offset tepid consumption amid weak household confidence. Monetary policy easing provided further support to economic activity in this first phase. With benign growth and moderating inflation, most central banks had lowered interest rates from restrictive to near-neutral levels, where many have paused since late 2025. In a few exceptional cases, central banks hiked interest rates including in Japan due to low real interest rates, and in Australia and Colombia because of domestic inflationary pressures. Meanwhile, central bank balance sheets remained large in key jurisdictions. Accommodative financial conditions were also a key factor supporting growth during this phase. Financial conditions eased throughout 2025 (Graph 3.C), as the strong surge in global risk appetite fuelled by AI optimism dominated the effects of trade policy uncertainty. Global stocks enjoyed strong rallies on robust corporate earnings, led by major technology and AI-related stocks. Rising equity values, whose ratio to income has more than doubled since 2010, in turn supported household consumption through wealt
+
+NEEDLE: Global stocks enjoyed strong rallies IDX 5875
+ed large in key jurisdictions. Accommodative financial conditions were also a key factor supporting growth during this phase. Financial conditions eased throughout 2025 (Graph 3.C), as the strong surge in global risk appetite fuelled by AI optimism dominated the effects of trade policy uncertainty. Global stocks enjoyed strong rallies on robust corporate earnings, led by major technology and AI-related stocks. Rising equity values, whose ratio to income has more than doubled since 2010, in turn supported household consumption through wealth effects. Corporate credit spreads continued to narrow in major jurisdictions, with robust primary issuance across the ratings spectrum and record volumes from AI-related firms. Investors' risk appetite was also evident in the private credit space, which contributed to the financing of AI infrastructure build-out. The conflict and its peril The start of the conflict in Iran in late February 2026 and subsequent escalation – including attacks on energy infrastructure across the Persian Gulf and the effective closure of the Strait of Hormuz – posed a renewed threat to the global outlook. In early March, the unprecedented blockade of the world's most
+
+NEEDLE: record volumes from AI-related firms IDX 6261
+logy and AI-related stocks. Rising equity values, whose ratio to income has more than doubled since 2010, in turn supported household consumption through wealth effects. Corporate credit spreads continued to narrow in major jurisdictions, with robust primary issuance across the ratings spectrum and record volumes from AI-related firms. Investors' risk appetite was also evident in the private credit space, which contributed to the financing of AI infrastructure build-out. The conflict and its peril The start of the conflict in Iran in late February 2026 and subsequent escalation – including attacks on energy infrastructure across the Persian Gulf and the effective closure of the Strait of Hormuz – posed a renewed threat to the global outlook. In early March, the unprecedented blockade of the world's most critical energy chokepoint brought the Strait's traffic to a standstill (Graph 4.A). The supply disruption was historically large in terms of volumes lost, with a cut in crude oil flow of over 10 million barrels a day, equivalent to 13% of normal supply (Graph 4.B). By comparison, supply losses in the 1970s energy crises were around 8%. That said, oil prices increased proportionally
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_002.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i==11:
+            obj=json.loads(line)
+            text=obj['body_text'].replace('\\n',' ')
+            for needle in ['40-50m barrels of oil per day','return on capital by nearly a third','Europe','extraordinary year']:
+                idx=text.find(needle)
+                print('\\nNEEDLE:', needle, 'IDX', idx)
+                if idx"'!=-1:
+                    print(text[max(0,idx-300):idx+900])
+PY' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+NEEDLE: 40-50m barrels of oil per day IDX 673
+as demonstrated just how important the latter has become as a source of profit for the industry—particularly in Europe. Trading used to be the majors’ dirty little secret for topping up returns. It is not little anymore. The volume of hydrocarbons traded by BP, Shell and TotalEnergies—equivalent to 40-50m barrels of oil per day—is five to ten times what they produce. Nor is the contribution to their profitability a rounding error. Our calculations suggest the trio’s trading arms could be on course to boost their average return on capital by nearly a third or more this year.
+
+NEEDLE: return on capital by nearly a third IDX 899
+olume of hydrocarbons traded by BP, Shell and TotalEnergies—equivalent to 40-50m barrels of oil per day—is five to ten times what they produce. Nor is the contribution to their profitability a rounding error. Our calculations suggest the trio’s trading arms could be on course to boost their average return on capital by nearly a third or more this year.
+
+NEEDLE: Europe IDX 485
+nergy shock. One is to sell the hydrocarbons they pump and refine themselves. The other is to buy barrels that others produce and flog them to whoever wants them most. The third Gulf war has demonstrated just how important the latter has become as a source of profit for the industry—particularly in Europe. Trading used to be the majors’ dirty little secret for topping up returns. It is not little anymore. The volume of hydrocarbons traded by BP, Shell and TotalEnergies—equivalent to 40-50m barrels of oil per day—is five to ten times what they produce. Nor is the contribution to their profitability a rounding error. Our calculations suggest the trio’s trading arms could be on course to boost their average return on capital by nearly a third or more this year.
+
+NEEDLE: extraordinary year IDX 47
+Big oil’s secretive trading arms are having an extraordinary year Meet the corporate gamblers who never waste a good energy crisis Oil majors have two ways to make big money during an energy shock. One is to sell the hydrocarbons they pump and refine themselves. The other is to buy barrels that others produce and flog them to whoever wants them most. The third Gulf war has demonstrated just how important the latter has become as a source of profit for the industry—particularly in Europe. Trading used to be the majors’ dirty little secret for topping up returns. It is not little anymore. The volume of hydrocarbons traded by BP, Shell and TotalEnergies—equivalent to 40-50m barrels of oil per day—is five to ten times what they produce. Nor is the contribution to their profitability a rounding error. Our calculations suggest the trio’s trading arms could be on course to boost their average return on capital by nearly a third or more this
+
+codex
+I have the extraction set. Next step is to materialize `all_facts_002.jsonl` directly from the input order and then run a quick validation pass on line count and JSON shape before reporting totals.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_002.jsonl')
+output_path = Path('all_facts_002.jsonl')
+
+facts_by_doc = {
+    '5ee418096dd11b83c41907635c533a6a': [],
+    '5fd711879df3f00b4a18c96862118df5': [],
+    '62edfd8468f11de57b223cd9cc6abffd': [
+        {
+            'claim': 'After Spirit Airlines closed, search activity for Greyhound rose 20% from the previous year.',
+            'subject': 'Greyhound',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '20%',
+            'time': 'the previous year',
+            'cause': 'the recent shuttering of Spirit Airlines',
+            'entities': ['Greyhound', 'Spirit Airlines'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Greyhound routes that overlap with former Spirit Airlines flights have seen a 30% increase in passengers.',
+            'subject': 'Greyhound',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '30%',
+            'time': '2026-06-28',
+            'cause': 'the closure of Spirit Airlines',
+            'entities': ['Greyhound', 'Spirit Airlines'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Researchers predict that bus ridership could grow 4% this year.',
+            'subject': 'US intercity bus market',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '4%',
+            'time': 'this year',
+            'cause': None,
+            'entities': ['US intercity bus market'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Flight prices have increased roughly 27% year-to-date, while bus and train tickets have increased around 4%.',
+            'subject': 'US travel prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '27% and 4%',
+            'time': 'year-to-date',
+            'cause': None,
+            'entities': ['US airline market', 'US bus market', 'US rail market'],
+            'confidence': 0.95,
+        },
+    ],
+    '67326798fdf9b974a7c19869023bb4ea': [
+        {
+            'claim': 'The BIS said global growth proved resilient in 2025 thanks to lower than expected effective tariffs, firms adapting to higher tariffs and optimism driven by artificial intelligence.',
+            'subject': 'global economy',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': None,
+            'time': '2025',
+            'cause': 'lower than expected effective tariffs, firms adaptation to higher tariffs and optimism driven by artificial intelligence',
+            'entities': ['Bank for International Settlements', 'global economy'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'The BIS said the recent Middle East conflict has lifted inflation and uncertainty.',
+            'subject': 'global inflation',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'the recent Middle East conflict',
+            'cause': 'the recent Middle East conflict',
+            'entities': ['Bank for International Settlements', 'Middle East'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'The BIS said high public debt and the rise of non-bank financial institutions raise the risk of abrupt sovereign bond repricing and market dysfunction.',
+            'subject': 'sovereign bond markets',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'high public debt and the rise of non-bank financial institutions',
+            'entities': ['Bank for International Settlements', 'non-bank financial institutions', 'sovereign bond markets'],
+            'confidence': 0.9,
+        },
+    ],
+    '684e702ea8deb2794f37c635ee652a78': [
+        {
+            'claim': 'Since 2025, almost "'$9bn of Chinese renewables investment in America has been cancelled, paused or sold to local investors, up from none in 2022 and 2023.'"',
+            'subject': 'Chinese renewables investment in America',
+            'predicate': 'corporate_action',
+            'object': 'local investors',
+            'direction': 'down',
+            'magnitude': '"'$9bn'"',
+            'time': 'since 2025',
+            'cause': None,
+            'entities': ['United States', 'China'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Some Chinese clean-energy assets in America have traded at discounts of as much as 40%.',
+            'subject': 'Chinese clean-energy assets in America',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '40%',
+            'time': '2026-06-28',
+            'cause': 'Chinese firms are divesting assets at fire-sale prices',
+            'entities': ['United States', 'China'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'The sell-off of Chinese clean-energy assets in America was triggered by a change in America’s tax law last year meant to purge Chinese influence from the clean-energy sector.',
+            'subject': 'Chinese clean-energy assets in America',
+            'predicate': 'policy_action',
+            'object': 'US clean-energy sector',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'last year',
+            'cause': 'a change in America’s tax law',
+            'entities': ['United States', 'China'],
+            'confidence': 0.95,
+        },
+    ],
+    '698cd1a9305c701ec6c14610243944e5': [],
+    '712eb37be2971fd836545626006122fa': [
+        {
+            'claim': 'The BIS said today’s stablecoins have weaknesses including deviations from par and fragmentation and pose risks to financial integrity.',
+            'subject': 'stablecoins',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Bank for International Settlements', 'stablecoins'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'The BIS said widespread stablecoin adoption could affect bank funding, credit provision, fiscal space and monetary policy.',
+            'subject': 'stablecoins',
+            'predicate': 'forecast',
+            'object': 'bank funding, credit provision, fiscal space and monetary policy',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': 'widespread stablecoin adoption',
+            'entities': ['Bank for International Settlements', 'stablecoins', 'banks', 'central banks'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'The BIS said policy should tighten safeguards around stablecoins and integrate tokenisation into the two-tier system anchored in central bank money.',
+            'subject': 'Bank for International Settlements',
+            'predicate': 'statement',
+            'object': 'stablecoins',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Bank for International Settlements', 'stablecoins', 'central bank money'],
+            'confidence': 0.92,
+        },
+    ],
+    '7316336a3b5b071840472ae1f7979eb6': [
+        {
+            'claim': 'Ukrainian forces struck and started a fire at the Slavyansk Oil Refinery in Krasnodar Krai on the night of June 27 to 28.',
+            'subject': 'Slavyansk Oil Refinery',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'the night of June 27 to 28',
+            'cause': 'a Ukrainian strike campaign intended to influence Russia to end the war in Ukraine',
+            'entities': ['Ukraine', 'Russia', 'Slavyansk Oil Refinery', 'Krasnodar Krai'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Ukraine’s Unmanned Systems Forces said the Slavyansk Oil Refinery has an annual capacity of 5.2 million tons.',
+            'subject': 'Slavyansk Oil Refinery',
+            'predicate': 'production_change',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '5.2 million tons',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Slavyansk Oil Refinery', 'Ukraine'],
+            'confidence': 0.88,
+        },
+    ],
+    '7f7e1afe69f96b3955782eb682be0867': [
+        {
+            'claim': 'Global merchandise trade volumes grew nearly 5% in the first half of 2025 despite sharp tariff hikes and high trade policy uncertainty.',
+            'subject': 'global merchandise trade',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'nearly 5%',
+            'time': 'the first half of 2025',
+            'cause': None,
+            'entities': ['global merchandise trade'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The effective average US tariff rate stabilised at 10% in the second half of 2025, below the peak announcement of more than 25%.',
+            'subject': 'effective average US tariff rate',
+            'predicate': 'policy_action',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '10% from more than 25%',
+            'time': 'the second half of 2025',
+            'cause': 'exemptions, trade agreements and measured responses from trading partners',
+            'entities': ['United States'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'China’s exports of higher value added goods grew by 13% in 2025.',
+            'subject': 'China higher value added goods exports',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '13%',
+            'time': '2025',
+            'cause': None,
+            'entities': ['China'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Most central banks had lowered interest rates from restrictive to near-neutral levels by late 2025.',
+            'subject': 'central banks',
+            'predicate': 'policy_action',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'late 2025',
+            'cause': 'benign growth and moderating inflation',
+            'entities': ['central banks'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Financial conditions eased throughout 2025 as AI-driven risk appetite outweighed trade policy uncertainty.',
+            'subject': 'global financial conditions',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'throughout 2025',
+            'cause': 'a strong surge in global risk appetite fuelled by AI optimism',
+            'entities': ['global financial markets', 'artificial intelligence'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'Corporate credit spreads continued to narrow in major jurisdictions, with robust primary issuance across the ratings spectrum and record volumes from AI-related firms.',
+            'subject': 'corporate credit spreads',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2025',
+            'cause': 'strong investor risk appetite',
+            'entities': ['corporate credit markets', 'AI-related firms'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'The blockade of the Strait of Hormuz cut crude oil flow by over 10 million barrels a day, equivalent to 13% of normal supply.',
+            'subject': 'crude oil supply through the Strait of Hormuz',
+            'predicate': 'supply_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'over 10 million barrels a day, equivalent to 13% of normal supply',
+            'time': 'early March',
+            'cause': 'the effective closure of the Strait of Hormuz',
+            'entities': ['Strait of Hormuz', 'crude oil'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Oil prices increased proportionally less than in previous crisis episodes because reserve drawdowns cushioned the shock and market participants believed the disruption would be short-lived.',
+            'subject': 'oil prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'early March',
+            'cause': 'oil reserve drawdowns and expectations that the disruption would prove short-lived',
+            'entities': ['oil market', 'Strait of Hormuz'],
+            'confidence': 0.91,
+        },
+    ],
+    '80f5d852d56c9f4038d196edf5dc5433': [],
+    '850b28da0e88bd6adfb841ea6c0fbbf7': [
+        {
+            'claim': 'BP, Shell and TotalEnergies trade hydrocarbons equivalent to 40-50m barrels of oil per day, which is five to ten times what they produce.',
+            'subject': 'BP, Shell and TotalEnergies trading arms',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '40-50m barrels of oil per day',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['BP', 'Shell', 'TotalEnergies'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The trading arms of BP, Shell and TotalEnergies could boost the trio’s average return on capital by nearly a third or more this year.',
+            'subject': 'BP, Shell and TotalEnergies trading arms',
+            'predicate': 'forecast',
+            'object': 'BP, Shell and TotalEnergies',
+            'direction': 'up',
+            'magnitude': 'nearly a third or more',
+            'time': 'this year',
+            'cause': 'an energy shock linked to the third Gulf war',
+            'entities': ['BP', 'Shell', 'TotalEnergies'],
+            'confidence': 0.94,
+        },
+    ],
+    '886d3f281dade4a2a769ae5ac00675cb': [
+        {
+            'claim': 'Grayscale research head Zach Pandl said Strategy should sell at least "'$3 billion in Bitcoin to cover most of the company’s cash obligations for the next two years.'"',
+            'subject': 'Strategy',
+            'predicate': 'statement',
+            'object': 'Bitcoin',
+            'direction': 'down',
+            'magnitude': '"'$3 billion'"',
+            'time': 'the next two years',
+            'cause': 'to cover most of the company’s cash obligations and restore confidence in its capital structure',
+            'entities': ['Strategy', 'Bitcoin', 'Grayscale', 'Zach Pandl'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Pandl expects a 50-basis-point increase to STRC’s dividend rate, adding roughly "'$100 million in annual obligations over two years.'"',
+            'subject': 'STRC dividend rate',
+            'predicate': 'forecast',
+            'object': 'Strategy',
+            'direction': 'up',
+            'magnitude': '50 basis points and roughly "'$100 million'"',
+            'time': 'over two years',
+            'cause': None,
+            'entities': ['STRC', 'Strategy', 'Zach Pandl'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Strategy faces an annual preferred dividend obligation of approximately "'$1.2 billion, driven primarily by STRC.'"',
+            'subject': 'Strategy',
+            'predicate': 'other',
+            'object': 'STRC',
+            'direction': 'na',
+            'magnitude': 'approximately "'$1.2 billion'"',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Strategy', 'STRC'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'STRC fell to as low as "'$71.25 on Friday, a 28.75% discount to par.'"',
+            'subject': 'STRC',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$71.25 and 28.75%'"',
+            'time': 'Friday',
+            'cause': None,
+            'entities': ['STRC', 'Strategy'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Strategy’s common stock MSTR closed Friday at "'$82.31, down 26.86% throughout the trading week.'"',
+            'subject': 'MSTR',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$82.31 and 26.86%'"',
+            'time': 'Friday',
+            'cause': None,
+            'entities': ['MSTR', 'Strategy'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Strategy acquired 520 Bitcoin for "'$34.9 million between June 15 and June 21.'"',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'Bitcoin',
+            'direction': 'up',
+            'magnitude': '520 Bitcoin for "'$34.9 million'"',
+            'time': 'between June 15 and June 21',
+            'cause': None,
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Strategy increased its US dollar reserve by "'$300 million to $1.4 billion.'"',
+            'subject': 'Strategy US dollar reserve',
+            'predicate': 'corporate_action',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$300 million to $1.4 billion'"',
+            'time': '2026-06-28',
+            'cause': None,
+            'entities': ['Strategy'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'CryptoQuant said Strategy’s cash reserve is down 38% in 2026.',
+            'subject': 'Strategy cash reserve',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '38%',
+            'time': '2026',
+            'cause': None,
+            'entities': ['Strategy', 'CryptoQuant'],
+            'confidence': 0.94,
+        },
+    ],
+}
+
+docs = []
+with input_path.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+
+with output_path.open('w') as out:
+    for obj in docs:
+        row = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts_by_doc[obj['doc_id']],
+        }
+        out.write(json.dumps(row, ensure_ascii=True) + '\\n')
+
+print(f'wrote {len(docs)} docs and {sum(len(facts_by_doc[d[\"doc_id\"]]) for d in docs)} facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 106ms:
+wrote 12 docs and 33 facts
+
+codex
+The file is written. I’m running one short validation pass now to confirm the output stays line-aligned with the 12 input documents and that every row is valid JSON with the required top-level keys.
+exec
+/bin/zsh -lc 'wc -l all_facts_002.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_002.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+req={'doc_id','title','facts'}
+count=0
+with open('all_facts_002.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        assert set(obj)==req, (i, obj.keys())
+        assert isinstance(obj['facts'], list)
+        count += sum(1 for _ in obj['facts'])
+print(f'validated {i} docs and {count} facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+validated 12 docs and 33 facts
+
+codex
+12 docs processed, 33 facts
+tokens used
+57,129
+12 docs processed, 33 facts

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSnapshot } from "valtio";
 import { proxy } from "valtio";
 import {
+  BookOpenText,
   Circle,
   Database,
   LayoutGrid,
@@ -10,6 +11,7 @@ import {
   Rss,
   Settings as SettingsIcon,
   FileText,
+  Waypoints,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/Header";
@@ -19,18 +21,31 @@ import { ReportsPanel } from "@/components/panels/ReportsPanel";
 import { RunsPanel } from "@/components/panels/RunsPanel";
 import { SourcesPanel } from "@/components/panels/SourcesPanel";
 import { DesksPanel } from "@/components/panels/DesksPanel";
+import { GraphPanel } from "@/components/panels/GraphPanel";
+import { BriefsPanel } from "@/components/panels/BriefsPanel";
 import { chatStore, probeReady } from "@/lib/chat/store";
 
 // Market Color is a chat-first market-intelligence client. A slim icon rail
-// switches between the LLM chat and the management surfaces (reports, daily
-// runs, sources, desks) — all served by the API the client points at.
-type View = "chat" | "reports" | "runs" | "sources" | "desks" | "settings";
+// switches between the LLM chat and the management surfaces (reports, briefs,
+// the transmission-map graph, daily runs, sources, desks) — all served by the
+// API the client points at.
+type View =
+  | "chat"
+  | "reports"
+  | "briefs"
+  | "graph"
+  | "runs"
+  | "sources"
+  | "desks"
+  | "settings";
 
 const nav = proxy<{ view: View }>({ view: "chat" });
 
 const RAIL: { view: View; label: string; Icon: typeof MessageSquare }[] = [
   { view: "chat", label: "Chat", Icon: MessageSquare },
   { view: "reports", label: "Reports", Icon: FileText },
+  { view: "briefs", label: "Desk Briefs", Icon: BookOpenText },
+  { view: "graph", label: "Transmission Map", Icon: Waypoints },
   { view: "runs", label: "Daily Runs", Icon: Rocket },
   { view: "sources", label: "Sources", Icon: Rss },
   { view: "desks", label: "Desks", Icon: LayoutGrid },
@@ -71,6 +86,8 @@ export default function App() {
         <main id="main-content" className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-surface-app">
           {view === "chat" && <ChatPanel />}
           {view === "reports" && <ReportsPanel />}
+          {view === "briefs" && <BriefsPanel />}
+          {view === "graph" && <GraphPanel />}
           {view === "runs" && <RunsPanel />}
           {view === "sources" && <SourcesPanel />}
           {view === "desks" && <DesksPanel />}

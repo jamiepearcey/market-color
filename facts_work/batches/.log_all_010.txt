@@ -1,0 +1,484 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1faf-2dc0-75b2-85df-5a5176fb93dc
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_010.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_010.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_010.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:56:47.004235Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m going to inspect `all_batch_010.jsonl` to understand the document patterns, then I’ll generate `all_facts_010.jsonl` directly from that file and verify the counts.
+exec
+/bin/zsh -lc 'wc -l all_batch_010.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_010.jsonl
+
+exec
+/bin/zsh -lc "sed -n '1,3p' all_batch_010.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "27a5eed97f2caa0bf1bd1a2030a53fce", "source_name": "AP Top News", "published_date": "2026-06-29", "url": "https://apnews.com/article/arizona-supreme-court-citizenship-voting-888283794ee8b43b8785ab4c8c96b479", "title": "Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws", "body_text": "Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws WASHINGTON (AP) — The Supreme Court said Monday it will consider a Republican push to enforce strict Arizona voting laws passed in the swing state after the 2020 election. The high court has allowed some similar rules to take effect as lawsuits play out, including Arizona’s proof-of-citizenship requirement for state and local elections and a Virginia purge of voter rolls that the state said was aimed at keeping noncitizens from voting. The appeal was filed by the Republican National Committee after lower courts found the measures violated federal voting laws, and it was joined by GOP President Donald Trump’s administration. “The RNC is proud to lead this effort, and we will keep fighting nationwide to defend election integrity and ensure only eligible citizens cast a ballot,” said Chairman Joe Gruters. The high court is expected to hear arguments in the fall and likely hand down an opinion after the midterm elections. The Republican-controlled legislature passed the laws in 2022, part of a wave of similar proposals around the country after Trump falsely claimed widespread voter fraud was responsible for his narrow defeat there to Democrat Joe Biden. Trump reclaimed the state in 2024, helping secure his return to the White House. One measure requires people to show proof of citizenship when registering to vote using a state form. Another calls for regular purges of the voter rolls to remove people if their citizenship could not be confirmed, including within 90 days of an election. The case reached the Supreme Court’s emergency docket in 2024. The justices gave the GOP a partial victory, allowing Arizona to require proof of citizenship for registration in state and local elections but not federal races. Also that year, the high court allowed Virginia to continue a purge of voter rolls shortly before the election. Citizenship is required to vote across the country, and people must attest they are citizens under penalty of perjury to register. Arizona is among only a handful of states that require additional proof, like a driver’s license or passport. Data indicates that voting by noncitizens is rare. Arizona tried to impose proof requirements for national elections in 2013, but the law was struck down by the Supreme Court. Now, people can register as “federal only” voters without providing proof of citizenship, but Arizona requires additional proof for state and local election participation. Just over 19,000 people were registered as active federal-only voters in 2023. ___ Follow the AP’s coverage of the U.S. Supreme Court at https://apnews.com/hub/us-supreme-court."}
+{"doc_id": "27e9c63a046e2b65aecbe88a204da286", "source_name": "Metal.com (SMM)", "published_date": "2026-06-29", "url": "https://news.metal.com/newscontent/103977680-smm-announcement-announcement-on-modifying-the-names-of-indonesian-tin-ingot-premium-price-points", "title": "[SMM Announcement] Announcement on Modifying the Names of Indonesian Tin Ingot Premium Price Points", "body_text": "Dear Users, To further enhance the readability of our price information, and to optimize the platform's data display standards, we will adjust the names of the Indonesian Tin ingot premium price on our website. This adjustment is solely an optimization of the name expressions and does not involve any changes to the price calculation logic, data sources, or update rules. Following the adjustment, the relevant metal price information will be clearer and more standardized, making it more convenient for you to reference and use. The price subject to this name modification are as follows: · Original Name: FOB Singapore Tin Ingot premium New Name: SMM Indonesian Tin Ingot, FOB Singapore Premium, USD/tonne · Original Name: FOB Indonesian Tin Ingot premium New Name: SMM Indonesian Tin Ingot, FOB Indonesia Premium, USD/tonne · Original Name: CIF China Tin Ingot premium New Name: SMM Indonesian Tin Ingot, CIF China Premium, USD/tonne We apologize for any inconvenience this may cause and kindly seek your understanding. If you have any questions regarding our prices, please feel free to reach out to us via our online customer service. Thank you for your continued support and trust! Shanghai Metals Market (SMM) Information & Technology Co., Ltd. Tin Research Department June 29, 2026"}
+{"doc_id": "28000e72aa21c311676788e52da4273d", "source_name": "Kitco News", "published_date": "2026-06-29", "url": "https://www.kitco.com/news/off-the-wire/2026-06-29/tsx-ends-lower-metal-mining-shares-fall", "title": "TSX ends lower as metal mining shares fall", "body_text": "June 29 (Reuters) - Canada's main stock index fell on Monday as lower gold prices weighed on metal mining shares, but the market remained on course for another quarterly gain. The Toronto Stock Exchange's S&P/TSX Composite index (.GSPTSE), ended down 156.18 points, or 0.5%, at 34,823.82. For the second quarter, the TSX was headed for a gain of 6.3%. That would be its eighth straight quarterly advance, marking the longest such stretch since 1996. \"I think now we're just in this sideways mode where we're trying to see what the narrative for the second half of the year is,\" said Greg Taylor, chief investment officer at PenderFund Capital Management. \"We've still got this concern around higher oil and inflation and what the Fed is going to think.\" The price of oil settled 2.2% higher at $70.75 a barrel after attacks by the U.S. and Iran underscored the fragility of their interim peace deal, while cautious hopes of a continued recovery in energy shipping through the Strait of Hormuz limited gains. Investors expect the Federal Reserve to raise interest rates as soon as September to fight inflation. The materials group (.GSPTTMT), which includes metal mining shares, fell 1.1%. The price of gold was down 1.8%, moving toward the bottom of its range since November. \"Everyone is going to be watching to see if there is any rebound in the commodities and some sort of pause in the U.S. dollar move which has been extreme,\" Taylor said. Consumer discretionary (.GSPTTCD), fell 1%, with shares of apparel retailer Aritzia Inc (ATZ.TO), down 2.9%, while consumer staples (.GSPTTCS), ended 1.7% lower. Just two of the 10 major sectors ended higher, including heavily weighted financials (.SPTTFS), which added 0.3%. Reporting by Fergal Smith in Toronto and Sruthi Shankar and Sudeshna Ghoshal in Bengaluru: Editing by Tasim Zahid and Nick Zieminski"}
+
+codex
+The batch is small, 12 documents, but the content types vary. I’m reading the full set now so I can separate genuine market facts from non-market or administrative items and keep the extraction strict.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_batch_010.jsonl')
+for i,line in enumerate(p.read_text().splitlines(),1):
+    obj=json.loads(line)
+    print(f\"{i}. {obj['doc_id']} | {obj['source_name']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 27a5eed97f2caa0bf1bd1a2030a53fce | AP Top News | 2026-06-29 | Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws
+2. 27e9c63a046e2b65aecbe88a204da286 | Metal.com (SMM) | 2026-06-29 | [SMM Announcement] Announcement on Modifying the Names of Indonesian Tin Ingot Premium Price Points
+3. 28000e72aa21c311676788e52da4273d | Kitco News | 2026-06-29 | TSX ends lower as metal mining shares fall
+4. 28a9f489c90cdf818223ff17f3b2fe05 | AP Top News | 2026-06-29 | More than 100 Venezuelans who were deported from the US hours before the earthquakes are missing
+5. 28ad4cefd737323e1d15812f044ffab2 | Al Jazeera | 2026-06-29 | Ex-NBA players Malik Beasley, Ed Davis indicted in betting investigation
+6. 28fe898a6b8a785462a5e794994d3c5a | FXStreet News | 2026-06-29 | Euro strengthens as Eurozone sentiment improves ahead of German HICP | FXStreet
+7. 2942987cec3a6c311746d95792715cf9 | Cointelegraph | 2026-06-29 | Galaxy Digital Cuts 2026 CLARITY Act Odds to 50%
+8. 2a3e37d58c48223d14478ba8047f17d0 | Decrypt | 2026-06-29 | What Is Strategy (MSTR)? The Bitcoin Treasury Company - Decrypt
+9. 2aea19461f98a1a2fdce00ddc20e8caa | Nikkei Asia | 2026-06-29 | How US-Iran conflict devastated infrastructure in the Middle East
+10. 2b85d1317538953ea563da33e4102ccc | Yahoo Finance | 2026-06-29 | S&P Global (SPGI) Takes a New Step in AI-Powered Risk Intelligence
+11. 2ba0f99cf6c55ab88269e45e5c451caa | Northern Miner | 2026-06-29 | Sweden grants 25-year rare earths concession - The Northern Miner
+12. 2cebc27c722d62b6bd564f51c0f1529a | ForexLive | 2026-06-29 | XTB Institutional Reflects on iFX EXPO International 2026 | investingLive
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json,textwrap
+from pathlib import Path
+for i,line in enumerate(Path('all_batch_010.jsonl').read_text().splitlines(),1):
+    o=json.loads(line)
+    print('\\n'+'='*30)
+    print(i,o['doc_id'],o['title'])
+    print(textwrap.shorten(o['body_text'], width=1800, placeholder=' ...'))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+==============================
+1 27a5eed97f2caa0bf1bd1a2030a53fce Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws
+Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws Supreme Court will weigh Trump-backed Republican appeal to enforce Arizona voting laws WASHINGTON (AP) — The Supreme Court said Monday it will consider a Republican push to enforce strict Arizona voting laws passed in the swing state after the 2020 election. The high court has allowed some similar rules to take effect as lawsuits play out, including Arizona’s proof-of-citizenship requirement for state and local elections and a Virginia purge of voter rolls that the state said was aimed at keeping noncitizens from voting. The appeal was filed by the Republican National Committee after lower courts found the measures violated federal voting laws, and it was joined by GOP President Donald Trump’s administration. “The RNC is proud to lead this effort, and we will keep fighting nationwide to defend election integrity and ensure only eligible citizens cast a ballot,” said Chairman Joe Gruters. The high court is expected to hear arguments in the fall and likely hand down an opinion after the midterm elections. The Republican-controlled legislature passed the laws in 2022, part of a wave of similar proposals around the country after Trump falsely claimed widespread voter fraud was responsible for his narrow defeat there to Democrat Joe Biden. Trump reclaimed the state in 2024, helping secure his return to the White House. One measure requires people to show proof of citizenship when registering to vote using a state form. Another calls for regular purges of the voter rolls to remove people if their citizenship could not be confirmed, including within 90 days of an election. The case reached the Supreme Court’s emergency docket in 2024. The justices gave the GOP a partial victory, allowing ...
+
+==============================
+2 27e9c63a046e2b65aecbe88a204da286 [SMM Announcement] Announcement on Modifying the Names of Indonesian Tin Ingot Premium Price Points
+Dear Users, To further enhance the readability of our price information, and to optimize the platform's data display standards, we will adjust the names of the Indonesian Tin ingot premium price on our website. This adjustment is solely an optimization of the name expressions and does not involve any changes to the price calculation logic, data sources, or update rules. Following the adjustment, the relevant metal price information will be clearer and more standardized, making it more convenient for you to reference and use. The price subject to this name modification are as follows: · Original Name: FOB Singapore Tin Ingot premium New Name: SMM Indonesian Tin Ingot, FOB Singapore Premium, USD/tonne · Original Name: FOB Indonesian Tin Ingot premium New Name: SMM Indonesian Tin Ingot, FOB Indonesia Premium, USD/tonne · Original Name: CIF China Tin Ingot premium New Name: SMM Indonesian Tin Ingot, CIF China Premium, USD/tonne We apologize for any inconvenience this may cause and kindly seek your understanding. If you have any questions regarding our prices, please feel free to reach out to us via our online customer service. Thank you for your continued support and trust! Shanghai Metals Market (SMM) Information & Technology Co., Ltd. Tin Research Department June 29, 2026
+
+==============================
+3 28000e72aa21c311676788e52da4273d TSX ends lower as metal mining shares fall
+June 29 (Reuters) - Canada's main stock index fell on Monday as lower gold prices weighed on metal mining shares, but the market remained on course for another quarterly gain. The Toronto Stock Exchange's S&P/TSX Composite index (.GSPTSE), ended down 156.18 points, or 0.5%, at 34,823.82. For the second quarter, the TSX was headed for a gain of 6.3%. That would be its eighth straight quarterly advance, marking the longest such stretch since 1996. "I think now we're just in this sideways mode where we're trying to see what the narrative for the second half of the year is," said Greg Taylor, chief investment officer at PenderFund Capital Management. "We've still got this concern around higher oil and inflation and what the Fed is going to think." The price of oil settled 2.2% higher at $70.75 a barrel after attacks by the U.S. and Iran underscored the fragility of their interim peace deal, while cautious hopes of a continued recovery in energy shipping through the Strait of Hormuz limited gains. Investors expect the Federal Reserve to raise interest rates as soon as September to fight inflation. The materials group (.GSPTTMT), which includes metal mining shares, fell 1.1%. The price of gold was down 1.8%, moving toward the bottom of its range since November. "Everyone is going to be watching to see if there is any rebound in the commodities and some sort of pause in the U.S. dollar move which has been extreme," Taylor said. Consumer discretionary (.GSPTTCD), fell 1%, with shares of apparel retailer Aritzia Inc (ATZ.TO), down 2.9%, while consumer staples (.GSPTTCS), ended 1.7% lower. Just two of the 10 major sectors ended higher, including heavily weighted financials (.SPTTFS), which added 0.3%. Reporting by Fergal Smith in Toronto and Sruthi Shankar and Sudeshna ...
+
+==============================
+4 28a9f489c90cdf818223ff17f3b2fe05 More than 100 Venezuelans who were deported from the US hours before the earthquakes are missing
+More than 100 Venezuelans who were deported from the US hours before the earthquakes are missing More than 100 Venezuelans who were deported from the US hours before the earthquakes are missing MIAMI (AP) — More than 100 people just deported from the United States were being held in a hotel when earthquakes struck Venezuela, setting off a scramble to find survivors and bodies buried in the rubble, according to survivors. A deportation flight from Miami arrived in Venezuela hours before Wednesday’s earthquakes. On board were 146 Venezuelans, including 19 women and seven children, according to ICE Flight Monitor, an initiative of Human Rights First, which tracks deportation flights. They were transported to a hotel in La Guaira. Lisbeth Portillo, 58, said she escaped the rubble from the hotel with about 20 other deportees who walked the streets looking for help. They saw people running, some naked and others barefoot as they emerged from the rubble of the building in La Guaira, one of the areas that was hardest hit in Wednesday’s 7.2 and 7.5 earthquakes. “We walked about five kilometers, and I cried and cried … there was no communication,” Portillo said in a phone interview from her home in Maracaibo, Venezuela. They reached a National Guard building, where they had a chance to call relatives. “I was born again; God gave me a second chance,” said Portillo. “I am traumatized,” she said after a pause, weeping. The Venezuelan government says more than 1,700 people were killed. They survived the earthquake the same day that were deported from the U.S. Portillo was caught up in the Trump administration’s drive for mass deportations. In May, ICE Flight Monitor tracked 288 deportation flights to 38 countries, including Burkina Faso, Cambodia, Cameroon, Chile and the Ivory ...
+
+==============================
+5 28ad4cefd737323e1d15812f044ffab2 Ex-NBA players Malik Beasley, Ed Davis indicted in betting investigation
+Former NBA players Malik Beasley and Ed Davis were indicted on Monday on federal charges related to an alleged sports betting operation. They are among six defendants named in an indictment released by the US Attorney’s Office for the Eastern District of New York. Recommended Stories list of 4 items- list 1 of 4Can Morocco pull off an upset and knock out Netherlands in the last 32? - list 2 of 4Manchester City hires Enzo Maresca as manager to replace Pep Guardiola - list 3 of 4VIDEO: World Cup Day 19: Morocco beats Netherlands; Germany crashes out - list 4 of 4The match that changed the World Cup forever Davis was arrested on Monday along with William Brown, Rob Gorodetsky and Ernesto Plascencia, while Beasley and Paolo Zamorano were not yet in custody as of Monday morning. Zamorano is an NBA player agent. The indictment alleges that Beasley lost millions of dollars gambling during his nine-year NBA career with six teams from 2016-25. He agreed to adjust his performance ahead of at least three games during the 2023-24 season with the Milwaukee Bucks so that his alleged co-conspirators could wager on his statistics, per the indictment. Prosecutors allege that Beasley accepted bribes in order to reduce or pay off debts he owed to Davis, his teammate with the Minnesota Timberwolves in 2020-21. Davis played 12 seasons with eight teams from 2010-22. “Only way you can beat Vegas is sports betting,” Davis texted Beasley in December 2023, according to the indictment. “… We can make some good money.” A month later, Beasley told Davis he would underperform on rebounding in a January 26, 2024, game between the Bucks and Cleveland Cavaliers, per the indictment. He finished with three rebounds, under the betting line of 3.5 at some sportsbooks. “(The) defendants and their co- ...
+
+==============================
+6 28fe898a6b8a785462a5e794994d3c5a Euro strengthens as Eurozone sentiment improves ahead of German HICP | FXStreet
+EUR/USD rose above 1.1420 in the American session on Monday as investors digested mixed Eurozone sentiment figures and looked ahead to key German data. The latest Eurozone releases showed Business Climate in June at -0.38, weaker than the previous revised -0.27 reading. However, the Economic Sentiment Indicator improved to 95.0, beating expectations of 94.3 and rising from a revised 93.7, offering some support to the Euro. Attention now turns to Germany’s preliminary HICP inflation figures. German HICP inflation slowed to 2.7% YoY in May from 2.9% in April, while the next flash estimate is due on Tuesday. A hotter-than-expected inflation reading could support the Euro by strengthening expectations that the European Central Bank (ECB) may need to keep policy restrictive for longer. Markets will also watch German Retail Sales, which will provide a clearer view of household demand. The previous April reading showed Retail Sales falling 0.3% MoM, less than the 0.5% decline expected by analysts, but still pointing to weak consumer momentum. Short-term technical analysis: On the 4-hour chart, EUR/USD trades at 1.1421. The pair holds above the 20-period Simple Moving Average (SMA) at 1.1376 and a nearby horizontal level at 1.1415, hinting at a mildly constructive tone, although the broader trend remains capped by the 100-period SMA at 1.1494 overhead. The Relative Strength Index (RSI) at 58 suggests improving bullish momentum but not yet overbought conditions, leaving the pair in a neutral-to-slightly bullish near-term bias while price is squeezed between immediate support and initial resistance. On the topside, initial resistance is seen at 1.1434, where a horizontal barrier could limit further gains ahead of the more significant 100-period SMA at 1.1494. On the downside, ...
+
+==============================
+7 2942987cec3a6c311746d95792715cf9 Galaxy Digital Cuts 2026 CLARITY Act Odds to 50%
+Galaxy cuts CLARITY Act odds to 50% as Senate floor time narrows Galaxy cut its 2026 CLARITY Act odds to 50%, warning that Senate floor time is running out before the August recess. Galaxy Digital has cut its odds of the CLARITY Act becoming law in 2026 to 50%, warning that the US Senate is running out of time to move the crypto market structure bill before its August recess. “We are reducing our odds of CLARITY Act passage in 2026 to 50-50,” wrote Galaxy's head of firmwide research, Alex Thorn, citing the lack of a unified Senate Banking-Agriculture text, no firm floor schedule and a narrowing legislative window before lawmakers leave Washington. Thorn said the downgrade was about the bill's timing, not substance and added that the congressional competition for floor time “intensified” after US President Donald Trump abruptly canceled the signing of the bipartisan housing bill and said he would not sign it until Congress passed the SAVE Act, to introduce a proof-of-citizenship elections bill. The downgrade comes after Galaxy lowered its previous estimate of the bill from 75% to 60% on June 9. On May 22, the company had raised its CLARITY Act estimate to 75%. The CLARITY Act is set for a House hearing on July 17. The bill aims to establish the first regulatory framework for digital assets in the US, but it has been met with criticism. It cleared the Senate Banking Committee in May, with most Democrats and the banking industry pushing back, arguing that it would allow crypto firms to offer yields on stablecoins without facing the same requirements as traditional financial institutions. Source: Alex Thorn Congressional calendar squeezes crypto bill The latest cut reflects mounting concern that even a bill with bipartisan support may not get enough floor time in a ...
+
+==============================
+8 2a3e37d58c48223d14478ba8047f17d0 What Is Strategy (MSTR)? The Bitcoin Treasury Company - Decrypt
+In brief - Formerly software firm MicroStrategy, Strategy has transitioned to a Bitcoin treasury company model after adopting BTC as its primary reserve asset. - Under co-founder and chair Michael Saylor, Strategy embarked on an aggressive Bitcoin buying spree for its corporate treasury. - In June 2026, Strategy revealed that it had sold 32 BTC, in a pivot from its “never sell Bitcoin” stance. Today, Strategy is one of the most important institutions in cryptocurrency, but it didn’t start out that way. Originally called MicroStrategy, the company co-founded by Michael Saylor—one of the most influential figures in the world of Bitcoin—first made its mark in software. Now, however, it’s best known for its aggressive strategy of acquiring Bitcoin for its corporate reserves, with Saylor becoming a figurehead for the institutional adoption of the asset. Here’s everything else you need to know about Strategy and its relationship with Bitcoin. What is Strategy? Before it added Bitcoin to its balance sheet, Strategy was best known for its business intelligence software solutions, which were designed to help businesses more easily analyze data for improved decision making. Founded in 1989 by Michael Saylor, Strategy quickly became successful, going public and trading on the NASDAQ in 1998 as MSTR. But just two years later, Saylor and two other top executives at Strategy had to settle a case with the SEC, which alleged that the company had “materially overstated revenues and earnings from the sales of software and information services.” After a brief spike in its share price in 2000, MSTR traded in a tight range for the next two decades, only beginning to make a major move upwards at the end of 2020—the same year it announced its first Bitcoin purchase. Until early 2025, ...
+
+==============================
+9 2aea19461f98a1a2fdce00ddc20e8caa How US-Iran conflict devastated infrastructure in the Middle East
+TOKYO/LONDON -- During the military conflict between the U.S. and Iran, missile strikes damaged oil and gas facilities around the Gulf region. One estimate puts the cost of restoring this infrastructure at $46 billion. Nikkei examined seven complexes built with the help of Japanese companies, early movers in energy projects in the Middle East, based on an analysis of satellite imagery and on-the-ground video footage. Japanese companies once held a commanding position in the region's energy infrastructure market. But China and India have expanded their presence in recent years and a new contest is now taking shape over reconstruction contracts. Among the damaged sites is Ras Laffan Industrial City in Qatar, one of the world's largest hubs for liquefied natural gas. The complex has long-standing ties to Japanese companies. In 1997, Japan's Chubu Electric Power began buying Qatari LNG, becoming the Middle Eastern country's first customer. Go Matsuo, managing director of the Energy Economics and Society Research Institute, who assisted Nikkei with the satellite-image analysis, said Iran "most likely targeted the heat exchangers, the most critical pieces of equipment in these plants." He added, "Restoration could take around three years."
+
+==============================
+10 2b85d1317538953ea563da33e4102ccc S&P Global (SPGI) Takes a New Step in AI-Powered Risk Intelligence
+S&P Global Inc. (NYSE:SPGI) is one of the 9 Best Stocks to Buy in Chris Hohn's TCI Fund Portfolio. On June 12, 2026, S&P Global Energy, a core division of S&P Global Inc. (NYSE:SPGI), launched the United Nations Global Compact (UNGC) Screening Dataset, through S&P Global Sustainable1, to help financial institutions and corporations evaluate corporate alignment with the ten UNGC principles. Using advanced AI and machine learning, the new tool monitors millions of public sources in real time and tracks risks across human rights, labor, environment, and anti-corruption. The dataset that combines controversy tracking and business involvement screening initially covers 16,500 global companies with plans to expand to 24,000. According to S&P Global, the data aims to give investors actionable risk indicators to better inform portfolio construction. Separately, Rothschild & Co Redburn lowered its price target on S&P Global Inc. (NYSE:SPGI) from $540 to $520 and maintains a Buy rating on the stock. The firm adjusted information services ratings, noting that AI is driving value redistribution rather than wholesale disruption. The analyst stated proprietary datasets, like ratings and risk, will retain pricing power. Workflow and aggregation models are anticipated to face gradual erosion from AI integration. Founded in 1917, S&P Global Inc. (NYSE:SPGI) is a leading financial intelligence and analytics corporation. The New York-based company provides credit ratings, benchmarks, indices, market intelligence, commodity data, analytics, and financial information services for businesses, governments, investors, and institutions. While we acknowledge the potential of SPGI as an investment, we believe certain AI stocks offer greater upside potential and carry less downside risk. If ...
+
+==============================
+11 2ba0f99cf6c55ab88269e45e5c451caa Sweden grants 25-year rare earths concession - The Northern Miner
+The Swedish government has granted Leading Edge Materials (TSXV: LEM) a 25-year mining lease for one of Europe’s leading heavy rare earths projects after the company addressed environmental concerns and reduced its footprint. The government revoked a previous concession in 2016 for the Norra Kärr project in southern Sweden due to environmental concerns, three years after its initial issuance. Since then, Leading Edge has taken steps to address those concerns and reduced the project’s size by 65%, the company said on Monday. “The government’s decision affirms that this is a strategically important heavy rare earth deposit, located in a tier one jurisdiction,” Leading Edge CEO Kurt Budge said in a release. The Norra Kärr project has “the capacity to supply all of Europe’s annual dysprosium requirements alongside meaningful terbium and yttrium production,” he said. Those heavy rare earths are key inputs in the production of permanent magnets used in electric vehicles, wind turbines and other advanced technologies, including defence applications. A study by the Geological Survey of Sweden highlighted Norra Kärr as one of Europe’s richest rare earth deposits with a high proportion of heavy rare earths. The continent currently doesn’t produce the metals. Greenland Norra Kärr is similar to Critical Metals’ (Nasdaq: CRML) Tanbreez project and Kvanefjeldheld by Energy Transition Minerals (ASX: ETM), both in Greenland, because of their bulk, low-to-mid grade and very large-scale. A 2021 preliminary economic assessment (PEA) on Norra Kärr had outlined a potential 26-year mine operation producing an average of 5,340 tonnes per annum of mixed rare earth oxides (MREOs), based on material representing approximately 30% of the project’s inferred resource of 110 million tonnes ...
+
+==============================
+12 2cebc27c722d62b6bd564f51c0f1529a XTB Institutional Reflects on iFX EXPO International 2026 | investingLive
+XTB Institutional, formerly known as X Open Hub, part of XTB Group, was among the exhibitors at iFX EXPO International 2026. This year’s edition marked a special milestone in XTB Institutional’s and X Open Hub’s history as the strengthening its alignment with XTB Group, whose parent company XTB S.A. is listed on the Warsaw Stock Exchange announced its rebranding from X Open Hub to XTB Institutional. According to the company, this transition was aimed at cementing its position as an institutional-grade liquidity provider and making this immediately clear to industry participants. This initiative involved mainly a name change without any effects on the company’s offering and target market. Therefore, the decision to announce the change at iFX EXPO International, a global B2B event attended by thousands of decision-makers and senior executives from online trading, fintech and banking, couldn’t have been more opportune. Strategically positioned on the expo floor at booth 31, Hall 2 at City of Dreams Mediterranean, XTB took the opportunity to reconnect with existing partners and clients and meet new ones, while showcasing its institutional-grade liquidity offering. Brokers, banks and other institutional partners attending the event saw live demonstrations of XTB Institutional’s multi-asset liquidity offering and engaged directly with the team. The conversation, for the most part, revolved around liquidity depth, execution reliability and speed, transparent pricing, broader market access and scalability. From a technical perspective, discussions covered deeper order books, razor-sharp spreads, bookshare models, a newly added equity offering and up to 3.7% interest rates on hedge accounts, alongside access to over 5,000 FX and CFD instruments. This offering has earned XTB ...
+
+codex
+I have the batch map now. Several items are clearly non-market and will get empty fact lists; I’m pulling the full text only for the borderline market documents so the final claims stay explicit and atomic.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+ids=['2942987cec3a6c311746d95792715cf9','2a3e37d58c48223d14478ba8047f17d0','2ba0f99cf6c55ab88269e45e5c451caa','2cebc27c722d62b6bd564f51c0f1529a']
+for line in Path('all_batch_010.jsonl').read_text().splitlines():
+    o=json.loads(line)
+    if o['doc_id'] in ids:
+        print('\\n###',o['doc_id'],o['title'])
+        print(o['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+### 2942987cec3a6c311746d95792715cf9 Galaxy Digital Cuts 2026 CLARITY Act Odds to 50%
+Galaxy cuts CLARITY Act odds to 50% as Senate floor time narrows Galaxy cut its 2026 CLARITY Act odds to 50%, warning that Senate floor time is running out before the August recess. Galaxy Digital has cut its odds of the CLARITY Act becoming law in 2026 to 50%, warning that the US Senate is running out of time to move the crypto market structure bill before its August recess. “We are reducing our odds of CLARITY Act passage in 2026 to 50-50,” wrote Galaxy's head of firmwide research, Alex Thorn, citing the lack of a unified Senate Banking-Agriculture text, no firm floor schedule and a narrowing legislative window before lawmakers leave Washington. Thorn said the downgrade was about the bill's timing, not substance and added that the congressional competition for floor time “intensified” after US President Donald Trump abruptly canceled the signing of the bipartisan housing bill and said he would not sign it until Congress passed the SAVE Act, to introduce a proof-of-citizenship elections bill. The downgrade comes after Galaxy lowered its previous estimate of the bill from 75% to 60% on June 9. On May 22, the company had raised its CLARITY Act estimate to 75%. The CLARITY Act is set for a House hearing on July 17. The bill aims to establish the first regulatory framework for digital assets in the US, but it has been met with criticism. It cleared the Senate Banking Committee in May, with most Democrats and the banking industry pushing back, arguing that it would allow crypto firms to offer yields on stablecoins without facing the same requirements as traditional financial institutions. Source: Alex Thorn Congressional calendar squeezes crypto bill The latest cut reflects mounting concern that even a bill with bipartisan support may not get enough floor time in a crowded Senate calendar. Senate legislative schedule. Source: Senate.gov The US Senate has entered a state work period from Monday until July 10. The Senate is also scheduled to begin its traditional August recess on Aug. 8 for five weeks before returning to Washington on Sept. 14, according to its legislative schedule. Related: Hyperliquid added to Singapore's Investor Alert List The runway to pass the bill is quickly declining, said Thorn, adding that the debate over the SAVE Act “injects another contentious, leadership-consuming fight into an already crowded queue.” He added that the Senate is also working on two unfinished developments, including Section 702 of the Foreign Intelligence Surveillance Act (FISA), to which the House failed to pass a reauthorization and the National Defense Authorization Act (NDAA) for the fiscal year of 2027, which is considered “must-pass” legislation and is often the target of political debate. At the beginning of June, over 200 crypto companies and organizations urged the US Senate to pass the CLARITY Act in a letter shared by crypto lobby group Stand With Crypto. Later in June, a group of law enforcement organizations and a coalition of Catholic organizations reached out to White House officials with concerns that the CLARITY Act could create oversight gaps regarding illicit activity. Magazine: How crypto laws changed in 2025 — and how they’ll change in 2026 More on the subject
+
+### 2a3e37d58c48223d14478ba8047f17d0 What Is Strategy (MSTR)? The Bitcoin Treasury Company - Decrypt
+In brief - Formerly software firm MicroStrategy, Strategy has transitioned to a Bitcoin treasury company model after adopting BTC as its primary reserve asset. - Under co-founder and chair Michael Saylor, Strategy embarked on an aggressive Bitcoin buying spree for its corporate treasury. - In June 2026, Strategy revealed that it had sold 32 BTC, in a pivot from its “never sell Bitcoin” stance. Today, Strategy is one of the most important institutions in cryptocurrency, but it didn’t start out that way. Originally called MicroStrategy, the company co-founded by Michael Saylor—one of the most influential figures in the world of Bitcoin—first made its mark in software. Now, however, it’s best known for its aggressive strategy of acquiring Bitcoin for its corporate reserves, with Saylor becoming a figurehead for the institutional adoption of the asset. Here’s everything else you need to know about Strategy and its relationship with Bitcoin. What is Strategy? Before it added Bitcoin to its balance sheet, Strategy was best known for its business intelligence software solutions, which were designed to help businesses more easily analyze data for improved decision making. Founded in 1989 by Michael Saylor, Strategy quickly became successful, going public and trading on the NASDAQ in 1998 as MSTR. But just two years later, Saylor and two other top executives at Strategy had to settle a case with the SEC, which alleged that the company had “materially overstated revenues and earnings from the sales of software and information services.” After a brief spike in its share price in 2000, MSTR traded in a tight range for the next two decades, only beginning to make a major move upwards at the end of 2020—the same year it announced its first Bitcoin purchase. Until early 2025, Saylor’s company operated as MicroStrategy—but dropped the “Micro” in February, opting for a more powerful and positive tone with just Strategy. The rebrand became synonymous with the popular The Social Network film reference in which Mark Zuckerberg is advised to drop “The” from “The Facebook.” Strategy’s Bitcoin treasury reserve In 2020, Strategy made a groundbreaking move: the company adopted Bitcoin as its primary treasury reserve asset. Concerned about the devaluation of the United States dollar and fiat currency due to inflation, Saylor spearheaded the company's first purchase of $250 million in Bitcoin as a hedge against economic uncertainty. “This investment reflects our belief that Bitcoin, as the world’s most widely-adopted cryptocurrency, is a dependable store of value and an attractive investment asset with more long-term appreciation potential than holding cash,” he said at the time. The company’s Bitcoin buying strategy has evolved over time and shifted to primarily using the sale of convertible notes to raise funds to buy more Bitcoin. In other words, Strategy utilizes short-term debt raises via convertible notes that allow investors to eventually cash in for Strategy stock. It then uses the funds raised from the sale of the notes to buy Bitcoin. This strategy has ultimately been adopted by other publicly traded companies like MARA, Metaplanet and Riot Platforms. In December 2024, Saylor likened this strategy to the development of Manhattan real estate, telling CNBC that, “Every time Manhattan real estate goes up in value, they issue more debt to develop more real estate.” The firm signaled in October 2024 that it has no plans on slowing down in the future. At that time, Strategy announced plans to raise up to $42 billion in order to add more of the leading cryptocurrency asset to its balance sheet. Seeking more though, the firm passed a vote in January 2025 to implement a 30x increase of its Class A common shares, allowing it to add even more Bitcoin than initially planned. Days later, the company announced the offering of a new stock, Strike (STRK)–as a new way for it to raise money to buy Bitcoin. Selling shares for $80 a piece, the firm aimed to grab another $584 million for Bitcoin purchases to build out its treasury. The firm announced another $2 billion convertible senior notes sale in February 2025. Throughout the year, the firm would launch additional preferred stock offerings to help fund its Bitcoin purchases, granting different types of investors access to different risk-adjusted products like Stretch (STRC), Stride (STRD), Strife (STRF), and Stream (STRE) in addition to Strike. The strategy of raising debt to buy Bitcoin has been adopted by other publicly traded companies like MARA and Riot Platforms. In December, Saylor likened this strategy to the development of Manhattan real estate, telling CNBC that, “Every time Manhattan real estate goes up in value, they issue more debt to develop more real estate.” As Strategy has become ever more closely intertwined with Bitcoin, the company now refers to itself as the “World’s First and Largest Bitcoin Treasury Company” via its investor relations page. Michael Saylor, Bitcoin convert Though Michael Saylor is now one of the loudest voices advocating for Bitcoin, he wasn’t always a Bitcoin bull. Just seven years before his company adopted the crypto as its main reserve asset, Saylor tweeted that “#Bitcoin days are numbered. It seems like just a matter of time before it suffers the same fate as online gambling.” #Bitcoin is a swarm of cyber hornets serving the goddess of wisdom, feeding on the fire of truth, exponentially growing ever smarter, faster, and stronger behind a wall of encrypted energy. — Michael Saylor (@saylor) September 18, 2020 Since then, Saylor has done a complete 180°, claiming Bitcoin is the best long-term asset to hold while committing to “buying the top forever,” referring to consistently purchasing the asset at its peak prices—which Strategy continues to do. In Saylor’s view, that means he might be buying Bitcoin at $13 million, the price target he’s established for the asset over the next 21 years as he expects it to take up a larger percentage of total global capital. The case against Strategy’s Bitcoin reserve Strategy’s persistent Bitcoin acquisitions via the sale of debt has faced scrutiny by analysts and media in the space. In November 2024, Robinhood-backed Sherwood Media outlined the “math problem,” with MSTR being worth 3x the amount of BTC that it holds and the potential of forced liquidations in a drawdown. This premium, known as the firm’s mNAV or its multiple to its net asset value, has historically traded at a strong premium for Strategy. However, as Bitcoin fell in 2026, Strategy’s mNAV—which had reached as high as 3.89x in November 2024—dropped below 1, meaning the company’s market cap is now valued below the value of its Bitcoin holdings. The falling mNAV corresponded with around a 70% drop in the MSTR share price over the six-month period from August 2025 to February 2026, with the company reporting a loss of $12.4 billion in Q4 2025. Skeptics have often noted that if the MSTR share price falls enough, Strategy could be forced to sell Bitcoin to repay billions in convertible notes, “effectively reversing its ‘perpetual motion machine’...which would further decrease Bitcoin’s price,” according to Sherwood Media. But as shares fell, alongside BTC in February 2026, Saylor called concerns about the firm’s ability to pay its debts and dividends “unfounded,” noting that his firm would just “refinance the debt” should the price of BTC fall far enough. To help avoid situations where the firm may be forced into selling BTC, it established a cash reserve in December 2025, kickstarting it with $1.44 billion in funds. It later added to that pile, ultimately securing more than 2.5 years worth of debt and dividends as of February 2026, according to Saylor—who claims that the company can cover its $6 billion debt if BTC falls as low as $8,000. In May 2026, the firm used 61% of its cash buffer to repurchase $1.5 billion in convertible notes. Similar to the concerns raised about the drop in MSTR, a more than 4.5% drop from the $100 par value of STRC in June 2026 led others to show skepticism in the firm’s ability to maneuver cleanly through a prolonged period of trading below par. Analysts pointed to the exposure of a "structural crack" in Strategy's Bitcoin flywheel, as the longer STRC trades below $100, the greater the likelihood of a “trap” developing that would force the firm to decide between offering new shares or selling Bitcoin to keep paying its dividend. From "never sell your Bitcoin" to "never be a net seller" In May 2026 Strategy revised its long-held “never sell your Bitcoin” philosophy, with executives signaling that offloading some of its Bitcoin holdings wasn’t off the table. During the company’s Q1 2026 earnings call, CEO Phong Le said the firm would consider selling Bitcoin if doing so improved its “Bitcoin-per-share” position or helped manage debt and dividend obligations. "We will sell Bitcoin when it's advantageous to the company,” Le said. “We're not going to sit back and just say, 'We'll never sell the Bitcoin.'" Saylor went further, suggesting that the firm might sell Bitcoin to "inoculate the market—just to send the message that we did it." He later clarified that Strategy’s goal is to “never be a net seller” of Bitcoin, arguing that the company still expects to acquire far more BTC than it might eventually sell to fund dividends or operations. Days after the comments, Strategy resumed buying Bitcoin. However, it didn’t make it much further before eventually yielding to Saylor’s telegraphed remarks, ultimately selling 32 BTC or about $2.5 million worth in the last week of May. The move coincided with an extended BTC drawdown that saw it fall as low as $60,211 in early June, more than 52% off its all-time high of $126,080. Speaking of the decline that transpired around the time of the firm’s sale, Saylor noted that Bitcoin’s weakness was significantly impacted by the “historic scale” of the artificial intelligence trade, pointing to more than $4.3 billion in outflows from Bitcoin ETFs in a span of less than a month. Strategy isn't the only Bitcoin treasury firm to have sold Bitcoin. In March 2026, Bitcoin mining firm MARA Holdings sold 28% of its Bitcoin holdings, around 15,000 BTC, raising around $1.1 billion to repurchase part of its convertible debt. The firm billed it as a way to improve its overall financial footing and finance its pivot from Bitcoin mining into an "energy and digital infrastructure company." A month later, Riot Platforms followed suit, announcing the sale of over $250 million in BTC in the first quarter of the year as part of a "strategic evolution" into data center development. Strategy's shifting playbook In June 2026, Strategy unveiled a "Digital Credit Capital Framework," making the shift in its playbook towards "active capital management" official. Under the new framework approved by its board, the firm announced a "BTC Monetization Program" that would enable it to sell up to $1.25 billion in BTC to bolster its cash reserves, make payouts on products such as Stretch (STRC), or repurchase securities including common stock. Strategy announces a Digital Credit Capital Framework designed to strengthen Digital Credit, enhance liquidity, preserve long-term Bitcoin exposure, and support long-term value creation. $MSTR $STRC https://t.co/AUoUCtem53 — Michael Saylor (@saylor) June 29, 2026 In a statement, the firm's CFO Andrew Kang said that the program “gives Strategy the flexibility to use a portion of its BTC Reserve to strengthen Digital Credit, fund or replenish the USD Reserve, fund dividend payments and interest expense, and fund accretive repurchases when BTC monetization is more advantageous than issuing common equity.” The firm also indicated that it would maintain enough cash to cover dividends for at least a full year, and committed to not issuing more common shares to purchase Bitcoin unless the company were valued at a premium to its holdings. The future of Strategy
+
+### 2ba0f99cf6c55ab88269e45e5c451caa Sweden grants 25-year rare earths concession - The Northern Miner
+The Swedish government has granted Leading Edge Materials (TSXV: LEM) a 25-year mining lease for one of Europe’s leading heavy rare earths projects after the company addressed environmental concerns and reduced its footprint. The government revoked a previous concession in 2016 for the Norra Kärr project in southern Sweden due to environmental concerns, three years after its initial issuance. Since then, Leading Edge has taken steps to address those concerns and reduced the project’s size by 65%, the company said on Monday. “The government’s decision affirms that this is a strategically important heavy rare earth deposit, located in a tier one jurisdiction,” Leading Edge CEO Kurt Budge said in a release. The Norra Kärr project has “the capacity to supply all of Europe’s annual dysprosium requirements alongside meaningful terbium and yttrium production,” he said. Those heavy rare earths are key inputs in the production of permanent magnets used in electric vehicles, wind turbines and other advanced technologies, including defence applications. A study by the Geological Survey of Sweden highlighted Norra Kärr as one of Europe’s richest rare earth deposits with a high proportion of heavy rare earths. The continent currently doesn’t produce the metals. Greenland Norra Kärr is similar to Critical Metals’ (Nasdaq: CRML) Tanbreez project and Kvanefjeldheld by Energy Transition Minerals (ASX: ETM), both in Greenland, because of their bulk, low-to-mid grade and very large-scale. A 2021 preliminary economic assessment (PEA) on Norra Kärr had outlined a potential 26-year mine operation producing an average of 5,340 tonnes per annum of mixed rare earth oxides (MREOs), based on material representing approximately 30% of the project’s inferred resource of 110 million tonnes grading 0.5% total rare earth oxides (TREOs). A key differentiator of the project, said Leading Edge, was its high ratio of the far scarcer heavy rare earths (dysprosium and terbium or DyTb) to light rare earths (neodymium and praseodymium or NdPr) contained within the resource. At 2.5 to 1, it means that for every kg of NdPr produced, Norra Kärr is expected to yield 0.4 kg of DyTb. Meanwhile, the average ratio for projects in its peer group is 38.5 to 1, it said. Based on older and much lower rare earth prices for Dy and Tb, the PEA report gave Norra Kärr a post-tax net present value (at 10% discount) of $762 million, an internal rate of return of 26%, and average annual earnings before interest, taxes, depreciation and amortization of $206 million. Permitting With the mining lease now secured, Leading Edge said it will move the project towards an updated prefeasibility study (PFS) and enter talks with potential offtake partners and financiers in order to bring Norra Kärr into production. “With European supply chain resilience now a policy imperative, Leading Edge Materials is on track to develop Europe’s first heavy rare earths mine,” Budge said. At the same time, the company will also look to advance its environmental permitting process, pledging that it will be “developed to the highest environmental standards, in close dialogue with the local community, including those who remain skeptical of the project.” Shares of Leading Edge Materials soared 21% to C32¢ apiece by mid-Monday in Toronto, taking the company’s market capitalization to C$81.1 million.
+
+### 2cebc27c722d62b6bd564f51c0f1529a XTB Institutional Reflects on iFX EXPO International 2026 | investingLive
+XTB Institutional, formerly known as X Open Hub, part of XTB Group, was among the exhibitors at iFX EXPO International 2026. This year’s edition marked a special milestone in XTB Institutional’s and X Open Hub’s history as the strengthening its alignment with XTB Group, whose parent company XTB S.A. is listed on the Warsaw Stock Exchange announced its rebranding from X Open Hub to XTB Institutional. According to the company, this transition was aimed at cementing its position as an institutional-grade liquidity provider and making this immediately clear to industry participants. This initiative involved mainly a name change without any effects on the company’s offering and target market. Therefore, the decision to announce the change at iFX EXPO International, a global B2B event attended by thousands of decision-makers and senior executives from online trading, fintech and banking, couldn’t have been more opportune. Strategically positioned on the expo floor at booth 31, Hall 2 at City of Dreams Mediterranean, XTB took the opportunity to reconnect with existing partners and clients and meet new ones, while showcasing its institutional-grade liquidity offering. Brokers, banks and other institutional partners attending the event saw live demonstrations of XTB Institutional’s multi-asset liquidity offering and engaged directly with the team. The conversation, for the most part, revolved around liquidity depth, execution reliability and speed, transparent pricing, broader market access and scalability. From a technical perspective, discussions covered deeper order books, razor-sharp spreads, bookshare models, a newly added equity offering and up to 3.7% interest rates on hedge accounts, alongside access to over 5,000 FX and CFD instruments. This offering has earned XTB industry-wide recognition and multiple awards over the years, including ‘Most Trusted Liquidity Provider MEA’ by the UF AWARDS Global 2026. According to CEO Michal Copiuk, the company appears to be heading in the right direction, as ‘The conversations we had in Limassol confirmed that brokers and banks are looking for liquidity partners who combine market access, reliability and transparency. That is exactly where XTB Institutional is focused.’ Aside from the technical aspects of XTB’s liquidity offering, the key takeaway for industry participants is straightforward: a new name but the same value proposition with a stronger alignment to XTB Group and a clear commitment to brokers and banks. Reflecting on the event, Michal Copiuk, CEO of XTB Institutional, said: ‘iFX EXPO International 2026 was an important opportunity for us to meet brokers, banksand industry partners face to face and to discuss what institutional clients need mosttoday: reliable liquidity, transparent pricing and partnership models that can scale withtheir business. As XTB Institutional, we are entering a new chapter under a stronger brandidentity, but our focus remains the same - supporting professional partners withinstitutional-grade liquidity and execution solutions backed by the experience of the XTBGroup.' To explore our solutions, learn more about our services as an institutional liquidity provider. About XTB Institutional XTB Institutional is the institutional liquidity and execution arm of XTB Group, providingbrokers and banks with access to institutional-grade multi-asset liquidity and execution solutions. The offering includes access to a broad range of instruments, transparent pricing, reliable execution and scalable partnership models designed for B2B clients. Backed by the experience, governance and international presence of XTB Group, XTB Institutional supports partners seeking reliable liquidity access across global markets.
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+ids=['28fe898a6b8a785462a5e794994d3c5a','2b85d1317538953ea563da33e4102ccc','2aea19461f98a1a2fdce00ddc20e8caa']
+for line in Path('all_batch_010.jsonl').read_text().splitlines():
+    o=json.loads(line)
+    if o['doc_id'] in ids:
+        print('\\n###',o['doc_id'],o['title'])
+        print(o['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+### 28fe898a6b8a785462a5e794994d3c5a Euro strengthens as Eurozone sentiment improves ahead of German HICP | FXStreet
+EUR/USD rose above 1.1420 in the American session on Monday as investors digested mixed Eurozone sentiment figures and looked ahead to key German data. The latest Eurozone releases showed Business Climate in June at -0.38, weaker than the previous revised -0.27 reading. However, the Economic Sentiment Indicator improved to 95.0, beating expectations of 94.3 and rising from a revised 93.7, offering some support to the Euro. Attention now turns to Germany’s preliminary HICP inflation figures. German HICP inflation slowed to 2.7% YoY in May from 2.9% in April, while the next flash estimate is due on Tuesday. A hotter-than-expected inflation reading could support the Euro by strengthening expectations that the European Central Bank (ECB) may need to keep policy restrictive for longer. Markets will also watch German Retail Sales, which will provide a clearer view of household demand. The previous April reading showed Retail Sales falling 0.3% MoM, less than the 0.5% decline expected by analysts, but still pointing to weak consumer momentum. Short-term technical analysis: On the 4-hour chart, EUR/USD trades at 1.1421. The pair holds above the 20-period Simple Moving Average (SMA) at 1.1376 and a nearby horizontal level at 1.1415, hinting at a mildly constructive tone, although the broader trend remains capped by the 100-period SMA at 1.1494 overhead. The Relative Strength Index (RSI) at 58 suggests improving bullish momentum but not yet overbought conditions, leaving the pair in a neutral-to-slightly bullish near-term bias while price is squeezed between immediate support and initial resistance. On the topside, initial resistance is seen at 1.1434, where a horizontal barrier could limit further gains ahead of the more significant 100-period SMA at 1.1494. On the downside, support emerges first at 1.1415, followed by 1.1401 and 1.1381. Those supports come before the technical floor defined by the 20-period SMA at 1.1376, a break of which would weaken the current constructive bias and open the door to a deeper pullback. (The technical analysis of this story was written with the help of an AI tool.)
+
+### 2aea19461f98a1a2fdce00ddc20e8caa How US-Iran conflict devastated infrastructure in the Middle East
+TOKYO/LONDON -- During the military conflict between the U.S. and Iran, missile strikes damaged oil and gas facilities around the Gulf region. One estimate puts the cost of restoring this infrastructure at $46 billion. Nikkei examined seven complexes built with the help of Japanese companies, early movers in energy projects in the Middle East, based on an analysis of satellite imagery and on-the-ground video footage. Japanese companies once held a commanding position in the region's energy infrastructure market. But China and India have expanded their presence in recent years and a new contest is now taking shape over reconstruction contracts. Among the damaged sites is Ras Laffan Industrial City in Qatar, one of the world's largest hubs for liquefied natural gas. The complex has long-standing ties to Japanese companies. In 1997, Japan's Chubu Electric Power began buying Qatari LNG, becoming the Middle Eastern country's first customer. Go Matsuo, managing director of the Energy Economics and Society Research Institute, who assisted Nikkei with the satellite-image analysis, said Iran "most likely targeted the heat exchangers, the most critical pieces of equipment in these plants." He added, "Restoration could take around three years."
+
+### 2b85d1317538953ea563da33e4102ccc S&P Global (SPGI) Takes a New Step in AI-Powered Risk Intelligence
+S&P Global Inc. (NYSE:SPGI) is one of the 9 Best Stocks to Buy in Chris Hohn's TCI Fund Portfolio. On June 12, 2026, S&P Global Energy, a core division of S&P Global Inc. (NYSE:SPGI), launched the United Nations Global Compact (UNGC) Screening Dataset, through S&P Global Sustainable1, to help financial institutions and corporations evaluate corporate alignment with the ten UNGC principles. Using advanced AI and machine learning, the new tool monitors millions of public sources in real time and tracks risks across human rights, labor, environment, and anti-corruption. The dataset that combines controversy tracking and business involvement screening initially covers 16,500 global companies with plans to expand to 24,000. According to S&P Global, the data aims to give investors actionable risk indicators to better inform portfolio construction. Separately, Rothschild & Co Redburn lowered its price target on S&P Global Inc. (NYSE:SPGI) from $540 to $520 and maintains a Buy rating on the stock. The firm adjusted information services ratings, noting that AI is driving value redistribution rather than wholesale disruption. The analyst stated proprietary datasets, like ratings and risk, will retain pricing power. Workflow and aggregation models are anticipated to face gradual erosion from AI integration. Founded in 1917, S&P Global Inc. (NYSE:SPGI) is a leading financial intelligence and analytics corporation. The New York-based company provides credit ratings, benchmarks, indices, market intelligence, commodity data, analytics, and financial information services for businesses, governments, investors, and institutions. While we acknowledge the potential of SPGI as an investment, we believe certain AI stocks offer greater upside potential and carry less downside risk. If you're looking for an extremely undervalued AI stock that also stands to benefit significantly from Trump-era tariffs and the onshoring trend, see our free report on the best short-term AI stock. READ NEXT: 10 Cheap Jim Cramer Stocks to Invest In Right Now and Chase Coleman's Tiger Global Portfolio: 10 Best Stocks to Buy Disclosure: None. Follow Insider Monkey on Google News.
+
+codex
+I’ve got the fact set defined. I’m writing `all_facts_010.jsonl` now in input order, then I’ll do a quick structural check and print the final document/fact count line only.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_010.jsonl')
+output_path = Path('all_facts_010.jsonl')
+
+def fact(claim, subject, predicate, object, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+facts_by_doc = {
+    '27a5eed97f2caa0bf1bd1a2030a53fce': [],
+    '27e9c63a046e2b65aecbe88a204da286': [
+        fact(
+            'Shanghai Metals Market said it will rename three Indonesian tin ingot premium price points on its website on June 29, 2026.',
+            'Shanghai Metals Market', 'corporate_action', 'Indonesian tin ingot premium price points', 'na', None, '2026-06-29', None,
+            ['Shanghai Metals Market', 'Indonesian tin ingot'], 0.98),
+        fact(
+            'Shanghai Metals Market said the renaming of its Indonesian tin ingot premium price points does not change the price calculation logic, data sources, or update rules.',
+            'Shanghai Metals Market', 'statement', 'Indonesian tin ingot premium price points', 'flat', None, '2026-06-29', None,
+            ['Shanghai Metals Market', 'Indonesian tin ingot'], 0.98),
+    ],
+    '28000e72aa21c311676788e52da4273d': [
+        fact(
+            'The S&P/TSX Composite index fell 156.18 points, or 0.5%, to 34,823.82 on June 29, 2026, as lower gold prices weighed on metal mining shares.',
+            'S&P/TSX Composite Index', 'price_move', None, 'down', '156.18 points, or 0.5%', '2026-06-29', 'Lower gold prices weighed on metal mining shares.',
+            ['S&P/TSX Composite Index', 'Toronto Stock Exchange', 'gold'], 0.99),
+        fact(
+            'The S&P/TSX Composite index was headed for a 6.3% gain in the second quarter of 2026.',
+            'S&P/TSX Composite Index', 'forecast', None, 'up', '6.3%', 'second quarter of 2026', None,
+            ['S&P/TSX Composite Index'], 0.95),
+        fact(
+            'Oil settled 2.2% higher at "'$70.75 a barrel on June 29, 2026, after attacks by the United States and Iran underscored the fragility of their interim peace deal.'"',
+            'Oil', 'price_move', None, 'up', '2.2% to "'$70.75 a barrel'"', '2026-06-29', 'Attacks by the United States and Iran underscored the fragility of their interim peace deal.',
+            ['Oil', 'United States', 'Iran'], 0.98),
+        fact(
+            'Investors expected the Federal Reserve to raise interest rates as soon as September 2026 to fight inflation.',
+            'Federal Reserve', 'forecast', None, 'up', None, 'September 2026', 'To fight inflation.',
+            ['Federal Reserve', 'United States'], 0.93),
+        fact(
+            'The TSX materials group fell 1.1% on June 29, 2026.',
+            'TSX materials group', 'price_move', None, 'down', '1.1%', '2026-06-29', None,
+            ['TSX materials group'], 0.98),
+        fact(
+            'Gold fell 1.8% on June 29, 2026.',
+            'Gold', 'price_move', None, 'down', '1.8%', '2026-06-29', None,
+            ['Gold'], 0.98),
+        fact(
+            'The TSX consumer discretionary sector fell 1.0% on June 29, 2026.',
+            'TSX consumer discretionary sector', 'price_move', None, 'down', '1.0%', '2026-06-29', None,
+            ['TSX consumer discretionary sector'], 0.97),
+        fact(
+            'Aritzia shares fell 2.9% on June 29, 2026.',
+            'Aritzia', 'price_move', None, 'down', '2.9%', '2026-06-29', None,
+            ['Aritzia'], 0.98),
+        fact(
+            'The TSX consumer staples sector fell 1.7% on June 29, 2026.',
+            'TSX consumer staples sector', 'price_move', None, 'down', '1.7%', '2026-06-29', None,
+            ['TSX consumer staples sector'], 0.97),
+        fact(
+            'The TSX financials sector rose 0.3% on June 29, 2026.',
+            'TSX financials sector', 'price_move', None, 'up', '0.3%', '2026-06-29', None,
+            ['TSX financials sector'], 0.97),
+    ],
+    '28a9f489c90cdf818223ff17f3b2fe05': [],
+    '28ad4cefd737323e1d15812f044ffab2': [],
+    '28fe898a6b8a785462a5e794994d3c5a': [
+        fact(
+            'EUR/USD rose above 1.1420 in the American session on June 29, 2026, as investors digested mixed Eurozone sentiment figures and looked ahead to German data.',
+            'EUR/USD', 'price_move', None, 'up', 'above 1.1420', '2026-06-29', 'Investors digested mixed Eurozone sentiment figures and looked ahead to German data.',
+            ['EUR/USD', 'Eurozone', 'Germany'], 0.98),
+        fact(
+            'The Eurozone Business Climate indicator was -0.38 in June 2026, weaker than the previous revised reading of -0.27.',
+            'Eurozone Business Climate indicator', 'other', None, 'down', '-0.38 versus -0.27 previously', 'June 2026', None,
+            ['Eurozone'], 0.97),
+        fact(
+            'The Eurozone Economic Sentiment Indicator improved to 95.0 in June 2026 from a revised 93.7 and beat expectations of 94.3.',
+            'Eurozone Economic Sentiment Indicator', 'other', None, 'up', '95.0 versus 93.7 revised and 94.3 expected', 'June 2026', None,
+            ['Eurozone'], 0.98),
+        fact(
+            'Germany\\'s HICP inflation slowed to 2.7% year over year in May 2026 from 2.9% in April 2026.',
+            'Germany HICP inflation', 'other', None, 'down', '2.7% YoY from 2.9%', 'May 2026', None,
+            ['Germany'], 0.99),
+        fact(
+            'Germany\\'s retail sales fell 0.3% month over month in April 2026, versus an expected 0.5% decline.',
+            'Germany retail sales', 'demand_change', None, 'down', '0.3% MoM', 'April 2026', None,
+            ['Germany'], 0.97),
+    ],
+    '2942987cec3a6c311746d95792715cf9': [
+        fact(
+            'Galaxy Digital cut its odds of the CLARITY Act becoming law in 2026 to 50% on June 29, 2026.',
+            'Galaxy Digital', 'forecast', 'CLARITY Act', 'down', '50%', '2026-06-29', 'Senate floor time was running out before the August recess.',
+            ['Galaxy Digital', 'CLARITY Act', 'United States Senate'], 0.99),
+        fact(
+            'Galaxy Digital had lowered its estimate for the CLARITY Act from 75% to 60% on June 9, 2026.',
+            'Galaxy Digital', 'forecast', 'CLARITY Act', 'down', 'from 75% to 60%', '2026-06-09', None,
+            ['Galaxy Digital', 'CLARITY Act'], 0.97),
+        fact(
+            'Galaxy Digital said its June 29, 2026 downgrade cited the lack of a unified Senate Banking-Agriculture text, no firm floor schedule, and a narrowing legislative window before lawmakers leave Washington.',
+            'Galaxy Digital', 'statement', 'CLARITY Act', 'na', None, '2026-06-29', None,
+            ['Galaxy Digital', 'CLARITY Act', 'United States Senate'], 0.98),
+        fact(
+            'The CLARITY Act was set for a House hearing on July 17, 2026.',
+            'CLARITY Act', 'event', 'United States House of Representatives', 'na', None, '2026-07-17', None,
+            ['CLARITY Act', 'United States House of Representatives'], 0.97),
+        fact(
+            'The article said the CLARITY Act cleared the Senate Banking Committee in May 2026.',
+            'CLARITY Act', 'policy_action', 'United States Senate Banking Committee', 'na', None, 'May 2026', None,
+            ['CLARITY Act', 'United States Senate Banking Committee'], 0.9),
+    ],
+    '2a3e37d58c48223d14478ba8047f17d0': [
+        fact(
+            'Strategy adopted Bitcoin as its primary treasury reserve asset in 2020.',
+            'Strategy', 'corporate_action', 'Bitcoin', 'na', None, '2020', 'The company was concerned about devaluation of the United States dollar and fiat currency due to inflation.',
+            ['Strategy', 'Bitcoin', 'United States dollar'], 0.99),
+        fact(
+            'Strategy made its first Bitcoin purchase in 2020 for "'$250 million.'"',
+            'Strategy', 'corporate_action', 'Bitcoin', 'up', '"'$250 million'"', '2020', 'The purchase was presented as a hedge against economic uncertainty.',
+            ['Strategy', 'Bitcoin'], 0.99),
+        fact(
+            'Strategy announced plans in October 2024 to raise up to "'$42 billion to add more Bitcoin to its balance sheet.'"',
+            'Strategy', 'forecast', 'Bitcoin', 'up', 'up to "'$42 billion'"', 'October 2024', None,
+            ['Strategy', 'Bitcoin'], 0.98),
+        fact(
+            'Strategy passed a vote in January 2025 to implement a 30x increase of its Class A common shares.',
+            'Strategy', 'corporate_action', 'Class A common shares', 'up', '30x', 'January 2025', 'To add more Bitcoin than initially planned.',
+            ['Strategy', 'Bitcoin'], 0.97),
+        fact(
+            'Strategy offered its Strike preferred stock at "'$80 per share in January 2025 and aimed to raise $584 million for Bitcoin purchases.'"',
+            'Strategy', 'corporate_action', 'Strike preferred stock', 'up', '"'$80 per share and $584 million target'"', 'January 2025', 'To fund Bitcoin purchases.',
+            ['Strategy', 'Strike', 'Bitcoin'], 0.97),
+        fact(
+            'Strategy announced a "'$2 billion convertible senior notes sale in February 2025.'"',
+            'Strategy', 'corporate_action', 'convertible senior notes', 'up', '"'$2 billion'"', 'February 2025', 'To help fund Bitcoin purchases.',
+            ['Strategy', 'Bitcoin'], 0.98),
+        fact(
+            'Strategy\\'s mNAV fell below 1 in 2026 after reaching as high as 3.89x in November 2024 as Bitcoin fell.',
+            'Strategy mNAV', 'price_move', None, 'down', 'below 1 from 3.89x', '2026', 'Bitcoin fell in 2026.',
+            ['Strategy', 'Bitcoin'], 0.96),
+        fact(
+            'MSTR fell about 70% over the six-month period from August 2025 to February 2026.',
+            'MSTR', 'price_move', None, 'down', 'about 70%', 'August 2025 to February 2026', None,
+            ['Strategy', 'MSTR'], 0.96),
+        fact(
+            'Strategy reported a "'$12.4 billion loss in the fourth quarter of 2025.'"',
+            'Strategy', 'other', None, 'down', '"'$12.4 billion loss'"', 'Q4 2025', None,
+            ['Strategy'], 0.98),
+        fact(
+            'Strategy established a cash reserve with "'$1.44 billion in December 2025.'"',
+            'Strategy', 'corporate_action', 'cash reserve', 'up', '"'$1.44 billion'"', 'December 2025', 'To help avoid forced Bitcoin sales.',
+            ['Strategy', 'Bitcoin'], 0.97),
+        fact(
+            'Strategy used 61% of its cash buffer in May 2026 to repurchase "'$1.5 billion in convertible notes.'"',
+            'Strategy', 'corporate_action', 'convertible notes', 'down', '"'$1.5 billion'"', 'May 2026', None,
+            ['Strategy'], 0.98),
+        fact(
+            'Strategy sold 32 BTC, or about "'$2.5 million worth, in the last week of May 2026.'"',
+            'Strategy', 'corporate_action', 'Bitcoin', 'down', '32 BTC, or about "'$2.5 million'"', 'last week of May 2026', None,
+            ['Strategy', 'Bitcoin'], 0.99),
+        fact(
+            'Bitcoin fell to as low as "'$60,211 in early June 2026, more than 52% below its all-time high of $126,080.'"',
+            'Bitcoin', 'price_move', None, 'down', 'to "'$60,211, more than 52% below $126,080'"', 'early June 2026', None,
+            ['Bitcoin'], 0.98),
+        fact(
+            'MARA Holdings sold around 15,000 BTC, or 28% of its Bitcoin holdings, in March 2026 and raised about "'$1.1 billion.'"',
+            'MARA Holdings', 'corporate_action', 'Bitcoin', 'down', 'around 15,000 BTC, or 28%, raising about "'$1.1 billion'"', 'March 2026', 'To repurchase part of its convertible debt and support its pivot into an energy and digital infrastructure company.',
+            ['MARA Holdings', 'Bitcoin'], 0.98),
+        fact(
+            'Riot Platforms sold more than "'$250 million of Bitcoin in the first quarter of 2026.'"',
+            'Riot Platforms', 'corporate_action', 'Bitcoin', 'down', 'more than "'$250 million'"', 'Q1 2026', 'As part of a strategic evolution into data center development.',
+            ['Riot Platforms', 'Bitcoin'], 0.98),
+        fact(
+            'Strategy unveiled a Digital Credit Capital Framework in June 2026 that included a BTC Monetization Program allowing sales of up to "'$1.25 billion of Bitcoin.'"',
+            'Strategy', 'corporate_action', 'Bitcoin', 'down', 'up to "'$1.25 billion'"', 'June 2026', 'To bolster cash reserves, fund payouts, and repurchase securities.',
+            ['Strategy', 'Bitcoin'], 0.99),
+        fact(
+            'Strategy said it would maintain enough cash to cover dividends for at least one full year.',
+            'Strategy', 'statement', 'dividends', 'flat', None, 'June 2026', None,
+            ['Strategy'], 0.96),
+    ],
+    '2aea19461f98a1a2fdce00ddc20e8caa': [
+        fact(
+            'Missile strikes damaged oil and gas facilities around the Gulf region during the military conflict between the United States and Iran.',
+            'Gulf region oil and gas facilities', 'event', None, 'na', None, 'during the military conflict between the United States and Iran', None,
+            ['United States', 'Iran', 'Gulf region'], 0.98),
+        fact(
+            'One estimate put the cost of restoring damaged Gulf-region oil and gas infrastructure at "'$46 billion.'"',
+            'Gulf region oil and gas infrastructure', 'forecast', None, 'na', '"'$46 billion'"', '2026-06-29', None,
+            ['Gulf region'], 0.97),
+        fact(
+            'Ras Laffan Industrial City in Qatar, one of the world\\'s largest liquefied natural gas hubs, was among the damaged sites.',
+            'Ras Laffan Industrial City', 'event', None, 'na', None, '2026-06-29', None,
+            ['Ras Laffan Industrial City', 'Qatar', 'liquefied natural gas'], 0.97),
+        fact(
+            'Go Matsuo said restoration of the damaged plants could take around three years because Iran most likely targeted heat exchangers, which he described as the most critical equipment in the plants.',
+            'Damaged Gulf-region energy plants', 'forecast', None, 'na', 'around three years', '2026-06-29', 'Iran most likely targeted heat exchangers.',
+            ['Iran', 'Gulf region'], 0.95),
+    ],
+    '2b85d1317538953ea563da33e4102ccc': [
+        fact(
+            'S&P Global Energy launched the United Nations Global Compact Screening Dataset through S&P Global Sustainable1 on June 12, 2026.',
+            'S&P Global Energy', 'corporate_action', 'United Nations Global Compact Screening Dataset', 'na', None, '2026-06-12', None,
+            ['S&P Global Energy', 'S&P Global Sustainable1', 'S&P Global'], 0.99),
+        fact(
+            'S&P Global said the new UNGC Screening Dataset initially covers 16,500 global companies and is planned to expand to 24,000.',
+            'United Nations Global Compact Screening Dataset', 'forecast', 'global companies', 'up', '16,500 to 24,000 companies', '2026-06-12', None,
+            ['S&P Global'], 0.98),
+        fact(
+            'Rothschild & Co Redburn lowered its price target on S&P Global to "'$520 from $540 and maintained a Buy rating.'"',
+            'Rothschild & Co Redburn', 'forecast', 'S&P Global', 'down', '"'$520 from $540'"', '2026-06-29', None,
+            ['Rothschild & Co Redburn', 'S&P Global'], 0.99),
+        fact(
+            'Rothschild & Co Redburn said AI is driving value redistribution rather than wholesale disruption in information services.',
+            'Rothschild & Co Redburn', 'statement', 'information services sector', 'na', None, '2026-06-29', None,
+            ['Rothschild & Co Redburn', 'S&P Global'], 0.95),
+    ],
+    '2ba0f99cf6c55ab88269e45e5c451caa': [
+        fact(
+            'The Swedish government granted Leading Edge Materials a 25-year mining lease for the Norra Karr heavy rare earths project.',
+            'Swedish government', 'policy_action', 'Leading Edge Materials', 'na', '25-year mining lease', '2026-06-29', 'The company addressed environmental concerns and reduced the project footprint.',
+            ['Swedish government', 'Leading Edge Materials', 'Norra Karr'], 0.99),
+        fact(
+            'The Swedish government revoked a previous Norra Karr concession in 2016 because of environmental concerns.',
+            'Swedish government', 'policy_action', 'Norra Karr', 'down', None, '2016', 'Environmental concerns.',
+            ['Swedish government', 'Norra Karr'], 0.98),
+        fact(
+            'Leading Edge Materials said it reduced the Norra Karr project\\'s size by 65%.',
+            'Leading Edge Materials', 'corporate_action', 'Norra Karr', 'down', '65%', '2026-06-29', 'To address environmental concerns.',
+            ['Leading Edge Materials', 'Norra Karr'], 0.98),
+        fact(
+            'Leading Edge Materials said the Norra Karr project has the capacity to supply all of Europe\\'s annual dysprosium requirements alongside meaningful terbium and yttrium production.',
+            'Norra Karr project', 'forecast', 'Europe', 'up', None, '2026-06-29', None,
+            ['Norra Karr', 'Europe', 'dysprosium', 'terbium', 'yttrium'], 0.95),
+        fact(
+            'A 2021 preliminary economic assessment outlined a potential 26-year mine at Norra Karr producing an average of 5,340 tonnes per annum of mixed rare earth oxides.',
+            'Norra Karr project', 'forecast', 'mixed rare earth oxides', 'up', '5,340 tonnes per annum', '2021', None,
+            ['Norra Karr', 'mixed rare earth oxides'], 0.98),
+        fact(
+            'The 2021 preliminary economic assessment was based on approximately 30% of Norra Karr\\'s inferred resource of 110 million tonnes grading 0.5% total rare earth oxides.',
+            'Norra Karr inferred resource', 'other', None, 'na', '110 million tonnes at 0.5% TREOs', '2021', None,
+            ['Norra Karr'], 0.97),
+        fact(
+            'Leading Edge Materials said Norra Karr\\'s dysprosium-terbium to neodymium-praseodymium ratio is 2.5 to 1, or 0.4 kilograms of DyTb for every kilogram of NdPr produced.',
+            'Norra Karr project', 'other', None, 'na', '2.5 to 1, or 0.4 kg per 1 kg', '2026-06-29', None,
+            ['Norra Karr', 'dysprosium', 'terbium', 'neodymium', 'praseodymium'], 0.97),
+        fact(
+            'The 2021 preliminary economic assessment gave the Norra Karr project a post-tax net present value of "'$762 million, an internal rate of return of 26%, and average annual EBITDA of $206 million.'"',
+            'Norra Karr project', 'forecast', None, 'na', '"'$762 million NPV, 26% IRR, and $206 million average annual EBITDA'"', '2021', None,
+            ['Norra Karr'], 0.98),
+        fact(
+            'Leading Edge Materials said it will move Norra Karr toward an updated prefeasibility study and enter talks with potential offtake partners and financiers.',
+            'Leading Edge Materials', 'corporate_action', 'Norra Karr', 'na', None, '2026-06-29', 'The mining lease has been secured.',
+            ['Leading Edge Materials', 'Norra Karr'], 0.97),
+        fact(
+            'Leading Edge Materials shares rose 21% to C"'$0.32 by mid-Monday in Toronto, giving the company a market capitalization of C$81.1 million.'"',
+            'Leading Edge Materials', 'price_move', None, 'up', '21% to C"'$0.32'"', '2026-06-29', 'Sweden granted the Norra Karr mining lease.',
+            ['Leading Edge Materials', 'Norra Karr'], 0.99),
+    ],
+    '2cebc27c722d62b6bd564f51c0f1529a': [
+        fact(
+            'X Open Hub rebranded to XTB Institutional in 2026.',
+            'XTB Institutional', 'corporate_action', 'X Open Hub', 'na', None, '2026', 'To strengthen alignment with XTB Group and clarify its position as an institutional-grade liquidity provider.',
+            ['XTB Institutional', 'X Open Hub', 'XTB Group'], 0.99),
+        fact(
+            'XTB Institutional said the rebranding mainly changed the name and did not affect the company\\'s offering or target market.',
+            'XTB Institutional', 'statement', None, 'flat', None, '2026', None,
+            ['XTB Institutional', 'XTB Group'], 0.98),
+        fact(
+            'XTB Institutional said its offering includes a newly added equity product, access to more than 5,000 FX and CFD instruments, and up to 3.7% interest rates on hedge accounts.',
+            'XTB Institutional', 'corporate_action', 'institutional liquidity offering', 'up', 'up to 3.7% interest rates and more than 5,000 instruments', '2026', None,
+            ['XTB Institutional', 'XTB Group'], 0.97),
+    ],
+}
+
+docs = [json.loads(line) for line in input_path.read_text().splitlines()]
+with output_path.open('w', encoding='utf-8') as f:
+    for doc in docs:
+        out = {
+            'doc_id': doc['doc_id'],
+            'title': doc['title'],
+            'facts': facts_by_doc[doc['doc_id']],
+        }
+        f.write(json.dumps(out, ensure_ascii=False) + '\\n')
+
+total_facts = sum(len(facts_by_doc[doc['doc_id']]) for doc in docs)
+print(f\"docs processed: {len(docs)}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 60
+
+codex
+docs processed: 12, total facts: 60
+tokens used
+43,555
+docs processed: 12, total facts: 60

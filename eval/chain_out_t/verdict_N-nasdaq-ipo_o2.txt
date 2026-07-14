@@ -1,0 +1,3 @@
+VERDICT: A
+
+Answer A specifically identifies the SpaceX $87.5B "largest IPO ever" listing and uniquely ties it to Nasdaq via the SPCX.O ticker, making the causal mechanism (one unprecedented offering concentrating proceeds on Nasdaq) explicit and grounded, whereas B notes the SpaceX IPO but never connects it to Nasdaq.

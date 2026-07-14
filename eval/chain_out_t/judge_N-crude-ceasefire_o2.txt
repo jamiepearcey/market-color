@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did crude oil prices edge lower late in the window?
+
+ANSWER A:
+Crude oil edged lower late in the window because, after climbing back above the 100-hour moving average near $70.40 during the North American session and rallying to a session high of $71.60, buyers could not sustain the momentum and the market reversed sharply lower, falling back below the 100-hour moving average (then at $70.21) to a new session low [1][7]. This failed breakout left sellers firmly in control from a technical perspective [1]. Crude ultimately settled down $1.25, or 1.77%, at $69.50 on June 30, 2026 [8]. More broadly, prices had been declining and posted a third consecutive weekly drop, pressured by the US-Iran ceasefire signed June 17 that reopened the Strait of Hormuz and eased the earlier supply shortage [9][15][3]. The context explains the late-window dip mainly in technical terms (the failed breakout); it does not give a specific fresh late-session news catalyst beyond this momentum failure.
+
+ANSWER B:
+Crude edged lower late in the window mainly because a rally attempt failed: after climbing back above the 100-hour moving average near $70.40 during the North American session and reaching a session high of $71.60, buyers could not sustain the momentum, and over the last several hours the market reversed sharply lower, fell back below the 100-hour moving average (then at $70.21), and extended to a new session low [1][7]. That failed breakout left sellers in technical control, and crude settled down $1.25, or 1.77%, at $69.50 [1][8]. This intraday weakness sits within a broader decline tied to the US-Iran ceasefire signed June 17, 2026, which reopened the Strait of Hormuz and eased the supply shortage, pulling prices back toward pre-war levels [3][9][5]. The context explains the technical trigger for the late-window drop but does not give a specific fresh catalyst (e.g., a data release or news item) in those final hours beyond the failed moving-average break.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

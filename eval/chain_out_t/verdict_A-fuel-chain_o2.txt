@@ -1,0 +1,3 @@
+VERDICT: B
+
+Answer B better traces the causal chain by linking specific mechanisms (Iran war → oil supply disruption, constrained Middle Eastern crude flows, Strait of Hormuz uncertainty raising freight/sourcing costs) to how they could plausibly propagate into any region, while both correctly flag the missing Central Asia data.

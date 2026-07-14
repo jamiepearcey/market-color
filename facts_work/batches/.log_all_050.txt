@@ -1,0 +1,272 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc3-38e3-7292-ab5c-36522c4568f7
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_050.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_050.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_050.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:18:40.035772Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading the input schema from `all_batch_050.jsonl` first, then I’ll generate `all_facts_050.jsonl` directly from that file and verify the output count.
+exec
+/bin/zsh -lc 'wc -l all_batch_050.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_050.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_050.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(f\"DOC {i}: keys={sorted(obj.keys())}\")
+        print(obj['doc_id'])
+        print(obj['title'][:200])
+        print((obj['body_text'] or '')[:800].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+2f59524cb2c77579c5000ad58300e9fc
+Everton close in on deals for Tyrique George and Hayden Hackney
+Everton are close to agreeing a fee with Chelsea for the winger Tyrique George as Hayden Hackney puts the finishing touches to his move from Middlesbrough. George made 11 appearances for Everton last season after joining on loan in February. That deal included an option for Everton to sign the England Under-21 international on a permanent basis for £25m and, although that option was not activated, David Moyes still wants to secure the 20-year-old’s services. Talks over the structure of a deal have progressed between Everton and Chelsea this week and an agreement is understood to be close. Everton would pay less than the £25m up front but Chelsea would get close to their original asking price with add-ons. A similar proposal has produced a breakthrough in Everton’s pursuit of Hackney. Middl
+---
+DOC 2: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+2f71a09b5bead5045251f9abe44b3fd8
+Blast Furnace Maintenance Expectations Increase! Iron Ore Prices Consolidate in the Short Term and Turn Bearish Later [SMM Imported Ore Daily Brief]
+Today, DCE iron ore futures consolidated. Contract I2609 eventually closed at 747 yuan/mt, up 0.61% from the previous trading session. Port spot prices rose by 0-3 yuan/mt from the previous trading day. Trader activity was moderate, steel mill purchases were mostly based on rigid demand, and as of now, spot trading volume was moderate. Currently, iron ore fundamentals continued to show a bearish structure. The supply side remained loose, with no clear signs of shifting, while demand entered a plateau phase, expected to continue trending downward in the future. This week's SMM survey data showed that the impact on hot metal due to blast furnace maintenance was 1.1563 million mt, down 48,700 mt WoW, and next week, the estimated impact is expected to reach 1.2005 million mt. On the news front
+---
+DOC 3: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+2fa883134d8ea3c3ab1ec44bceb6ece9
+New Trump book, 'Regime Change,' has sold 300,000 copies, with more being printed, publisher says
+New Trump book, ‘Regime Change,’ has sold 300,000 copies, with more being printed, publisher says New Trump book, ‘Regime Change,’ has sold 300,000 copies, with more being printed, publisher says It turns out readers still want to learn more about President Donald Trump after all. “Regime Change: Inside the Imperial Presidency of Donald Trump,” the l atest book on the Trump presidency, written by political journalists Maggie Haberman and Jonathan Swan, has sold more than 300,000 copies in its opening week, according to publisher Simon & Schuster. They’re the kind of sales that numerous works about Trump reached during his first term, but had been rare during his second term. Publishers had speculated that the public had tired of Trump books, believing there was little left to know. The tot
+---
+
+codex
+I’ve confirmed there are 12 documents. Next I’m scanning all titles and bodies so I can extract only explicit market-relevant claims and leave non-market items empty.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_050.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        body=(obj.get('body_text') or '').replace('\\n',' ')
+        print(f\"DOC {i} | {obj['doc_id']} | {obj['published_date']} | {obj['source_name']}\")
+        print(obj['title'])
+        print(body[:1800])
+        print('\\n'+'='*100+'\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1 | 2f59524cb2c77579c5000ad58300e9fc | 2026-06-30 | Guardian Business
+Everton close in on deals for Tyrique George and Hayden Hackney
+Everton are close to agreeing a fee with Chelsea for the winger Tyrique George as Hayden Hackney puts the finishing touches to his move from Middlesbrough. George made 11 appearances for Everton last season after joining on loan in February. That deal included an option for Everton to sign the England Under-21 international on a permanent basis for £25m and, although that option was not activated, David Moyes still wants to secure the 20-year-old’s services. Talks over the structure of a deal have progressed between Everton and Chelsea this week and an agreement is understood to be close. Everton would pay less than the £25m up front but Chelsea would get close to their original asking price with add-ons. A similar proposal has produced a breakthrough in Everton’s pursuit of Hackney. Middlesbrough have been seeking £25m for the midfielder, who has only one year remaining on his contract and had also attracted interest from Crystal Palace. Everton have agreed to pay a guaranteed £16.5m rising to £25m with add-ons for the 24-year-old. Hackney, named Championship player of the season for 2025-26, is expected to have a medical in the coming days and to become an Everton player by the end of the week.
+
+====================================================================================================
+
+DOC 2 | 2f71a09b5bead5045251f9abe44b3fd8 | 2026-06-30 | Metal.com (SMM)
+Blast Furnace Maintenance Expectations Increase! Iron Ore Prices Consolidate in the Short Term and Turn Bearish Later [SMM Imported Ore Daily Brief]
+Today, DCE iron ore futures consolidated. Contract I2609 eventually closed at 747 yuan/mt, up 0.61% from the previous trading session. Port spot prices rose by 0-3 yuan/mt from the previous trading day. Trader activity was moderate, steel mill purchases were mostly based on rigid demand, and as of now, spot trading volume was moderate. Currently, iron ore fundamentals continued to show a bearish structure. The supply side remained loose, with no clear signs of shifting, while demand entered a plateau phase, expected to continue trending downward in the future. This week's SMM survey data showed that the impact on hot metal due to blast furnace maintenance was 1.1563 million mt, down 48,700 mt WoW, and next week, the estimated impact is expected to reach 1.2005 million mt. On the news front, marginal disruptions dominated, with bullish news prevailing, but not yet pointing to a one-sided market. Therefore, taking everything into account, short-term iron ore prices will continue to move sideways. [SMM Steel]
+
+====================================================================================================
+
+DOC 3 | 2fa883134d8ea3c3ab1ec44bceb6ece9 | 2026-06-30 | AP Top News
+New Trump book, 'Regime Change,' has sold 300,000 copies, with more being printed, publisher says
+New Trump book, ‘Regime Change,’ has sold 300,000 copies, with more being printed, publisher says New Trump book, ‘Regime Change,’ has sold 300,000 copies, with more being printed, publisher says It turns out readers still want to learn more about President Donald Trump after all. “Regime Change: Inside the Imperial Presidency of Donald Trump,” the l atest book on the Trump presidency, written by political journalists Maggie Haberman and Jonathan Swan, has sold more than 300,000 copies in its opening week, according to publisher Simon & Schuster. They’re the kind of sales that numerous works about Trump reached during his first term, but had been rare during his second term. Publishers had speculated that the public had tired of Trump books, believing there was little left to know. The total figures include preorders, print book sales, ebooks, and e-audiobooks and orders that have yet to be fulfilled because of demand, the publishing house said. Simon & Schuster said the book is into its third hard copy printing, with 200,000 copies on order, after it sold out quickly in bookstores and on Amazon. It’s the best first-week clip of any hardcover nonfiction book in 2026. The book covers the first 14 months of Trump’s second presidency and takes readers inside the West Wing, White House residence and Trump’s Mar-a-Lago estate, aboard Air Force One and on foreign trips with the president. Trump, who has a long history with Haberman from her days covering him as a New York City business and society figure, has trashed the book as “mostly made up.” Haberman and Swan are now New York Times reporters. Their manuscript depicts meticulous details of Trump’s military decisions, how he’s wielded the power of the Justice Department against his political opponents, his conversations wi
+
+====================================================================================================
+
+DOC 4 | 300d8e7db252629f1c226acb0f28b574 | 2026-06-30 | FXStreet News
+Swiss Franc declines ahead of KOF Leading Indicator | FXStreet
+USD/CHF recovers its recent losses from the previous day, trading around 0.8090 during the Asian hours on Tuesday. Traders await the KOF Swiss Leading Indicator due later in the day, which is expected to inch up to 98.2 in May, from 98.0 prior. The USD/CHF pair gains ground as the US Dollar advances amid rising hawkish sentiment surrounding the Federal Reserve’s (Fed) policy trajectory. According to the CME FedWatch tool, traders are now pricing in a nearly 60% probability of a Fed interest rate hike by September. Traders are awaiting this week's key US labor market reports, particularly Thursday’s Nonfarm Payrolls (NFP) data, for definitive clues on the central bank's next moves. Forecasters currently expect June job growth to land at 114,000, with the Unemployment Rate holding flat at 4.3%. The Greenback gains safe-haven support from persistent geopolitical friction in the Middle East, though diplomatic signals remain highly conflicted. US President Donald Trump announced that the two nations were set to hold fresh peace talks on Tuesday in Doha, Qatar, following a weekend of regional hostilities. However, Tehran sharply contradicted this claim, stating that no negotiation meetings are scheduled with Washington at any level and emphasizing that Iran remains focused on implementing its existing memorandum of understanding rather than entering final agreement talks. Swiss Franc FAQs The Swiss Franc (CHF) is Switzerland’s official currency. It is among the top ten most traded currencies globally, reaching volumes that well exceed the size of the Swiss economy. Its value is determined by the broad market sentiment, the country’s economic health or action taken by the Swiss National Bank (SNB), among other factors. Between 2011 and 2015, the Swiss Franc was pegged to the E
+
+====================================================================================================
+
+DOC 5 | 3035b0a3de0de8c0d0d00c4af9e63963 | 2026-06-30 | Guardian Business
+I pushed myself too hard at the gym – and ended up in the hospital
+In January 2025, I attended my first bootcamp class. I had spent the day hunched over my laptop, anxious and craving an intense workout that would dispel my worries. I booked the class at a nearby gym, and the five-star reviews promised the all-consuming exercise I wanted: “Militant style instructor, but very motivating,” read one. Another: “Hardest workout of my life; extremely rewarding.” The gym was no-frills – just a room with a mirror. After a standard warm-up, we did four sets of lateral shuffle push-ups across the floor, interspersed with standing, weight-bearing exercises. When my turn came, I dropped to plank position and started doing steady, shallow reps, focusing on my form. But caution soon fell away. Upbeat music was booming and someone was always advancing beside me. When the instructor encouraged us to lower all the way down, I obeyed, even though my form suffered. I had rarely done more than a handful of pushups at a time, and in the final set, I was exhausted, collapsing on every rep and barely prying my torso off the floor. The rest of class was a blur. I became nauseated, told the instructor I needed to pause, and stepped outside to suck cold winter air into my lungs. Back in the studio, I sat on the sidelines and waited for the dizziness to recede before slinking to my spot for the core section and cooldown. Later that night, I felt what I thought was typical post-workout muscle soreness. I was satisfied; the ache was proof of a successful workout. But the next day, lifting my arms to wash my face was exhausting. Searing pain kept me awake that night. Two days after the class, my arms were so stiff I couldn’t raise them more than a few inches, even to brush my teeth. When I Googled my symptoms – pain, weakness and a new one, dark urine – something f
+
+====================================================================================================
+
+DOC 6 | 303cbd85269fc09d675b452ca109105c | 2026-06-30 | FXStreet News
+Gold steadies after sliding to fresh seven-month low, Fed rate-hike bets weigh | FXStreet
+Gold (XAU/USD) rebounds on Tuesday after falling to a fresh seven-month low of $3,941 in the Asian session, as dip buyers help the precious metal recover some of its losses. At the time of writing, XAU/USD trades around $4,030 after hitting an intraday high of $4,063. Despite the modest intraday recovery, Gold remains on track for its worst quarter since 2013, having erased all of its gains for the year. The precious metal is down nearly 18% this quarter and is heading for its biggest monthly decline since 2008, with losses of about 11%. The downside came as geopolitical tensions in the Middle East triggered an energy-driven inflation shock, causing a hawkish repricing of Federal Reserve (Fed) interest rate expectations. While Gold typically benefits from geopolitical tensions and rising inflation, higher interest rates reduce its appeal because the non-yielding metal becomes less attractive relative to interest-bearing assets. Meanwhile, uncertainty over a potential round of talks between the US and Iran in Qatar and expectations that the Fed could raise borrowing costs in the second half of the year continue to support the US Dollar (USD). The US Dollar Index (DXY), which tracks the Greenback's value against a basket of six major currencies, is trading around 101.10 and is on track for a second consecutive monthly gain. A stronger Greenback adds further pressure on Gold by making it more expensive for overseas buyers. According to the CME FedWatch Tool, traders are currently pricing in a 63% probability of a rate hike at the September meeting. Cleveland Fed President Beth Hammack said on Tuesday, "We may need higher rates to bring inflation back to target," while adding, "I worry what higher rates could do to the rest of the economy." This week's US labor market data 
+
+====================================================================================================
+
+DOC 7 | 30460e4fb4309be31e0454a5060945e0 | 2026-06-30 | Kitco News
+Gold and silver market update: Why interest rate changes may mislead investors
+In this presentation, Jeffrey Christian of CPM Group discusses the relationship between interest rates, gold prices, silver prices, and investor demand. He begins with a precious metals market update, explaining why gold broke below $4,000 overnight before recovering near $4,040, why the $4,000 level may continue to be tested, and why CPM Group would not be surprised to see gold move toward $3,800 during the current summer consolidation period. Jeff also reviews the silver market, including silver’s move below $60, the possibility of further short-term weakness toward $55 or $50, and the continued selling pressure from ETF investors and secondary coin flows. He explains why CPM Group remains short-term cautious but longer term bullish on gold and silver, based on the expectation that economic and political conditions may become more hostile later in the year and into 2027. The presentation also covers platinum and palladium weakness, auto demand risks, and why platinum group metals are more industrial in nature than gold and silver. Jeff then turns to real interest rates, explaining why they do not automatically mean higher or lower gold and silver prices. He shows why the relationship is complicated, why gold and silver sometimes move with interest rates, and why investors need to understand what is driving rates instead of blindly using them as an indicator. CPM thanks Monetary Metals for making this paid CPM research available to our viewers. If you're interested in learning more about how gold leasing works, visit www.Monetary-Metals.com/CPM
+
+====================================================================================================
+
+DOC 8 | 3066776a4070bfb719b5b068003a27b4 | 2026-06-30 | SCMP News
+Opinion | Why the AI future won’t be decided by algorithms and chatbots
+Why the AI future won’t be decided by algorithms and chatbots Just as geopolitical influence in the 20th century often rested on energy markets, so may the 21st century be dominated by infrastructure Governments announce AI strategies and investors pour billions into start-ups promising to transform everything from medicine to education. Nonetheless, the most consequential battle in the AI age may not be over algorithms at all. It may be over the machines. Behind every chatbot response and AI-generated image lies a vast physical infrastructure of semiconductor factories, data centres, cloud networks, transmission lines and power plants. These are the factories of the 21st century. Increasingly, the divide may be between countries that own the infrastructure behind AI and those that only access the applications built on top of it. History offers a familiar lesson. During the Industrial Revolution, economic power flowed to countries that controlled manufacturing capacity. In the 20th century, geopolitical influence often rested on oil, pipelines and energy markets. Today, computing power is emerging as the new strategic asset. The United States currently hosts more than 4,200 data centres, accounting for nearly half of global capacity. Germany, Europe’s second-largest hub, has slightly over 500. China has fewer than 500, while India, despite being the world’s most populous country, has nearly 300. This gap matters because AI runs on infrastructure. Training and deploying advanced AI models require enormous processing power. Countries with stronger computing ecosystems are better positioned to attract investment, host digital industries and capture more value from the AI economy. The US’ advantage extends beyond numbers. Microsoft, Amazon, Google and Meta operate some of t
+
+====================================================================================================
+
+DOC 9 | 3081b8d550747c3d4d2116a29370277a | 2026-06-30 | Al Jazeera
+The path from Gaza to Trump’s return
+How the Biden administration’s response to October 7 reshaped US politics and influenced the 2024 presidential election. What happened inside the White House after October 7, 2023, changed the course of Israel’s genocidal war on Gaza and reshaped the Democratic Party. After three primary elections that could indicate the future of the Democratic base, a new book by Akbar Shahid Ahmed reveals the inside story of how the US administration never wavered in its support of Israel and planted roots for the return of Donald Trump. In this episode: Akbar Shahid Ahmed (@AkbarSAhmed), journalist and author of Crossing the Red Line Episode credits: This episode was produced by Tamara Khandaker and Sonia Bhagat, with Spencer Cline, Jana Dabliz, and our host, Malika Bilal. It was edited by Alexandra Locke. Our sound designer is Alex Roldan. Our video editors are Hisham Abu Salah and Mohannad al-Melhemm. Alexandra Locke is The Take’s executive producer. The Take production team is Marcos Bartolome, Sonia Bhagat, Spencer Cline, Sari el-Khalili, Tamara Khandaker, Chloe K Li, Alexandra Locke, Catherine Nouhan, Alex Roldan, and Noor Wazwaz. Our host is Malika Bilal. Our editorial intern is Jana Dabliz. Our engagement producers are Adam Abou-Gad and Vienna Maglio. Andrew Greiner is lead of audience engagement. Our video editors are Hisham Abu Salah and Mohannad al-Melhem. Alexandra Locke is The Take’s executive producer. Connect with us:
+
+====================================================================================================
+
+DOC 10 | 308feda54460e6813fddb832444ba23f | 2026-06-30 | Zero Hedge
+JPMorgan Backs US Crypto Bill, But Puts Warning Label Front & Center As Senate Eyes August Deadline
+JPMorgan threw its support behind federal digital asset legislation Monday, but the bank’s message to Congress was as much a caution as an endorsement: get the framework right, or risk recreating the financial vulnerabilities regulation was designed to prevent. In a joint op-ed, Umar Farooq, global co-head of JPMorgan Payments, and Peter Muriungi, CEO of Digital Assets and Blockchain Solutions, argued that the United States has a genuine opportunity to lead in digital finance — provided lawmakers pair regulatory clarity with durable safeguards. The piece arrived as the Senate race to advance the Digital Asset Market Clarity Act before its August recess, with negotiators still working through sticking points on stablecoin yield provisions, ethics rules for government officials with crypto ties, and liability protections for decentralized finance developers. “Regulatory clarity matters only if paired with durable safeguards,” Farooq and Muriungi wrote. “Clarity with gaps or loopholes can push activity into lightly supervised channels and weaken long-standing protections.” The op-ed stands out less for what it celebrates than for what it warns against. Rather than leading with the promise of tokenization and programmable money, the executives spent much of their argument flagging how crypto innovation could go wrong without proper guardrails. JPMorgan’s take on stablecoins, blockchain On market structure, JPMorgan’s position was blunt: the blockchain on which a product is issued does not change its economic function. Assets that look and behave like securities should face disclosure, custody, and market integrity rules. Decentralized trading platforms that operate like brokers or exchanges should be held to the same standards. Tokenization, the executives argued, should im
+
+====================================================================================================
+
+DOC 11 | 30e8e744454d3690b1eb746854a56a76 | 2026-06-30 | SCMP News
+So and Atzeni optimistic as Top Dragon returns over ‘best distance’ at Sha Tin
+Trainer Chris So Wai-yin and jockey Andrea Atzeni are full of optimism as Top Dragon steps out over his “ideal distance” on his return in Wednesday’s Class Two Hong Kong Reunification Cup (1,400m) at Sha Tin. The Pierata galloper ran in two legs of the Classic Series earlier this campaign, finishing fifth in the Classic Mile and after a second-place finish in the Class Two company the start after, he ran a gallant seventh in the Hong Kong Derby (2,000m). He has been absent since the Derby in March, but that was by design rather than any setback, and he has been trialling well since. So is relishing the chance to drop him back to what he describes as his “best distance” with Atzeni taking the reins for the third time. “Everything is normal. I just spoke to the owner and even before the Derby, we spoke about giving him a small break. We’ve brought him back now and everything is normal – first start back to 1,400m, which is his ideal distance, so let’s see,” So said. “All three trials were pretty good – I was happy after the trial and everything was normal, he’s looking well. So far, he’s very healthy and I really hope giving him a break after the Derby, he can run a good race. “1,200m is a bit short and because he has taken a break, 1,600m is a bit too far. So, we made the decision to put him in the 1,400m race. I think 1,400m is the best distance for him on his comeback.” Those sentiments were echoed by Atzeni, who was pleased with his Derby performance and will be looking to break his duck aboard the four-year-old. “I thought it was a good run in the Derby – he had a good trip around from a kind gate but he didn’t quite get the 2,000m. He’s had a break, been freshened up and had a few trials. He’s in good order,” Atzeni said. Atzeni booted home a double at Sha Tin last 
+
+====================================================================================================
+
+DOC 12 | 31052af9de072ee446c70de66460227f | 2026-06-30 | Mining.com
+PH7 secures C$5M from Natural Resources Canada for copper extraction technology
+PH7 secures C$5M from Natural Resources Canada for copper extraction technology Vancouver-based critical metals processing company pH7 Technologies announced Tuesday up to C$5 million ($3.5 million) in funding from Natural Resources Canada through the Mining Decarbonization Demonstration Call for Proposals to evaluate a first-of-its-kind copper production technology using samples from Trekor Metals’ Gibraltar mine in British Columbia, Canada’s second largest open-pit copper operation. The project will validate pH7’s proprietary closed-loop copper extraction process, which converts low-grade sulfide ore directly into 99.9% pure copper cathodes on-site while generating green hydrogen as a by-product. If successful, the project will generate the operational, environmental and economic data needed to support potential future scale-up and deployment across the Canadian mining sector, the company said. “As demand for copper continues to grow due to electrification, renewable energy infrastructure, artificial intelligence and advanced manufacturing, the industry faces the challenge of increasing supply while reducing environmental impacts,” pH7 Technologies CEO Mohammad Doostmohammadi said in a news release. “The support from Natural Resources Canada validates the importance of developing innovative Canadian technologies that can strengthen critical mineral supply chains, improve resource efficiency and help decarbonize the mining industry,” he said. “Canada has the resources, talent and innovative technologies needed to be a global leader in critical minerals,” Minister of Energy and Natural Resources Tim Hodgson added. “Projects like this help strengthen domestic supply chains, improve the competitiveness of our mining sector and support economic growth while advancing more 
+
+====================================================================================================
+
+
+codex
+I’ve got the document set classified. I’m writing `all_facts_050.jsonl` now with only explicit, market-relevant claims, and I’ll verify both document order and total fact count afterward.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+
+published = '2026-06-30'
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+facts_by_doc = {
+    '2f59524cb2c77579c5000ad58300e9fc': [],
+    '2f71a09b5bead5045251f9abe44b3fd8': [
+        fact('DCE iron ore futures contract I2609 closed at 747 yuan/mt, up 0.61% from the previous trading session.', 'DCE iron ore futures contract I2609', 'price_move', None, 'up', '0.61%', 'Today', None, ['Dalian Commodity Exchange', 'Iron ore'], 0.99),
+        fact('Port spot iron ore prices rose by 0-3 yuan/mt from the previous trading day.', 'Port spot iron ore prices', 'price_move', None, 'up', '0-3 yuan/mt', 'Today', None, ['Iron ore'], 0.97),
+        fact('The impact on hot metal due to blast furnace maintenance was 1.1563 million mt, down 48,700 mt week over week.', 'Hot metal output impact from blast furnace maintenance', 'production_change', None, 'down', '48,700 mt', \"This week's SMM survey\", 'blast furnace maintenance', ['Hot metal', 'SMM'], 0.96),
+        fact('The estimated impact on hot metal due to blast furnace maintenance is expected to reach 1.2005 million mt next week.', 'Hot metal output impact from blast furnace maintenance', 'forecast', None, 'up', '1.2005 million mt', 'Next week', 'blast furnace maintenance', ['Hot metal', 'SMM'], 0.9),
+        fact('SMM said short-term iron ore prices will continue to move sideways.', 'Iron ore prices', 'forecast', None, 'flat', None, 'Short term', 'loose supply and plateauing demand', ['Iron ore', 'SMM'], 0.88),
+    ],
+    '2fa883134d8ea3c3ab1ec44bceb6ece9': [],
+    '300d8e7db252629f1c226acb0f28b574': [
+        fact('USD/CHF traded around 0.8090 during Asian hours on Tuesday as the pair recovered recent losses.', 'USD/CHF', 'price_move', 'Swiss franc', 'up', '0.8090', 'Tuesday', 'advancing US Dollar amid rising hawkish sentiment around the Federal Reserve policy path', ['USD/CHF', 'US Dollar', 'Swiss franc', 'Federal Reserve'], 0.94),
+        fact('The KOF Swiss Leading Indicator is expected to inch up to 98.2 in May from 98.0 prior.', 'KOF Swiss Leading Indicator', 'forecast', None, 'up', '98.2 from 98.0', 'May', None, ['KOF Swiss Leading Indicator', 'Switzerland'], 0.93),
+        fact('Traders are pricing in a nearly 60% probability of a Federal Reserve interest rate hike by September.', 'Federal Reserve', 'forecast', None, 'up', 'nearly 60% probability', 'By September', 'rising hawkish sentiment around the Federal Reserve policy trajectory', ['Federal Reserve', 'CME FedWatch'], 0.95),
+        fact('Forecasters expect US June job growth of 114,000 with the unemployment rate flat at 4.3%.', 'US labor market', 'forecast', None, 'flat', '114,000 jobs and 4.3%', 'June', None, ['United States'], 0.92),
+    ],
+    '3035b0a3de0de8c0d0d00c4af9e63963': [],
+    '303cbd85269fc09d675b452ca109105c': [
+        fact('Gold fell to a fresh seven-month low of "'$3,941 in the Asian session.'"', 'Gold', 'price_move', None, 'down', '"'$3,941'"', 'Tuesday Asian session', None, ['Gold'], 0.98),
+        fact('Gold later rebounded to trade around "'$4,030 after hitting an intraday high of $4,063.'"', 'Gold', 'price_move', None, 'up', '"'$4,030 after $4,063 high'"', 'At the time of writing', 'dip buying', ['Gold'], 0.95),
+        fact('Gold is down nearly 18% this quarter and is on track for its worst quarter since 2013.', 'Gold', 'price_move', None, 'down', 'nearly 18%', 'This quarter', 'energy-driven inflation shock and hawkish repricing of Federal Reserve rate expectations', ['Gold', 'Federal Reserve'], 0.96),
+        fact('Gold is heading for its biggest monthly decline since 2008 with losses of about 11%.', 'Gold', 'price_move', None, 'down', 'about 11%', 'This month', 'higher interest-rate expectations and a stronger US Dollar', ['Gold', 'US Dollar', 'Federal Reserve'], 0.95),
+        fact('The US Dollar Index was trading around 101.10 and was on track for a second consecutive monthly gain.', 'US Dollar Index', 'price_move', None, 'up', '101.10', 'Tuesday', 'expectations that the Federal Reserve could raise borrowing costs in the second half of the year', ['US Dollar Index', 'US Dollar', 'Federal Reserve'], 0.94),
+        fact('Traders are pricing in a 63% probability of a Federal Reserve rate hike at the September meeting.', 'Federal Reserve', 'forecast', None, 'up', '63% probability', 'September meeting', None, ['Federal Reserve', 'CME FedWatch'], 0.95),
+    ],
+    '30460e4fb4309be31e0454a5060945e0': [
+        fact('Gold broke below "'$4,000 overnight before recovering near $4,040.'"', 'Gold', 'price_move', None, 'down', 'below "'$4,000'"', 'Overnight', None, ['Gold'], 0.93),
+        fact('CPM Group said it would not be surprised to see gold move toward "'$3,800 during the current summer consolidation period.'"', 'Gold', 'forecast', None, 'down', '"'$3,800'"', 'Current summer consolidation period', None, ['Gold', 'CPM Group'], 0.87),
+        fact('Silver moved below "'$60.'"', 'Silver', 'price_move', None, 'down', 'below "'$60'"', 'Short term', None, ['Silver'], 0.93),
+        fact('CPM Group said silver could weaken toward "'$55 or $50 in the short term.'"', 'Silver', 'forecast', None, 'down', '"'$55 or $50'"', 'Short term', 'continued selling pressure from ETF investors and secondary coin flows', ['Silver', 'CPM Group'], 0.88),
+        fact('CPM Group said it remains short-term cautious but longer-term bullish on gold and silver.', 'CPM Group', 'statement', 'Gold and silver', 'na', None, 'Later in the year and into 2027', 'expectation that economic and political conditions may become more hostile', ['CPM Group', 'Gold', 'Silver'], 0.86),
+    ],
+    '3066776a4070bfb719b5b068003a27b4': [
+        fact('The United States hosts more than 4,200 data centres, accounting for nearly half of global capacity.', 'United States data centre market', 'statement', None, 'na', 'more than 4,200 data centres', published, None, ['United States', 'Data centres'], 0.94),
+        fact('Germany has slightly over 500 data centres.', 'Germany data centre market', 'statement', None, 'na', 'slightly over 500 data centres', published, None, ['Germany', 'Data centres'], 0.92),
+        fact('China has fewer than 500 data centres.', 'China data centre market', 'statement', None, 'down', 'fewer than 500 data centres', published, None, ['China', 'Data centres'], 0.92),
+        fact('India has nearly 300 data centres.', 'India data centre market', 'statement', None, 'na', 'nearly 300 data centres', published, None, ['India', 'Data centres'], 0.92),
+    ],
+    '3081b8d550747c3d4d2116a29370277a': [],
+    '308feda54460e6813fddb832444ba23f': [
+        fact('JPMorgan backed federal digital asset legislation on Monday.', 'JPMorgan', 'statement', 'US federal digital asset legislation', 'na', None, 'Monday', None, ['JPMorgan', 'United States'], 0.95),
+        fact('JPMorgan said regulatory clarity for digital assets must be paired with durable safeguards or activity could shift into lightly supervised channels and weaken protections.', 'JPMorgan', 'statement', 'US digital asset regulation', 'na', None, 'Monday', None, ['JPMorgan', 'Digital assets', 'United States'], 0.93),
+        fact('The Senate is racing to advance the Digital Asset Market Clarity Act before its August recess.', 'US Senate', 'event', 'Digital Asset Market Clarity Act', 'na', None, 'Before its August recess', None, ['US Senate', 'Digital Asset Market Clarity Act', 'United States'], 0.91),
+    ],
+    '30e8e744454d3690b1eb746854a56a76': [],
+    '31052af9de072ee446c70de66460227f': [
+        fact('pH7 Technologies secured up to C"'$5 million in funding from Natural Resources Canada.'"', 'pH7 Technologies', 'deal_or_contract', 'Natural Resources Canada', 'up', 'up to C"'$5 million'"', 'Tuesday', None, ['pH7 Technologies', 'Natural Resources Canada'], 0.99),
+        fact('The funding will be used to evaluate pH7 Technologies\\' copper production technology using samples from Trekor Metals\\' Gibraltar mine in British Columbia.', 'pH7 Technologies', 'corporate_action', 'Trekor Metals Gibraltar mine', 'na', None, published, 'Natural Resources Canada funding', ['pH7 Technologies', 'Natural Resources Canada', 'Trekor Metals', 'Gibraltar mine', 'British Columbia'], 0.95),
+        fact('pH7 Technologies said its closed-loop process converts low-grade sulfide ore directly into 99.9% pure copper cathodes on-site while generating green hydrogen as a by-product.', 'pH7 Technologies copper extraction process', 'production_change', 'Copper cathodes', 'up', '99.9% pure copper cathodes', published, None, ['pH7 Technologies', 'Copper', 'Green hydrogen'], 0.93),
+    ],
+}
+
+records = []
+with open('all_batch_050.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        records.append({
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts_by_doc[obj['doc_id']],
+        })
+
+with open('all_facts_050.jsonl', 'w') as out:
+    for rec in records:
+        out.write(json.dumps(rec, ensure_ascii=True) + '\\n')
+
+print(f\"docs processed: {len(records)}, total facts: {sum(len(r['facts']) for r in records)}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 30
+
+codex
+The output file is written. I’m doing a minimal verification pass on the JSONL structure and fact totals, then I’ll return the requested single summary line.
+exec
+/bin/zsh -lc 'wc -l all_facts_050.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_050.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+count_docs = 0
+count_facts = 0
+with open('all_facts_050.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        count_docs += 1
+        count_facts += len(obj['facts'])
+print(f'docs processed: {count_docs}, total facts: {count_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 30
+
+codex
+docs processed: 12, total facts: 30
+tokens used
+18,218
+docs processed: 12, total facts: 30

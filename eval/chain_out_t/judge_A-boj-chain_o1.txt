@@ -1,0 +1,16 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why has the Bank of Japan signalled readiness to tighten policy further?
+
+ANSWER A:
+The Bank of Japan has framed its readiness to tighten as part of an ongoing normalisation process, having already hiked the policy rate to 1.00% while pledging to keep "raising the policy interest rate and adjust the degree of monetary accommodation 'in response to developments in economic activity and prices as well as financial conditions'" [1]. Officials have reiterated a willingness to raise rates further if economic conditions align [1], reflecting a broader tightening stance amid mounting inflation risks [6] and a gradual normalisation away from ultra-loose settings [9]. The underlying driver is inflation: a weaker yen and a spike in global energy prices pushed Japanese inflation above the BoJ's 2% target, with the prospect of rising salaries also fuelling price pressures [4], and firms are now raising wages and prices more actively so the inflationary impact of a weak yen may be larger than in the past [4]. 
+
+One caveat worth noting: the BoJ's own assessment is that price trends remain slightly below 2% [18], so the context suggests the tightening signal is forward-looking rather than a response to inflation currently being sustainably above target. The context does not give explicit BoJ statements quantifying how much further tightening is intended (markets were pricing only 22 bps by year-end [17]).
+
+ANSWER B:
+The Bank of Japan has kept forward guidance pointing to continued normalisation, saying it will keep raising the policy rate "in response to developments in economic activity and prices as well as financial conditions," and Uchida reiterated willingness to raise rates further if economic conditions align [1]. This stance reflects mounting inflation risks: a weaker yen and a spike in global energy prices pushed Japanese inflation above the BoJ's 2% target, with the prospect of rising salaries also fuelling price pressures [4]. Board member Sato added that firms are raising wages and prices more actively, so the inflationary impact of a weak yen may be larger than in the past [4]. Accordingly, the BoJ raised its policy rate to 1.00% — the highest in decades — as part of a gradual normalisation driven by inflation concerns [6][9].
+
+One gap: the context describes the drivers (inflation, wages, yen weakness) but offers limited detail on specific forward-looking economic forecasts or the exact conditions the BoJ would require before its next hike.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

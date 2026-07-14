@@ -1,0 +1,997 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fba-0c15-7a43-8ab1-adc0bf25fe2d
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_032.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_032.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_032.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:08:40.341582Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_032.jsonl` first to confirm the document shape and content style, then I’ll generate `all_facts_032.jsonl` strictly from that file and report the document and fact counts.
+exec
+/bin/zsh -lc 'wc -l all_batch_032.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_032.jsonl
+
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_032.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj = json.loads(line)
+        print(f'--- doc {i} ---')
+        print(obj.keys())
+        print(obj['doc_id'])
+        print(obj['title'][:200])
+        print((obj['body_text'] or '')[:800].replace('\\n',' '))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+--- doc 1 ---
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+e0e16956f8010d77acb556ef9b8c28d6
+Top seeds Sinner and Sabalenka answer doubters at Wimbledon Day one
+Men’s defending champion Jannik Sinner and women’s top seed Aryna Sabalenka both arrived at Wimbledon with question marks hanging over them but answered the doubters with contrasting first-round victories. Italy’s Sinner – playing his first match since his shock collapse and defeat in the second round of the French Open on a scorching day in Paris – was stretched to the limit by Serbia’s Miomir Kecmanovic but survived, winning 4-6, 6-3, 6-7(6), 6-2, 6-3 on Monday. Recommended Stories list of 4 items- list 1 of 4Sinner shocked in French Open exit as Cerundolo recovers from two-sets down - list 2 of 4Sabalenka ‘mentally off track’ as French Open exit made her want to ‘quit’ - list 3 of 4Russian teenager Mirra Andreeva wins French Open to claim first Grand Slam - list 4 of 4Paris Diamond Leag
+--- doc 2 ---
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+e1efe180e66df9dd90798e8b8f82f149
+Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings
+Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings WASHINGTON (AP) — The Supreme Court on Monday dramatically expanded presidential power, upholding President Donald Trump’s firings of the heads of independent federal agencies with one important exception: the Federal Reserve. The justices allowed Fed governor Lisa Cook to stay in her job while she fights the Republican president’s effort to fire her over allegations of mortgage fraud, which she has denied. But other than at the nation’s central bank, with its role of setting interest rates, the court held that presidents have free rein to fire agency heads at will, despite federal laws that require a cause for
+--- doc 3 ---
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+e25e676cc1305636c8b51c00a0f5373a
+So far, so fast
+“Let them wed”, we declared in 1996, next to an image of two tuxedoed men holding hands on a wedding cake. The cover drew more hostile correspondence than any in The Economist’s history to that point. In an accompanying leader we urged governments around the world to legalise same-sex marriage, which at the time seemed like a far-fetched idea. Eight years later Massachusetts pioneered the recognition of gay marriage in America, but even then the cause seemed to be going nowhere. The move sparked a national backlash, with state after state rushing to enact legal bans. The marriage-equality movement was on “one of the most impressive losing streaks in American political history”, we wrote in a 2014 retrospective. “Marriage traditionalists crowed that the people would never accept a hare-brai
+
+codex
+The batch is small, 12 documents. I’m scanning all titles and source metadata now so I can separate market-relevant items from non-market pieces before extracting only explicit claims.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_032.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj = json.loads(line)
+        print(f\"{i:02d}\\t{obj['doc_id']}\\t{obj['published_date']}\\t{obj['source_name']}\\t{obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+01	e0e16956f8010d77acb556ef9b8c28d6	2026-06-29	Al Jazeera	Top seeds Sinner and Sabalenka answer doubters at Wimbledon Day one
+02	e1efe180e66df9dd90798e8b8f82f149	2026-06-29	AP Top News	Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings
+03	e25e676cc1305636c8b51c00a0f5373a	2026-06-29	The Economist - Finance & Economics	So far, so fast
+04	e3faeaf0c7dbf1bfc08631d69bbd4a47	2026-06-29	ForexLive	UK mortgage approvals fall back, consumer credit growth holds up in May | investingLive
+05	e3fe9074fefe9e8e7efb2772bc985468	2026-06-29	Al Jazeera	Mehdi Hasan: Disrupting democracy’s decline
+06	e45b3c242058ec55e93cdb09c6429f21	2026-06-29	AP Top News	Venezuelans search more earthquake ruins as attention turns to humanitarian crisis
+07	e5efa56186e8931206fb452c1072edcd	2026-06-29	Decrypt	Strategy Snaps 9-Day Losing Streak as Bitcoin Giant Adopts 'Robust' Capital Framework - Decrypt
+08	e677874011ee8faf0b386d424160ba91	2026-06-29	AP Top News	Andy Burnham says he’d hand more power to local governments if he becomes UK leader
+09	e6a7e437664ff3d2d758efc1963722b6	2026-06-29	Kitco News	As JPMorgan succession takes shape, insiders say this time it is for real
+10	e80bac43626fae614e3a8394bd79e0a9	2026-06-29	Decrypt	Bitcoin Is in a Fight at $60K—Here's What the Charts Say - Decrypt
+11	e81e3bbebd840b3417fb5f113f2570e1	2026-06-29	CNBC Markets	China widens Japan export curbs, targeting drone makers, nuclear firms and defense institutes
+12	e8de4ab2844d945e9225ae7ed898bb48	2026-06-29	Yahoo Finance	Royalty Pharma, plc (RPRX) Rallied on Earnings Beat
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_032.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj = json.loads(line)
+        txt=(obj['body_text'] or '').replace('\\n',' ')
+        print(f\"--- {i:02d} {obj['doc_id']} ---\")
+        print(txt[:1200])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+--- 01 e0e16956f8010d77acb556ef9b8c28d6 ---
+Men’s defending champion Jannik Sinner and women’s top seed Aryna Sabalenka both arrived at Wimbledon with question marks hanging over them but answered the doubters with contrasting first-round victories. Italy’s Sinner – playing his first match since his shock collapse and defeat in the second round of the French Open on a scorching day in Paris – was stretched to the limit by Serbia’s Miomir Kecmanovic but survived, winning 4-6, 6-3, 6-7(6), 6-2, 6-3 on Monday. Recommended Stories list of 4 items- list 1 of 4Sinner shocked in French Open exit as Cerundolo recovers from two-sets down - list 2 of 4Sabalenka ‘mentally off track’ as French Open exit made her want to ‘quit’ - list 3 of 4Russian teenager Mirra Andreeva wins French Open to claim first Grand Slam - list 4 of 4Paris Diamond League to go ahead with safety measures amid heatwave Sabalenka, who left Paris in a “deep, dark place” after losing the last 10 games of her quarterfinal against Diana Shnaider, followed Sinner onto Centre Court and breezed past Serbian qualifier Teodora Kostovic 6-2, 6-3. While world number one Sinner, the overwhelming favourite in the absence of Spain’s Carlos Alcaraz, lived to fight another day, t
+--- 02 e1efe180e66df9dd90798e8b8f82f149 ---
+Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings WASHINGTON (AP) — The Supreme Court on Monday dramatically expanded presidential power, upholding President Donald Trump’s firings of the heads of independent federal agencies with one important exception: the Federal Reserve. The justices allowed Fed governor Lisa Cook to stay in her job while she fights the Republican president’s effort to fire her over allegations of mortgage fraud, which she has denied. But other than at the nation’s central bank, with its role of setting interest rates, the court held that presidents have free rein to fire agency heads at will, despite federal laws that require a cause for such dismissals and a 91-year-old decision that had limited executive authority. With the six conservative justices in the majority, the nine-member court jettisoned its unanimous decision in Humphrey’s Executor that had limited when presidents can fire agencies’ board members — in part to try to ensure decision-making free of political influence. “We hold that such protection from removal is con
+--- 03 e25e676cc1305636c8b51c00a0f5373a ---
+“Let them wed”, we declared in 1996, next to an image of two tuxedoed men holding hands on a wedding cake. The cover drew more hostile correspondence than any in The Economist’s history to that point. In an accompanying leader we urged governments around the world to legalise same-sex marriage, which at the time seemed like a far-fetched idea. Eight years later Massachusetts pioneered the recognition of gay marriage in America, but even then the cause seemed to be going nowhere. The move sparked a national backlash, with state after state rushing to enact legal bans. The marriage-equality movement was on “one of the most impressive losing streaks in American political history”, we wrote in a 2014 retrospective. “Marriage traditionalists crowed that the people would never accept a hare-brained idea foisted upon them by homosexual activists and their elitist friends. Rare and brave was the politician who supported gay marriage. Barack Obama opposed it in his 2008 presidential campaign, despite what he promised would be his ‘fierce advocacy’ of gay and lesbian equality.” But our report in 2014 was not an examination of America’s lack of progress on gay marriage. Rather, it was an acco
+--- 04 e3faeaf0c7dbf1bfc08631d69bbd4a47 ---
+- Mortgage approvals 56.205k vs 62.900k expected - Prior 65.945k; revised to 66.034k UK mortgage approvals fell off by quite a bit last month, with net borrowing of mortgage debt by individuals also seen decreasing to £2.9 billion in May - down from £4.4 billion in April. This was below the previous 6-month average of £5.1 billion, and the lowest since May 2025 (£1.9 billion). As for net borrowing of consumer credit by individuals, that remained largely unchanged in May at £1.7 billion. However, that continues to also hold below the previous 6-month average of £1.9 billion. That said, the annual growth rate for all consumer credit was 8.9% in May, up from 8.7% in April. The breakdown shows the annual growth rate for credit card borrowing increasing to 12.1% from 11.8%. Meanwhile, the annual growth rate for other forms of consumer credit increased to 7.5% from 7.4% previously.
+--- 05 e3fe9074fefe9e8e7efb2772bc985468 ---
+With democracy on the decline in both the UK and US, Mehdi Hasan makes the case for independent journalism. Mehdi Hasan has had a front seat to US and UK politics for decades. With Britain facing yet another change in prime minister a decade after Brexit and the US looking ahead to its next vote with the midterm elections in November, we get his take on this moment and why independent journalism is needed more than ever. In this episode: - Mehdi Hasan (@mehdirhasan), Editor-in-Chief, Zeteo Episode credits: This episode was produced by Sonia Bhagat and Alexandra Locke, with Tamara Khandaker, Spencer Cline, Jana Dabliz and our host, Malika Bilal. Our sound designer is Alex Roldan. Our video editors are Hisham Abu Salah and Mohannad al-Melhem. Alexandra Locke is The Take’s executive producer. Connect with us:
+--- 06 e45b3c242058ec55e93cdb09c6429f21 ---
+Venezuelans search more earthquake ruins as attention turns to humanitarian crisis Venezuelans search more earthquake ruins as attention turns to humanitarian crisis LA GUAIRA, Venezuela (AP) — With the window for finding survivors shrinking fast, Venezuelans combed Monday through more ruins of buildings toppled by last week’s powerful back-to-back earthquakes, and attention turned to the country’s humanitarian crisis that could persist for years. Relief organizations say the first 72 hours after a natural disaster is the most crucial time period for rescues, though survival can be extended if people have access to food and water. Five days after the twin quakes, questions loomed about whether the cash-strapped government will be able to coordinate the effort needed to care for thousands of people who have been left homeless. In other developments, a 4.6 magnitude aftershock rumbled through the disaster zone in the northern state of La Guaira. The death toll stood at more than 1,700 people, according to the government, which has long retained tight control over news media. Venezuelan government promotes its efforts Facing criticism that authorities have done too little, too slowly,
+--- 07 e5efa56186e8931206fb452c1072edcd ---
+In brief - Shares of Strategy snapped a nine-day losing streak, paring monthly losses on the back of a capital management framework. - The Bitcoin-buying firm's flagship preferred stock recovered losses after falling to record lows last week. - An analyst described Strategy's framework as a "point-by-point answer" to investor concerns. Shares of Strategy (MSTR) snapped a nine-day losing streak on Monday, rebounding after the Bitcoin-buying firm unveiled a new framework for managing its capital. The company’s stock popped 12.6% to $92.68, paring monthly losses after Strategy signaled future liquidations of the digital asset would be formulaic, according to Yahoo Finance. Although Strategy typically starts the week by announcing how much Bitcoin it has recently bought, the firm instead told investors that its so-called USD Reserve had expanded to $2.55 billion, while drawing attention to a “BTC Monetization Program.” Moving forward, the company indicated that it could generate $1.25 billion in proceeds for its cash cushion by selling Bitcoin, providing it with additional resources to manage dividends and debt. Analysts had previously warned that Strategy’s cash reserves had worn thin
+--- 08 e677874011ee8faf0b386d424160ba91 ---
+Andy Burnham says he’d hand more power to local governments if he becomes UK leader Andy Burnham says he’d hand more power to local governments if he becomes UK leader MANCHESTER, England (AP) — Andy Burnham, likely the next U.K. prime minister, pledged Monday to give away a chunk of his power by handing greater autonomy to local leaders in a “circuit-breaker” for the sclerotic British state. The former mayor of Greater Manchester also said he would move part of the prime minister’s office from London’s 10 Downing St. to northwest England as part of “the biggest rebalancing of power our country has seen.” “Growth cannot be ordered from the top down. Instead, it can only be nurtured from the bottom up,” Burnham said in a speech aimed at bringing voters, Labour Party colleagues and financial markets up to speed with his economic vision. Burnham is the strong favorite to replace Prime Minister Keir Starmer, who announced his resignation last week. AP correspondent Karen Chammas reports on Andy Burnham’s new vision for Britain if he becomes the new prime minister. “If councils can’t fix potholes, what chance do they have of bringing forward major regeneration schemes to get growth goin
+--- 09 e6a7e437664ff3d2d758efc1963722b6 ---
+NEW YORK, June 29 (Reuters) - Over the years JPMorgan Chase (JPM.N), CEO Jamie Dimon has talked many times about succession - but a date to hand over the baton seemed elusive. This time, sources said, the plan is real. Dimon plans to stay as CEO for up to three more years, with insiders hoping that the bank will name his successor - Troy Rohrbaugh or Doug Petno, the bank's newly named co-presidents - ahead of that. Rohrbaugh, who has been tasked with running JPMorgan's massive consumer business, is seen as having the lead internally, according to the views of two senior executives at the firm. They added that Rohrbaugh's promotion to the other side of the bank from the commercial and investment banking business suggests he's the frontrunner to take over the top job from Dimon. And when the time comes, Dimon would become executive chairman, a separate source familiar with the matter said, echoing what Dimon has said publicly and speaking on condition of anonymity because the discussions are private. The succession, if it were to come to pass, would end one of the longest-standing questions on Wall Street: Who will replace Dimon, the statesman banker who has built JPMorgan into the b
+--- 10 e80bac43626fae614e3a8394bd79e0a9 ---
+In brief - The Bitcoin daily price chart shows an RSI of 34, ADX of 36.9 trending bearish, a death-cross EMA setup, showing an organized decline. - The $58,035 support level held on Monday's intra-day dip to $58,801. It may not get many more chances. - On Myriad, traders say there's an 80% Bitcoin price dumps before any market rebound. Wall Street turned green today—Nasdaq up 1.4%, S&P 500 up 0.8%—after the Supreme Court blocked Trump's attempt to fire Federal Reserve governor Lisa Cook and a U.S.-Iran ceasefire reduced tensions near the Strait of Hormuz. Risk assets rallied, but Bitcoin barely noticed. BTC is down roughly 53% from its October 2025 all-time high of $126,198 and just logged back-to-back quarterly losses resembling the 2022 bear market. The macro backdrop isn't helping. Spot Bitcoin ETFs bled roughly $4 billion in June, stripping away the institutional bid that had cushioned earlier drawdowns. The Fed under Kevin Warsh remains hawkish—markets are pricing an 80% chance of a December rate hike. Bitcoin price: What the daily chart is telling us Bitcoin opened Monday at $59,473 on the daily chart, dipped to a session low of $58,801, then recovered to trade around $60,104
+--- 11 e81e3bbebd840b3417fb5f113f2570e1 ---
+China on Monday blacklisted four Japanese government defense research institutes and imposed tighter export restrictions on dozens of other Japanese entities, escalating a months-long campaign to restrict Tokyo's access to dual-use goods, including rare earth minerals. The Ministry of Commerce added 20 entities, including the National Institute for Defense Studies and research centers for ground, naval, and air systems, to the export control list. Several units under Mitsubishi Electric and Mitsubishi Heavy Industries were also targeted. Domestic exporters, as well as overseas organizations or individuals, are prohibited from transferring Chinese-origin dual-use items to the named entities, according to the statement, adding that any ongoing activities must stop immediately. Separately, China added another 20 entities, including Mitsui E&S Co., drone maker Terra Drone Corporation, nuclear fuel processors, and multiple units of OKI Electric Industry, to a watch list requiring enhanced licensing scrutiny. Both actions take effect immediately. The ministry said it would apply stricter end-user and end-use reviews to watch-listed entities, and that exports involving Japanese military u
+--- 12 e8de4ab2844d945e9225ae7ed898bb48 ---
+Meridian Funds, managed by ArrowMark Partners, released its first-quarter 2026 investor letter for "Meridian Hedged Equity Fund". A copy of the letter can be downloaded here. The Fund invests in high-quality growth companies and mitigates risk by writing call options. Following the late-February strike on Iran, oil prices surged, leading to a risk-off sentiment, boosting energy sector performance. Large-cap technology stocks declined as investors rotated towards smaller companies and more defensive value investments. Market conditions are becoming challenging due to reduced expectations for a Federal Reserve rate cut and increasing geopolitical uncertainty. The Fund returned 0.08% (net) for the quarter, outperforming the S&P 500 Index, which fell 4.33%, and the CBOE S&P 500 BuyWrite Index, which declined 0.92%. At the end of the period, 43% of the portfolio was unhedged, while the remainder was invested in companies with covered call options. In addition, please check the Fund's top five holdings to know its best picks in 2026. In its first-quarter 2026 investor letter, Meridian Hedged Equity Fund highlighted Royalty Pharma plc (NASDAQ:RPRX). Royalty Pharma plc (NASDAQ:RPRX) is a b
+
+codex
+I’ve isolated the likely market-bearing documents. Next I’m reading the full text for those items so the output claims stay atomic and tied to explicit wording, not summary inference.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids={'e1efe180e66df9dd90798e8b8f82f149','e3faeaf0c7dbf1bfc08631d69bbd4a47','e5efa56186e8931206fb452c1072edcd','e6a7e437664ff3d2d758efc1963722b6','e80bac43626fae614e3a8394bd79e0a9','e81e3bbebd840b3417fb5f113f2570e1','e8de4ab2844d945e9225ae7ed898bb48','e677874011ee8faf0b386d424160ba91'}
+with open('all_batch_032.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        if obj['doc_id'] in ids:
+            print(f\"\\n=== {obj['doc_id']} | {obj['title']} ===\\n\")
+            print(obj['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+=== e1efe180e66df9dd90798e8b8f82f149 | Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings ===
+
+Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings Supreme Court says Fed’s Cook can keep her job for now, but it upholds other Trump firings WASHINGTON (AP) — The Supreme Court on Monday dramatically expanded presidential power, upholding President Donald Trump’s firings of the heads of independent federal agencies with one important exception: the Federal Reserve. The justices allowed Fed governor Lisa Cook to stay in her job while she fights the Republican president’s effort to fire her over allegations of mortgage fraud, which she has denied. But other than at the nation’s central bank, with its role of setting interest rates, the court held that presidents have free rein to fire agency heads at will, despite federal laws that require a cause for such dismissals and a 91-year-old decision that had limited executive authority. With the six conservative justices in the majority, the nine-member court jettisoned its unanimous decision in Humphrey’s Executor that had limited when presidents can fire agencies’ board members — in part to try to ensure decision-making free of political influence. “We hold that such protection from removal is contrary to the separation of powers enshrined in the Constitution,” Chief Justice John Roberts wrote for the court. Support for Trump’s position The justices ruled in the case of former Federal Trade Commission member Rebecca Slaughter, whom Trump fired without cause despite a provision of federal law that requires a reason. The logic of the decision extends to other agencies, including the National Labor Relations Board, the Merit Systems Protection Board and the Consumer Product Safety Commission, where Trump also has fired board members. Trump voiced his approval in a Truth Social post. “It is such an Honor to be the sitting President who won this Historic and Unprecedented Ruling, one of the most important ever given with respect to Presidential Powers,” he wrote. The court already had signaled its support for the Trump administration’s position, over the liberals’ objection, by allowing Slaughter and the board members of other agencies to be removed from their jobs even as their legal challenges continued. No president before Trump had sought to wrest control of the agencies that regulate wide swaths of American life, including nuclear energy, product safety and labor relations. But at arguments in Slaughter’s case in December, the six conservatives, including three appointed by Trump, seemed more concerned about issuing a ruling that would endure than handing too much power to Trump. Their rhetoric was reminiscent of the presidential immunity case in 2024 that allowed Trump to avoid prosecution for his efforts to undo his 2020 presidential election loss to Democrat Joe Biden. The court is writing a decision “for the ages,” Justice Neil Gorsuch said then. Justice Sonia Sotomayor, in a dissent she summarized aloud in the courtroom, said the ruling could lead to “submission, instability, and even oppression.” “The president, to be sure, emerges with more power than ever before. That power was given to him by six justices on this court, not the people or the Constitution,” Sotomayor said. Fed governor Cook’s case In Cook’s case, the court voted 5-4 to reject the Trump administration’s effort to get Cook out of her job now. Roberts, Justice Brett Kavanaugh and the three liberal justices were in the majority. Allowing Cook to be ousted now, Roberts wrote, “would allow the President to remove a member of the Federal Reserve at any time, for any reason, without any notice before, and without any judicial check after. That would turn for-cause protection into little more than at-will employment.” Roberts did include a footnote in his opinion noting that nothing forbids Trump from “trying again” to fire her, provided she is given proper notice and a chance to contest it. Trump suggested he would take Roberts up on the offer, saying on Truth Social that “we will take appropriate action immediately to make sure that someone who has committed wrongdoing will not be making vital decisions concerning the Welfare of the United States of America!” Cook, who was nominated to the Fed’s Board of Governors by Biden, can continue in her post at least as long as her lawsuit challenging her firing goes on, the court said. The Trump administration is appealing a lower-court ruling in her favor. Besides trying to fire Cook, Trump had threatened to fire former Federal Reserve chairman Jerome Powell if he didn’t leave the board when his term as chairman ended in mid-May. Powell has remained as a governor, even as Kevin Warsh has replaced him as chairman. Judges on lower courts have allowed Cook to remain in her post as one of seven central bank governors. The true motivation for trying to fire Cook, Trump’s critics say, is the Republican president’s desire to exert control over U.S. interest rate policy. If Trump succeeds in removing Cook, the first Black woman to be a Federal Reserve governor, he could replace her with his own appointee and gain a majority on the Fed’s board. The case is being closely watched by Wall Street investors and could have broad impacts on the financial markets and the U.S. economy. Cook said her case was “never about mortgage documents signed years before I became a Federal Reserve governor.” “It was an attempt to remove me on a manufactured pretext because I refused to bow to political pressure and continued to set interest rates based only on what would best serve the American people. That is the most fundamental obligation of a Federal Reserve governor,” Cook said in a statement. Trump’s confrontation with the Fed Trump has been dismissive of worries that cutting rates too quickly could trigger higher inflation. He wants dramatic reductions so the government can borrow more cheaply and Americans can pay lower borrowing costs for new homes, cars or other large purchases, as worries about high costs have soured some voters on his economic management. The Fed has left its key rate unchanged this year, but a growing chorus of policymakers is expressing concern about persistently high inflation and suggesting the central bank could raise its benchmark rate by the end of this year or leave it unchanged. While Cook’s case was under review at the high court, Trump dramatically escalated his confrontation with the Fed. The Justice Department opened a criminal investigation of Powell and served the central bank with subpoenas. The investigation ended in late April, the department said. The announcement cleared a major roadblock to the confirmation of Warsh as Powell’s successor. The case against Cook stems from allegations she claimed two properties, in Michigan and Georgia, as “primary residences” in June and July 2021, before she joined the Fed board. Such claims can lead to a lower mortgage rate and smaller down payment than if one of them was declared as a rental property or second home. Those applications, Solicitor General D. John Sauer said in January, are evidence of “gross negligence at best” and give Trump reason to fire her. In any event, he argued, courts shouldn’t be reviewing his decision and Cook has no right to a hearing. Cook has denied any wrongdoing and has not been charged with a crime. ___ Follow the AP’s coverage of the U.S. Supreme Court at https://apnews.com/hub/us-supreme-court.
+
+=== e3faeaf0c7dbf1bfc08631d69bbd4a47 | UK mortgage approvals fall back, consumer credit growth holds up in May | investingLive ===
+
+- Mortgage approvals 56.205k vs 62.900k expected - Prior 65.945k; revised to 66.034k UK mortgage approvals fell off by quite a bit last month, with net borrowing of mortgage debt by individuals also seen decreasing to £2.9 billion in May - down from £4.4 billion in April. This was below the previous 6-month average of £5.1 billion, and the lowest since May 2025 (£1.9 billion). As for net borrowing of consumer credit by individuals, that remained largely unchanged in May at £1.7 billion. However, that continues to also hold below the previous 6-month average of £1.9 billion. That said, the annual growth rate for all consumer credit was 8.9% in May, up from 8.7% in April. The breakdown shows the annual growth rate for credit card borrowing increasing to 12.1% from 11.8%. Meanwhile, the annual growth rate for other forms of consumer credit increased to 7.5% from 7.4% previously.
+
+=== e5efa56186e8931206fb452c1072edcd | Strategy Snaps 9-Day Losing Streak as Bitcoin Giant Adopts 'Robust' Capital Framework - Decrypt ===
+
+In brief - Shares of Strategy snapped a nine-day losing streak, paring monthly losses on the back of a capital management framework. - The Bitcoin-buying firm's flagship preferred stock recovered losses after falling to record lows last week. - An analyst described Strategy's framework as a "point-by-point answer" to investor concerns. Shares of Strategy (MSTR) snapped a nine-day losing streak on Monday, rebounding after the Bitcoin-buying firm unveiled a new framework for managing its capital. The company’s stock popped 12.6% to $92.68, paring monthly losses after Strategy signaled future liquidations of the digital asset would be formulaic, according to Yahoo Finance. Although Strategy typically starts the week by announcing how much Bitcoin it has recently bought, the firm instead told investors that its so-called USD Reserve had expanded to $2.55 billion, while drawing attention to a “BTC Monetization Program.” Moving forward, the company indicated that it could generate $1.25 billion in proceeds for its cash cushion by selling Bitcoin, providing it with additional resources to manage dividends and debt. Analysts had previously warned that Strategy’s cash reserves had worn thin. Meanwhile, Strategy said it may occasionally repurchase common and preferred shares to capitalize on “market dislocations.” What’s more, the company would only issue common shares when the company is valued at a premium relative to its enterprise value. In the announcement, Strategy Executive Chairman and co-founder Michael Saylor also said that the dividend for Stretch (STRC) had been raised an eighth time, putting it on track to offer 12% annually across distributions that are made twice a month. STRC rose 12.2% to $83.67, according to Yahoo Finance. Last week, the product fell as low as $71.25, drifting far below the $100 par value at which it is designed to trade. When the product trades at or above that threshold, Strategy issues more of it to purchase Bitcoin. In a note shared by Mark Palmer, managing director and senior research analyst at Benchmark-StoneX, he described Strategy’s framework as “robust,” while reiterating a “Buy” rating and $570 price target. “The upshot is that Strategy is now an active manager of both sides of its capital structure, an approach that we view as a significant positive for its shareholders,” Palmer wrote, calling the framework a “direct, point-by-point answer to the concerns investors have been voicing.” On Monday, Bitcoin changed hands around $60,200, a 1.1% increase over the past day, according to CoinGecko. The digital asset fell as low as $58,200 last week as the sell-off surrounding STRC and Strategy’s common stock intensified. Strategy’s framework brought clarity to the conditions under which the digital asset could be sold in the future—and to what extent. Still, the company’s shares remained down nearly 42% from $149.93 over the past month, around the time it sold 32 Bitcoin for $2.5 million, marking its first sale since 2022. Meanwhile, the firm’s Bitcoin stockpile stood unchanged at 847,363 Bitcoin. Valued at $51 billion, the company’s stockpile showed around $13.1 billion in unrealized losses. On Myriad, a prediction market owned by Decrypt parent company Dastan, traders foresaw a 15% chance that Strategy would hold more than 1 million Bitcoin before year’s end. That marked a slight improvement from 14.5% odds a week ago.
+
+=== e677874011ee8faf0b386d424160ba91 | Andy Burnham says he’d hand more power to local governments if he becomes UK leader ===
+
+Andy Burnham says he’d hand more power to local governments if he becomes UK leader Andy Burnham says he’d hand more power to local governments if he becomes UK leader MANCHESTER, England (AP) — Andy Burnham, likely the next U.K. prime minister, pledged Monday to give away a chunk of his power by handing greater autonomy to local leaders in a “circuit-breaker” for the sclerotic British state. The former mayor of Greater Manchester also said he would move part of the prime minister’s office from London’s 10 Downing St. to northwest England as part of “the biggest rebalancing of power our country has seen.” “Growth cannot be ordered from the top down. Instead, it can only be nurtured from the bottom up,” Burnham said in a speech aimed at bringing voters, Labour Party colleagues and financial markets up to speed with his economic vision. Burnham is the strong favorite to replace Prime Minister Keir Starmer, who announced his resignation last week. AP correspondent Karen Chammas reports on Andy Burnham’s new vision for Britain if he becomes the new prime minister. “If councils can’t fix potholes, what chance do they have of bringing forward major regeneration schemes to get growth going?” Burnham said. He set out a 10-year plan to get “good growth in every postcode,” in a country where wealth and power are concentrated in London and the south of England. He said he would reverse almost two decades of low growth since the 2008 financial crisis through an approach dubbed “Manchesterism” — harnessing private and public money to invest in areas like transport, housing and infrastructure. He also pledged to create new industrial jobs and better educational opportunities, and to reform the U.K.’s inefficient and expensive privatized water and energy utilities. Moving the new ‘No. 10 North’ to Manchester During the speech at the People’s History Museum in the city where he spent nine years as mayor, Burnham said a new government office in Manchester – dubbed “No. 10 North” — would oversee regional development and become “the nerve center of a rewired Britain,” tasked with equalizing living standards across the country. Regional mayors would get more power over housing, welfare and education as part of his planned reforms. Burnham’s rousing speech was short on specifics about where the government would find more money, and he didn’t take questions from journalists. Burnham won praise for his role in revitalizing and regenerating Manchester, but he has not served in a U.K. government for almost two decades, and may struggle to replicate “Manchesterism” on a U.K.-wide scale. The Institute for Public Policy Research, a left-leaning think tank, said Burnham is right to focus on “rebalancing Britain.” “The U.K.’s concentration of power and opportunity in Westminster has held back growth, productivity and living standards for too long,” said IPPR Executive Director Harry Quilter-Pinner. “The real test now is delivery.” Matthew Flinders, a politics professor at the University of Sheffield, said replicating Burnham’s Manchester approach on a national level would require “a fundamental shift” in the way politics is done in Britain. “And at the heart of that would be moving from a very traditional, elitist, centralized model of politics toward something that is in many ways far more European, far more based on power-sharing in order to develop long-term policymaking capacity,” he said. Burnham is likely to inherit Starmer’s challenges Burnham will be aware that Starmer also announced a 10-year mission — the equivalent of two full terms in government —- to transform Britain soon after he was elected in a landslide in July 2024. Starmer is leaving after two years in office marred by missteps and judgment errors that eroded his standing with his party and the public. Burnham won a special election for a seat in Parliament on June 18 and was sworn in as a lawmaker on June 22, the same day Starmer announced that he will resign as soon as a successor is chosen. Burnham is so far the only contender in the Labour Party leadership contest. If no one challenges him, he will become prime minister by July 20. While Burnham is considered more charismatic than the stolid Starmer, he will face many of the same political and economic challenges, including a sluggish economy, tattered public services and a cost-of-living squeeze. He will also be constrained by the platform the center-left Labour Party was elected on in 2024, with its pledges not to increase taxes on working people. And like other NATO countries, the U.K. is under pressure to dramatically increase defense spending to counter a more aggressive Russia and less reliable United States. The government’s long-awaited defense investment plan — which sparked the resignation of Defense Secretary John Healey on June 11 — is expected to be published before a NATO summit in Turkey on July 7 and 8. Starmer’s successor will be expected to stick to the commitments in the plan. “Andy Burnham’s big idea is to shuffle power between politicians,” said opposition Conservative Party Chairman Kevin Hollinrake. “Not fix the welfare system. Not cut the taxes strangling working families and British business. Not fund the defense our country desperately needs.” ___ Lawless reported from London. Associated Press Writer Brian Melley contributed to this story.
+
+=== e6a7e437664ff3d2d758efc1963722b6 | As JPMorgan succession takes shape, insiders say this time it is for real ===
+
+NEW YORK, June 29 (Reuters) - Over the years JPMorgan Chase (JPM.N), CEO Jamie Dimon has talked many times about succession - but a date to hand over the baton seemed elusive. This time, sources said, the plan is real. Dimon plans to stay as CEO for up to three more years, with insiders hoping that the bank will name his successor - Troy Rohrbaugh or Doug Petno, the bank's newly named co-presidents - ahead of that. Rohrbaugh, who has been tasked with running JPMorgan's massive consumer business, is seen as having the lead internally, according to the views of two senior executives at the firm. They added that Rohrbaugh's promotion to the other side of the bank from the commercial and investment banking business suggests he's the frontrunner to take over the top job from Dimon. And when the time comes, Dimon would become executive chairman, a separate source familiar with the matter said, echoing what Dimon has said publicly and speaking on condition of anonymity because the discussions are private. The succession, if it were to come to pass, would end one of the longest-standing questions on Wall Street: Who will replace Dimon, the statesman banker who has built JPMorgan into the biggest and one of the most profitable U.S. banks. Shareholders are prepared for Dimon to finally hand over, but want it to be done as smoothly as possible. "My only request of the firm is that it is very clearly laid out and handled seamlessly," said Walter Todd, chief investment officer, Greenwood Capital in South Carolina, which owns JPM shares, describing Dimon's succession as "inevitable". TIMELINE MAPPED OUT Dimon himself has been vocal about succession, both publicly and in private. In a social meeting weeks ago at the bank's new headquarters in Manhattan, Dimon, unprompted, told a senior Wall Street executive about the "deep bench" of talent JPMorgan has to succeed him, a second source said. JPMorgan declined comment on the conversations. Dimon is expected to stay in charge for up to three more years before transitioning to executive chairman, but a successor could be named earlier, within two to two-and-a-half years, one of the sources said. Every board meeting is devoting a significant amount of time to the succession question, the source said. After handing over the reins, Dimon will likely stay as executive chairman for a couple of years, the source said. Previously, Dimon had given varying timelines. He said he envisioned an exit in less than five years, a similar message to that given in 2018. Earlier this year, he said he wanted to stay on, in a comment his spokespeople said at the time was a joke. In February, he said he would remain . Spokespeople for Rohrbaugh and Petno declined to comment. RISKS OF WAITING Even a two-to-three year timeline carries risks. The two executives stressed that a wait of up to three years could raise the risk of the bank losing potential successors, with one saying it would likely be a concern for the board. While JPMorgan awarded four of its top executives, including Petno and Rohrbaugh, multimillion-dollar retention pay packages, the bank's board would likely not want to lose them or any other potential successors during the unofficial waiting period, one of the executives said. Numerous senior executives including Matt Zames, Charlie Scharf and Bill Demchak left the firm during Dimon's tenure to take senior roles elsewhere. They did not immediately respond to a request seeking comment. If Rohrbaugh or Petno quickly impress, the bank could move more swiftly, the two executives said. One of the executives said that the view within the bank was that Rohrbaugh has the lead, with an impressive track record having come up through the ranks as a trader, although a separate source said that Petno should not be written off given his track record of bringing in large deals. On the betting platform Kalshi, Rohrbaugh has pulled ahead at 45%, with Petno at 34%. For Rohrbaugh, who built his reputation on trading floors, taking the CEO role would mean a big shift to the bank's sprawling suite of branches, credit cards and mortgages, a division that accounted for nearly 39% of its total revenue in the first quarter. The 56-year-old began his career as a foreign-exchange trader and joined JPMorgan in 2005. Petno, 61, meanwhile, takes sole charge of the commercial and investment bank after a 35-year career at JPMorgan. He is a seasoned banker who spent more than two decades in investment banking and led J.P. Morgan's Global Natural Resources Group. The division encompasses global banking, markets, payments and securities services, placing him at the helm of some of the lender's most profitable businesses. If the bank proceeds with an accelerated timeline, it would mirror a similar move at rival Morgan Stanley, where Ted Pick was chosen to succeed longtime CEO James Gorman more than two years after being appointed co-president. Still, shareholders are more than happy to see Dimon stick around. Eric Kuby, chief investment officer, North Star Investment Management Corp., which owns JPMorgan shares, said the shares "command a premium multiple" compared to other major bank stocks partly due to the Dimon factor. "The market is well aware of his intentions to not run JPMorgan for very much longer," Kuby said. "But we think he does a great job, so the longer he is steering the ship, the better." Reporting by Anirban Sen and Nupur Anand in New York and Manya Saini in Bengaluru; Additional reporting by Utkarsh Shetti, Lewis Krauskopf,Tatiana Bautzer; Editing by Megan Davies and Sanjeev Miglani
+
+=== e80bac43626fae614e3a8394bd79e0a9 | Bitcoin Is in a Fight at $60K—Here's What the Charts Say - Decrypt ===
+
+In brief - The Bitcoin daily price chart shows an RSI of 34, ADX of 36.9 trending bearish, a death-cross EMA setup, showing an organized decline. - The $58,035 support level held on Monday's intra-day dip to $58,801. It may not get many more chances. - On Myriad, traders say there's an 80% Bitcoin price dumps before any market rebound. Wall Street turned green today—Nasdaq up 1.4%, S&P 500 up 0.8%—after the Supreme Court blocked Trump's attempt to fire Federal Reserve governor Lisa Cook and a U.S.-Iran ceasefire reduced tensions near the Strait of Hormuz. Risk assets rallied, but Bitcoin barely noticed. BTC is down roughly 53% from its October 2025 all-time high of $126,198 and just logged back-to-back quarterly losses resembling the 2022 bear market. The macro backdrop isn't helping. Spot Bitcoin ETFs bled roughly $4 billion in June, stripping away the institutional bid that had cushioned earlier drawdowns. The Fed under Kevin Warsh remains hawkish—markets are pricing an 80% chance of a December rate hike. Bitcoin price: What the daily chart is telling us Bitcoin opened Monday at $59,473 on the daily chart, dipped to a session low of $58,801, then recovered to trade around $60,104—a +1.06% move. That bounce wasn't random. The $58,035 level is the anchor of the entire bearish Fibonacci leg measured from the June high of $67,253, and it's been holding as a horizontal support line. Bulls stepped in near it today. The question is how many times they can keep doing that. The Average Directional Index, or ADX, reads 36.9 on the daily. ADX measures how strong a trend is—direction aside—and anything above 25 signals a genuine, committed trend is in place. The RSI—the Relative Strength Index, which gauges buying and selling momentum on a 0 to 100 scale—sits at 34 on the daily. That's in bear territory, just above the 30 level that typically marks oversold conditions. An oversold reading can attract bargain hunters and spark a relief bounce, but at 34, Bitcoin hasn't hit that floor yet. The pressure is clearly downward. The exponential moving average picture is uniformly bearish. The 50-day exponential moving average, or EMA, sits around $66,913—well above the current price, acting as overhead resistance. The 200-day EMA is even higher at approximately $76,517. When price trades below both moving averages with the 50 also below the 200—a configuration traders call a death cross—it signals the medium- and long-term trends are both pointing down. That's exactly what the daily chart is showing right now. The bigger picture is harder to ignore. On Myriad, a prediction market created by Decrypt’s parent company Dastan, traders are pricing in an 80% chance Bitcoin dumps to $55K as opposed to pumping back to $84K. Not great news for the permabullish crew. Overall, considering Bitcoin is in a compression zone, the four-hour chart may seem a bit more interesting for traders with shorter time horizons. The price of Bitcoin has been compressing between roughly $59,200 and $60,400, and the Squeeze is still “on” at that timeframe with barely positive momentum (+0.26). And this makes prices predictable as long as the compression remains. With 5x leverage, each round trip on that $1,200 band yields approximately 21.1% on reinvested capital—turning $1,000 into close to $2,000 over a few cycles with manageable risk. That's the trade while the compression holds. A break below $59,200 kills it immediately. If $58,035 breaks, the daily chart offers no meaningful support until the $55,528 priceline —pretty close to the Myriad doom scenario. For the bulls, the first real target on any recovery is the Fibonacci Golden Zone between $62,644 and $63,732 on the daily, which would need to be reclaimed to even start talking about a trend reversal. Above that sits the descending trendline around $65,000. Clear both, and the 50-day EMA at $66,913 comes into view—a level Bitcoin hasn't traded near in over a month. Disclaimer The views and opinions expressed by the author are for informational purposes only and do not constitute financial, investment, or other advice.
+
+=== e81e3bbebd840b3417fb5f113f2570e1 | China widens Japan export curbs, targeting drone makers, nuclear firms and defense institutes ===
+
+China on Monday blacklisted four Japanese government defense research institutes and imposed tighter export restrictions on dozens of other Japanese entities, escalating a months-long campaign to restrict Tokyo's access to dual-use goods, including rare earth minerals. The Ministry of Commerce added 20 entities, including the National Institute for Defense Studies and research centers for ground, naval, and air systems, to the export control list. Several units under Mitsubishi Electric and Mitsubishi Heavy Industries were also targeted. Domestic exporters, as well as overseas organizations or individuals, are prohibited from transferring Chinese-origin dual-use items to the named entities, according to the statement, adding that any ongoing activities must stop immediately. Separately, China added another 20 entities, including Mitsui E&S Co., drone maker Terra Drone Corporation, nuclear fuel processors, and multiple units of OKI Electric Industry, to a watch list requiring enhanced licensing scrutiny. Both actions take effect immediately. The ministry said it would apply stricter end-user and end-use reviews to watch-listed entities, and that exports involving Japanese military users, military applications or any end-use that could strengthen Japan's defense capabilities would not be approved. The measures mark the latest escalation in a campaign launched in January, when Beijing banned dual-use exports to Japan, including rare earth elements, permanent magnets and other critical minerals required for defense technologies. In February, China added 20 entities, including subsidiaries of Mitsubishi Heavy Industries, IHI Corp. and Kawasaki Heavy Industries, to its export control list and another 20 firms, including Subaru Corp., TDK Corp. and FUJI Aerospace Technology to the watch list. China has ratcheted up pressure on Tokyo after comments by Japanese Prime Minister Sanae Takaichi in November that a hypothetical Chinese attack on Taiwan could trigger a military response from Tokyo, which drew criticism from Beijing. In a statement Monday, a spokesperson for the commerce ministry said Japan had shown no remorse since the February listings and had instead "accelerated" its push toward what Beijing characterizes as "new-style militarism" — including deploying offensive weapons and launching missiles overseas. Beijing urged Japan to "turn back from the wrong path," while insisting the measures would not affect normal bilateral economic and trade activities and that "law-abiding Japanese firms have no reasons to worry." Market reactions were mixed following the statement. Mitsubishi Electric and Howa Machinery, one of the 20 companies on the surveillance list, declined around 1.4% and 4.6%, respectively, while Mitsubishi Heavy Industries and Terra Drone Corp gained 4.9% and 1.7%. China has sought to leverage its dominance over critical mineral supply chains as a tool of deterrence — pressuring political behavior it opposes without resorting to military force, Gracelin Baskaran, director of the critical minerals security program at the Center for Strategic & International Studies, said in a report in January. Countries that have expressed support for Taiwan remain particularly exposed, she added. Japan has invested in domestic refining and processing to reduce its dependence on China for rare earths since 2010, but it remains deeply entangled in supply chains that rely on China and Vietnam, from mining to permanent magnet manufacturing. Koki Akimoto, an economist at Daiwa Institute of Research, estimated in December that a one-year cutoff of Chinese rare earth imports and sustained component supply constraints would reduce Japan's real GDP by about 1.3%, or roughly 7 trillion yen ($43.3 billion).
+
+=== e8de4ab2844d945e9225ae7ed898bb48 | Royalty Pharma, plc (RPRX) Rallied on Earnings Beat ===
+
+Meridian Funds, managed by ArrowMark Partners, released its first-quarter 2026 investor letter for "Meridian Hedged Equity Fund". A copy of the letter can be downloaded here. The Fund invests in high-quality growth companies and mitigates risk by writing call options. Following the late-February strike on Iran, oil prices surged, leading to a risk-off sentiment, boosting energy sector performance. Large-cap technology stocks declined as investors rotated towards smaller companies and more defensive value investments. Market conditions are becoming challenging due to reduced expectations for a Federal Reserve rate cut and increasing geopolitical uncertainty. The Fund returned 0.08% (net) for the quarter, outperforming the S&P 500 Index, which fell 4.33%, and the CBOE S&P 500 BuyWrite Index, which declined 0.92%. At the end of the period, 43% of the portfolio was unhedged, while the remainder was invested in companies with covered call options. In addition, please check the Fund's top five holdings to know its best picks in 2026. In its first-quarter 2026 investor letter, Meridian Hedged Equity Fund highlighted Royalty Pharma plc (NASDAQ:RPRX). Royalty Pharma plc (NASDAQ:RPRX) is a biopharmaceutical investment company that specializes in acquiring royalty interests and funding innovation in the biopharmaceutical industry. On June 26, 2026, Royalty Pharma plc (NASDAQ:RPRX) closed at $56.23 per share, reflecting a market capitalization of $32.38 billion. Royalty Pharma plc (NASDAQ:RPRX) posted a one-month return of 1.90%, and its shares gained 56.06% over the past 52 weeks. Meridian Hedged Equity Fund stated the following regarding Royalty Pharma plc (NASDAQ:RPRX) in its Q1 2026 investor letter: "Royalty Pharma plc (NASDAQ:RPRX) is the industry's largest buyer of biopharmaceutical royalties, partnering with innovators to co fund late-stage clinical trials and acquiring existing royalties on approved therapies. Our investment thesis focuses on the company's ability to deliver diversified, long-duration cash flows tied to blockbuster drugs while avoiding the research, development, and manufacturing risks typical of traditional biotech firms. Its scale and structural advantages support the potential for steady top-line growth that is relatively insulated from broader macroeconomic volatility. The stock performed well in the quarter following another earnings beat and expectations for continued strength from established franchises. We maintained our position throughout the quarter."
+
+codex
+I have the source material and I’m writing the output file now. The extraction is being encoded document by document so non-market pieces stay empty and market items only include claims stated in the text.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+infile = Path('all_batch_032.jsonl')
+outfile = Path('all_facts_032.jsonl')
+
+facts_by_id = {
+    'e0e16956f8010d77acb556ef9b8c28d6': [],
+    'e1efe180e66df9dd90798e8b8f82f149': [
+        {
+            'claim': 'The Supreme Court allowed Federal Reserve Governor Lisa Cook to remain in her job while she challenges President Donald Trump\\'s effort to fire her.',
+            'subject': 'Federal Reserve',
+            'predicate': 'policy_action',
+            'object': 'Lisa Cook',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'The Supreme Court rejected the Trump administration\\'s immediate effort to remove her while her lawsuit continues.',
+            'entities': ['Federal Reserve', 'Lisa Cook', 'U.S. Supreme Court', 'Donald Trump'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Supreme Court held that, outside the Federal Reserve, presidents can fire independent agency heads at will.',
+            'subject': 'United States',
+            'predicate': 'policy_action',
+            'object': 'independent federal agencies',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'The court jettisoned the 91-year-old Humphrey\\'s Executor precedent limiting executive removal power.',
+            'entities': ['United States', 'U.S. Supreme Court', 'Federal Reserve'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The Federal Reserve has kept its key rate unchanged this year.',
+            'subject': 'Federal Reserve',
+            'predicate': 'policy_action',
+            'object': 'key interest rate',
+            'direction': 'flat',
+            'magnitude': None,
+            'time': 'this year',
+            'cause': None,
+            'entities': ['Federal Reserve'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'A growing chorus of policymakers is suggesting the Federal Reserve could raise its benchmark rate by the end of this year or leave it unchanged.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': 'benchmark rate',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'by the end of this year',
+            'cause': 'Policymakers are expressing concern about persistently high inflation.',
+            'entities': ['Federal Reserve'],
+            'confidence': 0.86,
+        },
+    ],
+    'e25e676cc1305636c8b51c00a0f5373a': [],
+    'e3faeaf0c7dbf1bfc08631d69bbd4a47': [
+        {
+            'claim': 'UK mortgage approvals fell to 56.205k in May from a revised 66.034k in April.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'mortgage approvals',
+            'direction': 'down',
+            'magnitude': '56.205k from 66.034k',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'UK mortgage approvals in May were below the 62.900k expected.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'mortgage approvals',
+            'direction': 'down',
+            'magnitude': '56.205k vs 62.900k expected',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Net borrowing of mortgage debt by individuals in the UK decreased to £2.9 billion in May from £4.4 billion in April.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'mortgage debt borrowing by individuals',
+            'direction': 'down',
+            'magnitude': '£2.9 billion from £4.4 billion',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'UK net borrowing of consumer credit by individuals was largely unchanged at £1.7 billion in May.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'consumer credit borrowing by individuals',
+            'direction': 'flat',
+            'magnitude': '£1.7 billion',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The annual growth rate for all UK consumer credit rose to 8.9% in May from 8.7% in April.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'consumer credit',
+            'direction': 'up',
+            'magnitude': '8.9% from 8.7%',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The annual growth rate for UK credit card borrowing increased to 12.1% in May from 11.8% in April.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'credit card borrowing',
+            'direction': 'up',
+            'magnitude': '12.1% from 11.8%',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The annual growth rate for other forms of UK consumer credit increased to 7.5% in May from 7.4% previously.',
+            'subject': 'United Kingdom',
+            'predicate': 'demand_change',
+            'object': 'other consumer credit',
+            'direction': 'up',
+            'magnitude': '7.5% from 7.4%',
+            'time': 'May',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.97,
+        },
+    ],
+    'e3fe9074fefe9e8e7efb2772bc985468': [],
+    'e45b3c242058ec55e93cdb09c6429f21': [],
+    'e5efa56186e8931206fb452c1072edcd': [
+        {
+            'claim': 'Strategy shares rose 12.6% to "'$92.68 on Monday, snapping a nine-day losing streak.'"',
+            'subject': 'Strategy',
+            'predicate': 'price_move',
+            'object': 'MSTR shares',
+            'direction': 'up',
+            'magnitude': '12.6% to "'$92.68'"',
+            'time': 'Monday',
+            'cause': 'The company unveiled a new framework for managing its capital.',
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Strategy said its USD Reserve had expanded to "'$2.55 billion.'"',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'USD Reserve',
+            'direction': 'up',
+            'magnitude': '"'$2.55 billion'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Strategy'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Strategy said it could generate "'$1.25 billion for its cash cushion by selling Bitcoin under its BTC Monetization Program.'"',
+            'subject': 'Strategy',
+            'predicate': 'forecast',
+            'object': 'Bitcoin',
+            'direction': 'up',
+            'magnitude': '"'$1.25 billion'"',
+            'time': 'Moving forward',
+            'cause': 'The company said the proceeds would provide additional resources to manage dividends and debt.',
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Strategy said it may occasionally repurchase common and preferred shares to capitalize on market dislocations.',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'common and preferred shares',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'to capitalize on market dislocations',
+            'entities': ['Strategy'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Strategy said it would only issue common shares when the company is valued at a premium relative to its enterprise value.',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'common shares',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'The policy is part of its new capital management framework.',
+            'entities': ['Strategy'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Strategy raised the dividend on Stretch (STRC) for the eighth time, putting the preferred stock on track to offer 12% annually.',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'Stretch (STRC)',
+            'direction': 'up',
+            'magnitude': '12% annually',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Strategy', 'Stretch'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Stretch (STRC) rose 12.2% to "'$83.67 on Monday.'"',
+            'subject': 'Stretch',
+            'predicate': 'price_move',
+            'object': 'STRC preferred stock',
+            'direction': 'up',
+            'magnitude': '12.2% to "'$83.67'"',
+            'time': 'Monday',
+            'cause': 'Strategy announced a new capital management framework and a higher STRC dividend.',
+            'entities': ['Stretch', 'Strategy'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Bitcoin traded around "'$60,200 on Monday, up 1.1% over the past day.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '1.1% to around "'$60,200'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Bitcoin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Strategy\\'s shares remained down nearly 42% over the past month from "'$149.93.'"',
+            'subject': 'Strategy',
+            'predicate': 'price_move',
+            'object': 'MSTR shares',
+            'direction': 'down',
+            'magnitude': 'nearly 42% from "'$149.93'"',
+            'time': 'over the past month',
+            'cause': None,
+            'entities': ['Strategy'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Strategy sold 32 Bitcoin for "'$2.5 million around a month ago, marking its first Bitcoin sale since 2022.'"',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'Bitcoin',
+            'direction': 'down',
+            'magnitude': '32 Bitcoin for "'$2.5 million'"',
+            'time': 'around the time it sold 32 Bitcoin for "'$2.5 million'"',
+            'cause': None,
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Strategy\\'s Bitcoin holdings were unchanged at 847,363 Bitcoin.',
+            'subject': 'Strategy',
+            'predicate': 'corporate_action',
+            'object': 'Bitcoin holdings',
+            'direction': 'flat',
+            'magnitude': '847,363 Bitcoin',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Strategy\\'s Bitcoin stockpile was valued at "'$51 billion and showed about $13.1 billion in unrealized losses.'"',
+            'subject': 'Strategy',
+            'predicate': 'other',
+            'object': 'Bitcoin stockpile',
+            'direction': 'down',
+            'magnitude': '"'$13.1 billion in unrealized losses'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Strategy', 'Bitcoin'],
+            'confidence': 0.95,
+        },
+    ],
+    'e677874011ee8faf0b386d424160ba91': [
+        {
+            'claim': 'Andy Burnham said he would hand greater autonomy to local leaders if he becomes UK prime minister.',
+            'subject': 'United Kingdom',
+            'predicate': 'statement',
+            'object': 'local governments',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'He described the move as a circuit-breaker for the British state.',
+            'entities': ['United Kingdom', 'Andy Burnham'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'Andy Burnham said he would use private and public money to invest in UK transport, housing and infrastructure.',
+            'subject': 'United Kingdom',
+            'predicate': 'forecast',
+            'object': 'transport, housing and infrastructure',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '10-year plan',
+            'cause': 'He said the approach would reverse almost two decades of low growth since the 2008 financial crisis.',
+            'entities': ['United Kingdom', 'Andy Burnham'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Andy Burnham said he would reform the UK\\'s privatized water and energy utilities.',
+            'subject': 'United Kingdom',
+            'predicate': 'statement',
+            'object': 'water and energy utilities',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['United Kingdom', 'Andy Burnham'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'The article said the UK faces a sluggish economy, tattered public services and a cost-of-living squeeze.',
+            'subject': 'United Kingdom',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['United Kingdom'],
+            'confidence': 0.88,
+        },
+        {
+            'claim': 'The article said the UK is under pressure to increase defense spending dramatically.',
+            'subject': 'United Kingdom',
+            'predicate': 'forecast',
+            'object': 'defense spending',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'A more aggressive Russia and a less reliable United States are increasing pressure on NATO countries.',
+            'entities': ['United Kingdom', 'NATO', 'Russia', 'United States'],
+            'confidence': 0.9,
+        },
+    ],
+    'e6a7e437664ff3d2d758efc1963722b6': [
+        {
+            'claim': 'Reuters reported that Jamie Dimon plans to remain JPMorgan Chase CEO for up to three more years.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'corporate_action',
+            'object': 'Jamie Dimon',
+            'direction': 'flat',
+            'magnitude': 'up to three more years',
+            'time': 'up to three more years',
+            'cause': 'The bank is mapping out its succession plan.',
+            'entities': ['JPMorgan Chase', 'Jamie Dimon'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Reuters reported that JPMorgan Chase could name Jamie Dimon\\'s successor within two to two-and-a-half years.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'forecast',
+            'object': 'CEO succession',
+            'direction': 'na',
+            'magnitude': 'within two to two-and-a-half years',
+            'time': 'within two to two-and-a-half years',
+            'cause': 'The board is devoting significant time to succession planning.',
+            'entities': ['JPMorgan Chase', 'Jamie Dimon'],
+            'confidence': 0.88,
+        },
+        {
+            'claim': 'Reuters reported that Troy Rohrbaugh and Doug Petno are JPMorgan Chase\\'s newly named co-presidents and are the main internal successor candidates to Jamie Dimon.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'corporate_action',
+            'object': 'Troy Rohrbaugh and Doug Petno',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'The bank is preparing for CEO succession.',
+            'entities': ['JPMorgan Chase', 'Troy Rohrbaugh', 'Doug Petno', 'Jamie Dimon'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'Reuters reported that Troy Rohrbaugh is viewed internally as the frontrunner to replace Jamie Dimon.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'statement',
+            'object': 'Troy Rohrbaugh',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'Senior executives cited Rohrbaugh\\'s promotion and track record.',
+            'entities': ['JPMorgan Chase', 'Troy Rohrbaugh', 'Jamie Dimon'],
+            'confidence': 0.83,
+        },
+        {
+            'claim': 'Reuters reported that Jamie Dimon would become executive chairman after stepping down as JPMorgan Chase CEO.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'forecast',
+            'object': 'Jamie Dimon',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'when the time comes',
+            'cause': 'The transition is part of the bank\\'s succession plan.',
+            'entities': ['JPMorgan Chase', 'Jamie Dimon'],
+            'confidence': 0.87,
+        },
+        {
+            'claim': 'JPMorgan Chase\\'s consumer business accounted for nearly 39% of total revenue in the first quarter.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'other',
+            'object': 'consumer business',
+            'direction': 'na',
+            'magnitude': 'nearly 39% of total revenue',
+            'time': 'first quarter',
+            'cause': None,
+            'entities': ['JPMorgan Chase'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Eric Kuby said JPMorgan Chase shares trade at a premium valuation partly because of Jamie Dimon.',
+            'subject': 'JPMorgan Chase',
+            'predicate': 'statement',
+            'object': 'JPMorgan shares',
+            'direction': 'up',
+            'magnitude': 'premium multiple',
+            'time': '2026-06-29',
+            'cause': 'He attributed the premium partly to the Dimon factor.',
+            'entities': ['JPMorgan Chase', 'Jamie Dimon'],
+            'confidence': 0.82,
+        },
+    ],
+    'e80bac43626fae614e3a8394bd79e0a9': [
+        {
+            'claim': 'The Nasdaq rose 1.4% and the S&P 500 gained 0.8% on Monday.',
+            'subject': 'United States equity market',
+            'predicate': 'price_move',
+            'object': 'Nasdaq and S&P 500',
+            'direction': 'up',
+            'magnitude': 'Nasdaq +1.4%, S&P 500 +0.8%',
+            'time': 'Monday',
+            'cause': 'The article said the Supreme Court blocked Trump\\'s attempt to fire Fed governor Lisa Cook and a U.S.-Iran ceasefire reduced tensions near the Strait of Hormuz.',
+            'entities': ['Nasdaq', 'S&P 500', 'Lisa Cook', 'Federal Reserve', 'United States', 'Iran'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Bitcoin was down roughly 53% from its October 2025 all-time high of "'$126,198.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'roughly 53% from "'$126,198'"',
+            'time': 'October 2025 to 2026-06-29',
+            'cause': None,
+            'entities': ['Bitcoin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Spot Bitcoin ETFs saw roughly "'$4 billion of outflows in June.'"',
+            'subject': 'Spot Bitcoin ETFs',
+            'predicate': 'demand_change',
+            'object': 'Bitcoin',
+            'direction': 'down',
+            'magnitude': 'roughly "'$4 billion'"',
+            'time': 'June',
+            'cause': None,
+            'entities': ['Spot Bitcoin ETFs', 'Bitcoin'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Markets were pricing an 80% chance of a Federal Reserve rate hike in December.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': 'December rate hike',
+            'direction': 'up',
+            'magnitude': '80% chance',
+            'time': 'December',
+            'cause': 'The article described the Fed under Kevin Warsh as hawkish.',
+            'entities': ['Federal Reserve', 'Kevin Warsh'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Bitcoin opened Monday at "'$59,473, fell to $58,801 intraday, and later traded around $60,104.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '+1.06% to around "'$60,104 after a low of $58,801'"',
+            'time': 'Monday',
+            'cause': 'Bulls stepped in near the "'$58,035 support level, according to the article.'"',
+            'entities': ['Bitcoin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The article said Bitcoin\\'s "'$58,035 support level held on Monday.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'other',
+            'object': '"'$58,035 support level'"',
+            'direction': 'flat',
+            'magnitude': '"'$58,035'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Bitcoin'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'On Myriad, traders were pricing an 80% chance that Bitcoin falls to "'$55,000 rather than rebounds to $84,000.'"',
+            'subject': 'Bitcoin',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '80% chance of "'$55,000'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Bitcoin', 'Myriad'],
+            'confidence': 0.93,
+        },
+    ],
+    'e81e3bbebd840b3417fb5f113f2570e1': [
+        {
+            'claim': 'China blacklisted four Japanese government defense research institutes and imposed tighter export restrictions on dozens of other Japanese entities.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'Japanese entities',
+            'direction': 'na',
+            'magnitude': 'four institutes and dozens of entities',
+            'time': '2026-06-29',
+            'cause': 'The move escalated China\\'s campaign to restrict Tokyo\\'s access to dual-use goods.',
+            'entities': ['China', 'Japan'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'China\\'s Ministry of Commerce added 20 Japanese entities, including units of Mitsubishi Electric and Mitsubishi Heavy Industries, to its export control list.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'Mitsubishi Electric and Mitsubishi Heavy Industries units',
+            'direction': 'na',
+            'magnitude': '20 entities',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['China', 'Mitsubishi Electric', 'Mitsubishi Heavy Industries', 'Japan'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'China added another 20 Japanese entities, including Mitsui E&S, Terra Drone and OKI Electric Industry units, to a watch list requiring enhanced licensing scrutiny.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'Mitsui E&S, Terra Drone and OKI Electric Industry units',
+            'direction': 'na',
+            'magnitude': '20 entities',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['China', 'Mitsui E&S', 'Terra Drone', 'OKI Electric Industry', 'Japan'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'China said domestic exporters and overseas organizations or individuals must stop transferring Chinese-origin dual-use items to entities on the export control list immediately.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'export control list entities',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'immediately',
+            'cause': 'The entities were placed on China\\'s export control list.',
+            'entities': ['China'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'China said exports involving Japanese military users, military applications or end-uses that could strengthen Japan\\'s defense capabilities would not be approved.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'exports to Japanese military-related end uses',
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'China is applying stricter end-user and end-use reviews to watch-listed entities.',
+            'entities': ['China', 'Japan'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The article said China banned dual-use exports to Japan in January, including rare earth elements, permanent magnets and other critical minerals used in defense technologies.',
+            'subject': 'China',
+            'predicate': 'sanction',
+            'object': 'Japan',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'January',
+            'cause': None,
+            'entities': ['China', 'Japan', 'rare earth elements', 'permanent magnets'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Mitsubishi Electric shares fell about 1.4% after China\\'s announcement.',
+            'subject': 'Mitsubishi Electric',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'down',
+            'magnitude': 'around 1.4%',
+            'time': 'following the statement',
+            'cause': 'China widened export curbs on Japanese entities.',
+            'entities': ['Mitsubishi Electric', 'China'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Howa Machinery shares fell about 4.6% after China\\'s announcement.',
+            'subject': 'Howa Machinery',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'down',
+            'magnitude': 'around 4.6%',
+            'time': 'following the statement',
+            'cause': 'China widened export curbs on Japanese entities.',
+            'entities': ['Howa Machinery', 'China'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Mitsubishi Heavy Industries shares rose 4.9% after China\\'s announcement.',
+            'subject': 'Mitsubishi Heavy Industries',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'up',
+            'magnitude': '4.9%',
+            'time': 'following the statement',
+            'cause': 'The market reaction to China\\'s export-curb announcement was mixed.',
+            'entities': ['Mitsubishi Heavy Industries', 'China'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Terra Drone shares rose 1.7% after China\\'s announcement.',
+            'subject': 'Terra Drone',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'up',
+            'magnitude': '1.7%',
+            'time': 'following the statement',
+            'cause': 'The market reaction to China\\'s export-curb announcement was mixed.',
+            'entities': ['Terra Drone', 'China'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Daiwa Institute of Research estimated that a one-year cutoff of Chinese rare earth imports and sustained component supply constraints would reduce Japan\\'s real GDP by about 1.3%, or roughly 7 trillion yen.',
+            'subject': 'Japan',
+            'predicate': 'forecast',
+            'object': 'real GDP',
+            'direction': 'down',
+            'magnitude': 'about 1.3% or roughly 7 trillion yen',
+            'time': 'one-year cutoff',
+            'cause': 'A one-year cutoff of Chinese rare earth imports and sustained component supply constraints.',
+            'entities': ['Japan', 'China', 'Daiwa Institute of Research', 'rare earths'],
+            'confidence': 0.93,
+        },
+    ],
+    'e8de4ab2844d945e9225ae7ed898bb48': [
+        {
+            'claim': 'Following the late-February strike on Iran, oil prices surged.',
+            'subject': 'Oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'late-February',
+            'cause': 'the late-February strike on Iran',
+            'entities': ['Oil', 'Iran'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Large-cap technology stocks declined as investors rotated toward smaller companies and more defensive value investments.',
+            'subject': 'Large-cap technology stocks',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'first quarter 2026',
+            'cause': 'Investors rotated toward smaller companies and more defensive value investments.',
+            'entities': ['Large-cap technology stocks'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Meridian Hedged Equity Fund returned 0.08% net in the first quarter of 2026.',
+            'subject': 'Meridian Hedged Equity Fund',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '0.08%',
+            'time': 'first quarter 2026',
+            'cause': None,
+            'entities': ['Meridian Hedged Equity Fund'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The S&P 500 Index fell 4.33% in the first quarter of 2026.',
+            'subject': 'S&P 500 Index',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '4.33%',
+            'time': 'first quarter 2026',
+            'cause': None,
+            'entities': ['S&P 500 Index'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The CBOE S&P 500 BuyWrite Index declined 0.92% in the first quarter of 2026.',
+            'subject': 'CBOE S&P 500 BuyWrite Index',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '0.92%',
+            'time': 'first quarter 2026',
+            'cause': None,
+            'entities': ['CBOE S&P 500 BuyWrite Index'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'At the end of the period, 43% of Meridian Hedged Equity Fund\\'s portfolio was unhedged.',
+            'subject': 'Meridian Hedged Equity Fund',
+            'predicate': 'corporate_action',
+            'object': 'portfolio',
+            'direction': 'na',
+            'magnitude': '43%',
+            'time': 'end of the period',
+            'cause': None,
+            'entities': ['Meridian Hedged Equity Fund'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Royalty Pharma closed at "'$56.23 per share on June 26, 2026, implying a market capitalization of $32.38 billion.'"',
+            'subject': 'Royalty Pharma',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'na',
+            'magnitude': '"'$56.23 per share and $32.38 billion market capitalization'"',
+            'time': 'June 26, 2026',
+            'cause': None,
+            'entities': ['Royalty Pharma'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Royalty Pharma posted a 1.90% return over one month.',
+            'subject': 'Royalty Pharma',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'up',
+            'magnitude': '1.90%',
+            'time': 'one month',
+            'cause': None,
+            'entities': ['Royalty Pharma'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Royalty Pharma shares gained 56.06% over the past 52 weeks.',
+            'subject': 'Royalty Pharma',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'up',
+            'magnitude': '56.06%',
+            'time': 'past 52 weeks',
+            'cause': None,
+            'entities': ['Royalty Pharma'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Meridian Hedged Equity Fund said Royalty Pharma performed well in the quarter after another earnings beat.',
+            'subject': 'Royalty Pharma',
+            'predicate': 'price_move',
+            'object': 'shares',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'the quarter',
+            'cause': 'another earnings beat and expectations for continued strength from established franchises',
+            'entities': ['Royalty Pharma', 'Meridian Hedged Equity Fund'],
+            'confidence': 0.9,
+        },
+    ],
+}
+
+docs = []
+with infile.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+
+with outfile.open('w') as out:
+    total_facts = 0
+    for obj in docs:
+        facts = facts_by_id.get(obj['doc_id'], [])
+        total_facts += len(facts)
+        record = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        out.write(json.dumps(record, ensure_ascii=True) + '\\n')
+
+print(f'docs processed: {len(docs)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 63
+
+codex
+Wrote `all_facts_032.jsonl` in the current directory.
+
+`docs processed: 12, total facts: 63`
+tokens used
+37,035
+Wrote `all_facts_032.jsonl` in the current directory.
+
+`docs processed: 12, total facts: 63`

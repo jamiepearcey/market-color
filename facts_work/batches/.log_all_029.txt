@@ -1,0 +1,481 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fb8-f913-7d52-8de2-3d132f2abf18
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_029.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_029.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_029.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:07:28.056588Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading the batch format first and then I’ll generate `all_facts_029.jsonl` directly from `all_batch_029.jsonl`, staying strictly within the local file.
+exec
+/bin/zsh -lc 'wc -l all_batch_029.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_029.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_029.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(f'DOC {i}:', {k: obj.get(k) for k in ['doc_id','source_name','published_date','title']})
+        print((obj.get('body_text','')[:1200]).replace('\\n',' '))
+        print('\\n---\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 177ms:
+DOC 1: {'doc_id': 'c6d291349e93fc1894975985063519ad', 'source_name': 'Metal.com (SMM)', 'published_date': '2026-06-29', 'title': 'June Aluminum Semis PMI Falls Back to Contraction Territory at 46.6%, Domestic Demand Weakness Weighs on All Segments'}
+June Aluminum Semis PMI Falls Back to Contraction Territory at 46.6%, Domestic Demand Weakness Weighs on All Segments In June the aluminum processing industry exhibited a pronounced divergence pattern of "external demand outperforming domestic demand, with the aluminum wire and cable industry unable to sustain the market on its own." Export orders, energy storage, UHV, and other areas provided structural support, but a combination of weak domestic consumption, wild swings in aluminum prices, and policy disruptions made it difficult for the overall industry sentiment to recover markedly in the short term. June 29, 2026 In June, the overall PMI for China’s aluminum semis industry came in at 46.6%, a sharp drop of 4.2 percentage points from May, with all sub-segments posting widespread declines. Aluminum plate/sheet and strip (47.1%), aluminum foil (46.3%), architectural extrusions (45.4%), industrial extrusions (45.7%), primary alloy (47.6%), and secondary alloy (37.0%) all stayed below the 50 mark, while only aluminum wire and cable (53.5%) remained in expansion territory, albeit with notably weakened expansion momentum. The common pressure factor across segments was weak domestic e
+
+---
+
+DOC 2: {'doc_id': 'c818cfa04755aac02bc2d34875245899', 'source_name': 'AP Top News', 'published_date': '2026-06-29', 'title': 'Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards'}
+Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards Inmates overpowered correctional staff and took over parts of a jail in eastern North Carolina early Monday, but the siege ended hours later when law enforcement officers entered the facility and seized control. Three guards and 88 inmates were inside the Bertie-Martin Regional Detention Center in Windsor when the takeover began at about 5 a.m., prompting an immediate response from local, state and federal authorities, the North Carolina State Bureau of Investigation said in a statement posted on social media. By early afternoon, the Bureau of Investigation and the FBI had “cleared the facility,” the state bureau said in a statement. ”All inmates and staff are safe and accounted for, and those who sustained injuries have received treatment.” Inmates have been transferred to other facilities and the jail will remain secured while the damage is assessed, the Bureau of Investigation said. The 90-bed jail located about 120 miles (190 kilometers) east of Raleigh houses pretrial detainees and short-te
+
+---
+
+DOC 3: {'doc_id': 'c9213e7e7a4f68db0ce99d545cd315e7', 'source_name': 'Yahoo Finance', 'published_date': '2026-06-29', 'title': 'Caterpillar (CAT) Hits Unprecedented Valuation Amid AI Infrastructure Surge'}
+Heartland Advisors, an investment management company, released its first-quarter 2026 investor letter for the "Heartland Opportunistic Value Equity Strategy". A copy of the letter can be downloaded here. Improving market breadth was noted in the first quarter, but geopolitical instability in the Middle East disrupted this trend. Instead of speculating on the conflict's duration or crude oil prices, we focus on bottom-up fundamental analysis. The market also favored AI winners with high valuations and penalized losers. Against this backdrop, the strategy appreciated 3.66%, outperforming the Russell 3000 Value Index, which rose 2.23%. Stock selection was positive across most sectors. In addition, you can check the Fund's top 5 holdings to determine its best picks for 2026. In its first-quarter 2026 investor letter, Heartland Opportunistic Value Equity Strategy noted that Caterpillar Inc. (NYSE:CAT) is at an unprecedented level. Caterpillar Inc. (NYSE:CAT) is a leading manufacturer of construction and mining equipment, off-highway diesel and natural gas engines, industrial gas turbines, and diesel-electric locomotives. On June 26, 2026, Caterpillar Inc. (NYSE:CAT) closed at $997.47 pe
+
+---
+
+
+codex
+The batch has 12 documents. I’ve sampled the first few; some are clearly non-market and will map to empty fact lists, while others need careful extraction from narrative text without inference.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_029.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['source_name']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. c6d291349e93fc1894975985063519ad | Metal.com (SMM) | 2026-06-29 | June Aluminum Semis PMI Falls Back to Contraction Territory at 46.6%, Domestic Demand Weakness Weighs on All Segments
+2. c818cfa04755aac02bc2d34875245899 | AP Top News | 2026-06-29 | Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards
+3. c9213e7e7a4f68db0ce99d545cd315e7 | Yahoo Finance | 2026-06-29 | Caterpillar (CAT) Hits Unprecedented Valuation Amid AI Infrastructure Surge
+4. c952d173fd6a92616d1f2eefc33f6040 | The Economist - Finance & Economics | 2026-06-29 | Is Andy Burnham more than just a smart-casual Keir Starmer?
+5. ca7ac74498403572c22acdc301216cbb | ForexLive | 2026-06-29 | The AUDUSD finds willing sellers against the 100 hour MA and moves toward recent lows | investingLive
+6. cb35a17995f7e665b52b532280154382 | Cointelegraph | 2026-06-29 | Bitcoin Holds $60K As Selling Slows But Bottom May Not Be In
+7. cbe4841eda9e4a24d50a22aa02e06edd | ForexLive | 2026-06-29 | BoE's Pill: Monetary policy hasn’t been restrictive enough over the last few years | investingLive
+8. cdf3fcb008448dd15648c5e61a5bb113 | Cointelegraph | 2026-06-29 | Donald Trump Has 10 Days to Decide on Housing Bill with CBDC Ban
+9. ce584ed26a01592acbf7635c11ef85e3 | AP Top News | 2026-06-29 | Supreme Court rules states can count late-arriving mailed ballots, rejecting Trump-led challenge
+10. cea564da5e646c2a2100d6c856b74ff0 | Al Jazeera | 2026-06-29 | Paraguay shock Germany in shootout win for one of all-time World Cup upsets
+11. cef942f6ee0f5fa06581c7c160c79721 | Cointelegraph | 2026-06-29 | Senate Leaders Push for July Passage of CLARITY Act
+12. cf246a79eb4e5142babba8a9fbd37c0f | Yahoo Finance | 2026-06-29 | Eni Joins Vaca Muerta Venture to Advance Argentina LNG Project
+
+codex
+I’ve isolated the likely market-relevant items and I’m reading those in full now. The output file will keep all 12 docs in order, with empty `facts` arrays where the article has no market content.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+ids={1,3,5,6,7,8,11,12}
+with open('all_batch_029.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in ids:
+            obj=json.loads(line)
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:', obj['title'])
+            print('DATE:', obj['published_date'])
+            print(obj['body_text'])
+            print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 1 c6d291349e93fc1894975985063519ad =====
+TITLE: June Aluminum Semis PMI Falls Back to Contraction Territory at 46.6%, Domestic Demand Weakness Weighs on All Segments
+DATE: 2026-06-29
+June Aluminum Semis PMI Falls Back to Contraction Territory at 46.6%, Domestic Demand Weakness Weighs on All Segments In June the aluminum processing industry exhibited a pronounced divergence pattern of "external demand outperforming domestic demand, with the aluminum wire and cable industry unable to sustain the market on its own." Export orders, energy storage, UHV, and other areas provided structural support, but a combination of weak domestic consumption, wild swings in aluminum prices, and policy disruptions made it difficult for the overall industry sentiment to recover markedly in the short term. June 29, 2026 In June, the overall PMI for China’s aluminum semis industry came in at 46.6%, a sharp drop of 4.2 percentage points from May, with all sub-segments posting widespread declines. Aluminum plate/sheet and strip (47.1%), aluminum foil (46.3%), architectural extrusions (45.4%), industrial extrusions (45.7%), primary alloy (47.6%), and secondary alloy (37.0%) all stayed below the 50 mark, while only aluminum wire and cable (53.5%) remained in expansion territory, albeit with notably weakened expansion momentum. The common pressure factor across segments was weak domestic end-use demand: automotive sheets & plates were dragged down by “steel-for-aluminum substitution,” air-conditioner foil production schedules softened, general-purpose sheets and packaging foil entered the off-season, and new energy vehicle supporting orders declined marginally. On the export side, performance was mixed—new export orders for aluminum plate/sheet and strip and aluminum foil remained resilient, but the new export order index for aluminum wire and cable slumped 16.6 percentage points to 46.97%, signaling a marked narrowing of the export window. Secondary alloy was hit by the “reverse invoicing” policy, which pushed up compliance costs for aluminum scrap, tight raw material supply, and weakening auto production and sales, sending its PMI to the lowest level among all segments. By product type: Aluminum plate/sheet and strip: The monthly composite PMI for aluminum plate/sheet and strip stood at 47.1% in June, below the 50 mark. Looking at sub-indices, the new export order index and backlog order index both came in at 61.2%, in high-expansion territory, supported by strength in overseas markets in the first half of the month and restocking cycles outside China. Export orders on hand were full, and delivery lead times for newly received orders had extended to late August or even September. However, the new order index and production index both recorded only 45.4%. China’s general-purpose sheet market had long been suppressed by high aluminum prices, with civilian aluminum semis demand shrinking sharply, and fixed-price engineering project orders were widely delayed because their cargo pick-up would incur outright losses. Meanwhile, automotive sheet & plates were impacted as automakers broadly pushed “steel-for-aluminum substitution” to control costs: exterior panels of low and mid-end car models were almost all switched to steel, and structural parts were also replaced with steel in batches, to some extent weighing on automotive aluminum sheet & plate consumption. On the price side, the purchase price index printed at 49.1%. The reality that aluminum prices pulled back from highs during the month and spot aluminum prices tumbled to 22,850 yuan/mt at the end of June (a weekly drop of more than 1,000 yuan) dealt a huge blow to market sentiment, intensifying downstream users’ speculative wait-and-see mentality of “rushing to buy amid continuous price rises and holding back amid price downturns.” The finished product inventory index (45.4%) and raw material inventory index (47.6%) both stood in contraction territory, with enterprises proactively controlling production schedules and destocking amid weak demand. In summary, although export and energy storage terminal orders provided a solid bottom support, multiple intertwined pressures—persistent softness in general-purpose sheets, shrinking automotive aluminum demand, and wild swings in aluminum prices—are expected to keep the aluminum plate/sheet and strip PMI under pressure below the 50 mark in July. Aluminum Foil: The aluminum foil industry's PMI registered 46.3% in June, with all core sub-indices weakening across the board. The new orders index and production index both fell to 43.3%. Specifically, the air-conditioner foil segment was the biggest drag on the downturn. Weighed by the sluggish real estate market and persistently high raw material prices, end-user finished product enterprises sharply cut their domestic sales production schedules in June to control cash flow and avoid inventory blowups, leading to a simultaneous disruption in air-conditioner foil production schedules. In the packaging foil segment, the traditional off-season effect accelerated, June-August, with demand for pharmaceutical foil and video pouch in China continuing to weaken. Some small and medium-sized aluminum foil clients have begun intermittent holidays due to insufficient orders. The new export orders index (56.7%) and backlog orders index (55.8%) remained in expansion territory, reflecting relatively stable external demand. Customs data showed that aluminum foil exports rose 4% MoM in May, with export order delivery times for related enterprises extended to September. The raw material inventory index fell to 43.7%, as enterprises began large-scale procurement pullbacks and rescheduled production plans amid a deepening off-season. Overall, while battery foil and export orders provided some resilience for the industry, given the heavy drag from air-conditioner foil, the deepening off-season in packaging foil, and the disruption of downstream procurement pace caused by wild price swings, the aluminum foil PMI is expected to continue operating below the 50 mark in July. Construction Extrusion: The construction extrusion industry's composite PMI registered 45.4% in June, pulling back below the 50 mark. The production index was recorded at 42.6% this month, with both the new orders index and procurement volume index at 43.1%, as the industry's prosperity shifted into a downturn territory. North China was relatively less impacted by the industry off-season, with end-user consumption for home decoration aluminum extrusion and doors/windows still showing resilience. The off-season characteristics were more pronounced in south China, where orders declined markedly after entering June. Although large-scale engineering orders had previously supported industry operations, the completion and delivery of aluminum extrusion for some projects recently left a lack of sufficient new orders to take over, dragging down industry production. Additionally, the downward shift in the aluminum price center brought limited incremental order volume, insufficient to offset the impact of weakening demand during the industry off-season. The export orders index was recorded at 51.8% this month, with extrusion exports remaining prosperous, as demand for construction extrusion products like system curtain walls and doors/windows showed ample resilience in regions such as Southeast Asia, Australia, and South America. Looking to July, the industry off-season will persist further. Temperatures are expected to climb in south China, slowing the progress of downstream end-user door/window replacement demand and large-scale engineering projects, with order demand anticipated to contract. On the export side, the price spread between Chinese and overseas markets has been narrowing recently. If this price spread cannot be restored going forward and enterprise profitability cannot recover, aluminum extrusion export volumes face the risk of pulling back later on. Overall, construction aluminum extrusion's PMI is expected to remain below the 50 mark in July. Industrial Extrusion: The composite PMI for the industrial extrusion sector registered 45.7% in June, pulling back below the 50 mark as industry sentiment shifted into contraction territory. The production index stood at 41.9%, new orders at 42.5%, and procurement volume at 41.3%. Demand from the energy storage segment continued to expand during the month, providing a rigid floor for industry operating rates. On the NEV side, however, some enterprises reported weakening end-user sales for specific car models supplied to automakers, with downstream matching orders pulling back at the margin, directly dragging overall operating rates lower. In June, downstream demand in the industrial extrusion sector showed low sensitivity to price stimulus from lower aluminum prices, with downstream end-users mostly making just-in-time procurement based on orders on hand and production schedules. The finished product inventory index came in at 50%, as enterprises broadly avoided passive inventory buildup and factored in downstream payment collection and cargo pick-up performance when taking orders, maintaining light-inventory operations to safeguard cash flow health. The new export orders index registered 51.2%, with some enterprises reporting a marginal recovery in orders for aviation-grade aluminum extrusions sold overseas through traders. In addition, some enterprises leveraged their deep-processing strengths to export aluminum outdoor leisure equipment, extending the positive trend in export sentiment into June. Heading into July, the narrowing price spread between Chinese and overseas markets will compress export margins, and industrial extrusion export volumes are expected to pull back at the margin. Combined with a deepening off-season, the industrial extrusion PMI is expected to remain below the 50 mark in July. Aluminum Wire and Cable: China’s aluminum wire and cable industry PMI registered 53.5% in June, down 0.8 percentage points MoM. While still above the 50 mark, expansion momentum weakened and industry sentiment pulled back at the margin. By sub-index, the production index registered 57.51%, up 1.8 percentage points from 55.75% in May, as production enthusiasm remained relatively robust, supported by sustained export order scheduling and aluminum price declines that revived orders from State Grid. The new orders index registered 55.64%, down 3.4 percentage points from 59.06% in May, as only the second batch of UHV orders was formally placed and the third batch entered the tender process during the month, with the relatively slow pace of new order placements leading to notably weaker new order performance. The new export orders index registered 46.97%, tumbling 16.6 percentage points from 63.59% in May, plunging from expansion territory into contraction territory—a clear signal of a narrowing export window. The backlog order index registered 51.63%, down 6.3 percentage points from 57.89% in May, retreating from expansion territory to near the 50 mark as enterprises accelerated the digestion of previously backlogged orders and orders on hand began normalizing. The procurement volume index registered 59.06%, up 2.1 percentage points from 56.92% in May, as raw material purchasing maintained a positive trend and tight supply of aluminum rod in the market confirmed that restocking demand from producers remained in release. The raw material inventory index registered 46.97%, down 6.1 percentage points from 53.03% in May, indicating a marked destocking of raw materials at plants. Taken together, the production side of the aluminum wire and cable industry stayed high in June, while the procurement side continued active restocking. Yet signals such as sluggish new order growth, rapid digestion of backlog orders, and especially the sharp plunge in new export orders indicate that the sector’s expansion momentum is decelerating at an accelerating pace. As the diminishing price spread between Chinese and overseas markets shuts the export window, the aluminum wire and cable industry PMI is expected to pull back significantly to around 45.6% in July, with the sector
+
+
+===== DOC 3 c9213e7e7a4f68db0ce99d545cd315e7 =====
+TITLE: Caterpillar (CAT) Hits Unprecedented Valuation Amid AI Infrastructure Surge
+DATE: 2026-06-29
+Heartland Advisors, an investment management company, released its first-quarter 2026 investor letter for the "Heartland Opportunistic Value Equity Strategy". A copy of the letter can be downloaded here. Improving market breadth was noted in the first quarter, but geopolitical instability in the Middle East disrupted this trend. Instead of speculating on the conflict's duration or crude oil prices, we focus on bottom-up fundamental analysis. The market also favored AI winners with high valuations and penalized losers. Against this backdrop, the strategy appreciated 3.66%, outperforming the Russell 3000 Value Index, which rose 2.23%. Stock selection was positive across most sectors. In addition, you can check the Fund's top 5 holdings to determine its best picks for 2026. In its first-quarter 2026 investor letter, Heartland Opportunistic Value Equity Strategy noted that Caterpillar Inc. (NYSE:CAT) is at an unprecedented level. Caterpillar Inc. (NYSE:CAT) is a leading manufacturer of construction and mining equipment, off-highway diesel and natural gas engines, industrial gas turbines, and diesel-electric locomotives. On June 26, 2026, Caterpillar Inc. (NYSE:CAT) closed at $997.47 per share, reflecting a market capitalization of $459.43 billion. Caterpillar Inc. (NYSE:CAT) posted a one-month return of 15.27%, and its shares gained 156.94 over the past 52 weeks. Heartland Opportunistic Value Equity Strategy stated the following regarding Caterpillar Inc. (NYSE:CAT) in its Q1 2026 investor letter: "Beneath the surface, excitement surrounding artificial intelligence (AI) continues to foster an environment of extreme valuation disparity between the perceived winners and losers of an AI infrastructure buildout and the associated implications of use cases proliferating across the global economy. As an example, Caterpillar Inc. (NYSE:CAT), the manufacturer of construction and mining equipment, traded to unprecedented levels this quarter. On Enterprise Value to Sales, CAT's valuation exceeded 6x versus peak valuation in prior cycles in the 2-4x range. If you've driven past a data center development, you'll see CAT bulldozers and excavators scattered across the horizon but bull-case excitement is all about the company's ability to manufacture natural gas turbines, which are being used to plug a power gap the utility industry will take years to plug in light of datacenter's insatiable demand for power. Caterpillar's fundamentals are impressive having come off a record revenue year in 2025. Today the stock trades at nearly 31x 2026 forecasted earnings and 18x 2029 earnings. For reference, the company's valuation has historically troughed (against cycle peak profits) below 12x suggesting that even if fundamentals remain uninterrupted and positive through 2029, the stock still has meaningful downside risk. Conversely, a lengthening list of perceived AI losers are approaching valuations not seen since the Great Financial Crisis in 2008-2009."
+
+
+===== DOC 5 ca7ac74498403572c22acdc301216cbb =====
+TITLE: The AUDUSD finds willing sellers against the 100 hour MA and moves toward recent lows | investingLive
+DATE: 2026-06-29
+The AUDUSD pushed higher during the European session, extending its rally to the falling 100-hour moving average, currently at 0.6900 (blue line on the chart above). Sellers stepped in at that level, which also coincided with the underside of a former channel trendline, reinforcing the bearish bias and keeping sellers in control. The pair has since rotated lower and is now eyeing Friday's low near 0.6875. Despite the pullback, the overall trading range remains very tight at just around 25 pips, leaving room for a larger directional move - on a break. A break below the 0.6875 level, would shift focus toward the key 200-day moving average at 0.6858. That level also aligns with a swing low dating back to April 6, making it a key support target and an area where dip buyers may look to make a stand. For buyers to regain control and improve the near-term technical outlook, the pair needs to move back above the falling 100-hour moving average at 0.6900. If that occurs, attention would turn to last Thursday's high at 0.69278. A break above that level would open the door for a test of the falling 200-hour moving average, currently at 0.69552.
+
+
+===== DOC 6 cb35a17995f7e665b52b532280154382 =====
+TITLE: Bitcoin Holds $60K As Selling Slows But Bottom May Not Be In
+DATE: 2026-06-29
+Bitcoin faces critical test as bulls aim to hold $60K: Did BTC bottom? Bitcoin’s loose hold on $60,000 and soft futures markets raise questions about whether BTC has bottomed. Bitcoin (BTC) trades at an important inflection point as retail investors are selling, big institutions are on hold despite the discounted valuation and the market is paused at $60,300, awaiting the next significant move. The situation reveals two very different investor groups making opposite bets. Retail investors sell, TradFi watches The general mood is fearful, with the Crypto Fear & Greed Index sitting at 36 out of 100, indicating fear but not total panic. This number masks a sharp divide. In June alone, investors pulled $4.4 billion from US spot Bitcoin ETFs — the worst month this year. At the same time, Strategy continues to buy BTC, although the pace and size of its purchases have slowed. While ETF flows and Bitcoin treasury accumulation are not in a buying phase, a majority of corporate BTC treasuries have not reduced their existing positions. Spot Bitcoin ETF net flows. Source: SoSoValue.com Leverage unwinds, but slowly The aggregate open interest in Bitcoin futures contracts across all exchanges is $19.92 billion. Two weeks ago, it was $20.1 billion. This unwinding — when traders close positions to reduce risk — is happening in an orderly way, not in a panic. The borrowing costs for holding long positions have dropped from 0.25% to 0.12%, suggesting that the worst of the forced selling is over. However, longs are still paying to hold their positions, meaning traders believe in a recovery but aren't willing to bet their full account on it. The current danger zone is $58,800, Bitcoin's low for the day. If the price breaks below this level, the next $500 million worth of traders holding long positions could be forced to close their trades, sending Bitcoin toward $56,000. That move may extend the selling pressure into next week. Bitcoin open interest, funding rate. Source: Hyblock The market is waiting, not acting When fresh capital flows into Bitcoin, volume spikes and the action shows up in the data. Right now, it doesn't, as trading volume is down, and open interest changes are small. This suggests the market is in an indecisive phase where retail traders may be done selling, but nobody is confident enough to buy in size yet. That's not surprising. MicroStrategy, which has accumulated Bitcoin for corporate reserves, did buy 3,600 Bitcoin in June for $236 million, betting on a recovery. But overall, institutions are holding rather than aggressively buying. This pause could break in either direction: lower (if one more wave of sellers emerges) or higher (if confidence returns). For Bitcoin to move meaningfully higher, it needs to reclaim $62,000. The risk is real: a macro news event at any point in the week, like the June employment report or the resumption of military action in Iran, could weigh on investor sentiment and tip BTC back under the $60,000 handle. More on the subject
+
+
+===== DOC 7 cbe4841eda9e4a24d50a22aa02e06edd =====
+TITLE: BoE's Pill: Monetary policy hasn’t been restrictive enough over the last few years | investingLive
+DATE: 2026-06-29
+- Full report here BoE's Pill has defended his recent calls for higher interest rates, warning policymakers against becoming complacent about inflation and the rising cost of living. Pill voted to raise interest rates to 4% at the Bank’s last two Monetary Policy Committee meetings, going against the majority in April and joined by only one other member, Megan Greene, in June. Pill’s concerns stem from inflation remaining above the BoE’s 2% target. He cautioned that recent oil and gas price increases could push inflation even higher. According to Pill, inflation at 3% should still be considered problematic, despite the tendency to view it as manageable after the UK experienced a peak of 11% inflation in previous years. He emphasized that his dissent was not motivated by publicity or a desire to challenge the committee, but by genuine concern that monetary policy has not been restrictive enough. Pill suggested that interest rates may have been lowered too quickly in recent years, allowing inflationary pressures to persist. The BoE has been cautious about further cuts due to inflation risks linked to higher energy prices. Governor Bailey has supported keeping rates unchanged, noting that energy prices continue to create inflationary pressure even after oil prices eased following a peace agreement. Pill concluded that the global economic environment is becoming increasingly uncertain and complex, stressing that the BoE’s priority should be ensuring monetary policy does not add further instability. The market is still pricing in 22 bps of tightening by year-end.
+
+
+===== DOC 8 cdf3fcb008448dd15648c5e61a5bb113 =====
+TITLE: Donald Trump Has 10 Days to Decide on Housing Bill with CBDC Ban
+DATE: 2026-06-29
+Donald Trump has 10 days to decide on housing bill with CBDC ban House Speaker Mike Johnson transmitted a housing bill with a provision barring the US Federal Reserve issuing or creating a CBDC until 2030 to Donald Trump on Monday. US President Donald Trump has about 10 days to decide whether or not to sign bipartisan housing legislation containing a ban on a central bank digital currency (CBDC) into law after saying he planned to prioritize a controversial voting bill. According to reports, House Speaker Mike Johnson sent the 21st Century ROAD to Housing Act to Trump’s desk on Monday, kicking off a 10-day timeline for the president to decide whether to ignore, sign or veto the bill under the US Constitution, excluding Sundays. The bill, passed by the House of Representatives last week, included language barring the Federal Reserve from issuing or creating a CBDC “or any digital asset that is substantially similar” until the end of 2030. Donald Trump signing executive orders on Monday. Source: The White House Trump reportedly called the legislation a “yawn” and sarcastically referred to the situation as a “big deal.” He canceled the signing ceremony for the bill on Wednesday, saying that Republicans in Congress should focus on passing the SAVE America Act. The legislation would require voters to provide proof of US citizenship in person to register, potentially disenfranchising millions of people. The 21st Century ROAD to Housing Act received significant bipartisan support from Democrats and Republicans, with members of both parties lauding progress ahead of Trump’s potential signature. Sponsored by Senator Elizabeth Warren, the Democrat-led legislation included a CBDC ban in an attempt to garner support from Republicans and the White House. Related: Senate leaders push for July passage of CLARITY Act “We should be celebrating a bipartisan housing law,” said Warren on Monday. “Instead, we have a call to action. Mr. President: sign the damn bill.” Senators on state work periods, chamber set to consider market structure The US Senate broke on Friday for state work periods, with lawmakers expected to return by July 13. The chamber’s calendar gives lawmakers about four weeks to address the Digital Asset Market Clarity (CLARITY) Act before another state work period in August. Trump said in March that he would “not sign other bills” until the SAVE America Act was passed, but also made a social media post signaling that he supported CLARITY. Should the president veto the bill, Congress could override his action with a two-thirds majority in both chambers. Magazine: SBF will never get a pardon, Trump peace deal boosts Bitcoin: Hodlers Digest June 14-21 More on the subject
+
+
+===== DOC 11 cef942f6ee0f5fa06581c7c160c79721 =====
+TITLE: Senate Leaders Push for July Passage of CLARITY Act
+DATE: 2026-06-29
+Senate leaders push for July passage of CLARITY Act Lawmakers in the US Senate are on state work periods until July 13, giving them only four weeks to address a cryptocurrency market structure bill before another break and possible delays due to campaigning for elections. The path of the Digital Asset Market Clarity (CLARITY) Act, a bill intended to establish comprehensive guidelines for cryptocurrency regulation, remains uncertain with the US Congress set to break for another state work period in a matter of weeks. Since passage in the US House of Representatives in July 2025, the CLARITY Act has faced several hurdles advancing in Congress, from industry pushback on stablecoin rewards to lawmakers’ concerns about ethics. The bill passed the Senate Agriculture Committee in January and the Senate Banking Committee in May along party lines, setting it up for consideration in the full chamber. However, US President Donald Trump on Wednesday canceled the signing ceremony for the 21st Century ROAD to Housing Act, a housing bill that received bipartisan support in both chambers and contained a ban on a central bank digital currency (CBDC). Trump said that he would not sign the bill until Republicans in Congress passed the SAVE America Act, legislation requiring voters to provide proof of US citizenship in person to register, adding in March that he would “not sign other bills” until it was passed. The move by the president leaves the future of the CLARITY Act in doubt despite earlier statements signaling he supported the bill. If Trump vetoes the legislation, Congress could override him with a two-thirds majority vote in both chambers. According to the US Constitution, if a president doesn’t sign or veto a bill within 10 days while Congress is in session, the bill automatically becomes law. Related: Galaxy cuts CLARITY Act odds to 50% as Senate floor time narrows On Monday, Republican leaders in the Senate, including banking committee chair Tim Scott and majority leader John Thune, said that they were pushing for the chamber to pass CLARITY in July. Lawmakers are scheduled to be out of Washington, DC and on state work periods until July 13, giving them four weeks to address the bill before a monthlong state work period in August. Source: Senator Tim Scott “We’ve been negotiating on the CLARITY Act hardcore since last Labor Day, and it’s been an arduous process,” said Senator Cynthia Lummis, one of the bill’s proponents, in a Fox Business interview last week, adding: “We’re still working a little bit on DeFi, we’re working [on] illicit finance, we’re working a little bit on ethics [..] We’re finally to the point where we’re going to put out the text over the July 4th, and give people one last really thorough look at the bill, and then we’re moving in July.” What happens if lawmakers face more delays on CLARITY? Republicans hold a slim majority in the US Senate, where they will need some support from Democrats should they hold a vote on CLARITY next month. Many Democratic lawmakers have been pushing for ethics provisions in the bill, citing the Trump family’s ties to the crypto industry through the president’s memecoin and his sons’ involvement in the World Liberty Financial platform and a Bitcoin mining company. Should Republicans not meet the 60-vote threshold in the Senate before August, many experts expect that lawmakers dealing with reelection campaigns could delay the passage of CLARITY, potentially pushing the legislation to the next session of Congress in 2027. Magazine: AI is banking the unbanked in Africa… faster than crypto More on the subject
+
+
+===== DOC 12 cf246a79eb4e5142babba8a9fbd37c0f =====
+TITLE: Eni Joins Vaca Muerta Venture to Advance Argentina LNG Project
+DATE: 2026-06-29
+Italian energy major Eni has signed an agreement to acquire a 32% stake in three unconventional gas blocks in Argentina's Vaca Muerta shale formation, strengthening its position in the country's flagship LNG export ambitions. The sale and purchase agreement covers the Meseta Buena Esperanza, Aguada Villanueva, and Las Tacanas blocks. The transaction remains subject to regulatory approvals. Once completed, ownership of the assets will be split between YPF (36%), Eni (32%), and XRG (32%). The upstream assets will supply gas to the Argentina LNG project, an integrated upstream and midstream development designed to monetize Vaca Muerta's vast shale gas resources. The project is expected to support 12 million metric tons per year (mtpa) of LNG export capacity through two floating LNG (FLNG) units, each capable of producing 6 mtpa. Eni said the investment aligns with its strategy of building integrated gas value chains that combine upstream production with LNG exports and marketing. The company has increasingly focused on FLNG developments globally as demand for flexible LNG supply continues to grow. "Our entry into Vaca Muerta... strengthens Eni's ability to develop world-scale gas resources and convert them into competitive LNG for international markets," said Guido Brusco, Eni's Chief Operating Officer for Global Natural Resources. XRG, ADNOC's international investment platform, said the transaction provides direct exposure to one of the world's largest unconventional gas resources while supporting Argentina's emergence as a long-term LNG supplier. The company highlighted the strategic partnership with YPF, Argentina's state-controlled energy producer, and Eni, a leading developer of floating LNG projects. YPF Chairman and CEO Horacio Marín said bringing Eni and XRG into the upstream segment strengthens the project's integrated value chain and advances its development at a global scale. The deal marks another milestone for the Argentina LNG initiative, which seeks to transform the country's abundant Vaca Muerta shale resources into export volumes targeting international markets. The project reflects broader industry efforts to develop new LNG supply sources amid rising global gas demand and growing interest in floating liquefaction technology. By Charles Kennedy for Oilprice.com More Top Reads From Oilprice.com
+
+
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+ids={2,4,9,10}
+with open('all_batch_029.jsonl') as f:
+    for i,line in enumerate(f,1):
+        if i in ids:
+            obj=json.loads(line)
+            print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+            print('TITLE:', obj['title'])
+            print(obj['body_text'][:2000])
+            print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 2 c818cfa04755aac02bc2d34875245899 =====
+TITLE: Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards
+Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards Authorities end a takeover at a North Carolina jail hours after inmates overpowered the guards Inmates overpowered correctional staff and took over parts of a jail in eastern North Carolina early Monday, but the siege ended hours later when law enforcement officers entered the facility and seized control. Three guards and 88 inmates were inside the Bertie-Martin Regional Detention Center in Windsor when the takeover began at about 5 a.m., prompting an immediate response from local, state and federal authorities, the North Carolina State Bureau of Investigation said in a statement posted on social media. By early afternoon, the Bureau of Investigation and the FBI had “cleared the facility,” the state bureau said in a statement. ”All inmates and staff are safe and accounted for, and those who sustained injuries have received treatment.” Inmates have been transferred to other facilities and the jail will remain secured while the damage is assessed, the Bureau of Investigation said. The 90-bed jail located about 120 miles (190 kilometers) east of Raleigh houses pretrial detainees and short-term inmates for Bertie and Martin counties. Inmates took two guards captive and the third guard escaped. Negotiations led to the release of the two guards along with 80 inmates, leaving only eight inmates inside, Bertie County Sheriff Tyrone Ruffin said at a news conference. Ruffin said the two guards who were released were undergoing medical treatment but he had no details about their injuries. Most of the remaining inmates “complied and exited the facility as soon as entry was made,” said Chad Flowers, a spokesperson for the State Bureau of Investigation. It wasn’t immediately known whether officers fired any lethal or non-lethal rounds upon entering the jail. In a telephone interview, Flowers said law enforcement officials were in a meeting about the incident and unavailable late Monday 
+
+
+===== DOC 4 c952d173fd6a92616d1f2eefc33f6040 =====
+TITLE: Is Andy Burnham more than just a smart-casual Keir Starmer?
+Is Andy Burnham more than just a smart-casual Keir Starmer? Britain’s next prime minister outlines plans that look a lot like those of the outgoing one “I AM GOING to give Britain the circuit-breaker it needs,” Andy Burnham promised as he set out for the first time what he wants to do if—or rather, when—he becomes prime minister. In the opening speech of his campaign for the Labour Party leadership on June 29th, the former mayor of Greater Manchester acknowledged that more of the same would not be enough for him to succeed where Sir Keir Starmer had failed. The contest to find a new Labour leader, and therefore prime minister, does not officially begin until July 9th. In reality it is as good as over. No other candidate has come forward. Barring some freak occurrence, Mr Burnham will be named party leader on July 17th and enter 10 Downing Street on July 20th.
+
+
+===== DOC 9 ce584ed26a01592acbf7635c11ef85e3 =====
+TITLE: Supreme Court rules states can count late-arriving mailed ballots, rejecting Trump-led challenge
+Supreme Court rules states can count late-arriving mailed ballots, rejecting Trump-led challenge Supreme Court rules states can count late-arriving mailed ballots, rejecting Trump-led challenge WASHINGTON (AP) — The Supreme Court on Monday ruled that states can count ballots that arrive after Election Day, a persistent target of President Donald Trump. The 5-4 decision rejected a Republican-led attack on laws in more than half the states and the District of Columbia that permit mailed ballots to arrive and be counted some number of days after the election, provided they are postmarked by Election Day. The outcome spares officials the headache of changing their ballot rules just a few months before the 2026 midterm congressional elections. In just over half those states, the more forgiving deadlines apply only to ballots cast by military and overseas voters. Justice Amy Coney Barrett wrote the court’s majority opinion, joined by Chief Justice John Roberts and the three liberal justices. Federal laws setting a single Election Day “leave open when those votes must be received,” Barrett wrote. AP Washington correspondent Sagar Meghani reports the Supreme Court has ruled states can count late-arriving mailed ballots. Congress could change the law, she said. “If varied deadlines for ballot receipt similarly call for a national solution, the American people must choose it through their elected representatives,” Barrett wrote. Justice Samuel Alito wrote the dissent for four justices. “Not only is today’s decision inconsistent with statutory text, legal context, historical practice, and precedent; it also threatens to produce lamentable consequences,” Alito wrote. “The majority’s holding spawns a slurry of troubling election-law questions and risks further undermining Americans’ confidence in election integrity.” The legal challenge was part of Trump’s broader attack on most mail balloting, which he has said breeds fraud despite strong evidence to the contrary and years of e
+
+
+===== DOC 10 cea564da5e646c2a2100d6c856b74ff0 =====
+TITLE: Paraguay shock Germany in shootout win for one of all-time World Cup upsets
+Five wins to go. How can your team reach the final and win World Cup 2026? Click here to find out. Germany’s World Cup 2026 campaign is over after a shock defeat – arguably the competition’s greatest – by Paraguay in the round of 32. Recommended Stories list of 4 items- list 1 of 4Morocco beat Netherlands in last-32 shootout to march on again at World Cup - list 2 of 4Manchester City hires Enzo Maresca as manager to replace Pep Guardiola - list 3 of 4Ex-NBA players Malik Beasley, Ed Davis indicted in betting investigation - list 4 of 4Top seeds Sinner and Sabalenka answer doubters at Wimbledon Day one The Germans trailed 1-0 at half-time to Julio Enciso’s 42nd-minute header from Matias Galarza’s cross on Monday. It was a limp display by the four-time winners in the first period, but they drew level in the second half, when Kai Havertz scored eight minutes after the restart with a glancing header from Florian Wirtz’s ball in from the flank. Germany then had a Jonathan Tah goal from a corner ruled out after a VAR review for a foul on Paraguay’s keeper, and with no further goal, the game went to spot kicks after extra time. Havertz, who helped Arsenal end a 22-year wait to win the English Premier League title this season, missed the opening kick of the shootout. The forward’s side would miss three kicks in total, as Paraguay, who themselves missed two kicks, eventually prevailed 4-3. Nick Woltemade and Tah were the other two German players to suffer the pain of penalty misses, while Paraguay’s Jose Canale scored the decisive spot kick. Germany were ranked number 10 in the world by the game’s governing body, FIFA, entering the tournament, while Paraguay were ranked 41st. The German defeat is potentially the greatest upset in World Cup football, but is surely the biggest at the knockout stage. The previous match it surpasses was another German defeat at the US 1994 World Cup, when a Hristo Stoichkov-inspired Bulgaria knocked out the defending champions in the quarterfina
+
+
+
+codex
+I have enough context to write the output now. I’m keeping the extraction conservative: only explicit claims, explicit drivers, and explicit time references from the article text.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_029.jsonl')
+output_path = Path('all_facts_029.jsonl')
+
+def fact(claim, subject, predicate, object_=None, direction='na', magnitude=None, time=None, cause=None, entities=None, confidence=0.95):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities or [],
+        'confidence': confidence,
+    }
+
+with input_path.open() as f:
+    docs = [json.loads(line) for line in f]
+
+results = []
+total_facts = 0
+
+for doc in docs:
+    doc_id = doc['doc_id']
+    title = doc['title']
+    pd = doc['published_date']
+    facts = []
+
+    if doc_id == 'c6d291349e93fc1894975985063519ad':
+        facts = [
+            fact(
+                'China\\'s overall aluminum semis PMI fell to 46.6% in June, down 4.2 percentage points from May.',
+                'China aluminum semis industry', 'demand_change', None, 'down', '46.6%; down 4.2 percentage points from May', 'June 2026',
+                'Weak domestic consumption, wild swings in aluminum prices, and policy disruptions weighed on the industry.',
+                ['China', 'aluminum semis'], 0.99),
+            fact(
+                'The aluminum wire and cable PMI was 53.5% in June, making it the only aluminum semis sub-segment that remained in expansion territory.',
+                'China aluminum wire and cable industry', 'demand_change', None, 'up', '53.5%', 'June 2026', None,
+                ['China', 'aluminum wire and cable'], 0.98),
+            fact(
+                'The aluminum wire and cable industry\\'s new export orders index fell 16.6 percentage points month over month to 46.97% in June.',
+                'China aluminum wire and cable industry', 'demand_change', 'export orders', 'down', 'down 16.6 percentage points to 46.97%', 'June 2026',
+                'The article said the export window was narrowing.',
+                ['China', 'aluminum wire and cable'], 0.98),
+            fact(
+                'The secondary alloy PMI fell to 37.0% in June, the lowest level among the aluminum semis segments discussed.',
+                'China secondary alloy industry', 'production_change', None, 'down', '37.0%', 'June 2026',
+                'The reverse invoicing policy raised compliance costs for aluminum scrap, raw material supply was tight, and auto production and sales were weakening.',
+                ['China', 'secondary aluminum alloy', 'aluminum scrap'], 0.98),
+            fact(
+                'Spot aluminum prices tumbled to 22,850 yuan/mt at the end of June after a weekly drop of more than 1,000 yuan.',
+                'Aluminum', 'price_move', None, 'down', '22,850 yuan/mt; weekly drop of more than 1,000 yuan', 'end of June 2026', None,
+                ['aluminum'], 0.98),
+            fact(
+                'China\\'s aluminum foil industry PMI registered 46.3% in June.',
+                'China aluminum foil industry', 'demand_change', None, 'down', '46.3%', 'June 2026',
+                'Sluggish real estate, high raw material prices, and the off-season weakened domestic demand.',
+                ['China', 'aluminum foil'], 0.97),
+            fact(
+                'China\\'s aluminum foil exports rose 4% month over month in May.',
+                'China aluminum foil exports', 'demand_change', None, 'up', '4% MoM', 'May 2026', None,
+                ['China', 'aluminum foil'], 0.97),
+            fact(
+                'China\\'s construction extrusion PMI registered 45.4% in June.',
+                'China construction extrusion industry', 'demand_change', None, 'down', '45.4%', 'June 2026',
+                'Off-season demand weakness and a lack of new orders after project completions dragged on production.',
+                ['China', 'construction aluminum extrusion'], 0.96),
+            fact(
+                'China\\'s industrial extrusion PMI registered 45.7% in June.',
+                'China industrial extrusion industry', 'demand_change', None, 'down', '45.7%', 'June 2026',
+                'Weakening NEV-related orders and off-season conditions pulled sentiment into contraction territory.',
+                ['China', 'industrial aluminum extrusion', 'new energy vehicles'], 0.96),
+            fact(
+                'The article forecasts that the aluminum wire and cable PMI will fall to around 45.6% in July.',
+                'China aluminum wire and cable industry', 'forecast', None, 'down', 'around 45.6%', 'July 2026',
+                'The diminishing price spread between Chinese and overseas markets is expected to shut the export window.',
+                ['China', 'aluminum wire and cable'], 0.94),
+        ]
+    elif doc_id == 'c9213e7e7a4f68db0ce99d545cd315e7':
+        facts = [
+            fact(
+                'Caterpillar closed at "'$997.47 per share on June 26, 2026.'"',
+                'Caterpillar Inc.', 'price_move', None, 'up', '"'$997.47 per share'"', '2026-06-26', None,
+                ['Caterpillar Inc.'], 0.99),
+            fact(
+                'Caterpillar had a market capitalization of "'$459.43 billion on June 26, 2026.'"',
+                'Caterpillar Inc.', 'other', None, 'na', '"'$459.43 billion'"', '2026-06-26', None,
+                ['Caterpillar Inc.'], 0.98),
+            fact(
+                'Caterpillar posted a one-month return of 15.27%.',
+                'Caterpillar Inc.', 'price_move', None, 'up', '15.27%', pd, None,
+                ['Caterpillar Inc.'], 0.98),
+            fact(
+                'Heartland Advisors said Caterpillar\\'s enterprise-value-to-sales valuation exceeded 6x in the first quarter of 2026, versus peak valuations in prior cycles in the 2-4x range.',
+                'Caterpillar Inc.', 'statement', None, 'up', 'exceeded 6x versus 2-4x in prior cycle peaks', 'Q1 2026',
+                'Heartland said AI infrastructure enthusiasm and demand for natural gas turbines used to address data-center power shortages drove the valuation.',
+                ['Caterpillar Inc.', 'Heartland Advisors', 'artificial intelligence', 'data centers'], 0.97),
+            fact(
+                'Heartland Advisors said Caterpillar was trading at nearly 31x 2026 forecast earnings and 18x 2029 earnings.',
+                'Caterpillar Inc.', 'statement', None, 'up', 'nearly 31x 2026 earnings and 18x 2029 earnings', 'Q1 2026', None,
+                ['Caterpillar Inc.', 'Heartland Advisors'], 0.97),
+        ]
+    elif doc_id == 'ca7ac74498403572c22acdc301216cbb':
+        facts = [
+            fact(
+                'AUD/USD rose to the falling 100-hour moving average at 0.6900 during the European session, where sellers emerged and pushed the pair back down toward 0.6875.',
+                'AUD/USD', 'price_move', None, 'down', 'resistance at 0.6900; moved toward 0.6875', '2026-06-29',
+                'Sellers stepped in at the 100-hour moving average and the underside of a former channel trendline.',
+                ['AUD/USD', 'Australian dollar', 'US dollar'], 0.98),
+            fact(
+                'A break below 0.6875 in AUD/USD would shift focus toward the 200-day moving average at 0.6858.',
+                'AUD/USD', 'forecast', None, 'down', '0.6858', '2026-06-29',
+                'The 200-day moving average aligns with a swing low from April 6.',
+                ['AUD/USD', 'Australian dollar', 'US dollar'], 0.96),
+            fact(
+                'A move back above the 100-hour moving average at 0.6900 would turn attention to 0.69278 in AUD/USD.',
+                'AUD/USD', 'forecast', None, 'up', '0.69278', '2026-06-29',
+                'The article said buyers would need to reclaim the 100-hour moving average to improve the near-term technical outlook.',
+                ['AUD/USD', 'Australian dollar', 'US dollar'], 0.95),
+        ]
+    elif doc_id == 'cb35a17995f7e665b52b532280154382':
+        facts = [
+            fact(
+                'Bitcoin was trading around "'$60,300 while trying to hold the $60,000 level.'"',
+                'Bitcoin', 'price_move', None, 'flat', '"'$60,300 and $60,000 support'"', pd, None,
+                ['Bitcoin'], 0.98),
+            fact(
+                'Investors pulled "'$4.4 billion from US spot Bitcoin ETFs in June, marking the worst month of the year for those funds.'"',
+                'US spot Bitcoin ETFs', 'demand_change', None, 'down', '"'$4.4 billion'"', 'June 2026', None,
+                ['Bitcoin', 'US spot Bitcoin ETFs'], 0.99),
+            fact(
+                'Strategy bought 3,600 Bitcoin in June for "'$236 million.'"',
+                'Strategy', 'corporate_action', 'Bitcoin', 'up', '3,600 BTC for "'$236 million'"', 'June 2026', None,
+                ['Strategy', 'Bitcoin'], 0.99),
+            fact(
+                'Aggregate open interest in Bitcoin futures across exchanges declined to "'$19.92 billion from $20.1 billion two weeks earlier.'"',
+                'Bitcoin futures market', 'demand_change', None, 'down', '"'$19.92 billion versus $20.1 billion two weeks earlier'"', pd,
+                'The article described the change as an orderly unwinding of leverage.',
+                ['Bitcoin', 'Bitcoin futures'], 0.98),
+            fact(
+                'The borrowing cost for holding long Bitcoin positions fell from 0.25% to 0.12%.',
+                'Bitcoin long positions', 'price_move', None, 'down', 'from 0.25% to 0.12%', pd,
+                'The article said this suggested the worst of the forced selling was over.',
+                ['Bitcoin'], 0.97),
+            fact(
+                'If Bitcoin breaks below "'$58,800, the article says roughly $500 million of long positions could be forced to close and the price could fall toward $56,000.'"',
+                'Bitcoin', 'forecast', None, 'down', '"'$500 million of longs; toward $56,000'"', pd,
+                'A break below the day\\'s low at "'$58,800 could trigger long liquidations.'"',
+                ['Bitcoin'], 0.96),
+            fact(
+                'The article says Bitcoin needs to reclaim "'$62,000 to move meaningfully higher.'"',
+                'Bitcoin', 'forecast', None, 'up', '"'$62,000'"', pd, None,
+                ['Bitcoin'], 0.95),
+        ]
+    elif doc_id == 'cbe4841eda9e4a24d50a22aa02e06edd':
+        facts = [
+            fact(
+                'Bank of England chief economist Huw Pill voted to raise interest rates to 4% at the last two Monetary Policy Committee meetings.',
+                'Bank of England', 'policy_action', None, 'up', '4%', pd, None,
+                ['Bank of England', 'Huw Pill', 'Monetary Policy Committee'], 0.99),
+            fact(
+                'Huw Pill said monetary policy has not been restrictive enough over the last few years.',
+                'Huw Pill', 'statement', 'Bank of England monetary policy', 'na', None, pd, None,
+                ['Huw Pill', 'Bank of England'], 0.98),
+            fact(
+                'Huw Pill warned that recent oil and gas price increases could push inflation higher.',
+                'Huw Pill', 'statement', 'UK inflation', 'up', None, pd,
+                'Recent increases in oil and gas prices.',
+                ['Huw Pill', 'Bank of England', 'oil', 'gas', 'United Kingdom'], 0.98),
+            fact(
+                'The market was pricing in 22 basis points of tightening by year-end.',
+                'Bank of England', 'forecast', None, 'up', '22 bps', 'by year-end 2026', None,
+                ['Bank of England', 'United Kingdom'], 0.97),
+        ]
+    elif doc_id == 'cdf3fcb008448dd15648c5e61a5bb113':
+        facts = [
+            fact(
+                'The 21st Century ROAD to Housing Act sent to President Donald Trump contains a provision barring the Federal Reserve from issuing or creating a CBDC or any substantially similar digital asset until the end of 2030.',
+                '21st Century ROAD to Housing Act', 'policy_action', 'Federal Reserve CBDC', 'na', 'ban until end of 2030', '2026-06-29', None,
+                ['21st Century ROAD to Housing Act', 'Federal Reserve', 'central bank digital currency', 'Donald Trump'], 0.99),
+            fact(
+                'House Speaker Mike Johnson sent the 21st Century ROAD to Housing Act to President Donald Trump\\'s desk on June 29, 2026, starting a 10-day decision window excluding Sundays.',
+                '21st Century ROAD to Housing Act', 'event', 'Donald Trump', 'na', '10 days excluding Sundays', '2026-06-29', None,
+                ['21st Century ROAD to Housing Act', 'Mike Johnson', 'Donald Trump'], 0.98),
+            fact(
+                'Donald Trump canceled the signing ceremony for the housing bill and said Republicans should focus on passing the SAVE America Act.',
+                'Donald Trump', 'statement', '21st Century ROAD to Housing Act', 'na', None, '2026-06-29', None,
+                ['Donald Trump', '21st Century ROAD to Housing Act', 'SAVE America Act'], 0.97),
+            fact(
+                'The Senate is on state work periods until July 13, leaving about four weeks to address the CLARITY Act before another August work period.',
+                'US Senate', 'event', 'CLARITY Act', 'na', 'about four weeks', 'until July 13, 2026', None,
+                ['US Senate', 'CLARITY Act'], 0.96),
+        ]
+    elif doc_id == 'cef942f6ee0f5fa06581c7c160c79721':
+        facts = [
+            fact(
+                'Republican Senate leaders including Tim Scott and John Thune said on June 29, 2026 that they were pushing for the Senate to pass the CLARITY Act in July.',
+                'CLARITY Act', 'policy_action', 'US Senate', 'na', None, '2026-06-29', None,
+                ['CLARITY Act', 'Tim Scott', 'John Thune', 'US Senate'], 0.99),
+            fact(
+                'The US Senate is on state work periods until July 13, leaving lawmakers four weeks to address the CLARITY Act before a monthlong August break.',
+                'US Senate', 'event', 'CLARITY Act', 'na', 'four weeks', 'until July 13, 2026', None,
+                ['US Senate', 'CLARITY Act'], 0.98),
+            fact(
+                'The CLARITY Act passed the Senate Agriculture Committee in January 2026 and the Senate Banking Committee in May 2026 along party lines.',
+                'CLARITY Act', 'policy_action', 'US Senate committees', 'na', None, 'January 2026 and May 2026', None,
+                ['CLARITY Act', 'Senate Agriculture Committee', 'Senate Banking Committee'], 0.98),
+            fact(
+                'Senator Cynthia Lummis said the Senate would release the CLARITY Act text over the July 4th period and then move on the bill in July.',
+                'Cynthia Lummis', 'statement', 'CLARITY Act', 'na', None, 'July 2026', None,
+                ['Cynthia Lummis', 'CLARITY Act', 'US Senate'], 0.97),
+            fact(
+                'The article says failure to reach the 60-vote threshold in the Senate before August could delay CLARITY Act passage to the next session of Congress in 2027.',
+                'CLARITY Act', 'forecast', 'US Senate', 'down', 'delay to 2027', 'before August 2026',
+                'Lawmakers may be distracted by reelection campaigns.',
+                ['CLARITY Act', 'US Senate'], 0.96),
+        ]
+    elif doc_id == 'cf246a79eb4e5142babba8a9fbd37c0f':
+        facts = [
+            fact(
+                'Eni signed an agreement to acquire a 32% stake in the Meseta Buena Esperanza, Aguada Villanueva, and Las Tacanas gas blocks in Argentina\\'s Vaca Muerta shale formation.',
+                'Eni', 'deal_or_contract', 'Vaca Muerta gas blocks', 'up', '32% stake', pd, None,
+                ['Eni', 'Vaca Muerta', 'Argentina', 'Meseta Buena Esperanza', 'Aguada Villanueva', 'Las Tacanas'], 0.99),
+            fact(
+                'The transaction is subject to regulatory approvals.',
+                'Eni Vaca Muerta transaction', 'event', None, 'na', None, pd, None,
+                ['Eni', 'Argentina', 'Vaca Muerta'], 0.98),
+            fact(
+                'Once the deal closes, ownership of the assets will be split YPF 36%, Eni 32%, and XRG 32%.',
+                'Vaca Muerta gas blocks', 'deal_or_contract', 'YPF, Eni, and XRG', 'na', 'YPF 36%, Eni 32%, XRG 32%', 'after completion', None,
+                ['YPF', 'Eni', 'XRG', 'Argentina'], 0.99),
+            fact(
+                'The upstream assets will supply gas to the Argentina LNG project.',
+                'Vaca Muerta gas blocks', 'supply_change', 'Argentina LNG project', 'up', None, 'after completion', None,
+                ['Vaca Muerta', 'Argentina LNG project', 'Argentina'], 0.98),
+            fact(
+                'The Argentina LNG project is expected to support 12 million metric tons per year of LNG export capacity through two floating LNG units of 6 mtpa each.',
+                'Argentina LNG project', 'forecast', None, 'up', '12 mtpa via two 6 mtpa FLNG units', pd, None,
+                ['Argentina LNG project', 'Argentina', 'LNG', 'floating LNG'], 0.99),
+        ]
+    else:
+        facts = []
+
+    total_facts += len(facts)
+    results.append({'doc_id': doc_id, 'title': title, 'facts': facts})
+
+with output_path.open('w') as out:
+    for obj in results:
+        out.write(json.dumps(obj, ensure_ascii=True) + '\\n')
+
+print(f'docs processed: {len(results)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 43
+
+codex
+The file is written. I’m doing a quick validation pass on structure and ordering, then I’ll return only the required processed-count line.
+exec
+/bin/zsh -lc 'wc -l all_facts_029.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_029.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_029.jsonl') as a, open('all_facts_029.jsonl') as b:
+    in_docs=[json.loads(x) for x in a]
+    out_docs=[json.loads(x) for x in b]
+    assert len(in_docs)==len(out_docs)==12
+    for i,(inp,out) in enumerate(zip(in_docs,out_docs),1):
+        assert inp['doc_id']==out['doc_id']
+        assert inp['title']==out['title']
+        assert isinstance(out['facts'], list)
+        for fact in out['facts']:
+            for key in ['claim','subject','predicate','object','direction','magnitude','time','cause','entities','confidence']:
+                assert key in fact, (i,key)
+    print('validated')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+validated
+
+codex
+docs processed: 12, total facts: 43
+tokens used
+26,504
+docs processed: 12, total facts: 43

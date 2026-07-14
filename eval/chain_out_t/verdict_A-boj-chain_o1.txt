@@ -1,0 +1,3 @@
+VERDICT: B
+
+Both trace the same causal chain, but B attributes claims to specific officials (Uchida, Sato) while A misattributes the wage/price claim generically and leans on hedges, making B's grounding tighter.

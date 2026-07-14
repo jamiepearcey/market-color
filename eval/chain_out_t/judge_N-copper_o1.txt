@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why is copper forecast to push toward 15,000 dollars per metric ton?
+
+ANSWER A:
+The provided context does not contain any forecast of copper reaching US$15,000 per metric ton, nor any price target or bullish long-term projection for copper, so the specific reason for that forecast cannot be sourced here. The context only explains recent copper price dynamics driven by tariff expectations: the COMEX-LME spread widened to nearly US$690/t on positioning ahead of a possible refined copper tariff, with a US study deadline on a potential 15% tariff on refined copper [1][13]. It also notes supportive macro signals such as China's manufacturing PMI rising to 50.3 in June and expected Chinese copper cathode production of 1.166 million tons in July, up 1.84% [12][14]. What is missing is any item mentioning a US$15,000/t price forecast or the drivers behind it.
+
+ANSWER B:
+The context does not contain any forecast of copper pushing toward US$15,000 per metric ton, so that specific projection and its rationale cannot be supported here. What the context does show is that recent copper price movements have been driven not by global supply-demand fundamentals but by tariff expectations, cross-market arbitrage, and front-loaded inventory accumulation ahead of a potential U.S. refined-copper tariff [1]. Traders accelerated shipments into the U.S. anticipating import tariffs, building COMEX inventories and opening an arbitrage window, with the COMEX-LME spread reaching nearly US$690/t in early June before narrowing [1][6]. The proposed U.S. tariff schedule of 15% in 2027 and 30% in 2028 on refined-copper imports is the key policy catalyst behind this positioning [14][19]. However, the context gives no analyst target of US$15,000/t, nor any explicit fundamental (supply deficit, demand growth) tied to such a figure — that information is missing.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

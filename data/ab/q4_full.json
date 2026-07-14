@@ -1,0 +1,58 @@
+[
+  {
+    "claim": "The Strait of Hormuz, which handles ~30% of global seaborne oil trade, suffered a near-total closure during the US-Iran war and has only partially reopened, with traffic below pre-conflict levels and sharply higher war-insurance premiums.",
+    "status": "corroborated",
+    "cite": ["5cf14c0c", "bba530b3", "eafef616", "55bc82f2", "6370e0db", "309eaa2f"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Asian economies are diversifying crude sourcing away from Hormuz-transit Gulf barrels: Indonesia took its first Russian crude cargo explicitly because the Iran war/Hormuz disruption forced it to seek alternative supply; India says it has already diversified with West Asia now only 20-30% of imports and leaned on Venezuela; and Asian refiners are scrambling for alternative cargoes from West Africa.",
+    "status": "corroborated",
+    "cite": ["19a48d85", "6370e0db", "ca147059", "c69a6841", "681e7cad"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "India is building out strategic petroleum reserves in response to the Iran conflict: ONGC will add 1.75mn tonnes (12.8mn barrels) of SPR capacity in Mangalore to cushion future supply shocks, part of a broader plan to expand reserves and strengthen supply partnerships.",
+    "status": "corroborated",
+    "cite": ["03db3380", "d345a681", "a55cfed6", "cf7d955e", "4608945d"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Asian economies are pursuing domestic refining, energy-sovereignty policy and biofuels as a Hormuz hedge: India is expanding refining (Modi), Indonesia reframes its energy transition as a geopolitical-shock hedge ('energy sovereignty'), Japan's new August energy plan/Power Asia framework emphasises oil-security diversification, and Asia is reviving biofuels to dodge Middle-East shortages.",
+    "status": "corroborated",
+    "cite": ["b66ed1a5", "5cf14c0c", "6670e211", "8b0c1bb7"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Counter-current/confound: the reshaping is partly reversible because Gulf producers relaunched a price war for Asian market share, with Saudi Arabia cutting its Asian OSP the sharpest in about two decades (up to ~$11/bbl for August), prompting China to buy 26mn barrels of Gulf crude on the deepened discount.",
+    "status": "corroborated",
+    "cite": ["681e7cad", "dbd69df2", "f3f46413", "b96f1bd1"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "The Iran conflict is reshaping the refined-product trade in favour of non-Gulf refiners, with Nigeria's 650,000 bpd Dangote refinery emerging as a major winner as its gasoline/diesel/jet exports accelerate.",
+    "status": "supported",
+    "cite": ["df7b02e0", "4d2e2453"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Oil-import dependency is the primary vulnerability for Asian emerging markets, with India the most exposed given thinner inventory buffers than China and Japan.",
+    "status": "supported",
+    "cite": ["38d54812"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "The causal-direction probe confirms that the Hormuz disruption drove the Asian diversification response.",
+    "status": "no_evidence_found",
+    "cite": [],
+    "counter_cite": [],
+    "searched": true
+  }
+]

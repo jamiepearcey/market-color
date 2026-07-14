@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "receptors": {
+      "command": "uv",
+      "args": ["run", "--quiet", "scripts/receptors_mcp.py"]
+    }
+  }
+}

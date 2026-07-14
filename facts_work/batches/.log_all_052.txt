@@ -1,0 +1,447 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc4-0ff1-76e2-81c2-dd25b589cc63
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_052.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_052.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_052.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:19:35.481500Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m processing `all_batch_052.jsonl` locally and will extract only explicitly stated market facts into `all_facts_052.jsonl`, preserving input order.
+exec
+/bin/zsh -lc 'wc -l all_batch_052.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_052.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+path='all_batch_052.jsonl'
+with open(path,'r',encoding='utf-8') as f:
+    for i,line in enumerate(islice(f,2),1):
+        obj=json.loads(line)
+        print(json.dumps({'doc_id':obj.get('doc_id'),'title':obj.get('title'),'published_date':obj.get('published_date'),'source_name':obj.get('source_name')}, ensure_ascii=False))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "339c430db5d1a77c0e6c57a0ac95bf6a", "title": "Yen hits 39-year low of 162 per dollar: 5 things to know", "published_date": "2026-06-30", "source_name": "Nikkei Asia"}
+{"doc_id": "347da1739bb6bf7b0abb51e427c61138", "title": "Exiled Chinese billionaire Guo Wengui jailed for 30 years in US for fraud", "published_date": "2026-06-30", "source_name": "SCMP News"}
+
+codex
+There are 12 documents. I’m reading the titles and bodies now to extract only claims the text directly supports, and I’ll return empty fact lists where a document is not market-relevant.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+path='all_batch_052.jsonl'
+with open(path,'r',encoding='utf-8') as f:
+    for idx,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f'--- DOC {idx} ---')
+        print('doc_id:', obj.get('doc_id'))
+        print('published_date:', obj.get('published_date'))
+        print('title:', obj.get('title'))
+        body=obj.get('body_text') or ''
+        print(body[:5000])
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+--- DOC 1 ---
+doc_id: 339c430db5d1a77c0e6c57a0ac95bf6a
+published_date: 2026-06-30
+title: Yen hits 39-year low of 162 per dollar: 5 things to know
+TOKYO -- The Japanese yen slipped into the 162-per-dollar range in Tokyo trading on Tuesday for the first time in 39 years, weakening to as low as 162.36 against the greenback and extending a slide that has accelerated in the past few months. Markets weigh Takaichi's stance against pressure from weakening currency An electronic screen displays the current Japanese yen exchange rate against the U.S. dollar outside a brokerage in Tokyo on June 30. (Photo by Shintaro Ino) TOKYO -- The Japanese yen slipped into the 162-per-dollar range in Tokyo trading on Tuesday for the first time in 39 years, weakening to as low as 162.36 against the greenback and extending a slide that has accelerated in the past few months.
+
+--- DOC 2 ---
+doc_id: 347da1739bb6bf7b0abb51e427c61138
+published_date: 2026-06-30
+title: Exiled Chinese billionaire Guo Wengui jailed for 30 years in US for fraud
+Self-exiled Chinese billionaire Guo Wengui jailed for 30 years in US for fraud conviction A New York judge ordered Guo to forfeit US$889 million in restitution, saying he ‘preyed on those seeking to bring Democracy to China’ A self-exiled billionaire Chinese business tycoon once believed to be among China’s wealthiest men was sentenced on Monday to 30 years in a US prison for a massive financial fraud that a federal judge said cost over 1,000 people worldwide hundreds of millions of dollars. Guo Wengui, who fled China a decade ago and reinvented himself as a US-based Communist Party critic, was sentenced in a Manhattan courtroom packed with his supporters by Judge Analisa Torres. She said he “preyed on those seeking to bring Democracy to China”, taking their money so he could live lavishly. Before he was sentenced, Guo protested against his treatment in jail, saying he was taken to the hospital early on Monday. He disputed a prosecutor’s portrayal of him as faking illness, saying he repeatedly vomited as he was returned to jail before being brought to court. “When I came here, I said: ‘I have a tummy ache, I need to go to the bathroom, I don’t feel well,’” Guo said through an interpreter of his courthouse arrival. Later, Guo wiped his mouth repeatedly with a tissue. He only briefly addressed the criminal case, defending his intentions by saying in reference to the Communist Party: “The reason I came to the US was to destroy the CCP.” The judge, in sentencing him, read snippets of letters she received from victims who described losing their life savings and feeling severely anxious and shamed and having family members turn on them for their poor investment choice.
+
+--- DOC 3 ---
+doc_id: 34ec26518cafa755e6196ff6ee93122f
+published_date: 2026-06-30
+title: Crawford hoping grey can get Public’s Attention with breakthrough local win
+Brett Crawford is hoping Public Attention can secure a breakthrough victory in Hong Kong when he contests the Class Two Hong Kong Reunification Cup (1,400m) at Sha Tin on Wednesday. Crawford has been enjoying a super run of form, heading to Sha Tin off the back of a double last Saturday highlighted by the exciting Mr Incredible. Public Attention has placed at his only two starts for Crawford since being transferred from the David Hayes stable, both times ridden by Karis Teetan who will partner him once again on Wednesday. The Mauritian jockey also heads to the meeting on Wednesday in red-hot form after securing a treble last Saturday. The grey son of Written Tycoon was a two-time winner in Australia pre-import, including the Group Three Eskimo Prince Stakes (1,200m) at Randwick, and steps back up to the 1,400m trip which yielded him a second placing in the Group Three Caulfield Guineas Prelude. The four-year-old will also benefit from the light weight of 115lb when jumping from barrier five. “He’s doing very well – I’ve been very happy with his two runs in the yard so far. I think he’s going to be much better over the seven furlongs, so I’m looking forward to seeing him run over the 1,400m,” Crawford said. Australian jockey Ethan Brown will have his first race day ride on race rival Packing Hermod after piloting him in a lead-up trial. It’s been a frustrating season for the Francis Lui Kin-wai-trained five-year-old, who has placed just once from five starts this term – a far cry from his four wins from nine starts during the 2024–25 season. “This is a bit easier than what he’s used to. I’m looking forward to riding him. He is what he is – you know what you’re going to get from him and I know he’ll give his all,” Brown said. Stablemate Invincible Shield has enjoyed a very consistent season and drops back into Class Two company following a fifth placing in the Group Three Sha Tin Vase (1,200m). The son of I Am Invincible has drawn well in barrier one, and will have the services of regular rider Vincent Ho Chak-yiu. Several of the four-year-old Classic Series horses will also line-up, including Emblazon who is a three-time winner at the trip, Top Dragon who will have his first run since the Hong Kong Derby (2,000m) and Beauty Bolt. Ka Ying Attack makes his way into the grade for the first time following his impressive Class Three win for David Hall over Crossborderpegasus last start by two and a quarter lengths, and will relish the step up in distance on Wednesday as a two-time course and distance winner.
+
+--- DOC 4 ---
+doc_id: 34f697050709fa7ce471d6dd26653d4f
+published_date: 2026-06-30
+title: Supreme Court Strikes Down Trump's Birthright Citizenship Executive Order
+The Supreme Court on Tuesday struck down President Donald Trump's executive order curbing birthright citizenship. In a massive 194-page, 5-4 ruling, the Court affirmed a District Court ruling, holding that Executive Order 14160 - Trump's attempt to deny automatic citizenship to children born in the U.S. to parents who are undocumented or only temporarily present - violates the Fourteenth Amendment's Citizenship Clause. Chief Justice Roberts wrote the majority opinion, joined by Sotomayor, Kagan, Barrett, and Jackson. Justice Kavanaugh provided the sixth vote against the order while explicitly rejecting the majority's constitutional theory, arguing the EO fails only because it conflicts with a 1940s immigration statute - leaving the door open for Congress, not the Constitution, to revisit the question. BREAKING: The Supreme Court has ruled that the children of illegal aliens and foreign nationals born in the U.S. count as American citizens. — Greg Price (@greg_price11) June 30, 2026 Roberts and Barrett joined all the liberals. Disgusting. pic.twitter.com/FStIm0J3R3 Polymarket had it right on SCOTUS Birthright decision (it wasn't even close) pic.twitter.com/aIXK1g9kcz — zerohedge (@zerohedge) June 30, 2026 In response to the ruling, President Trump wrote that it was "too bad for our Country," but that Republicans can "easily make up for it in Congress through Legislation..." Background Birthright citizenship - the principle that nearly everyone born on U.S. soil automatically becomes a U.S. citizen - has stood as a foundational element of American law and identity for more than 150 years. Its modern constitutional anchor is the Citizenship Clause of the 14th Amendment, ratified in 1868 after the Civil War: "All persons born or naturalized in the United States, and subject to the jurisdiction thereof, are citizens of the United States and of the State wherein they reside." The clause was enacted primarily to overturn the Supreme Court's 1857 Dred Scott v. Sandford decision (which denied citizenship to black people) and to guarantee citizenship to formerly enslaved people and their descendants. It established a clear rule of jus soli (citizenship by birth on the soil) with narrow historical exceptions, such as children of foreign diplomats or members of invading armies. Original intent. Four Justices just threw it out. pic.twitter.com/OtGZOqCoY4 — NoNonsense2 (@NoMoNonsense2) June 30, 2026 The Supreme Court's landmark 1898 decision in United States v. Wong Kim Ark cemented this broad understanding. Wong Kim Ark, born in San Francisco to Chinese parents who were legal residents but ineligible for naturalization under then-existing exclusionary laws, was ruled a U.S. citizen. Justice Horace Gray's majority opinion affirmed that the 14th Amendment codifies "the ancient and fundamental rule of citizenship by birth within the territory, in the allegiance and under the protection of the country," applying to children of resident aliens without regard to race or the precise immigration status of the parents (beyond the traditional exceptions). For well over a century, this interpretation has governed practice: federal agencies, courts, and both political parties treated birth on U.S. soil as conferring citizenship almost universally, regardless of whether a parent was undocumented, a temporary visa holder, or a lawful permanent resident. The Modern Challenges In recent decades, conservatives, immigration restriction advocates, and President Donald Trump have advanced a narrower reading. They argue that "subject to the jurisdiction thereof" requires a deeper form of political allegiance or domicile - essentially limiting automatic citizenship to children of U.S. citizens or lawful permanent residents. In short: the clause was chiefly meant for freed slaves and their children, that extending it to children of undocumented immigrants creates "anchor babies," encourages illegal immigration and birth tourism, and imposes costs on the country. They point to certain 19th-century commentaries and historical practices in other nations as support. On January 20, 2025 - his first day in office for his second term - President Trump signed Executive Order 14160, "Protecting the Meaning and Value of American Citizenship." The order directs federal agencies not to recognize U.S. citizenship for children born in the United States after February 20, 2025, in two main scenarios: - The mother was unlawfully present in the U.S. and the father is neither a U.S. citizen nor a lawful permanent resident (LPR/green card holder); or - The mother's presence was lawful but temporary (e.g., student, work, or tourist visa) and the father is neither a citizen nor LPR. The administration maintains this is consistent with the 14th Amendment's original meaning and with the statutory codification in 8 U.S.C. § 1401(a), which largely tracks the constitutional language. The Path to the Supreme Court The order never took effect. Federal district courts in
+
+--- DOC 5 ---
+doc_id: 34fa5371cde40a6e4e8fc21c474db3bf
+published_date: 2026-06-30
+title: Gold consolidates around the 4,000 level as traders await the US NFP and CPI reports | investingLive
+FUNDAMENTAL OVERVIEW Gold fell briefly below the 4,000 level in the Asian session but quickly recouped the losses. Nothing has changed on the fundamental side as precious metals remain under pressure due to the Fed tightening risk. There's a 31% chance of a hike in July and 64% probability of a move in September, with a total of 33 bps of tightening priced in by year-end. There’s been a slightly dovish repricing in the last few days. One of the reasons could be the huge selloff in oil prices which have now reached pre-war levels. The other reason is that the hawkish repricing reached a near-term peak and for more we will likely need upside surprises in the NFP and CPI reports. All in all, there isn’t a strong reason to price in any more rate hikes at the moment. Therefore, we either see more pullbacks in the next days, or the price action remains rangebound until we get the US data. Chasing lower prices right now without a meaningful fresh catalyst looks bad from a risk to reward perspective. In terms of economic data, given the Fed’s focus on inflation, the US CPI will likely be more important for market pricing unless we get a blockbuster NFP report. In line or worse than expected data, should lead to a pullback pretty much across the board, with gold benefiting from some dovish repricing. GOLD TECHNICAL ANALYSIS – DAILY TIMEFRAME On the daily chart, we can see that gold dropped below the 4,000 level again in the Asian session but quickly recouped all the losses. The natural target remains the 3,885 level but the bearish momentum is clearly fading as the hawkish repricing peaked last week. If the price falls into the 3,885 level, we can expect the buyers to step in with a defined risk below the level to position for a rally into the major downward trendline. The sellers, on the other hand, will want to see the price breaking lower to increase the bearish bets into the major upward trendline around the 3,700 level. GOLD TECHNICAL ANALYSIS – 4 HOUR TIMEFRAME On the 4 hour chart, we can see the price broke below the minor counter-trendline and it’s now retesting it. The sellers are likely stepping in around the broken trendline with a defined risk above it to keep pushing into new lows. The buyers, on the other hand, will want to see the price breaking higher to pile in for a rally into the major downward trendline. GOLD TECHNICAL ANALYSIS – 1 HOUR TIMEFRAME On the 1 hour chart, there’s not much we can add here but if we get a break above the trendline, we can expect the pullback to extend into the swing high around the 4,096 level. That’s where the sellers will have a better risk to reward setup to target new lows, while the buyers will need a break to open the door for new highs. The red lines define the average daily range for today. UPCOMING CATALYSTS Today, we get the US Job Openings data and the US Consumer Confidence report. Tomorrow, we have the US ADP report, the US ISM Manufacturing PMI and Fed Chair Warsh speaking. On Thursday, we conclude with the US NFP report, and the US Jobless Claims figures.
+
+--- DOC 6 ---
+doc_id: 351ce4f4fc5b25193b6b943c3512bb97
+published_date: 2026-06-30
+title: At the World Cup, the media has set up a moral checkpoint
+“Why is it that African teams and Middle Eastern teams have to answer for what their governments are doing but European teams don’t?” South African comedian Trevor Noah asked recently during a World Cup watch party. He was reacting to the questions Western journalists had lobbed at Iranian players following their games. But the question goes far beyond Iran. It speaks to a familiar hierarchy in global journalism: Some players are allowed to be athletes. Others are turned into ambassadors, defendants and moral exhibits. The World Cup is often sold as the place where football rises above politics. This has always been a canard. Politics, and hypocrisy, have always been part of the sport. Teams have boycotted or been banned from the competition because of the policies of their governments. Russia is banned for its invasion of Ukraine. South Africa was eventually banned for apartheid. Israel, however, gets to play in qualifiers despite occupying Palestine, Lebanon and Syria, bombing Iran, and despite findings by Amnesty International, Human Rights Watch and UN experts that it is committing genocide in Gaza and maintaining a system of apartheid at home and in the occupied territories. The United States, too, has never been banned despite its many wars of aggression. Nor is the World Cup unique. International cultural and sporting competitions are full of politics and hypocrisies dressed up as principle. Just look at the controversies around Israel’s participation in Eurovision. Noah’s question is an indictment of a journalism that likes to imagine itself as challenging power but often mirrors its assumptions. Much ink was spilled over the propriety of Russia and Qatar hosting the 2018 and 2022 World Cups, given the policies of those governments. Yet there has been far less interrogation of the propriety of the US hosting this tournament while it attacks Iran and Venezuela, deports asylum seekers, and blocks or restricts the travel of tournament officials, players and fans. The selective accountability that runs through the institutions – who is banned, who is allowed to host – runs through the press box too. So it should not surprise us that some political questions are reserved for some teams and not others. Ahead of their match against Egypt in Seattle, branded locally as a “Pride Match”, Iran and Egypt were both asked about LGBTQ rights. A FIFA official even read a statement saying Iran wished to answer only questions about the game. Still, the media persisted. Egyptian officials also shielded their players from similar questions. Again, the point is not that LGBTQ rights, war, repression, discrimination, apartheid or genocide are unimportant. They are profoundly important. Journalists should ask difficult questions. But difficult questions should not become a ritual reserved for some passports. American players are not routinely asked to account for US bombings, border policy, racism, police violence or support for Israel. English players are not habitually asked about British arms exports or colonial legacy. French players are not expected to answer for military interventions in Africa. German players are not pressed on Berlin’s crushing of pro-Palestinian protests. And when European teams have been pulled into politics – the OneLove armbands and the German squad covering their mouths for a team photo at Qatar 2022, England taking a knee at Euro 2020 – it was a protest they chose to make, not a confession demanded of them before they were allowed to speak. No reporter required them to denounce their governments as the price of discussing a match. Western footballers are treated as individuals who happen to represent a country. Players from Iran, Egypt, South Africa, Saudi Arabia, Morocco, Senegal or Ghana are more easily turned into representatives of regimes. For many players from the Global South, the tournament press conference becomes an ideological checkpoint. Before they are allowed to talk about tactics, injuries or the opposition’s midfield, they are asked to explain their governments, their societies, their religions, their laws and their wars. Sound familiar? Remember Palestinian interviewees being required to condemn Hamas at the start of any interview before they could speak of the genocide in Gaza? The purpose was not clarification. It was classification. It established the moral hierarchy before the conversation could begin: Israel good, Hamas bad. Palestinian suffering could be heard only after passing through the checkpoint of Western approval. The same logic is visible in these World Cup pressers. The Iranians must condemn Iran. The Egyptians must condemn Egypt. Africans must prove they understand the West’s moral vocabulary before they can be trusted to speak. But Americans will not be asked to condemn the United States, nor the English the UK. This is the real answer to Noah’s question. The issue is not whether politics belongs in sport. It always has. The issue is who is made to carry po
+
+--- DOC 7 ---
+doc_id: 35d0f9cbb25f08a0e56fc572f291a581
+published_date: 2026-06-30
+title: ‘But we’re just 1% of emissions’: do smaller countries’ climate efforts matter?
+On first hearing, it is a position that sounds reasonable. “When our share of global emissions is less than 1%,” Rishi Sunak argued when he was the UK prime minister in 2023, “how can it be right that British citizens are now being told to sacrifice even more than others?” Sunak is not the only world leader to have cited such figures while delaying cuts to pollution. In 2019, Scott Morrison, Australia’s then prime minister, used his country’s 1.3% of global emissions to reject any suggestion Australia was not “doing our bit” on climate breakdown. In July, the German chancellor, Friedrich Merz, pointed to his country’s 2% share of global emissions while supporting loopholes in European climate targets. A few months later the Italian prime minister, Giorgia Meloni, followed suit, flagging the EU’s 6% share. More radical demands were heard in a radio interview in May with Tony Blair, the former UK prime minister who has consulted for petrostates since leaving office, who used the UK’s 1% share to urge it to abandon clean economy targets. Often presented next to the vast emissions from the US, China and India, which are collectively responsible for just over half of carbon pollution today, the claim that a country is “just 1% of emissions” has been used to suggest small but wealthy countries cannot stop the worsening of extreme weather events, such as the heatwave scorching Europe. “Even if we were all climate neutral in Germany tomorrow,” Merz said last summer, “not a single natural disaster would be prevented anywhere in the world.” But does the position hold up on closer examination? Climate scientists point to the much larger historical emissions of these countries – the metric that matters most for global heating – as well as the fact that these countries have more money to cut pollution. Per person, European countries have contributed a disproportionate amount to emissions, and progress in cleaning their economies is only now bringing annual emissions close to the global average. “These leaders wouldn’t like it if the top 1% of their wealthiest citizens didn’t pay their taxes, so the argument is fallacious and simply buck-passing,” said Prof Piers Forster, a climate scientist at the University of Leeds. “Future warming is driven by future emissions, so every tonne of carbon dioxide that a country or citizen can avoid emitting will improve temperature and heatwave outcomes for generations.” The three most populous countries in the world – the US, China and India – were the only ones individually responsible for more than 5% of the carbon emitted from burning fossil fuels in 2024. But while each of the remaining 194 countries can indeed claim to be less than 5% of the problem, together they are responsible for just under half of humanity’s yearly emissions. Despite this, the argument has been used to justify delaying action by the governments of some of the biggest polluters. More recently, it has found a home with nationalist-populist parties across the continent. The far-right leaders and energy spokespeople of western Europe’s five biggest economies – the UK, Germany, France, Spain and Italy – have all used the argument to justify calls to weaken climate policy in the last two years. Further analysis from the Energy and Climate Intelligence Unit (ECIU), a thinktank, shared exclusively with the Guardian, found 200 examples of such claims being made in national newspapers of 27 countries responsible for less than 2% of global CO2 emissions last year. Among the examples is an editorial in the British newspaper the Times, in March 2025, that stated: “Climate change is clearly a problem, yet Britain, which contributes around 1% of global emissions, can do little to stop it.” A YouGov poll for the ECIU in April found one in four Britons think countries emitting less than 1% of emissions should stop trying to reduce them. The share was highest among voters of Reform UK, of which half thought such countries should not continue cutting emissions. The party’s leader, Nigel Farage, said in an interview with the BBC last year that it was “absolutely mindless” for a country that produced less than 1% of global CO2 to “beggar itself”. Dr Ella Gilbert, a climate scientist and ECIU board member, said: “The climate crisis is a global problem and every country should be acting to reduce emissions and build a greener global economy, especially those with the largest historical responsibility, like the UK. The climate doesn’t care where carbon comes from – whether [it’s] from multiple countries responsible for smaller proportions of emissions, or China.” Gilbert said the science was clear that curbing emissions by reaching net zero was the only way to restore the climate and avoid dangerous tipping points. “The UK may account for just 1% of current global emissions, but we’re responsible for 100% of our own emissions, and we have the opportunity to show global leadership by bringing them down.”
+
+--- DOC 8 ---
+doc_id: 35f582e3fbf5a41b5d93185ae632bff6
+published_date: 2026-06-30
+title: Belarus’ Lukashenko courts Moscow and Beijing as Ukraine tensions simmer
+Belarus’ Lukashenko courts Moscow and Beijing as Ukraine tensions simmer China and Belarus must maintain strategic dialogue and continue to develop bilateral relations at a high level, President Xi said on Monday Belarusian leader Alexander Lukashenko has visited Russia and then China following a series of public exchanges with Ukraine, meeting President Xi Jinping in Beijing and Russian President Vladimir Putin at his Valdai residence. Lukashenko told Xi that being in China was for him “like coming home”, Belarusian journalists accompanying the delegation reported on Monday. Xi said China supported Belarus in preserving its state sovereignty, independence and territorial integrity, according to statements from the Chinese side. China and Belarus must maintain their strategic dialogue and continue to develop bilateral relations at a high level, Xi said. Lukashenko had previously spent two days in talks with Putin at the Russian president’s residence in Valdai, between Moscow and St Petersburg. The visit, which was initially not publicly announced, was accompanied by widespread speculation given the recent history of tensions with Kyiv. Ukraine’s leadership believes Russia wants to pressure its ally Belarus into more direct involvement in the war – something Lukashenko is seeking to avoid, even though he allowed Russian forces to use Belarusian territory for the 2022 invasion of Ukraine.
+
+--- DOC 9 ---
+doc_id: 3633f42a5d3ea87bfff4b57905da5513
+published_date: 2026-06-30
+title: Greentech Technology International Limited invites you to the 2026 SMM (16th) Tin Industry Chain Conference
+"Tin" Leads the Future: Industrial Transformation and Value Reconstruction in a New Cycle Conference Background Currently, the global tin industry stands at a historic turning point, where traditional cyclical logic has been completely shattered and strategic value has become fully prominent. The tin market in 2026 exhibits an unprecedentedly complex landscape and profound changes: I. Profound Reconstruction of Supply-Demand Patterns, Unprecedented Enhancement of Strategic Attributes The global static reserve-to-production ratio of tin resources is only 14 years, with scarcity increasingly evident. The supply side faces "triple pressures": repeated setbacks in Myanmar’s production resumptions, continuously tightening policies in Indonesia, and high geopolitical risks in the DRC, making resource constraints a new normal. Meanwhile, the demand structure has undergone a fundamental shift, and tin has become a strategic resource bridging traditional manufacturing and the digital future. II. Price System Breaks Historical Records, Industry Ecosystem Faces Restructuring In early 2026, SHFE tin price exceeded 470,000 yuan/mt, reaching an all-time high. This price breakthrough is not only a manifestation of supply-demand imbalance but also a marker of the revaluation of the tin industry. Traditional trade models, risk management systems, and supply chain collaboration methods all urgently require innovative breakthroughs. III. Technology-Driven and Green Transition Fostering a New Symbiotic Ecosystem Digital and intelligent technologies are deeply empowering the tin industry chain. The global green transition demands that the tin industry upgrade toward low-carbon and circular economy, with recycled tin recovery and green smelting processes becoming necessary paths. Every link in the industry chain must shift from competition to collaboration, building an open, resilient, and innovative symbiotic system. Against this backdrop, from August 19 to 21, 2026 in Changsha, Hunan the 2026 SMM (16th) Tin Industry Chain Conference will gather global industry elites for in-depth discussions. Greentech Technology International Limited will attend this grand event, discussing industry development trends with peers and jointly promoting the tin industry to new heights. Click to register now, witness and participate in this significant and far-reaching industry event, and together create a brilliant new chapter! Greentech Technology International Limited ("Greentech Technology", stock code: 00195) is a company listed on The Stock Exchange of Hong Kong Limited. On March 4, 2011, the company successfully acquired all equity interests in Baisong Mineral Resources Global Limited ("Baisong Mineral"), becoming a non-ferrous metal resources enterprise primarily engaged in tin ore mining and sales. Since the sale of its insulation materials business on February 29, 2011, the company has focused on the development of non-ferrous metal businesses. Greentech Technology International Limited is listed on The Stock Exchange of Hong Kong Limited. On 4 March 2011, the Company successfully acquired the entire interests of Parksong Mining and Resource Recycling Limited, thereby venturing into the min. Parksong Mining is an investment holding company that conducts tin mining in Tasmania, Australia, through a joint venture, holding a 50% interest in the Renison Mine, the Mount Bischoff open-cut tin project, and the Rentails tailings retreatment project. Among these, the Renison Mine has long been one of the world's major hard-rock tin mines and is also Australia's largest tin-producing mine. Our project partner, Yunnan Tin Group (Holding) Co., Ltd., is China's largest tin producer. With its extensive industry experience, Yunnan Tin Group provides strong support in the sale of tin and the production management of the Tasmania tin mines. Parksong Mining is an investment holding company which launches tin mining through a joint venture in Tasmania, Australia. It holds a 50% interest of the Renison quarry, the Mount Bischoff open cut tin project and the Rentails tailings retreatment project. The Renison tin deposit has always been one of the largest hard rock tin deposits in the world and the largest tin mine in Australia. Our project partner, Yunnan Tin Group (Holding) Co., Ltd., is the largest tin producer in China. With its extensive tin mining experience, Yunnan Tin Group will provide potent support to our metal tin sale and the production management of the Tasmania mines. Upon the acquisition of the tin mine, the company also strengthened its management and technical teams. With the addition of new management, it assembled a group of experts with unique achievements in geological exploration, mining, mineral processing, and smelting, and recruited a number of professionally trained and experienced engineering and technical personnel from Australia and mainland China to enhance frontline production management. The company believes that the experien
+
+--- DOC 10 ---
+doc_id: 3641d3e558cf58abf9e8dbd6bc408987
+published_date: 2026-06-30
+title: We have spent 30 years meeting Pauline Hanson’s anger with our own. What if we tried this instead? | Peter Lewis
+Australians have had a gutful. Across this wide brown land the waves of anger generate their own source of energy as we raise the one-fingered salute to the government, corporate elites and, increasingly, each other. I get it. I’ve had it up to here with climate backsliding. I’m appalled at the genocide in Gaza. I’m outraged that one man’s stupidity is dragging the world into recession. I’ve nothing but contempt for the tech-bros selling their AI snake oil, the consultancy firms gaming the system and grifters like Kyle and Karl sucking up all the oxygen. Most of all I’m angry that One Nation is taking so much space in the political discourse and that my polls are among those charting this rise so that every time I write a column, I have to focus in on Pauline Hanson and her populist humbug rather than the pressing issues facing our nation. But here we are. According to the latest Guardian Essential poll, One Nation is maintaining its meteoric rise in the polls, albeit with a slight flattening. Whether this is the beginning of a deeper decline or merely a plateau to build from remains to be seen. What we do know is that there are now so many people looking at One Nation that we can get a serious read on what’s driving those who have crossed the Hanson line (29%) and those who have become One Nation curious (23%). Based on our right track/wrong track metric, anger seems to be in the eye of their storm. Ed Coper, a political strategist has coined a word for this phenomenon. His excellent new book Angertainment lays out the science behind how anger is determining our reality, with algorithms deliberately set to cater to our lizard brain’s adrenal thirst for outrage driving voters to the far right. On this reading, One Nation is not just tapping into a general sense of grievance with the status quo, it’s harnessing a new centre of gravity in public discourse: anger pills that build their own momentum and shape a darker reality. For 30 years Hanson has been fixated on race, but it is only now that her messages are travelling beyond the fringes in serving the commercial interests of the big tech platforms. This is something else that I am very angry about. In that time, we have met Hanson’s sense of outrage with our own. We have condemned her, cancelled her, and poured our righteous scorn upon her. But in asserting Hanson’s illegitimacy for so long we have helped her secure the opposite: she is the angry outsider we have co-created. But here’s a thought. What if instead of feeding Hanson’s anger machine, we treated her with something closer to equanimity? Rather than letting ourselves get drawn into every outrage, doubling down on everything that reinforces our moral clarity, we retained our composure and engaged with her ideas on their merit? Because it is here where Hanson is most exposed, not her language, not her demeanour, not her clickbait, but her potpourri of half-baked ideas. A second set of responses to proposals she put forward at her National Press Club address earlier this month makes this point. TLDR: none of her populist policies are actually that popular. Hanson’s address to the NPC was revealing. Different actors used anger to promote their own ends: Hanson to reinforce her outsider status and hostility towards the mainstream media. The press gallery used it to generate headlines by taking Hanson on and GetUp! used it to energise its activist base. But almost by accident something else emerged from Hanson’s engagement with this longstanding political institution: genuine scrutiny of her policies revealed how unprepared she is to govern. The best question posed was how her call to pull out of the UN would invalidate Australia’s shipping and aviation treaties. She had no idea. Other claims like the call to scrap all paid parental leave were swiftly walked back. As for the so-called “mono-culture” panic, by the end of the week Hanson was embracing our rainbow World Cup squad as the cultural model she was championing. From a distance equanimity can risk looking like acquiescence, that we are pandering to prejudice when we should be calling it out. It is actually the opposite: by choosing to engage we hold her to account rather than rejecting her views outright and allowing them to stand condemned but never actually contested. A final table on the reason people are concerned about a One Nation vote draws this theory out. A majority of One Nation-curious voters fear the party is not equipped to govern – even those saying they would vote for Hanson are concerned about this. So, here’s my radical plan to confront Hanson. Let’s embrace her right to participate in the political discourse and engage in good faith; don’t ridicule her, don’t sneer at her lack of sophistication, don’t search for the reasons not to take her seriously. Because with these numbers she is deadly serious. Rather than taking her outrage bait let’s hold her to the same standards as other participants in our representative democracy. Ra
+
+--- DOC 11 ---
+doc_id: 3644c278f5dadc49c69691376ae7b433
+published_date: 2026-06-30
+title: Canada: GDP data signal firmer second quarter – RBC | FXStreet
+Royal Bank of Canada (RBC) economist Abbey Xu notes that Canadian Gross Domestic Product (GDP) rose 0.5% in April, beating Statistics Canada’s 0.4% advance estimate and marking the strongest monthly gain since July 2025. Goods-producing industries, especially mining, quarrying and Oil and gas extraction, led gains, with services expanding more moderately. Xu highlights that recent data track some upside risk to Royal Bank of Canada’s (RBC) 1.7% annualized Q2 GDP forecast, but stresses that trade uncertainty and goods-sector headwinds mean the Canadian economy is still expected to grow only at a modest pace in coming months. Modest growth outlook "Canadian economic activity increased 0.5% in April, slightly higher than Statistics Canada's 0.4% advance estimate and marking the strongest monthly gain since July 2025." "The stronger April reading points to a firmer start to the second quarter after growth stalled over the winter." "While uncertainty surrounding U.S. trade policy continues to weigh on the outlook, the latest data are broadly consistent with our view that underlying economic conditions continue to improve modestly on a per-person basis rather than signaling a material shift in underlying momentum." "That said, as-reported today's data is tracking some upside risk to our forecast for a 1.7% (annualized QoQ) increase in Q2." "Overall, the April report points to a firmer start to the second quarter following a weak first quarter." (This article was created with the help of an Artificial Intelligence tool and reviewed by an editor.) Author The FXStreet Insights Team is a group of journalists that handpicks selected market observations published by renowned experts. The content includes notes by commercial as well as additional insights by internal and external analysts.
+
+--- DOC 12 ---
+doc_id: 36be5c6c0df1eead51aa43946ba00252
+published_date: 2026-06-30
+title: Crude oil buying runs out of steam. The price moves back below its 100 hour moving average | investingLive
+Crude oil is settling down $1.25, or 1.77%, at $69.50. The high price for the day reached $71.60, while the low has been extended to $69.22 in the current hour. Recall that on Monday and Tuesday, buyers pushed crude higher to test the falling 100-hour moving average. Although the price briefly traded above that level on several hourly bars, the breakout lacked follow-through and quickly reversed. Sellers, however, were unable to capitalize, leaving the market trapped in a relatively tight range. That changed during the North American session today. Crude climbed back above the 100-hour moving average near $70.40, sparking another round of buying that carried the price to a session high of $71.60. But once again, the buyers could not sustain the momentum. Over the last several hours, the market has reversed sharply lower, fallen back below the 100-hour moving average—now at $70.21—and extended to a new session low. The buyers had their shot—and they missed. From a technical perspective, the failed break above the 100-hour moving average keeps the sellers firmly in control. To shift the near-term bias back in favor of the bulls, crude would need to move back above the 100-hour moving average and, more importantly, stay above it. Even then, there is more work to do. The next upside targets come in at the 200-hour moving average at $72.29 and the 200-day moving average at $73.88. Buyers would need to reclaim both levels to signal that they are beginning to regain control following the sharp decline from the June 3 high near $96.86. Until that happens, rallies are likely to be viewed as corrective moves within a broader bearish trend. On the downside, support comes in at last Friday's low of $68.56. A break below that level would have traders looking toward the February 27 closing price of $67.28—the last settlement before the start of the Iran conflict. Meanwhile, gasoline prices continue to attract attention. National average gasoline prices stood at $2.98 per gallon on February 27. According to AAA, the current national average is $3.84 per gallon. As crude prices have fallen, I have been paying close attention to the spread between crude oil and gasoline prices. There is always some lag in how lower crude prices filter through to the pump, but it is an issue that has also caught President Trump's attention, highlighted by his recent Truth Social post: Trump cannot say that gas prices are down - a campaign promise. In fact, at the end of the Biden term and the start of Trump's 2nd term, the price of a gallon was $3.11. So he is losing all around on his lower oil price promise.
+
+
+codex
+I’ve isolated the documents that are actually market-relevant. I’m writing the output now with conservative extraction rules so opinion pieces, legal commentary, and sports items stay empty unless they contain explicit market facts.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+infile = Path('all_batch_052.jsonl')
+outfile = Path('all_facts_052.jsonl')
+
+facts_by_doc = {
+    '339c430db5d1a77c0e6c57a0ac95bf6a': [
+        {
+            'claim': 'The Japanese yen weakened to as low as 162.36 per U.S. dollar in Tokyo trading on June 30, 2026, entering the 162-per-dollar range for the first time in 39 years.',
+            'subject': 'Japanese yen',
+            'predicate': 'price_move',
+            'object': 'U.S. dollar',
+            'direction': 'down',
+            'magnitude': '162.36 per dollar',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Japanese yen', 'U.S. dollar'],
+            'confidence': 0.99,
+        }
+    ],
+    '347da1739bb6bf7b0abb51e427c61138': [],
+    '34ec26518cafa755e6196ff6ee93122f': [],
+    '34f697050709fa7ce471d6dd26653d4f': [],
+    '34fa5371cde40a6e4e8fc21c474db3bf': [
+        {
+            'claim': 'Gold briefly fell below the 4,000 level in the Asian session on June 30, 2026, before recouping the losses.',
+            'subject': 'Gold',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'below 4,000',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Gold'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Precious metals remained under pressure because of Federal Reserve tightening risk.',
+            'subject': 'Precious metals',
+            'predicate': 'statement',
+            'object': 'Federal Reserve',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'Federal Reserve tightening risk',
+            'entities': ['Precious metals', 'Federal Reserve'],
+            'confidence': 0.83,
+        },
+        {
+            'claim': 'Markets were pricing a 31% chance of a Federal Reserve rate hike in July.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '31%',
+            'time': 'July',
+            'cause': None,
+            'entities': ['Federal Reserve'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Markets were pricing a 64% probability of a Federal Reserve move in September.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '64%',
+            'time': 'September',
+            'cause': None,
+            'entities': ['Federal Reserve'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Markets had priced in a total of 33 basis points of Federal Reserve tightening by year-end.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '33 bps',
+            'time': 'year-end',
+            'cause': None,
+            'entities': ['Federal Reserve'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Oil prices had fallen to pre-war levels after a huge selloff.',
+            'subject': 'Oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'a huge selloff',
+            'entities': ['Oil'],
+            'confidence': 0.84,
+        },
+    ],
+    '351ce4f4fc5b25193b6b943c3512bb97': [],
+    '35d0f9cbb25f08a0e56fc572f291a581': [],
+    '35f582e3fbf5a41b5d93185ae632bff6': [],
+    '3633f42a5d3ea87bfff4b57905da5513': [
+        {
+            'claim': 'The global static reserve-to-production ratio of tin resources is 14 years.',
+            'subject': 'Tin',
+            'predicate': 'supply_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '14 years',
+            'time': '2026',
+            'cause': None,
+            'entities': ['Tin'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'SHFE tin prices exceeded 470,000 yuan per metric ton in early 2026, reaching an all-time high.',
+            'subject': 'SHFE tin',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '470,000 yuan/mt',
+            'time': 'early 2026',
+            'cause': 'supply-demand imbalance and the revaluation of the tin industry',
+            'entities': ['Tin', 'Shanghai Futures Exchange'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Greentech Technology International Limited will attend the 2026 SMM Tin Industry Chain Conference in Changsha, Hunan, from August 19 to 21, 2026.',
+            'subject': 'Greentech Technology International Limited',
+            'predicate': 'event',
+            'object': '2026 SMM Tin Industry Chain Conference',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'August 19 to 21, 2026',
+            'cause': None,
+            'entities': ['Greentech Technology International Limited', 'Tin'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Greentech Technology International Limited holds a 50% interest in the Renison Mine, the Mount Bischoff open-cut tin project, and the Rentails tailings retreatment project in Tasmania through Parksong Mining.',
+            'subject': 'Greentech Technology International Limited',
+            'predicate': 'corporate_action',
+            'object': 'Parksong Mining',
+            'direction': 'na',
+            'magnitude': '50%',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Greentech Technology International Limited', 'Parksong Mining', 'Renison Mine', 'Mount Bischoff', 'Rentails', 'Tasmania'],
+            'confidence': 0.88,
+        },
+    ],
+    '3641d3e558cf58abf9e8dbd6bc408987': [],
+    '3644c278f5dadc49c69691376ae7b433': [
+        {
+            'claim': 'Canadian GDP rose 0.5% in April 2026, beating Statistics Canada\\'s 0.4% advance estimate.',
+            'subject': 'Canada GDP',
+            'predicate': 'price_move',
+            'object': 'Statistics Canada advance estimate',
+            'direction': 'up',
+            'magnitude': '0.5%',
+            'time': 'April 2026',
+            'cause': None,
+            'entities': ['Canada', 'Statistics Canada'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The 0.5% April 2026 increase in Canadian GDP was the strongest monthly gain since July 2025.',
+            'subject': 'Canada GDP',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '0.5%',
+            'time': 'April 2026',
+            'cause': None,
+            'entities': ['Canada'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Mining, quarrying, and oil and gas extraction led the gains in Canadian GDP in April 2026, while services expanded more moderately.',
+            'subject': 'Canada GDP',
+            'predicate': 'production_change',
+            'object': 'Mining, quarrying, and oil and gas extraction',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'April 2026',
+            'cause': None,
+            'entities': ['Canada', 'Mining', 'Quarrying', 'Oil and gas extraction', 'Services'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'The latest data tracked some upside risk to RBC\\'s forecast for 1.7% annualized quarter-on-quarter Canadian GDP growth in the second quarter.',
+            'subject': 'Canada GDP',
+            'predicate': 'forecast',
+            'object': 'Royal Bank of Canada',
+            'direction': 'up',
+            'magnitude': '1.7% annualized QoQ',
+            'time': 'Q2',
+            'cause': 'the stronger April 2026 GDP reading',
+            'entities': ['Canada', 'Royal Bank of Canada'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Uncertainty surrounding U.S. trade policy continued to weigh on the outlook for the Canadian economy.',
+            'subject': 'Canadian economy',
+            'predicate': 'statement',
+            'object': 'U.S. trade policy',
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'uncertainty surrounding U.S. trade policy',
+            'entities': ['Canada', 'United States'],
+            'confidence': 0.88,
+        },
+    ],
+    '36be5c6c0df1eead51aa43946ba00252': [
+        {
+            'claim': 'Crude oil settled down "'$1.25, or 1.77%, at $69.50 on June 30, 2026.'"',
+            'subject': 'Crude oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$1.25, or 1.77%, to $69.50'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Crude oil'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Crude oil reached a session high of "'$71.60 and a low of $69.22 on June 30, 2026.'"',
+            'subject': 'Crude oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$71.60 high and $69.22 low'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Crude oil'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Crude oil fell back below its 100-hour moving average, which was at "'$70.21, after failing to sustain a move above it on June 30, 2026.'"',
+            'subject': 'Crude oil',
+            'predicate': 'price_move',
+            'object': '100-hour moving average',
+            'direction': 'down',
+            'magnitude': '"'$70.21'"',
+            'time': '2026-06-30',
+            'cause': 'buyers could not sustain momentum above the 100-hour moving average',
+            'entities': ['Crude oil'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'AAA said the U.S. national average gasoline price was "'$3.84 per gallon on June 30, 2026.'"',
+            'subject': 'U.S. gasoline',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$3.84 per gallon'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['AAA', 'United States', 'Gasoline'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The U.S. national average gasoline price was "'$2.98 per gallon on February 27, 2026.'"',
+            'subject': 'U.S. gasoline',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$2.98 per gallon'"',
+            'time': 'February 27, 2026',
+            'cause': None,
+            'entities': ['United States', 'Gasoline'],
+            'confidence': 0.97,
+        },
+    ],
+}
+
+docs = []
+with infile.open('r', encoding='utf-8') as f:
+    for line in f:
+        docs.append(json.loads(line))
+
+with outfile.open('w', encoding='utf-8') as out:
+    total_facts = 0
+    for doc in docs:
+        facts = facts_by_doc.get(doc['doc_id'], [])
+        total_facts += len(facts)
+        out.write(json.dumps({
+            'doc_id': doc['doc_id'],
+            'title': doc.get('title'),
+            'facts': facts,
+        }, ensure_ascii=False) + '\\n')
+
+print(f'docs processed: {len(docs)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 21
+
+codex
+docs processed: 12, total facts: 21
+tokens used
+22,406
+docs processed: 12, total facts: 21

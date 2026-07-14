@@ -1,0 +1,65 @@
+[
+  {
+    "claim": "Ukrainian drone strikes knocked out over 30% of Russia's oil refining capacity, leaving Russia with a ~20% domestic gasoline production shortfall and planning to import up to 400,000 tonnes of fuel per month from neighbours.",
+    "status": "supported",
+    "cite": ["3bfbb159"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Russia banned diesel exports to protect domestic supply after refinery strikes and moved to start importing fuel in July.",
+    "status": "corroborated",
+    "cite": ["3fefcbbf", "451ddb48", "393e4a68", "3bfbb159"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Central Asia depends heavily on Russian refined product: Tajikistan and Kyrgyzstan rely on Russia for virtually all their petroleum products and even energy-rich Uzbekistan relies on Russian refined fuel because regional refining capacity is limited, so Russian refinery disruptions push fuel prices up across the region and force governments to seek alternative sources.",
+    "status": "corroborated",
+    "cite": ["cbb85aa6", "e2234b9d", "ef0d433b", "7c8a2219", "64dc8713", "30cf4b5c", "451ddb48"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Country responses are differentiated: Kyrgyzstan hunts for new suppliers, Uzbek prices climb, and Kazakhstan guards its own market by tightening control over petroleum products, with Russian high-octane gasoline now ~40% more expensive than in Kazakhstan, prompting a crackdown on cross-border arbitrage/smuggling.",
+    "status": "corroborated",
+    "cite": ["ef0d433b", "cb7220d3", "6e43a001", "594fd42f", "7c8a2219"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Confound: Tajikistan's own domestic policy (a 30 euro-per-tonne environmental fee on imported gasoline and diesel) independently raised fuel prices, so the regional price rise is not attributable to Russia alone.",
+    "status": "supported",
+    "cite": ["e2234b9d"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "Confound: a concurrent Iran/Middle-East supply shock tightened global refined-product and crude markets during the same window, contributing to higher Central Asian fuel costs independently of Russia.",
+    "status": "supported",
+    "cite": ["9c7c3ba4"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "The fuel crisis is pressuring Russia's own economy (BOFIT: growing policy-balancing challenges; government pays compensation to keep refiners selling domestically; ISW: strike campaigns will keep hurting the economy), the classic upstream of remittance/trade spillover to Central Asia.",
+    "status": "supported",
+    "cite": ["64dc8713", "30cf4b5c"],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "The Russian fuel crisis is spilling over to Central Asia through a remittances / migrant-labour / GDP channel.",
+    "status": "no_evidence_found",
+    "cite": [],
+    "counter_cite": [],
+    "searched": true
+  },
+  {
+    "claim": "The fuel-crisis spillover extends as a fuel-price channel into the broader former-Soviet space beyond Central Asia (Belarus, Ukraine, Moldova/Transnistria).",
+    "status": "no_evidence_found",
+    "cite": [],
+    "counter_cite": ["2ee89da4", "40afa080"],
+    "searched": true
+  }
+]

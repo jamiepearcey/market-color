@@ -1,0 +1,50 @@
+{
+  "fixture": true,
+  "desk": "energy",
+  "date": "2026-07-01",
+  "generated_utc": "2026-07-01T06:30:00Z",
+  "movers": [
+    { "symbol": "CL=F", "name": "WTI Crude", "close": 61.42, "ret_1d": -0.031, "zscore_20d": -2.1 },
+    { "symbol": "BZ=F", "name": "Brent Crude", "close": 64.87, "ret_1d": -0.028, "zscore_20d": -1.9 },
+    { "symbol": "XLE", "name": "Energy Select SPDR", "close": 84.15, "ret_1d": -0.019, "zscore_20d": -1.2 },
+    { "symbol": "NG=F", "name": "Henry Hub Natgas", "close": 3.02, "ret_1d": 0.002, "zscore_20d": 0.1 }
+  ],
+  "sections": [
+    {
+      "kind": "driver",
+      "anchor": "CL=F",
+      "title": "Hormuz reopening + US-Iran MoU -> supply-risk premium unwinds",
+      "chains": [
+        ["strait of hormuz", "oil price", "down"],
+        ["us-iran mou", "brent forecasts", "down"],
+        ["oil price", "us production", "up"]
+      ],
+      "facts": [
+        {
+          "claim": "Tanker transits resumed through the Strait of Hormuz after the de-escalation, unwinding the shipping-risk premium on Gulf crude and LNG.",
+          "source_name": "OilPrice.com",
+          "published_date": "2026-06-30",
+          "url": "https://oilprice.com/Energy/Energy-General/",
+          "corroboration": 3,
+          "is_new": true
+        },
+        {
+          "claim": "Banks cut Brent H2 forecasts after the US-Iran memorandum of understanding raised expectations of Iranian barrels returning to the market.",
+          "source_name": "Rigzone Latest",
+          "published_date": "2026-06-30",
+          "url": "https://www.rigzone.com/news/",
+          "corroboration": 2,
+          "is_new": true
+        }
+      ]
+    },
+    {
+      "kind": "no_driver",
+      "anchor": "NG=F",
+      "title": "US natgas: no clear driver",
+      "chains": [],
+      "facts": []
+    }
+  ],
+  "new_fact_count": 5
+}

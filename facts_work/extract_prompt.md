@@ -13,7 +13,7 @@ Each fact uses this shape:
   "direction": "<up|down|flat|na>",
   "magnitude": "<value/percent as written or null>",
   "time": "<date/period as written, else the doc published_date>",
-  "cause": "<stated driver or null>",
+  "cause": "<the MOST SPECIFIC stated driver, naming the concrete event/actor (e.g. 'Iran fired on the tanker Kiku in the Strait of Hormuz', not 'the conflict') — when the text states both a general and a specific cause, use the specific one; null if none stated>",
   "entities": ["<canonical entity names in this fact>"],
   "confidence": <0.0-1.0>
 }

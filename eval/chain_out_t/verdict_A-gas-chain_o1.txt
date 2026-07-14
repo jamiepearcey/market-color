@@ -1,0 +1,3 @@
+VERDICT: B
+
+Both correctly conclude the context lacks a driver, but B is more grounded — it cites specific production figures (Permian 17.2→27.6 Bcf/d) and notes they'd add supply, and flags that no item even confirms the contracts rose, giving a sharper causal analysis.

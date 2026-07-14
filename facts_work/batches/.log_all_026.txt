@@ -1,0 +1,935 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fb7-3a85-75a3-ad1b-0da327e68a31
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_026.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_026.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_026.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:05:35.222139Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_026.jsonl` to confirm the structure and then I’ll extract the facts into `all_facts_026.jsonl` in the same order.
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc 'wc -l all_batch_026.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_026.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_026.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj = json.loads(line)
+        print('LINE', i)
+        print(obj.keys())
+        print('TITLE:', obj.get('title'))
+        print('BODY:', obj.get('body_text','')[:700].replace('\\n',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+LINE 1
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+TITLE: Private equity is struggling with exits, even as the AI deal boom takes over Wall Street
+BODY: Private equity is staring down a growing pile of investments it can't cash out of. Fueled by the artificial intelligence frenzy, Wall Street's 2026 deal boom is on pace to set records. But even the roaring market hasn't been enough to help the private equity industry clear out its mountain of aging portfolio companies. PE firms are sitting on 13,325 unsold US companies as of the end of May, up from 12,900 as of last October, according to PitchBook estimates. It will take 11 years to sell that existing inventory at the current pace, a two-year increase compared to last fall. "It would be one thing if we were in difficult market times, but we have a reasonably strong economy, a stock market th
+
+LINE 2
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+TITLE: Supreme Court blocks Trump from removing Lisa Cook from the Federal Reserve | investingLive
+BODY: Lisa Cook will remain as a Fed Governor. US President Donald Trump had tried to fire Federal Reserve Governor Lisa Cook from her role over a primary residence disclosure on a mortgage application. The Governor claimed it was a clerical error and that she was fired without due process. Cook’s term on the Board of Governors doesn't expire until 2038. Trump has been looking to pack the Fed but it's not going well and it doesn't look like the Fed is going to have any latitude to cut rates anyway. When he fired her, he said he had “reason to believe” that she “may have made false statements on one or more mortgage agreements.” He told her that he lacked “confidence in [her] integrity” and that he
+
+LINE 3
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+TITLE: 'Durian tsunami': Prices plunge as oversupply hits Malaysia
+BODY: - Published For days now, a long line has been snaking around the two blocks leading up to the Durian Ninja fruit stall in Tampines, a busy township in the east of Singapore. They are waiting patiently for the free fruit the seller has been giving away daily since mid-June: two durians per customer, about 600kg a day. This generosity is being fuelled by an oversupply of durian across the border in Malaysia, which typically produces about 550,000 tonnes a year. But an unusually abundant 2026 has crashed the price of the prickly, pungent fruit beloved in large parts of Asia. Sixty-nine year-old Cherng, who is in the line in Singapore, tells the BBC that he has been having durian "almost every 
+
+
+codex
+The batch is small at 12 documents. I’m pulling the full set of titles and body snippets now so I can extract the facts directly from the source text without adding inference.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_026.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj = json.loads(line)
+        body = obj.get('body_text','').replace('\\n',' ')
+        print(f'[{i}] DOC_ID: {obj[\"doc_id\"]}')
+        print('DATE:', obj.get('published_date'))
+        print('TITLE:', obj.get('title'))
+        print('BODY:', body[:2500])
+        print('\\n' + '='*120 + '\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+[1] DOC_ID: ae5fb338d32a1486c8cb64023c00404d
+DATE: 2026-06-29
+TITLE: Private equity is struggling with exits, even as the AI deal boom takes over Wall Street
+BODY: Private equity is staring down a growing pile of investments it can't cash out of. Fueled by the artificial intelligence frenzy, Wall Street's 2026 deal boom is on pace to set records. But even the roaring market hasn't been enough to help the private equity industry clear out its mountain of aging portfolio companies. PE firms are sitting on 13,325 unsold US companies as of the end of May, up from 12,900 as of last October, according to PitchBook estimates. It will take 11 years to sell that existing inventory at the current pace, a two-year increase compared to last fall. "It would be one thing if we were in difficult market times, but we have a reasonably strong economy, a stock market that sets a new record about once a week, and a booming IPO market," said Scott Bok, former CEO of investment bank Greenhill & Co. "Private equity is really facing a conundrum right now," Bok added. Wall Street is expected to churn out its biggest year for mergers and acquisitions, bond offerings, and lending, according to Dealogic data. It could even set a record for IPOs if leading AI startups Anthropic (ANTH.PVT) and OpenAI (OPAI.PVT) go through with public offerings later this year. But for private equity's most tried-and-true exit route, M&A, the bulk of deal volume has come from large transactions by major corporations. Many of the companies sitting in PE funds are smaller, more sensitive to interest rates, and less related to AI. Total global M&A deal volume from financial sponsors — most commonly private equity — is dropping, according to Dealogic. Through June 24, the total proceeds and number of deals have declined 11% and 8%, respectively, year to date from last year. The same measures are down by a quarter or more compared to 2021 and 2022, the industry's busiest years this decade. Purchases from that era were made with cheap debt, before the Federal Reserve's 2022 rate hikes, "at what we now know was sort of the top of the market," said Steven Buibish, PitchBook's director of US private equity research. Roughly a third of firms sitting in PE portfolios are four to six years old, according to PitchBook data. Another quarter (26.9%) has been held for seven years or longer. This has created "a stalemate" between fund managers waiting for better valuations and their limited partners who want their money back, Buibish added. Private equity's traditional playbook is now increasingly difficult to pull off. "The days of easy financial engineering in terms of private 
+
+========================================================================================================================
+
+[2] DOC_ID: ae6222b936b1a9e8b2bd2a16ce68b59a
+DATE: 2026-06-29
+TITLE: Supreme Court blocks Trump from removing Lisa Cook from the Federal Reserve | investingLive
+BODY: Lisa Cook will remain as a Fed Governor. US President Donald Trump had tried to fire Federal Reserve Governor Lisa Cook from her role over a primary residence disclosure on a mortgage application. The Governor claimed it was a clerical error and that she was fired without due process. Cook’s term on the Board of Governors doesn't expire until 2038. Trump has been looking to pack the Fed but it's not going well and it doesn't look like the Fed is going to have any latitude to cut rates anyway. When he fired her, he said he had “reason to believe” that she “may have made false statements on one or more mortgage agreements.” He told her that he lacked “confidence in [her] integrity” and that he had determined that “faithfully executing the law requires [her] immediate removal from office," according to the judgement. The reasoning was fairly broad and takes some power from the White House. The Government first contends that the President’s determination of “cause” is wholly unreviewable because the statute “commits the determination of cause to” the President alone. ... The Court sees no such commitment. The decision was 5-4 so it was a close one. The Court’s narrowest ground is procedural: Cook was entitled to notice and some opportunity to respond before removal. The Court did not decide whether alleged mortgage fraud would be sufficient cause to remove Cook. It says the facts have not been found or analyzed under the proper standard. The Court left open whether serious private misconduct, including pre-office mortgage fraud, could qualify as cause if proven and linked to fitness for the role. The swing votes were Kavanaugh and Roberts. Notably, this story doesn't appear to be over. Bill Pulte, who is the US Director of Federal Housing and Acting Director of National Intelligence quickly tweeted: As I have repeatedly said, I believe Lisa Cook will be indicted for mortgage fraud. Pulte has long been leading this chart. If indicted and/or convicted that could clear the 'cause' section. Aside from the Fed, the Court separately ruled that Presidents have free rein to fire agency heads at will. Federal laws require a cause for such dismissals and in doing that, the court reversed a 91-year-old decision that had limited executive authority. So in making this decision, the Supreme Court decided that the Fed was a unique agency and the rules that apply to other agencies around independence don't apply to it. Update: Cook is out with a statement saying the decision 
+
+========================================================================================================================
+
+[3] DOC_ID: aec668b4e4987fcf4a10a5244de18162
+DATE: 2026-06-29
+TITLE: 'Durian tsunami': Prices plunge as oversupply hits Malaysia
+BODY: - Published For days now, a long line has been snaking around the two blocks leading up to the Durian Ninja fruit stall in Tampines, a busy township in the east of Singapore. They are waiting patiently for the free fruit the seller has been giving away daily since mid-June: two durians per customer, about 600kg a day. This generosity is being fuelled by an oversupply of durian across the border in Malaysia, which typically produces about 550,000 tonnes a year. But an unusually abundant 2026 has crashed the price of the prickly, pungent fruit beloved in large parts of Asia. Sixty-nine year-old Cherng, who is in the line in Singapore, tells the BBC that he has been having durian "almost every day". For him and his family, this is a rare chance to devour durians "of good quality, and sometimes at nearly half the price of previous seasons". Customers in Malaysia and neighbouring Singapore are swarming fruit stalls where durians are being sold at huge discounts or, if they are lucky, given away for free. But while durian lovers feast, Malaysian farmers are chagrined. They say this glut, or what many have dubbed a "durian tsunami", is the result of a decade-long boom, during which Malaysians flocked to durian farming to cash in on growing Chinese demand. "Back then, a lot of people cut down their rubber trees or oil palms to grow durians. A lot of the trees [planted then] are now starting to bear fruit," says Lu Yuee Thing, the owner of several durian farms near the Malaysian town of Raub. Over the last decade, Malaysia's durian exports, to China in particular, have soared, driven mainly by prized varieties like the Musang King - a buttery, bittersweet fruit largely grown in Raub that the Chinese have dubbed the "Hermès of durians". As Musang King gained popularity, "a lot of people got into Musang King [farming]", says Lee Wah Chong, who runs a luxury resort and durian farm in Malacca. The trees in the newer farms have reached maturity around the same time, resulting in a glut that has depressed prices across the Malaysian durian market and impacted exports. Last December, Lu sold his Musang King durians to retailers at an average of 13.50 ringgit ($3.30). This month, Lu says he can only sell them for half the price. Han says he has slashed prices for his Musang Kings by nearly a third, offering them to customers for 50 ringgit per kilogram. "The market pressure is too high for me," he says, adding that he is now trying to make up for lost profits with other fr
+
+========================================================================================================================
+
+[4] DOC_ID: af18dd7ae10e724dec471164976856e5
+DATE: 2026-06-29
+TITLE: What to Expect From Northern Trust's Q2 2026 Earnings Report
+BODY: With a market cap of $32.2 billion, Northern Trust Corporation (NTRS) is a leading global financial services provider specializing in wealth management, asset servicing, asset management, and banking solutions for corporations, institutions, affluent families, and individuals. It operates across the United States and 22 international locations, managing $18.6 trillion in assets under custody/administration and $1.8 trillion in assets under management as of March 31, 2026. The Chicago, Illinois-based company is expected to announce its fiscal Q2 2026 results before the market opens on Wednesday, Jul. 22. Ahead of the event, analysts predict NTRS to report a profit of $2.63 per share, a surge of 23.5% from $2.13 per share in the year-ago quarter. The company has surpassed Wall Street's bottom-line estimates in each of the last four quarters. More News from Barchart For fiscal 2026, analysts forecast NTRS to post EPS of $10.72, up nearly 19% from $9.01 in fiscal 2025. NTRS stock has soared 41.4% over the past 52 weeks, surpassing the S&P 500 Index's ($SPX) 19.8% return and the State Street Financial Select Sector SPDR ETF's (XLF) 3.4% gain over the same period. Shares of Northern Trust climbed more than 8% on Apr. 21 after the company reported stronger-than-expected Q1 2026 EPS of $2.71, driven largely by improved credit quality and stronger profitability. Investors were encouraged by a negative provision for credit losses of $3 million, reflecting improving credit conditions in the commercial and institutional loan portfolio, while net interest income rose 15% year-over-year to $661.6 million, surpassing the consensus estimate. Additionally, management highlighted 14% revenue growth, an 11% increase in trust and servicing fees to $1.34 billion, and a 43% surge in EPS. Analysts' consensus rating on Northern Trust stock is cautious, with a "Hold" rating overall. Among 16 analysts covering the stock, three recommend a "Strong Buy," one has a "Moderate Buy" rating, nine give a "Hold" rating, two suggest a "Moderate Sell," and one indicates a "Strong Sell."
+
+========================================================================================================================
+
+[5] DOC_ID: b0928b9f307c2a7da372f3974f9b87cd
+DATE: 2026-06-29
+TITLE: Rare earths, export controls and WTO reform headline new EU-China trade framework | investingLive
+BODY: The launch of a formal EU-China trade consultation mechanism reduces the near-term risk of an escalatory tariff exchange between Brussels and Beijing, offering some relief to European industries most exposed to Chinese import competition. Rare earth and critical mineral supply chains are the most immediate beneficiary, with China's assurances over existing export controls providing a degree of certainty for European manufacturers dependent on those inputs. The October timeline creates a defined catalyst for markets to assess progress, with the EU leaders summit on October 15 adding political weight to the deadline. A failure to deliver tangible results by then would likely reignite deficit-driven trade friction and could accelerate EU consideration of defensive measures against subsidised Chinese goods. --- The EU and China launched a new trade consultation mechanism in Brussels on Monday, setting an October deadline for tangible progress on a €360 billion annual trade deficit, export controls, and rare earth supply chain stability. Summary: - The EU and China held inaugural Trade and Investment Consultations in Brussels on June 29, with the first China-EU joint trade statement since 2019 issued following the meeting - The mechanism covers four streams: trade and investment balance, export controls, intellectual property rights, and WTO reform; a working group on trade balance launches immediately with a joint monitoring mechanism to track trade flows - The EU's trade deficit with China reached €360 billion last year, equivalent to roughly €1 billion per day, affecting all 27 member states - Trade Commissioner Maroš Šefčovič said he will visit China in October and expects to present first tangible results by then, with a progress assessment due in September and a roadmap with deliverables to follow in coming days - China provided assurances that existing export controls on rare earths and permanent magnets will not disrupt EU supply chains; Beijing had briefly curbed rare earth exports during a tariff dispute with the United States last autumn - German Economy Minister Katherina Reiche met Chinese Commerce Minister Wang Wentao over the weekend and called for closer cooperation on the basis of open markets and a level playing field The European Union and China launched a formal trade consultation mechanism in Brussels on Monday, setting an October deadline for measurable progress on a commercial relationship strained by a €360 billion annual trade deficit, 
+
+========================================================================================================================
+
+[6] DOC_ID: b1815fb5cbbcd530b771242fe0751f02
+DATE: 2026-06-29
+TITLE: Multiple Factors Lifted Equinix (EQIX) in Q1
+BODY: Meridian Funds, managed by ArrowMark Partners, released its first-quarter 2026 investor letter for "Meridian Hedged Equity Fund". A copy of the letter can be downloaded here. The Fund invests in high-quality growth companies and mitigates risk by writing call options. Following the late-February strike on Iran, oil prices surged, leading to a risk-off sentiment, boosting energy sector performance. Large-cap technology stocks declined as investors rotated towards smaller companies and more defensive value investments. Market conditions are becoming challenging due to reduced expectations for a Federal Reserve rate cut and increasing geopolitical uncertainty. The Fund returned 0.08% (net) for the quarter, outperforming the S&P 500 Index, which fell 4.33%, and the CBOE S&P 500 BuyWrite Index, which declined 0.92%. At the end of the period, 43% of the portfolio was unhedged, while the remainder was invested in companies with covered call options. In addition, please check the Fund's top five holdings to know its best picks in 2026. In its first-quarter 2026 investor letter, Meridian Hedged Equity Fund highlighted Equinix, Inc. (NASDAQ:EQIX) as a leading contributor. Equinix, Inc. (NASDAQ:EQIX) is a leading digital infrastructure company that operates a global network of data centers and interconnected ecosystems, enabling seamless delivery of digital experiences and cutting-edge AI quickly and efficiently. On June 26, 2026, Equinix, Inc. (NASDAQ:EQIX) closed at $1,091.30 per share, reflecting a market capitalization of $107.63 billion. Equinix, Inc. (NASDAQ:EQIX) posted a one-month return of 3.86%, and its shares gained 37.19% over the past 52 weeks. Meridian Hedged Equity Fund stated the following regarding Equinix, Inc. (NASDAQ:EQIX) in its Q1 2026 investor letter: "Equinix, Inc. (NASDAQ:EQIX) is a leading global provider of digital infrastructure, offering premium co-location and interconnection services across a global footprint of 280 data centers in 77 markets. Our investment thesis centers on its unmatched interconnection moat—more than 500,000 connections that create a powerful network effect for enterprise, cloud and network customers. The company is well positioned to capitalize on secular demand for artificial intelligence, hybrid multi-cloud architectures and vendor neutral digital infrastructure. The stock outperformed during the period after the company reported record bookings, accelerating recurring revenue growth, and AI-related workloads appr
+
+========================================================================================================================
+
+[7] DOC_ID: b21ab482ef833ed840a605e264b000c3
+DATE: 2026-06-29
+TITLE: What to look out for in markets this week? | investingLive
+BODY: It's going to be a bit of a hectic week, and a holiday-shortened one at that, with US markets closing early on Thursday and then closing on Friday in the run up to Independence Day. As such, that will see a lot of things being crammed together over the next four days for markets. So, let's take a look at some of the key things to focus on. US-Iran developments Over the weekend, tensions are flaring up again after Iran struck a commercial cargo vessel, the Kiku, in the Strait of Hormuz. After some light back and forth exchanges with the US, both sides are again looking to play things down to start the new week now. They are both standing off again as we look towards the resumption of high-stakes technical talks in Doha on 30 June. It is clear that both sides are fighting tooth and nail to salvage the broader 60-day memorandum of understanding at this point. However, the question remains whether or not they can find any common ground on nuclear/uranium issues as outlined before here. Strait of Hormuz On 26 June, there were around 40 to 50 vessels transiting the strait. In terms of crude oil vessels though, the figure was around 13 tankers according to Kpler. That continues to show decent promise and there were even a couple of VLCCs crossing. But after Iran's attack on Kiku, there was much apprehension in the waterway again. On 27 June, there were still around 40 vessels that crossed the strait. And while there were also a number of crude oil vessels transiting, they were all almost entirely smaller, regional Iranian-flagged tankers moving internally. So while there were some movements over the weekend, the details were not as encouraging with the rest of the maritime world being forced to slam the breaks. As things stand, high war-risk insurance premiums are still keeping many tankers waiting outside the Gulf of Oman. Sure, there are those willing to brave through the strait by deactivating their AIS transponders. But again, this isn't going to be a foolproof solution for many in trying to get the global energy and shipping market back on track. Big tech Friday saw much volatility in Wall Street again but at the end of it all, major indices in the US closed just marginally lower. I'd take that as a win considering the amount of pressure that tech shares were under all through the week, despite Micron's earnings beat. The nerves will continue to persist this week but so far, US futures are looking up today. It's still too early to draw much conclusions, with
+
+========================================================================================================================
+
+[8] DOC_ID: b2f31b59d25ef9ba510f5a4dd784d7c2
+DATE: 2026-06-29
+TITLE: BloFin donates $1M USDT plus 12M Venezuelan bolívar in direct cash relief for Venezuela earthquake victims
+BODY: BloFin donates $1M USDT plus 12M Venezuelan bolívar in direct cash relief for Venezuela earthquake victims BloFin, a global cryptocurrency exchange, has published an announcement from the BloFin Whaleness Charity Foundation outlining relief measures for users and communities affected by the earthquakes in northern Venezuela. June 29, 2026 — BloFin, a global cryptocurrency exchange, has published an announcement from the BloFin Whaleness Charity Foundation outlining relief measures for users and communities affected by the earthquakes in northern Venezuela. Following the devastating earthquakes that struck on June 25, 2026, BloFin will donate 12 million VES in direct cash relief through the Red Cross, distributed in local currency so that affected users in the hardest-hit regions can address immediate recovery needs on the ground. In addition, BloFin provides a $1 Million USDT futures bonus pool. According to the announcement, existing users in Venezuela who have already completed KYC will each receive a 30 USDT bonus, with distribution completed within the next 24 hours. BloFin also noted that both new registrants and existing users who complete KYC by July 10, 2026 (23:59 UTC-4) will be eligible to receive the 30 USDT bonus. All bonuses will be distributed before July 13, 2026 (UTC). About BloFin BloFin is a top-tier cryptocurrency exchange that specializes in futures trading. The platform offers a wide range of trading options, including 550+ USDT-M perpetual pairs, Coin-Margined Perpetual Contracts, spot trading, copy trading, API access, unified account management, and advanced sub-account solutions. Committed to security and compliance, BloFin integrates Fireblocks and Chainalysis to ensure robust asset protection. By partnering with top affiliates, BloFin delivers scalable trading solutions, efficient fund management, and enhanced flexibility for professional traders. As a constant sponsor of TOKEN2049, BloFin continues to expand its global presence, reinforcing its position as the place "WHERE WHALES ARE MADE."
+
+========================================================================================================================
+
+[9] DOC_ID: b3f30228f4f306d2436f61bb253ec152
+DATE: 2026-06-29
+TITLE: Ark Invest loads up on Coinbase, Circle, Bullish, Robinhood shares as stocks rally higher
+BODY: Ark Invest loads up on Coinbase, Circle, Bullish, Robinhood shares as stocks rally higher Quick Take - Ark bought $6.85 million worth of Coinbase shares, $6.21 million worth of Circle Internet Group, and $3.54 million in Bullish on Monday. - Coinbase, Circle, Bullish, and Robinhood stocks all rose on Monday, as the broader U.S. stock market rallied. We'd love your feedback. Cathie Wood's Ark Invest purchased additional shares of Coinbase, Circle, Bullish, and Robinhood on Monday across three exchange-traded funds amid a stock rally. Ark's trading disclosure for Monday shows the company bought 45,164 Coinbase (COIN) shares across its ARKK, ARKW, and ARKF ETFs, worth $6.85 million at the day's closing price. The firm also scooped up 81,757 shares of Circle Internet Group (CRCL), worth $6.21 million, and 149,422 shares in crypto exchange Bullish (BLSH), worth $3.54 million. Ark expanded its Robinhood (HOOD) holdings by 2,943 shares, valued at around $299,685. All four stocks traded higher on Monday. Coinbase closed up 1.74% at $151.65, Circle added 3.25% to $75.96, while Bullish climbed 1.72% to $23.69. Robinhood's stock rose 3.18% to $101.83. The S&P 500 Index, Dow Jones Index, and the Nasdaq Composite all rose yesterday. Ark Invest actively adjusts its ETF holdings to ensure no single stock exceeds 10% of any fund's portfolio, meaning that it rebalances weightings during periods of significant asset price fluctuations. On Monday, Circle announced that it has expanded its partnership with the Bank of New York Mellon (BNY) to deliver full-lifecycle stablecoin capabilities to institutional clients. This means that the two will allow users to custody, transfer, mint, and burn USDC directly through BNY's digital custody wallets. Meanwhile, Coinbase launched tokenized U.S. stocks on the platform earlier this month. Benchmark Equity Research maintained its "Buy" rating on Coinbase earlier this month, citing the launch of tokenized U.S. equities and reiterating a $270 price target for the crypto exchange. Disclaimer: The Block is an independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a majority investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange Bitget is an anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective, impactful, and timely information about the crypto industry. Here are our current financial disclosur
+
+========================================================================================================================
+
+[10] DOC_ID: b573816c57a2267fc8d2c023bdd51513
+DATE: 2026-06-29
+TITLE: Zelenskyy condemns 'horrific attacks' as Russian strikes kill 12 and wound 40 in Ukraine
+BODY: Zelenskyy condemns ‘horrific attacks’ as Russian strikes kill 12 and wound 40 in Ukraine Zelenskyy condemns ‘horrific attacks’ as Russian strikes kill 12 and wound 40 in Ukraine KYIV, Ukraine (AP) — Russian missiles and drones killed at least 12 civilians and injured 40 others in Ukraine on Monday in what President Volodymyr Zelenskyy described as “horrific attacks.” Since Russia launched its all-out invasion of its neighbor more than four years ago, its forces have conducted bombing in an effort to destroy Ukraine’s infrastructure and sap morale. More than 16,000 Ukrainian civilians have been killed, according to the U.N. A Russian missile targeting infrastructure struck the central city of Dnipro, killing six people and wounding 29, Dnipropetrovsk regional head Oleksandr Hanzha said. Russian drones also hit a passenger minibus in the southern city of Zaporizhzhia, killing three and wounding six, including a child, Zelenskyy said on social media. Russian drones also killed a 69-year-old woman and a 77-year-old man in the northeastern Sumy region, National Police said. Kharkiv Mayor Ihor Terekhov said a daytime Russian strike killed one person and wounded five others in the northeastern city. AP correspondent Karen Chammas reports on the latest from Ukraine and Russia. Other deadly attacks occurred in at least six other regions of Ukraine, authorities said. No further details were immediately available. Strikes leave some Ukrainians without power Some customers in eight Ukrainian regions were left without power Monday after Russian strikes, while hot weather drove up electricity use as people turned on air conditioners, grid operator Ukrenergo said. Zelenskyy renewed his plea for Europe to step up its development of air defenses to block Russia’s ballistic missiles. “People need greater protection from such horrific attacks,” Zelenskyy said. “Above all, we need anti-ballistic capabilities. It is essential that Europe is as active as possible in developing its own anti-ballistic defense — its own systems and missiles.” Putin says expanding Ukrainian drone attacks won’t stop the war A marked shift has taken place in the war in recent months, Western officials say, as Ukraine’s expanding drone strikes have brought fuel shortages in Russia and Russia-occupied territory. The attacks have weakened the Russian military’s supply lines to the front in eastern and southern Ukraine, slowing their advance, according to analysts. Ukraine’s innovative drone engineering 
+
+========================================================================================================================
+
+[11] DOC_ID: b6ac781d757fe27588aee0fff6084327
+DATE: 2026-06-29
+TITLE: Gold and silver weaken as Fed bets offset Hormuz risk - Kitco AM Report
+BODY: (Kitco NewsWire) - Spot gold and silver prices are weaker ahead of the North American market open on Monday as traders balance renewed U.S.-Iran diplomacy against higher oil prices and persistent Federal Reserve rate-hike risk. At the time of writing, spot gold was trading near $4,041.90 an ounce, down 1.14%, while spot silver was trading near $58.080, down 1.65% on the session. The week opens with U.S. jobs data as the main scheduled catalyst. Thursday’s June nonfarm payrolls report lands before the July 4 market holiday, compressing the reaction window for gold, the dollar and Treasury yields. The Federal Reserve remains the main positioning constraint for precious metals. The FOMC held the target range at 3.50% to 3.75% on June 17 in a 12-0 vote, but the June projections lifted the median 2026 funds-rate path to 3.8% from 3.4% in March and raised the 2026 PCE inflation projection to 3.6% from 2.7%. Early Monday trading shows the same split: stock futures are higher and the dollar is slightly lower on U.S.-Iran diplomacy hopes, but the 10-year Treasury yield is up 1.4 basis points to 4.385% and the market remains positioned for further Fed tightening risk. The Strait of Hormuz story is now a managed-transit risk, not a full closure shock. The U.S. and Iran agreed to halt attacks and plan to meet Tuesday in Doha over the waterway, with U.S. officials saying vessels can move freely for now. The underlying dispute has not been settled: the traffic coordination hotline was still not operational as of Saturday, and Iran has again asserted a role in managing passage through the strait. The current market impact is cross-cutting: oil is firmer, with Brent near $72.40 and WTI near $69.64, while gold is not getting a full haven bid because higher crude also feeds the Fed-inflation trade. The key outside markets see Nymex WTI crude oil prices firmer and trading around $69.64 a barrel, while Brent crude was near $72.40. The U.S. dollar index is slightly lower. The yield on the benchmark 10-year U.S. Treasury note is trading near the 4.4% area. Technically, spot gold bulls' next upside price objective is to push prices back above the $4,069.54 to $4,350.00 resistance zone, with a sustained move targeting $4,500.00 and then $4,891.54. Bears' next near-term downside price objective is a break below $3,950.00, with deeper downside targets at $3,886.46 and then $3,707.82. First resistance is seen at $4,069.54 and then at $4,350.00. First support is seen at $3,950.00 and
+
+========================================================================================================================
+
+[12] DOC_ID: b7eaedd24d11611cd2ef22107633c3a4
+DATE: 2026-06-29
+TITLE: South African anti-migrant protests: Thousands march amid heavy security deployment
+BODY: - Published Thousands of people have marched in South Africa's main cities to demand that all undocumented migrants leave the country. Police officers - backed by private security guards - have been deployed because of fears that protests could turn violent. Anti-migrant groups had set Tuesday as the deadline for undocumented migrants to leave. Many foreigners have already fled to escape violence and intimidation. South African police say 25,000 have been repatriated so far. Most are from other African countries. One undocumented Malawian told the BBC he was "happy to be going back" but "heartbroken" to be leaving behind four young children. The Ministry of Police said the protests had largely been peaceful across the country, with isolated incidents of looting. However Police Minister Firoz Cachalia confirmed that the army was deployed "on a contingency basis" in "parts of Johannesburg" as well as Durban. Police also confirmed the arrest of three more people in Hillbrow, a suburb in Johannesburg with a high migrant population, after two people were injured during protests. According to police, the trio "opened fire at protesters who were passing through the street" and the marchers retaliated by "torching the suspects' vehicle". Among the injured was a 17-year-old. Some protesters threw bricks, breaking the windows of some homes in Yeoville, another suburb where many African migrants live. Shops in the city centre were closed, while police visibility is high on major streets. In a neighbourhood in Germiston, about 15km (nine miles) from Johannesburg, demonstrators went to homes, evicting residents they suspected were foreign nationals and handing them over to police officers, insisting they check their documentation, local media report. Police said they had arrested five people for the alleged looting of a foreign-owned shop in Johannesburg's biggest township, Soweto. About 10 people were also arrested for looting in KwaZulu-Natal province, while a woman was arrested for assaulting a police officer and a man for "intimidation" following reports of a foreign national being beaten up, police said. Businesses in central Durban, the main city in the province, were also shut. Protesters handed over a memorandum listing their demands to government officials in Durban and Johannesburg. The leader of anti-migrant group March and March, Jacinta Ngobese-Zuma, said they would protest every Thursday for the next six months to force the government to "get rid of" undo
+
+========================================================================================================================
+
+
+codex
+I have the source text mapped. Next I’m writing `all_facts_026.jsonl` directly from the 12 documents, with the facts hand-constrained to claims explicitly stated in each title and body.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_026.jsonl')
+output_path = Path('all_facts_026.jsonl')
+
+facts_by_doc = {
+    'ae5fb338d32a1486c8cb64023c00404d': [
+        {
+            'claim': 'Private equity firms were sitting on 13,325 unsold U.S. companies at the end of May, up from 12,900 last October.',
+            'subject': 'U.S. private equity portfolio companies',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '13,325 from 12,900',
+            'time': 'as of the end of May',
+            'cause': None,
+            'entities': ['United States', 'PitchBook', 'Private equity'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'At the current pace, it would take 11 years to sell the existing private equity inventory, which is two years longer than last fall.',
+            'subject': 'U.S. private equity inventory',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '11 years, up two years',
+            'time': 'at the current pace',
+            'cause': None,
+            'entities': ['United States', 'PitchBook', 'Private equity'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Wall Street\\'s 2026 deal boom is on pace to set records, fueled by the artificial intelligence frenzy.',
+            'subject': 'Wall Street deal activity',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026',
+            'cause': 'the artificial intelligence frenzy',
+            'entities': ['Wall Street', 'Artificial intelligence'],
+            'confidence': 0.87,
+        },
+        {
+            'claim': 'Through June 24, total global M&A proceeds from financial sponsors had declined 11% year to date from last year.',
+            'subject': 'Global M&A proceeds from financial sponsors',
+            'predicate': 'deal_or_contract',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '11%',
+            'time': 'Through June 24, year to date',
+            'cause': None,
+            'entities': ['Dealogic', 'Private equity'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Through June 24, the number of global M&A deals from financial sponsors had declined 8% year to date from last year.',
+            'subject': 'Global M&A deal count from financial sponsors',
+            'predicate': 'deal_or_contract',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '8%',
+            'time': 'Through June 24, year to date',
+            'cause': None,
+            'entities': ['Dealogic', 'Private equity'],
+            'confidence': 0.97,
+        },
+    ],
+    'ae6222b936b1a9e8b2bd2a16ce68b59a': [
+        {
+            'claim': 'The Supreme Court blocked President Donald Trump from removing Lisa Cook from the Federal Reserve, so she will remain a Fed governor.',
+            'subject': 'Lisa Cook',
+            'predicate': 'policy_action',
+            'object': 'Federal Reserve',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Lisa Cook', 'Federal Reserve', 'United States Supreme Court', 'Donald Trump'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Lisa Cook\\'s term on the Federal Reserve Board of Governors does not expire until 2038.',
+            'subject': 'Lisa Cook',
+            'predicate': 'event',
+            'object': 'Federal Reserve Board of Governors',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2038',
+            'cause': None,
+            'entities': ['Lisa Cook', 'Federal Reserve'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The Supreme Court said Cook was entitled to notice and some opportunity to respond before removal.',
+            'subject': 'United States Supreme Court',
+            'predicate': 'policy_action',
+            'object': 'Lisa Cook',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['United States Supreme Court', 'Lisa Cook'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'The Supreme Court separately ruled that presidents can fire agency heads at will, while treating the Federal Reserve as a unique agency.',
+            'subject': 'United States Supreme Court',
+            'predicate': 'policy_action',
+            'object': 'Federal agencies',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['United States Supreme Court', 'Federal Reserve', 'United States'],
+            'confidence': 0.91,
+        },
+    ],
+    'aec668b4e4987fcf4a10a5244de18162': [
+        {
+            'claim': 'An unusually abundant 2026 durian crop has crashed durian prices in Malaysia.',
+            'subject': 'Malaysia durian prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026',
+            'cause': 'an oversupply of durian in Malaysia',
+            'entities': ['Malaysia', 'Durian'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Over the last decade, Malaysia\\'s durian exports have soared, especially to China, driven mainly by prized varieties such as Musang King.',
+            'subject': 'Malaysia durian exports',
+            'predicate': 'demand_change',
+            'object': 'China',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'Over the last decade',
+            'cause': 'growing Chinese demand',
+            'entities': ['Malaysia', 'China', 'Musang King', 'Durian'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'A Malaysian durian farmer said Musang King durians sold to retailers for an average of 13.50 ringgit last December but only half that price this month.',
+            'subject': 'Musang King durian prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'half the price from 13.50 ringgit',
+            'time': 'this month',
+            'cause': 'a market glut from oversupply',
+            'entities': ['Malaysia', 'Musang King', 'Durian'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'A seller said he cut Musang King prices by nearly a third to 50 ringgit per kilogram because market pressure was too high.',
+            'subject': 'Musang King durian prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': 'nearly a third to 50 ringgit per kilogram',
+            'time': '2026-06-29',
+            'cause': 'market pressure from oversupply',
+            'entities': ['Malaysia', 'Musang King', 'Durian'],
+            'confidence': 0.94,
+        },
+    ],
+    'af18dd7ae10e724dec471164976856e5': [
+        {
+            'claim': 'Northern Trust is expected to report fiscal Q2 2026 results before the market opens on Wednesday, Jul. 22.',
+            'subject': 'Northern Trust',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'Wednesday, Jul. 22',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Analysts expect Northern Trust to report Q2 2026 earnings of "'$2.63 per share, up 23.5% from $2.13 per share a year earlier.'"',
+            'subject': 'Northern Trust',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$2.63 per share, up 23.5%'"',
+            'time': 'Q2 2026',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Analysts forecast Northern Trust will post fiscal 2026 earnings of "'$10.72 per share, up nearly 19% from $9.01 in fiscal 2025.'"',
+            'subject': 'Northern Trust',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$10.72 per share, up nearly 19%'"',
+            'time': 'fiscal 2026',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Northern Trust stock has risen 41.4% over the past 52 weeks.',
+            'subject': 'Northern Trust stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '41.4%',
+            'time': 'past 52 weeks',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Northern Trust shares climbed more than 8% on Apr. 21 after the company reported stronger-than-expected Q1 2026 earnings of "'$2.71 per share.'"',
+            'subject': 'Northern Trust stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'more than 8%',
+            'time': 'Apr. 21',
+            'cause': 'stronger-than-expected Q1 2026 earnings of "'$2.71 per share'"',
+            'entities': ['Northern Trust'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Northern Trust said Q1 2026 net interest income rose 15% year over year to "'$661.6 million.'"',
+            'subject': 'Northern Trust',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '15% to "'$661.6 million'"',
+            'time': 'Q1 2026',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Northern Trust said Q1 2026 trust and servicing fees increased 11% to "'$1.34 billion.'"',
+            'subject': 'Northern Trust',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '11% to "'$1.34 billion'"',
+            'time': 'Q1 2026',
+            'cause': None,
+            'entities': ['Northern Trust'],
+            'confidence': 0.96,
+        },
+    ],
+    'b0928b9f307c2a7da372f3974f9b87cd': [
+        {
+            'claim': 'The EU and China launched a formal trade consultation mechanism in Brussels on June 29 with an October deadline for tangible progress.',
+            'subject': 'European Union and China',
+            'predicate': 'policy_action',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'June 29',
+            'cause': None,
+            'entities': ['European Union', 'China', 'Brussels'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The EU\\'s trade deficit with China reached €360 billion last year, or roughly €1 billion per day.',
+            'subject': 'European Union trade deficit with China',
+            'predicate': 'other',
+            'object': 'China',
+            'direction': 'na',
+            'magnitude': '€360 billion, roughly €1 billion per day',
+            'time': 'last year',
+            'cause': None,
+            'entities': ['European Union', 'China'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'China said existing export controls on rare earths and permanent magnets will not disrupt EU supply chains.',
+            'subject': 'China',
+            'predicate': 'statement',
+            'object': 'European Union supply chains',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['China', 'European Union', 'Rare earths', 'Permanent magnets'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'China had briefly curbed rare earth exports during a tariff dispute with the United States last autumn.',
+            'subject': 'China rare earth exports',
+            'predicate': 'supply_change',
+            'object': 'United States',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'last autumn',
+            'cause': 'a tariff dispute with the United States',
+            'entities': ['China', 'United States', 'Rare earths'],
+            'confidence': 0.95,
+        },
+    ],
+    'b1815fb5cbbcd530b771242fe0751f02': [
+        {
+            'claim': 'Oil prices surged after the late-February strike on Iran.',
+            'subject': 'Oil prices',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'late-February',
+            'cause': 'the strike on Iran',
+            'entities': ['Oil', 'Iran'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Large-cap technology stocks declined as investors rotated toward smaller companies and more defensive value investments.',
+            'subject': 'Large-cap technology stocks',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'Q1 2026',
+            'cause': 'investor rotation toward smaller companies and defensive value investments',
+            'entities': ['Large-cap technology stocks'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Equinix closed at "'$1,091.30 per share on June 26, 2026.'"',
+            'subject': 'Equinix stock',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$1,091.30 per share'"',
+            'time': 'June 26, 2026',
+            'cause': None,
+            'entities': ['Equinix'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Equinix shares returned 3.86% over one month.',
+            'subject': 'Equinix stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '3.86%',
+            'time': 'one month',
+            'cause': None,
+            'entities': ['Equinix'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Equinix shares gained 37.19% over the past 52 weeks.',
+            'subject': 'Equinix stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '37.19%',
+            'time': 'past 52 weeks',
+            'cause': None,
+            'entities': ['Equinix'],
+            'confidence': 0.97,
+        },
+    ],
+    'b21ab482ef833ed840a605e264b000c3': [
+        {
+            'claim': 'On June 26, around 40 to 50 vessels transited the Strait of Hormuz, including around 13 crude oil tankers, according to Kpler.',
+            'subject': 'Strait of Hormuz vessel traffic',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': 'around 40 to 50 vessels and around 13 crude oil tankers',
+            'time': '26 June',
+            'cause': None,
+            'entities': ['Strait of Hormuz', 'Kpler', 'Crude oil'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'On June 27, around 40 vessels crossed the Strait of Hormuz, but crude movements were almost entirely smaller regional Iranian-flagged tankers moving internally.',
+            'subject': 'Strait of Hormuz crude tanker traffic',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': 'around 40 vessels',
+            'time': '27 June',
+            'cause': 'apprehension after Iran\\'s attack on the Kiku',
+            'entities': ['Strait of Hormuz', 'Iran', 'Kiku', 'Crude oil'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'High war-risk insurance premiums are keeping many tankers waiting outside the Gulf of Oman.',
+            'subject': 'Tanker movements near the Gulf of Oman',
+            'predicate': 'supply_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'high war-risk insurance premiums',
+            'entities': ['Gulf of Oman', 'Tankers'],
+            'confidence': 0.94,
+        },
+    ],
+    'b2f31b59d25ef9ba510f5a4dd784d7c2': [
+        {
+            'claim': 'BloFin said it will donate 12 million Venezuelan bolívars in direct cash relief through the Red Cross for users and communities affected by the June 25, 2026 earthquakes in northern Venezuela.',
+            'subject': 'BloFin',
+            'predicate': 'corporate_action',
+            'object': 'Red Cross',
+            'direction': 'na',
+            'magnitude': '12 million VES',
+            'time': 'June 29, 2026',
+            'cause': 'the June 25, 2026 earthquakes in northern Venezuela',
+            'entities': ['BloFin', 'Venezuelan bolívar', 'Red Cross', 'Venezuela'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'BloFin is providing a "'$1 million USDT futures bonus pool for Venezuela earthquake relief measures.'"',
+            'subject': 'BloFin',
+            'predicate': 'corporate_action',
+            'object': 'USDT',
+            'direction': 'na',
+            'magnitude': '"'$1 million USDT'"',
+            'time': 'June 29, 2026',
+            'cause': 'the June 25, 2026 earthquakes in northern Venezuela',
+            'entities': ['BloFin', 'USDT', 'Venezuela'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Existing KYC-verified BloFin users in Venezuela will each receive a 30 USDT bonus within the next 24 hours.',
+            'subject': 'BloFin',
+            'predicate': 'corporate_action',
+            'object': 'Existing KYC-verified users in Venezuela',
+            'direction': 'na',
+            'magnitude': '30 USDT',
+            'time': 'within the next 24 hours',
+            'cause': 'the earthquake relief program',
+            'entities': ['BloFin', 'USDT', 'Venezuela'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'New registrants and existing users who complete KYC by July 10, 2026 will also be eligible for a 30 USDT bonus, with distribution due before July 13, 2026.',
+            'subject': 'BloFin',
+            'predicate': 'corporate_action',
+            'object': 'Eligible Venezuela users',
+            'direction': 'na',
+            'magnitude': '30 USDT',
+            'time': 'by July 10, 2026',
+            'cause': 'the earthquake relief program',
+            'entities': ['BloFin', 'USDT', 'Venezuela'],
+            'confidence': 0.96,
+        },
+    ],
+    'b3f30228f4f306d2436f61bb253ec152': [
+        {
+            'claim': 'Ark Invest bought 45,164 Coinbase shares worth "'$6.85 million on Monday across its ARKK, ARKW, and ARKF ETFs.'"',
+            'subject': 'Ark Invest',
+            'predicate': 'corporate_action',
+            'object': 'Coinbase',
+            'direction': 'up',
+            'magnitude': '45,164 shares worth "'$6.85 million'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Ark Invest', 'Coinbase', 'ARKK', 'ARKW', 'ARKF'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Ark Invest bought 81,757 Circle Internet Group shares worth "'$6.21 million on Monday.'"',
+            'subject': 'Ark Invest',
+            'predicate': 'corporate_action',
+            'object': 'Circle Internet Group',
+            'direction': 'up',
+            'magnitude': '81,757 shares worth "'$6.21 million'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Ark Invest', 'Circle Internet Group'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Ark Invest bought 149,422 Bullish shares worth "'$3.54 million on Monday.'"',
+            'subject': 'Ark Invest',
+            'predicate': 'corporate_action',
+            'object': 'Bullish',
+            'direction': 'up',
+            'magnitude': '149,422 shares worth "'$3.54 million'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Ark Invest', 'Bullish'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Ark Invest increased its Robinhood holdings by 2,943 shares valued at about "'$299,685 on Monday.'"',
+            'subject': 'Ark Invest',
+            'predicate': 'corporate_action',
+            'object': 'Robinhood',
+            'direction': 'up',
+            'magnitude': '2,943 shares valued at about "'$299,685'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Ark Invest', 'Robinhood'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Coinbase rose 1.74% to close at "'$151.65 on Monday.'"',
+            'subject': 'Coinbase stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '1.74% to "'$151.65'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Coinbase'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Circle rose 3.25% to "'$75.96 on Monday.'"',
+            'subject': 'Circle Internet Group stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '3.25% to "'$75.96'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Circle Internet Group'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Bullish rose 1.72% to "'$23.69 on Monday.'"',
+            'subject': 'Bullish stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '1.72% to "'$23.69'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Bullish'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Robinhood rose 3.18% to "'$101.83 on Monday.'"',
+            'subject': 'Robinhood stock',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '3.18% to "'$101.83'"',
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Robinhood'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Circle expanded its partnership with Bank of New York Mellon to let institutional clients custody, transfer, mint, and burn USDC through BNY digital custody wallets.',
+            'subject': 'Circle Internet Group',
+            'predicate': 'deal_or_contract',
+            'object': 'Bank of New York Mellon',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'Monday',
+            'cause': None,
+            'entities': ['Circle Internet Group', 'Bank of New York Mellon', 'USDC'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Coinbase launched tokenized U.S. stocks on its platform earlier this month.',
+            'subject': 'Coinbase',
+            'predicate': 'corporate_action',
+            'object': 'Tokenized U.S. stocks',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'earlier this month',
+            'cause': None,
+            'entities': ['Coinbase', 'United States'],
+            'confidence': 0.97,
+        },
+    ],
+    'b573816c57a2267fc8d2c023bdd51513': [
+        {
+            'claim': 'Russian strikes left some customers in eight Ukrainian regions without power on Monday.',
+            'subject': 'Ukraine electricity supply',
+            'predicate': 'supply_change',
+            'object': 'Eight Ukrainian regions',
+            'direction': 'down',
+            'magnitude': 'some customers in eight regions',
+            'time': 'Monday',
+            'cause': 'Russian strikes',
+            'entities': ['Ukraine', 'Ukrenergo', 'Russia'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Ukraine\\'s expanding drone strikes have brought fuel shortages in Russia and Russia-occupied territory.',
+            'subject': 'Fuel supply in Russia and Russia-occupied territory',
+            'predicate': 'supply_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'recent months',
+            'cause': 'Ukraine\\'s expanding drone strikes',
+            'entities': ['Ukraine', 'Russia'],
+            'confidence': 0.94,
+        },
+    ],
+    'b6ac781d757fe27588aee0fff6084327': [
+        {
+            'claim': 'Spot gold was trading near "'$4,041.90 an ounce, down 1.14%, on Monday morning.'"',
+            'subject': 'Spot gold',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '1.14% to "'$4,041.90 an ounce'"',
+            'time': 'Monday',
+            'cause': 'traders balancing renewed U.S.-Iran diplomacy against higher oil prices and Federal Reserve rate-hike risk',
+            'entities': ['Gold', 'United States', 'Iran', 'Federal Reserve'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Spot silver was trading near "'$58.080, down 1.65%, on Monday morning.'"',
+            'subject': 'Spot silver',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '1.65% to "'$58.080'"',
+            'time': 'Monday',
+            'cause': 'traders balancing renewed U.S.-Iran diplomacy against higher oil prices and Federal Reserve rate-hike risk',
+            'entities': ['Silver', 'United States', 'Iran', 'Federal Reserve'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Federal Reserve held its target rate range at 3.50% to 3.75% on June 17 in a 12-0 vote.',
+            'subject': 'Federal Reserve',
+            'predicate': 'policy_action',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': '3.50% to 3.75%',
+            'time': 'June 17',
+            'cause': None,
+            'entities': ['Federal Reserve', 'FOMC'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The Federal Reserve\\'s June projections raised the median 2026 funds-rate path to 3.8% from 3.4% in March.',
+            'subject': 'Federal Reserve 2026 funds-rate path',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'to 3.8% from 3.4%',
+            'time': '2026',
+            'cause': None,
+            'entities': ['Federal Reserve'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The Federal Reserve\\'s June projections raised the 2026 PCE inflation forecast to 3.6% from 2.7% in March.',
+            'subject': 'Federal Reserve 2026 PCE inflation forecast',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'to 3.6% from 2.7%',
+            'time': '2026',
+            'cause': None,
+            'entities': ['Federal Reserve', 'PCE inflation'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The 10-year U.S. Treasury yield was up 1.4 basis points to 4.385% early Monday.',
+            'subject': '10-year U.S. Treasury yield',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '1.4 basis points to 4.385%',
+            'time': 'early Monday',
+            'cause': None,
+            'entities': ['United States Treasury'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The United States and Iran agreed to halt attacks and plan to meet Tuesday in Doha over the Strait of Hormuz.',
+            'subject': 'United States and Iran',
+            'predicate': 'policy_action',
+            'object': 'Strait of Hormuz',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'Tuesday',
+            'cause': None,
+            'entities': ['United States', 'Iran', 'Doha', 'Strait of Hormuz'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Brent crude was near "'$72.40 and WTI crude was near $69.64 as oil traded firmer on Monday.'"',
+            'subject': 'Brent crude and WTI crude',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'Brent near "'$72.40 and WTI near $69.64'"',
+            'time': 'Monday',
+            'cause': 'managed-transit risk in the Strait of Hormuz',
+            'entities': ['Brent crude', 'WTI crude', 'Strait of Hormuz'],
+            'confidence': 0.94,
+        },
+    ],
+    'b7eaedd24d11611cd2ef22107633c3a4': [],
+}
+
+rows = []
+total_facts = 0
+with input_path.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        facts = facts_by_doc.get(obj['doc_id'], [])
+        total_facts += len(facts)
+        rows.append({
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        })
+
+with output_path.open('w') as f:
+    for row in rows:
+        f.write(json.dumps(row, ensure_ascii=True) + '\\n')
+
+print(f'docs processed: {len(rows)}, total facts: {total_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 56
+
+codex
+The output file is written. I’m doing a quick validation pass on `all_facts_026.jsonl` to confirm line count, JSON validity, and preserved document order before I close out.
+exec
+/bin/zsh -lc 'wc -l all_facts_026.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_026.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+inp = Path('all_batch_026.jsonl')
+out = Path('all_facts_026.jsonl')
+with inp.open() as f:
+    in_ids = [json.loads(line)['doc_id'] for line in f]
+with out.open() as f:
+    rows = [json.loads(line) for line in f]
+out_ids = [row['doc_id'] for row in rows]
+assert in_ids == out_ids
+print('json valid:', len(rows), 'rows; order matches input')
+print('total facts:', sum(len(row['facts']) for row in rows))
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+json valid: 12 rows; order matches input
+total facts: 56
+
+codex
+Wrote [all_facts_026.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_026.jsonl). Validation passed: 12 rows, input order preserved, 56 total facts.
+
+`docs processed: 12, total facts: 56`
+tokens used
+35,643
+Wrote [all_facts_026.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_026.jsonl). Validation passed: 12 rows, input order preserved, 56 total facts.
+
+`docs processed: 12, total facts: 56`

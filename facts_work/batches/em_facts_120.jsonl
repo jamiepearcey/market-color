@@ -1,0 +1,5 @@
+```jsonl
+{"doc_id":"d89fa99d9fd65a9666d02fc6c9ef6b79","title":"Indonesia - Politics - The Jakarta Post","facts":[]}
+{"doc_id":"e31a98356dc7b1295fe490fe37bbbaf2","title":"The Latest - The Jakarta Post","facts":[{"claim":"Indonesia officially launched a B50 biodiesel blending mandate requiring 50% palm-based diesel and 50% conventional diesel","subject":"Indonesia","predicate":"policy_action","object":null,"direction":"na","magnitude":"50%","time":"2026-07-10","cause":"President Prabowo Subianto's policy to cut fuel imports and achieve energy self-sufficiency","entities":["Indonesia","biodiesel","Prabowo Subianto"],"confidence":0.9},{"claim":"The rollout of B50 biodiesel blend will raise domestic palm oil demand","subject":"palm oil","predicate":"demand_change","object":null,"direction":"up","magnitude":null,"time":"2026-07-10","cause":"launch of Indonesia's B50 biodiesel blending mandate","entities":["Indonesia","palm oil","biodiesel"],"confidence":0.9}]}
+{"doc_id":"fcaf2947a694997a38e23abd09bb4269","title":"Indonesia - The Jakarta Post","facts":[]}
+```

@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did benchmark gas contracts rise?
+
+ANSWER A:
+The provided context does not explain why benchmark gas contracts rose. The only item touching a gas benchmark is that the U.S. EIA raised its Henry Hub spot price forecasts for 2026 and 2027 [12], but no driver or reason for that increase is given. Related gas items describe production trends rather than prices — Permian marketed natural gas production grew 60% from 17.2 Bcf/d in 2021 to 27.6 Bcf/d in 2025, driven by increasing gas-oil ratios [19][16] — which would if anything add supply. What is missing is any context item stating that benchmark gas contracts (e.g., Henry Hub futures) actually rose and identifying the cause; the numbered items overwhelmingly concern crude oil positioning and prices, not natural gas contract movements.
+
+ANSWER B:
+The context provides very little on natural gas specifically. The only benchmark gas reference is that the U.S. Energy Information Administration raised its Henry Hub spot price forecasts for 2026 and 2027 [12], but no reason or driver for that upward revision is given. The remaining natural gas item notes only that Eni and Libya's NOC started up a compression project improving gas recovery at the Bahr Essalam field, which relates to supply rather than a price rise [11]. The context does not explain *why* benchmark gas contracts rose — it lacks any stated driver (demand, supply disruption, or storage dynamics) behind the raised Henry Hub forecast, and the bulk of the items concern crude oil markets rather than gas [12][11].
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

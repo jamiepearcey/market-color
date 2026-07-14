@@ -1,0 +1,215 @@
+{
+ "version": "em-v1",
+ "note": "EM regional feed pack (Postscript 8 recommendations). region key = source_region for localized routing + local-vs-global dissent; join analyses on source_name.",
+ "feeds": [
+  {
+   "name": "bne IntelliNews",
+   "url": "https://news.google.com/rss/search?q=site:intellinews.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "cis",
+   "desks": [
+    "macro",
+    "fx",
+    "energy"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Eurasianet",
+   "url": "https://news.google.com/rss/search?q=site:eurasianet.org+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "cis",
+   "desks": [
+    "macro",
+    "geopolitics",
+    "energy"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Yicai Global",
+   "url": "https://news.google.com/rss/search?q=site:yicaiglobal.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "china",
+   "desks": [
+    "asia",
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Yonhap Economy",
+   "url": "https://news.google.com/rss/search?q=site:en.yna.co.kr+economy+OR+markets+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "korea",
+   "desks": [
+    "asia",
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Korea Herald",
+   "url": "https://news.google.com/rss/search?q=site:koreaherald.com+business+OR+markets+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "korea",
+   "desks": [
+    "asia",
+    "equities",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Economic Times Markets",
+   "url": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+   "method": "rss",
+   "region": "india",
+   "desks": [
+    "asia",
+    "equities",
+    "macro"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Livemint Markets",
+   "url": "https://www.livemint.com/rss/markets",
+   "method": "rss",
+   "region": "india",
+   "desks": [
+    "asia",
+    "equities",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Bloomberg Linea",
+   "url": "https://news.google.com/rss/search?q=site:bloomberglinea.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Valor Economico",
+   "url": "https://news.google.com/rss/search?q=site:valor.globo.com+when:3d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+   "method": "google_news_rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "BusinessDay Nigeria",
+   "url": "https://businessday.ng/feed/",
+   "method": "rss",
+   "region": "africa",
+   "desks": [
+    "macro",
+    "fx",
+    "energy"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Moneyweb",
+   "url": "https://www.moneyweb.co.za/feed/",
+   "method": "rss",
+   "region": "africa",
+   "desks": [
+    "macro",
+    "equities",
+    "metals"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Al-Monitor",
+   "url": "https://news.google.com/rss/search?q=site:al-monitor.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "mena",
+   "desks": [
+    "geopolitics",
+    "energy",
+    "macro"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Zawya",
+   "url": "https://news.google.com/rss/search?q=site:zawya.com+markets+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "mena",
+   "desks": [
+    "macro",
+    "energy",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Business Times SG",
+   "url": "https://news.google.com/rss/search?q=site:businesstimes.com.sg+when:3d&hl=en-SG&gl=SG&ceid=SG:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Jakarta Post",
+   "url": "https://news.google.com/rss/search?q=site:thejakartapost.com+business+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  }
+ ]
+}

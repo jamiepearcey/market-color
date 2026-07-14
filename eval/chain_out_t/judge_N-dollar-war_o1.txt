@@ -1,0 +1,14 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why has the US dollar risen about 3 percent this year?
+
+ANSWER A:
+The US dollar's roughly 3% rise this year has been driven largely by shifting Federal Reserve expectations: a more hawkish-than-expected FOMC dot plot and Kevin Warsh's hawkish debut upended bets for rate cuts, fueling a surge in rate-hike expectations (now 32 bps of tightening priced by year-end, with a 29% chance of a July hike and 62% for September) as inflation runs above target and the economy keeps growing [1][3][19][20][13]. Optimism about the U.S. economy — including an AI-driven boom in U.S. equities that has drawn capital rapidly and prompted asset allocation toward U.S. assets — has added further support [3][5]. Safe-haven demand during the U.S.-Israeli conflict with Iran also contributed to the gains [8]. The dollar has additionally benefited from a widening U.S.-Japan interest rate differential, pushing the yen to its weakest since 1986 [12].
+
+What the context does not provide is a single figure explicitly attributing the exact 3% year-to-date move to each driver; item [8] states the ~3% rise and cites safe-haven demand "partly," while the Fed-related and equity-inflows drivers are documented mainly around June/quarterly moves rather than a precise year-to-date breakdown [3][6][13].
+
+ANSWER B:
+The dollar's roughly 3% rise this year has been attributed partly to safe-haven demand during the U.S.-Israeli conflict with Iran [8]. A larger driver has been a hawkish repricing of Federal Reserve policy: a more hawkish-than-expected FOMC dot plot and a hawkish debut from Fed Chair Kevin Warsh upended expectations for rate cuts and boosted expectations for rate hikes, with markets now pricing tightening into year-end as inflation stays above target and the economy keeps growing [1][3][13][18]. The dollar has also been lifted by the AI-driven boom in U.S. equities attracting capital and a broad asset-allocation shift toward U.S. markets [3][5], as well as a widening U.S.–Japan interest rate differential that has pushed the yen to multi-decade lows [12]. These factors together carried the dollar to a fourth straight quarterly gain [13]. The context does not give a single decomposition of exactly how much each factor contributed to the specific 3% figure.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

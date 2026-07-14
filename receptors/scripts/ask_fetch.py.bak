@@ -1,0 +1,59 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["duckdb>=1.0"]
+# ///
+"""Turn ask_results.json (doc ids per method) into readable context blocks."""
+import json
+from pathlib import Path
+import duckdb
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA = Path(__file__).resolve().parents[1] / "data"
+CORPUS = ROOT / "data" / "news_corpus" / "dt=*" / "*.parquet"
+
+results = json.loads((DATA / "ask_results.json").read_text())
+import os
+# Default: compact union-only view. Set ASK_ALL=1 for all four methods.
+if os.environ.get("ASK_ALL") == "1":
+    METHODS = [("STANDARD VECTOR (cosine)", "cosine"),
+               ("W 1-HOP (direct causes)", "w1hop"),
+               ("W MULTI-HOP (PPR, hub-suppressed)", "wmultihop"),
+               ("UNION (1-hop ⊕ multi-hop, RRF)", "union")]
+else:
+    METHODS = [("NAIVE CHUNK RAG (cosine)", "cosine"),
+               ("UNION (1-hop ⊕ multi-hop causal, no final hop)", "union"),
+               ("ABDUCTIVE (+ hypothesis-search final hop)", "abductive")]
+ids = sorted({d for r in results for _, key in METHODS for d in r.get(key, [])})
+
+con = duckdb.connect()
+con.execute("CREATE TEMP TABLE want(doc_id VARCHAR)")
+con.executemany("INSERT INTO want VALUES (?)", [(i,) for i in ids])
+rows = con.execute(f"""
+    SELECT doc_id, any_value(title) t, any_value(source_name) s,
+           any_value(published_date) d, any_value(body_text) b
+    FROM '{CORPUS.as_posix()}' JOIN want USING (doc_id) GROUP BY doc_id
+""").fetchall()
+meta = {r[0]: {"title": r[1], "source": r[2], "date": r[3], "body": (r[4] or "")} for r in rows}
+
+def snippet(doc_id, n=75):
+    m = meta.get(doc_id, {})
+    body = " ".join((m.get("body") or "").split()[:n])
+    return f"[{m.get('date','?')} | {m.get('source','?')}] {m.get('title','(no title)')}\n    {body}"
+
+out = []
+for r in results:
+    out.append("=" * 90)
+    out.append(f"QUESTION: {r['question']}")
+    for method, key in METHODS:
+        docs = r.get(key, [])[:4]
+        out.append(f"\n--- {method} top-{len(docs)} ---")
+        for rank, doc_id in enumerate(docs, 1):
+            out.append(f"  {rank}. {snippet(doc_id)}")
+    out.append("")
+
+(DATA / "ask_contexts.txt").write_text("\n".join(out))
+# how much does multi-hop change vs 1-hop?
+for r in results:
+    a, b = set(r.get("w1hop", [])), set(r.get("wmultihop", []))
+    print(f"1hop∩multihop {len(a & b)}/{len(a)} | +{len(b - a)} new from multihop | {r['question'][:50]}")
+print(f"\nwrote {DATA/'ask_contexts.txt'}")

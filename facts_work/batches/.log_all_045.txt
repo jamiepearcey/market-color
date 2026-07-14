@@ -1,0 +1,591 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc0-9e16-7521-bee8-b50c9cfd5cde
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_045.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_045.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_045.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:15:49.724650Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m processing `all_batch_045.jsonl` directly and will inspect a few records first to lock the extraction pattern before writing `all_facts_045.jsonl`.
+exec
+/bin/zsh -lc 'rg -n "" all_batch_045.jsonl | head -n 3' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1:{"doc_id": "1f734ba03026cab4a14f175e10b2dc7f", "source_name": "Yahoo Finance", "published_date": "2026-06-30", "url": "https://finance.yahoo.com/markets/stocks/articles/aberdeen-group-lse-abdn-stock-210837924.html", "title": "Aberdeen Group (LSE:ABDN) Stock Fair Value Edges Higher After Split Analyst Revisions", "body_text": "Track your investments for FREE with Simply Wall St, the portfolio command center trusted by over 7 million individual investors worldwide. Bullish price targets for Aberdeen Group now cluster in the mid 200 GBp range, with several analysts outlining specific objectives between 241 GBp and 265 GBp. These shifts sit alongside mixed Street commentary, where recent Buy and Overweight ratings contrast with trims from more cautious banks that see less room between the current share price and their revised targets. As you read on, you will see how these competing views shape the evolving analyst narrative around Aberdeen Group and what to watch next. Stay updated as the Fair Value for Aberdeen Group shifts by adding it to your watchlist or portfolio. Alternatively, explore our Community to discover new perspectives on Aberdeen Group. What Wall Street Has Been Saying 🐂 Bullish Takeaways - Deutsche Bank has set one of the higher targets on Aberdeen Group, lifting its price objective to 265 GBp from 235 GBp and maintaining a Buy rating. This points to a more constructive view on the stock's valuation potential. - Citi has also moved to a Buy rating with a 265 GBp target, stating that Aberdeen Group's potential upside relative to consensus estimates is not fully reflected in the current share price. This indicates that some analysts see room for earnings outperformance. - JPMorgan is keeping an Overweight stance and has adjusted its target to 241 GBp from 240 GBp. This reinforces the view that, despite near term adjustments, Aberdeen Group still sits on the positive side of its risk reward framework for that firm. 🐻 Bearish Takeaways - Morgan Stanley, Citi, Deutsche Bank and JPMorgan have all trimmed Aberdeen Group targets at various points. This signals concerns around execution, valuation, or growth assumptions compared with earlier expectations, even if specific drivers are not detailed. - Target cuts from Morgan Stanley and others highlight that some researchers see a narrower margin of safety between the current share price and their revised targets. This may make them more cautious on how much room there is for error in the investment case. Do your thoughts align with the Bull or Bear Analysts? Perhaps you think there's more to the story. Head to the Simply Wall St Community to discover more perspectives! How This Changes the Fair Value For Aberdeen Group - Fair value per Aberdeen Group share adjusted from £2.15 to £2.24. - Revenue growth assumption moved from 92.47% to 102.28%. - Net profit margin assumption changed from 16.54% to 16.64%. - Future P/E input updated from 21.60x to 22.23x. - Discount rate revised from 8.57% to 8.47%."}
+2:{"doc_id": "1fa01116618cbd2435eaeb8e2dd1008d", "source_name": "ForexLive", "published_date": "2026-06-30", "url": "https://investinglive.com/centralbank/rba-stood-ready-to-hike-again-as-minutes-flag-excess-demand-weak-housing-20260630/", "title": "RBA stood ready to hike again as minutes flag excess demand, weak housing | investingLive", "body_text": "The minutes predate last week's 10 percent plus slide in Brent, creating a disconnect between the hawkish tone of the document and where markets have since moved, with only 10 basis points of further tightening now priced by year-end and 17 basis points of easing priced through 2027. The AUD faces a tension between the RBA's explicit willingness to hike again and the market's view that rates have likely peaked, leaving the currency vulnerable to repricing if upcoming data confirms the softer oil backdrop is feeding through to inflation expectations. Falling Sydney and Melbourne home prices add a domestic growth risk that could reinforce the market's dovish repricing, even as the board's own language remains firmly tightening-biased. The gap between the RBA's restrictive stance and a rapidly easing global oil shock is the key variable for rate-sensitive assets in the near term. --- RBA June minutes show the board held rates at 4.35% but stood ready to hike again, citing excess demand and inflation risks, though the meeting predated last week's 10% slide in oil prices. Summary: - The RBA held its cash rate target unchanged at 4.35% in June, judging this would best balance its inflation and employment objectives after three rate hikes earlier in the year - The board said monetary policy needed to remain restrictive to unwind excess demand and would raise the cash rate target further if necessary - Annual consumer price inflation ran at 4.0% in May, with core inflation at 3.6%, both materially above the RBA's 2 to 3 percent target band - The board judged Australian financial conditions to be probably somewhat restrictive, with the cash rate sitting at the top of staff estimates of the neutral rate - Members noted the housing market had weakened by more than expected, reflecting rate hikes and proposed tax changes, with Sydney and Melbourne home prices falling in recent months - The board viewed the Middle East conflict as a material upside risk to inflation and downside risk to growth, though it acknowledged an enduring resolution could reduce the extent of cost pass-through to consumers - Persistently weak productivity growth was flagged as a continuing risk to the timeline for returning inflation to target - The meeting was held on June 15 and 16, before Brent crude fell 10% the following week, and markets now price just 10 basis points of further tightening by year-end alongside 17 basis points of easing through 2027 The Reserve Bank of Australia said monetary policy needed to remain restrictive to unwind excess demand in the economy, minutes of its June board meeting showed on Tuesday, even as the rate backdrop the board was responding to has since shifted considerably. The board held the cash rate target unchanged at 4.35% following three hikes earlier this year, judging that holding steady would best balance its inflation and employment objectives. It nonetheless made clear it stood ready to raise rates again if needed, noting that monetary policy needed to remain restrictive to unwind current excess demand through a period of below trend growth. Annual consumer price inflation stood at 4.0% in May and core inflation at 3.6%, both well above the RBA's 2 to 3 percent target band. Members judged financial conditions were now probably somewhat restrictive, with the cash rate target sitting near the top of staff model estimates of the neutral rate and above the range estimated by market economists. The board acknowledged it would take time to assess the full impact of tightening undertaken since February, though it appeared at this stage to be having broadly the expected effect, particularly in housing, where conditions had softened by more than anticipated. That housing weakness, linked to higher mortgage rates and proposed tax changes for property investors, has shown up in falling home prices in Sydney and Melbourne in recent months. The board flagged this as a genuine two-sided risk: while it reinforced the case for restrictive policy working as intended, a more pronounced housing downturn could also weigh on consumption growth and feed back into weaker activity. The Middle East conflict featured prominently in the board's risk assessment. Members acknowledged the emergence of a potential path to resolution but described this as still an early stage development, and judged the conflict to pose material upside risks to inflation and downside risks to growth overall. They noted that an enduring resolution could reduce the degree to which firms pass on elevated costs to consumers, but cautioned that underlying inflation would likely still increase to some extent in response to recent fuel supply disruptions regardless of how the conflict evolves. The minutes also pointed to persistently weak productivity growth as a continuing concern, with members agreeing that a sustained shortfall could impede progress on returning inflation to target even as demand cools. Critically, the June 15 and 16 meeting predates a sharp deterioration in the oil price backdrop that the board was responding to. Brent crude fell roughly 10% in the week following the minutes' underlying period, a move that has materially shifted market pricing for the path of Australian rates. Futures markets now imply only about 10 basis points of additional tightening by the end of the year, down sharply from earlier expectations, with traders also pricing in 17 basis points of easing by the end of 2027. That repricing suggests markets believe the RBA's tightening cycle has likely already peaked, even as the board's own language in the minutes remains explicitly tilted toward further hikes if conditions warrant."}
+3:{"doc_id": "1fd50a31fa72fb3a6d33ac477bfd754a", "source_name": "Al Jazeera", "published_date": "2026-06-30", "url": "https://www.aljazeera.com/news/2026/6/30/dr-congo-says-1307-ebola-cases-confirmed-including-377-deaths", "title": "DR Congo says 1,307 Ebola cases confirmed, including 377 deaths", "body_text": "The Democratic Republic of the Congo (DRC) says confirmed Ebola cases in the country have reached 1,307 and include 377 deaths. In an update issued late on Monday, the country said the confirmed cases have been recorded in three provinces – Ituri, North Kivu and South Kivu. Recommended Stories list of 3 items- list 1 of 3Sudan says China has waived $50m loan: What’s in it for Khartoum, Beijing? - list 2 of 3Sixty-six years on: The promise of DRC independence remains unfulfilled - list 3 of 3Migrants in South Africa fear violence ahead of June 30 deadline The announcement comes as the AFP news agency reported that a case has been detected in a fourth province. A source at the DRC’s National Institute of Biomedical Research (INRB) quoted by AFP said the viral haemorrhagic fever has spread to Haut-Uele, which borders South Sudan and the Central African Republic. The source said the case there was detected after an infected person travelled from Bunia, Ituri’s capital, to Haut-Uele. That person has since died, another health source told AFP. Authorities are now trying to trace the chain of transmission and identify contacts. Its spread to Haut-Uele means the DRC’s entire northeast, home to about 15 million people, is now affected. The conflict-hit province of Ituri is the epicentre of the country’s latest Ebola outbreak, its 17th, which started in May. In many cases, the virus has spread at funerals, where the highly infectious bodies of Ebola victims are handled. For weeks, aid workers, facing mistrust among local communities, have struggled to plan safe burials in affected areas to prevent contact with the dead. In the DRC, funerals often last several days, during which family members and friends touch the body of the deceased. Reporting from a treatment centre in Rwampara in Ituri province, Al Jazeera’s Catherine Wambua-Soi said health workers often lack sufficient equipment. “These centres have been attacked several times. Last month, tents here were set on fire by an angry mob. Some Congolese still distrust those trying to help,” she said. “They need more of everything: protective gear, medicines, rapid test kits … and body bags.” On Saturday, the government issued a ban on public gatherings in four provinces, including the country’s capital, Kinshasa, as it continues to battle the spread of the outbreak. That order was issued before a planned protest in Kinshasa on July 8 against constitutional reform, and opposition figures have called the ban “politically motivated.”"}
+
+exec
+/bin/zsh -lc 'wc -l all_batch_045.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_045.jsonl
+
+codex
+The batch is small enough to handle precisely. I’m scanning the full set of titles and sources now so the extractor can stay conservative on what counts as market-relevant.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_batch_045.jsonl')
+for i,line in enumerate(p.read_text().splitlines(),1):
+    o=json.loads(line)
+    print(f\"{i}\\t{o['doc_id']}\\t{o['source_name']}\\t{o['published_date']}\\t{o['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1	1f734ba03026cab4a14f175e10b2dc7f	Yahoo Finance	2026-06-30	Aberdeen Group (LSE:ABDN) Stock Fair Value Edges Higher After Split Analyst Revisions
+2	1fa01116618cbd2435eaeb8e2dd1008d	ForexLive	2026-06-30	RBA stood ready to hike again as minutes flag excess demand, weak housing | investingLive
+3	1fd50a31fa72fb3a6d33ac477bfd754a	Al Jazeera	2026-06-30	DR Congo says 1,307 Ebola cases confirmed, including 377 deaths
+4	1ff7b25d44be08752e6fecb7c90d790e	Metal.com (SMM)	2026-06-30	Hunan Province has launched the second round of its provincial ecologi - Shanghai Metals Market (SMM)
+5	2031ae46d73675d5db1febb51d40f87b	FXStreet News	2026-06-30	RBA Minutes signal policy needed to remain restrictive: What it means for the Australian Dollar | FXStreet
+6	204356591a4f6cfb3f131bb88aaa0b9b	Investing.com Stock Market News	2026-06-30	Northrop Grumman wins $68M in defense contracts By Investing.com
+7	204f729932d84dd713d9e3dcade7c05e	CoinDesk	2026-06-30	Las empresas que más invierten en IA están aumentando sus empleos, según un estudio de Ramp
+8	208f614bc1b96178f05ec224aca8d2b2	Cointelegraph	2026-06-30	Nasdaq Takes TotalView Market Data Onchain with Pyth
+9	20972b25bffabe812369828d9a3766e2	War on the Rocks	2026-06-30	Lost in Translation: How A Premier Chinese Think Tank Views U.S.-Chinese Competition
+10	20ac5fe3a5c630d8452eae94aa6cc806	Guardian Business	2026-06-30	Trump threatens to abolish birthright citizenship through Congress after supreme court rules against him – live
+11	20b2ed3c299bfaa0cbffc4a80aee26fc	Guardian Business	2026-06-30	‘Commanding heights of the economy’: the postwar blueprint that inspires Burnham
+12	20c3e6ae61f0d0f36a4226eebd43ba31	Guardian Business	2026-06-30	NPR retracts ‘inaccurate’ story saying supreme court justice Samuel Alito retiring
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+ids={'204f729932d84dd713d9e3dcade7c05e','208f614bc1b96178f05ec224aca8d2b2'}
+for line in Path('all_batch_045.jsonl').read_text().splitlines():
+    o=json.loads(line)
+    if o['doc_id'] in ids:
+        print('\\nDOC',o['doc_id'],o['title'])
+        print(o['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+ids={'1ff7b25d44be08752e6fecb7c90d790e','2031ae46d73675d5db1febb51d40f87b','204356591a4f6cfb3f131bb88aaa0b9b'}
+for line in Path('all_batch_045.jsonl').read_text().splitlines():
+    o=json.loads(line)
+    if o['doc_id'] in ids:
+        print('\\nDOC',o['doc_id'],o['title'])
+        print(o['body_text'])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+DOC 204f729932d84dd713d9e3dcade7c05e Las empresas que más invierten en IA están aumentando sus empleos, según un estudio de Ramp
+Las empresas que más invierten en IA están aumentando empleos, según estudio de Ramp Un nuevo estudio de Ramp encontró que las empresas que realizan las inversiones más grandes en IA están ampliando sus plantillas, con los adoptantes frecuentes aumentando el número de empleados en aproximadamente un 10% y la contratación de niveles iniciales en un 12%, desafiando los temores de que la IA generativa ya esté causando pérdidas generalizadas de empleo. - Ramp analizó más de 21,500 empresas estadounidenses y descubrió que las firmas con el gasto más alto en IA aumentaron el empleo en aproximadamente un 10 % y la contratación de nivel inicial en un 12 %, mientras que los adoptantes de IA de baja intensidad no registraron ganancias significativas en el empleo. - Los investigadores advierten que los hallazgos muestran correlación, no causalidad, señalando que las empresas que adoptan IA ya eran firmas más grandes, de crecimiento más rápido y más técnicas, pero sostienen que los resultados sugieren que la inversión en IA está complementando actualmente el crecimiento de la fuerza laboral en lugar de reemplazar a los trabajadores. Ramp, una plataforma de operaciones financieras, afirmó que las empresas que realizan las mayores inversiones en inteligencia artificial están ampliando sus plantillas en lugar de reducirlas, según un nuevo estudio que desafía la narrativa de que la IA generativa ya está provocando despidos generalizados en trabajos de cuello blanco. El informe, realizado con el mercado laboral La firma de análisis Revelio Labs analizó el gasto en IA y los registros de empleo de 21,559 empresas estadounidenses entre 2021 y principios de 2026, citando datos de transacciones de Ramp. Al vincular los pagos corporativos a proveedores de IA con datos de la fuerza laboral, los investigadores encontraron que las empresas con la mayor intensidad de gasto en IA aumentaron el empleo aproximadamente un 10 % después de adoptar IA, mientras que los adoptantes de baja intensidad no mostraron un cambio estadísticamente significativo. El empleo de nivel inicial también aumentó alrededor de un 12 % entre los grandes adoptantes. Los hallazgos contrastan con las advertencias de algunos ejecutivos de tecnología y banca consideran que la IA eliminará rápidamente los empleos de oficina. En cambio, Ramp sostiene que las empresas que realizan inversiones sostenidas en IA están utilizando la tecnología para crecer, con aumentos en la contratación que se extienden más allá de la ingeniería hacia roles en ventas, administración, finanzas y servicio al cliente. El estudio también encontró que esos aumentos surgieron gradualmente durante un periodo de seis a doce meses, lo que sugiere que las empresas necesitan tiempo para integrar la IA en los flujos de trabajo antes de lograr ganancias de productividad. Los investigadores advierten que los adoptantes de IA no son representativos de la economía en general. Las empresas que adoptan IA ya eran más grandes, de mayor crecimiento, más técnicas y tenían más probabilidades de contar con financiamiento de capital riesgo antes de implementar la tecnología, lo que hace que las comparaciones simples con quienes no la adoptan sean engañosas. Para tener esto en cuenta, el estudio compara a los adoptantes tempranos con empresas similares que aún no habían adoptado IA, en lugar de con empresas que nunca la adoptaron. El informe también encontró que la adopción de IA sigue concentrada en industrias intensivas en conocimiento. Las empresas de información registraron las tasas de adopción más altas, seguidas por los sectores financiero y de servicios profesionales, mientras que sectores como la hostelería, las artes y la salud quedaron significativamente rezagados. Ramp afirmó que su investigación es una de las primeras en combinar el gasto corporativo observado en IA con registros laborales a nivel empresarial, lo que permite a los investigadores medir la adopción de IA basándose en compras reales en lugar de encuestas o estimaciones de exposición ocupacional. La empresa define la adopción como tres meses consecutivos con un gasto mínimo de $100 en proveedores de IA, y la intensidad de adopción se mide por el gasto en IA por empleado durante los primeros tres meses posteriores a la implementación. Los autores señalan que los resultados no deben interpretarse como una prueba de que la inteligencia artificial provoque contrataciones, sino más bien como evidencia de que las empresas que realizan inversiones sustanciales y sostenidas en IA están creciendo actualmente más rápido que compañías similares. Argumentan que los hallazgos sugieren que el impacto económico inicial de la IA podría estar menos relacionado con la sustitución de trabajadores y más con la habilitación de la expansión en empresas capaces de integrar la tecnología de manera efectiva. - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9 - 10 Zcash’s Tachyon upgrade aims to scale shielded payments, improve quantum readiness, and test whether its funding, security, and governance can hold. Zcash’s Tachyon upgrade aims to scale shielded payments, improve quantum readiness, and test whether its funding, security, and governance can hold. Por qué es importante: Zcash’s Tachyon upgrade aims to scale shielded payments, improve quantum readiness, and test whether its funding, security, and governance can hold.
+
+DOC 208f614bc1b96178f05ec224aca8d2b2 Nasdaq Takes TotalView Market Data Onchain with Pyth
+Nasdaq brings proprietary market data onchain through Pyth The partnership extends distribution of Nasdaq's TotalView market data to blockchain applications and other software platforms through Pyth's marketplace. Nasdaq has selected Pyth, an onchain financial data network, to distribute its proprietary market data to blockchain applications and other software platforms. The partnership initially covers Nasdaq TotalView, the exchange’s depth-of-book data feed, which includes every displayed buy and sell order across all price levels as well as order imbalance data around the opening and closing auctions. The feed is widely used by professional traders because it provides a more complete view of market liquidity than standard market quotes by displaying the full order book. According to Pyth, the marketplace gives software applications access to first-party market data through a single integration. The company said the service is intended for blockchain applications, digital asset exchanges, prediction markets, trading systems and other software platforms. Nasdaq joins a group of publishers on Pyth that includes exchanges Euronext and OTC Markets, electronic trading platforms Tradeweb and Kalshi, market data provider Exchange Data International, Singapore Exchange’s SGX FX and the US Department of Commerce. Related: Coinbase lets users transfer stock portfolios as exchange expands beyond crypto Nasdaq and ICE deepen digital asset strategies Nasdaq’s partnership with Pyth is the latest in a series of moves by established exchange operators to expand their digital asset businesses through cryptocurrency products, blockchain infrastructure and new market services. In March, Nasdaq has expanded its tokenization efforts through a partnership with crypto exchange Kraken and its infrastructure affiliate Backed to develop infrastructure linking traditional equities with blockchain networks. The initiative builds on the exchange operator’s broader push to integrate tokenized assets with traditional market infrastructure. The following month, the SEC approved Nasdaq’s proposal to list Bitcoin index options tied to the Nasdaq Bitcoin Index, paving the way for trading pending approval from the Commodity Futures Trading Commission. Nasdaq also partnered with CME Group to launch cryptocurrency index futures tracking a basket of seven digital assets, including Bitcoin, Ether, Solana and XRP, expanding its regulated crypto derivatives lineup. Other exchange operators have pursued similar initiatives. ICE, the parent company of the New York Stock Exchange, partnered with crypto exchange OKX in May to launch perpetual futures tied to its Brent crude and West Texas Intermediate oil benchmarks, marking the first product announced under the companies' broader partnership. Source: OKX Later, ICE CEO Jeffrey Sprecher called on regulators to allow traditional exchanges to offer 24/7 onchain perpetual futures, arguing regulated venues should be able to compete with crypto-native platforms already offering the products. Magazine: Bitcoin slides to $58K, XRP hits $1 but onchain data promising: Market Moves More on the subject
+
+ succeeded in 0ms:
+
+DOC 1ff7b25d44be08752e6fecb7c90d790e Hunan Province has launched the second round of its provincial ecologi - Shanghai Metals Market (SMM)
+Hunan Launches Second Round of Environmental Inspections, Affecting Lead-Zinc Mines Hunan Province has launched the second round of its provincial ecological and environmental protection inspection "look-back" campaign. The first batch of seven inspection teams has been fully deployed since June 13, 2026, covering the cities of Changsha, Zhuzhou, Yueyang, Shaoyang, Hengyang, Huaihua, and Zhangjiajie. According to market sources, some lead-zinc mines have suspended production as a result of the inspections. SMM will continue to monitor and assess the potential impact on zinc concentrate supply.Data Source Statement: Except for publicly available information, all other data are processed by SMM based on publicly available information, market communication, and relying on SMM's internal database model. They are for reference only and do not constitute decision-making recommendations.
+
+DOC 2031ae46d73675d5db1febb51d40f87b RBA Minutes signal policy needed to remain restrictive: What it means for the Australian Dollar | FXStreet
+The Reserve Bank of Australia (RBA) published the Minutes of its June monetary policy meeting this Tuesday, with the details below. Additional takeaways: RBA board noted housing market softer than expected amid rate increases, tax adjustments. Recent data varied, indicates economy slowing broadly as anticipated. RBA board agrees financial conditions are likely somewhat tight. Weakening housing market, anticipated slowdown in housing credit indicate tighter conditions. Middle East conflict continues to present significant upside risks for inflation, downside risks for growth. Economy running with excess demand, broad inflationary pressures. Will take necessary steps to ensure price stability, including potential rate hikes. Discussed Whether Robust Data Centre Activity Might Worsen Capacity Strains in Economy. Members highlight risks of possible significant decline in housing markets. Sustained high oil prices may influence price and wage-setting behavior. Household spending increase has not eased significantly. Ongoing weak productivity may hinder progress in bringing inflation back to target. The Australian Dollar (AUD) remains weak following the hawkish RBA Minutes. At the time of writing, the AUD/USD pair is trading 0.23% lower on the day to trade at 0.6871. Australian Dollar Price Today The table below shows the percentage change of Australian Dollar (AUD) against listed major currencies today. Australian Dollar was the weakest against the US Dollar. | USD | EUR | GBP | JPY | CAD | AUD | NZD | CHF | | |---|---|---|---|---|---|---|---|---| | USD | 0.13% | 0.14% | 0.15% | 0.08% | 0.21% | 0.02% | 0.13% | | | EUR | -0.13% | 0.01% | -0.02% | -0.10% | 0.07% | -0.13% | -0.02% | | | GBP | -0.14% | -0.01% | -0.02% | -0.09% | 0.07% | -0.13% | -0.03% | | | JPY | -0.15% | 0.02% | 0.02% | -0.06% | 0.06% | -0.11% | -0.02% | | | CAD | -0.08% | 0.10% | 0.09% | 0.06% | 0.11% | -0.05% | 0.04% | | | AUD | -0.21% | -0.07% | -0.07% | -0.06% | -0.11% | -0.17% | -0.07% | | | NZD | -0.02% | 0.13% | 0.13% | 0.11% | 0.05% | 0.17% | 0.08% | | | CHF | -0.13% | 0.02% | 0.03% | 0.02% | -0.04% | 0.07% | -0.08% | The heat map shows percentage changes of major currencies against each other. The base currency is picked from the left column, while the quote currency is picked from the top row. For example, if you pick the Australian Dollar from the left column and move along the horizontal line to the US Dollar, the percentage change displayed in the box will represent AUD (base)/USD (quote). What do RBA Meeting Minutes mean for the Australian Dollar? The Reserve Bank of Australia (RBA) publishes the Minutes of its monetary policy meeting two weeks after the interest rate decision is announced. It provides a detailed record of the discussions held between the RBA’s board members on monetary policy and economic conditions that influenced their decision on adjusting interest rates and/or bond buys. The minutes also reveal considerations on international economic developments and the exchange rate value. The Minutes can reveal whether the RBA is leaning toward tightening, easing, or maintaining policy settings, which could influence the Australian Dollar (AUD) and market expectations for future RBA decisions. Hawkish RBA Minutes indicate that policymakers are concerned about inflation or discussed the possibility of keeping rates higher for longer. On the other hand, dovish RBA Minutes suggest policymakers are increasingly concerned about slowing growth, weaker inflation, or discussed potential rate cuts. Technical Analysis: AUD/USD keeps the bearish vibe below the key 100-day SMA In the daily chart, AUD/USD extends a bearish near-term tone as spot holds beneath the 100-day simple moving average (SMA) and the Bollinger Bands’ 20-day middle band. Price is now leaning toward the lower half of the recent range, while the Relative Strength Index (14) around 26 signals oversold momentum, hinting that while selling pressure dominates, the downside could start to lose energy if fresh lows fail to attract follow-through. On the downside, immediate support emerges at the Bollinger Bands’ lower band near 0.6845, where sellers may hesitate to press the move without stronger momentum. On the topside, initial resistance is seen at the Bollinger 20-day middle band around 0.7000, followed by the 100-day SMA at 0.7078 and the upper Bollinger band near 0.7155, and only a sustained break above this clustered resistance zone would suggest that the broader bearish bias is beginning to unwind. (The technical analysis of this story was written with the help of an AI tool.) Economic Indicator RBA Meeting Minutes The minutes of the Reserve Bank of Australia meetings are published two weeks after the interest rate decision. The minutes give a full account of the policy discussion, including differences of view. They also record the votes of the individual members of the Committee. Generally speaking, if the RBA is hawkish about the inflationary outlook for the economy, then the markets see a higher possibility of a rate increase, and that is positive for the AUD. Read more.Last release: Tue May 19, 2026 01:30 Frequency: Weekly Actual: - Consensus: - Previous: - Source: Reserve Bank of Australia The Reserve Bank of Australia (RBA) publishes the minutes of its monetary policy meeting two weeks after the interest rate decision is announced. It provides a detailed record of the discussions held between the RBA’s board members on monetary policy and economic conditions that influenced their decision on adjusting interest rates and/or bond buys, significantly impacting the AUD. The minutes also reveal considerations on international economic developments and the exchange rate value. RBA FAQs The Reserve Bank of Australia (RBA) sets interest rates and manages monetary policy for Australia. Decisions are made by a board of governors at 11 meetings a year and ad hoc emergency meetings as required. The RBA’s primary mandate is to maintain price stability, which means an inflation rate of 2-3%, but also “..to contribute to the stability of the currency, full employment, and the economic prosperity and welfare of the Australian people.” Its main tool for achieving this is by raising or lowering interest rates. Relatively high interest rates will strengthen the Australian Dollar (AUD) and vice versa. Other RBA tools include quantitative easing and tightening. While inflation had always traditionally been thought of as a negative factor for currencies since it lowers the value of money in general, the opposite has actually been the case in modern times with the relaxation of cross-border capital controls. Moderately higher inflation now tends to lead central banks to put up their interest rates, which in turn has the effect of attracting more capital inflows from global investors seeking a lucrative place to keep their money. This increases demand for the local currency, which in the case of Australia is the Aussie Dollar. Macroeconomic data gauges the health of an economy and can have an impact on the value of its currency. Investors prefer to invest their capital in economies that are safe and growing rather than precarious and shrinking. Greater capital inflows increase the aggregate demand and value of the domestic currency. Classic indicators, such as GDP, Manufacturing and Services PMIs, employment, and consumer sentiment surveys can influence AUD. A strong economy may encourage the Reserve Bank of Australia to put up interest rates, also supporting AUD. Quantitative Easing (QE) is a tool used in extreme situations when lowering interest rates is not enough to restore the flow of credit in the economy. QE is the process by which the Reserve Bank of Australia (RBA) prints Australian Dollars (AUD) for the purpose of buying assets – usually government or corporate bonds – from financial institutions, thereby providing them with much-needed liquidity. QE usually results in a weaker AUD. Quantitative tightening (QT) is the reverse of QE. It is undertaken after QE when an economic recovery is underway and inflation starts rising. Whilst in QE the Reserve Bank of Australia (RBA) purchases government and corporate bonds from financial institutions to provide them with liquidity, in QT the RBA stops buying more assets, and stops reinvesting the principal maturing on the bonds it already holds. It would be positive (or bullish) for the Australian Dollar. Author
+
+DOC 204356591a4f6cfb3f131bb88aaa0b9b Northrop Grumman wins $68M in defense contracts By Investing.com
+S&P 500 and Nasdaq post best quarter since 2020, Dow notches best H1 in five years Investing.com - Northrop Grumman Corp. (NYSE:NOC) received three defense contracts totaling approximately $68 million from the U.S. Department of Defense, the agency announced Tuesday. The largest award is a $49 million undefinitized contract action letter contract for Joint Tactical Ground Station sustainment. The contract provides contractor logistics support and engineering services for the JTAGS program. Work will be performed in Colorado Springs, Colorado, and various locations globally, with completion expected by June 30, 2027. Fiscal 2026 operations and maintenance funds of $13.5 million and fiscal 2026 research, development, test, and evaluation funds of $5.5 million are being obligated at time of award. Space Systems Command Directorate of Contracting, Peterson Space Force Base, Colorado, is the contracting activity. Northrop Grumman’s El Segundo, California, facility received two additional modifications totaling $18.8 million for LEX wing extensions. The first modification is valued at $9,425,888 for L/H wing extensions with a completion date of July 7, 2028. The second modification is valued at $9,380,995 for R/H wing extensions with a completion date of Sept. 12, 2028. Both modifications are firm-fixed-price contracts issued against a two-year subsumable contract with one five-year option period. The Air Force is the using military service, and fiscal 2026 defense working capital funds are being applied. Defense Logistics Agency Weapons Support, Richmond, Virginia, is the contracting activity. This article was generated with the support of AI and reviewed by an editor. For more information see our T&C.
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+ids={'20972b25bffabe812369828d9a3766e2','20ac5fe3a5c630d8452eae94aa6cc806','20b2ed3c299bfaa0cbffc4a80aee26fc','20c3e6ae61f0d0f36a4226eebd43ba31'}
+for line in Path('all_batch_045.jsonl').read_text().splitlines():
+    o=json.loads(line)
+    if o['doc_id'] in ids:
+        print('\\nDOC',o['doc_id'],o['title'])
+        print(o['body_text'][:5000])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+DOC 20972b25bffabe812369828d9a3766e2 Lost in Translation: How A Premier Chinese Think Tank Views U.S.-Chinese Competition
+Join War on the Rocks and gain access to content trusted by policymakers, military leaders, and strategic thinkers worldwide. On May 13, 2026, Air Force One landed in Beijing for President Donald Trump’s first state visit to China in nearly a decade. That same morning, the China Institutes of Contemporary International Relations published a report titled The Evolving World and the Right Way to China-US Coexistence. The summit dominated global media coverage for two days. The report received almost none. The Beijing summit produced familiar imagery: honor guards, a state banquet in the Great Hall of the People, and carefully choreographed warmth. Chinese leader Xi Jinping announced that both sides had agreed to “strategic stability” as a framework for the next three years, and both leaders praised the collegial atmosphere. Beneath the pageantry, China’s premier foreign policy think tank had published its own assessment of the state of bilateral relations. Read against Mao Zedong’s original theory of protracted struggle, its report describes the current moment not as a step toward partnership but as the product of a strategy in which struggle precedes and produces cooperation on terms favorable to Beijing. Treating that stabilization as evidence of strategic convergence, rather than as a single stage within a longer competition, would be a misreading worth correcting. The China Institutes of Contemporary International Relations is not a conventional foreign policy think tank. It functions as a research and analysis arm of China’s Ministry of State Security, and its principal customers are the Central Foreign Affairs Commission of the Chinese Communist Party Central Committee, the body that sets the country’s strategic direction at the highest level. When it publishes something, it is either articulating existing leadership thinking back to the policy apparatus or feeding analysis upward to those who act on it. The institutional provenance is not incidental — it transforms the document from a scholarly exercise into something closer to an official strategic situation assessment. The report’s central analytical concept is “strategic stalemate.” It is the precise vocabulary that the founder of the People’s Republic of China Mao Zedong used in On Protracted War, his 1938 lectures at Yan’an, to designate the second of three phases in a long-duration geopolitical competition between a weaker rising power and a stronger incumbent. For any Chinese policy reader, the term has a single unambiguous referent: Mao’s second phase of protracted war. Its use in the report was not accidental. Mao’s protracted war phases are explicit. The first phase, “strategic defensive,” describes the period when the stronger adversary is on the offensive and the weaker side must preserve its forces, avoid annihilation, and resist without seeking decisive engagement. The second phase, “strategic stalemate,” describes the equilibrium in which neither side can deliver a decisive blow, and the weaker side uses the pause to build strength, exhaust the adversary, and shift the underlying balance of forces. The third phase, “strategic counteroffensive,” arrives when the balance has shifted sufficiently for the formerly weaker side to go on the offensive and secure final victory. The Institute’s report maps this framework directly onto U.S.-Chinese competition. Phase One corresponds to the post-Cold War era of American unipolar dominance, a period that begins with the Soviet collapse, shifts with the perceived erosion of U.S. primacy after the 2008 global financial crisis, and sharpens into open strategic competition as Washington’s posture toward Beijing hardens from the Obama administration onward. Throughout this period, China absorbed American pressure on issues ranging from market access, tariffs, and sanctions to what it saw as an increasingly assertive U.S. military containment strategy, abetted by Washington’s regional allies and partners, all while building and safeguarding its own economic and military capacity. The current moment is explicitly named Phase Two. The report advances beyond simply identifying the stalemate — it describes the present stage as a deepening of the equilibrium reached during the first U.S.-Chinese trade dispute of the late 2010s, marking the shift with the formulation from initial stalemate to comprehensive stalemate. It attributes that deepening to three compounding factors: a shift in composite national strength across the economic, scientific, and defense domains; economic resilience capable of mitigating American economic coercion; and resistance to what Beijing characterizes as a broader containment effort by Washington. Taken together, the report argues, these conditions mean the balance of forces has shifted further in China’s favor than it had during the earlier stalemate. Phase Three is implied but deliberately unnamed. Taiwan’s reunification with mainland China is described as inevitable, leaving only 
+
+DOC 20ac5fe3a5c630d8452eae94aa6cc806 Trump threatens to abolish birthright citizenship through Congress after supreme court rules against him – live
+In a rebuke to Donald Trump’s anti-immigrant agenda, the supreme court upheld birthright citizenship, which provides nearly all people born in the United States with citizenship. In a 6-3 opinion, the justices ruled that the Trump administration violated a provision of the 14th amendment, which was affirmed by the supreme court 128 years ago. “Children born in the United States to parents unlawfully or temporarily present are ‘subject to the jurisdiction’ of the United States and are citizens at birth under the Fourteenth Amendment’s Citizenship Clause,” the ruling reads. The NAACP, a civil rights group dedicated to advancing the rights of Black people, called the decision a “powerful affirmation of the constitution and the enduring promise of equality it represents”. Voto Latino, a non-profit pushing for Latino voting power, said that “the court drew a permanent line in the sand – defeating a radical attempt to divide our families and strip away any doubt that our community belongs here”. The president said the decision was “too bad”, but appeared undeterred in his quest to end birthright citizenship, turning his attention to Congress. Instead of trying to pass a constitutional amendment, Trump is pushing for lawmakers to create new legislation that establishes exceptions to birthright citizenship for children born to parents who do not have permanent legal status in the US. “Congress should start TODAY to work on ending expensive and unfair to our Country, Birthright Citizenship,” he wrote on Truth Social. But that will also be an uphill battle, as any legislation would need to overcome the 60-vote filibuster. The supreme court also ruled that schools can determine eligibility for women’s and girls’ sports teams based on biological sex,effectively upholding a ban on transgender women and girls from taking part in female sports teams. The ruling centered on the case of Lindsay Hecox, a college student in Idaho, and Becky Pepper-Jackson, a 15-year-old high school student from West Virginia. The court said that West Virginia and Idaho did not violate Title IX – which bars educational programs that receive federal funding from discriminating based on sex. But the court’s three liberal justices said in a dissenting opinion that the bans do impede on the constitution’s equal protection clause. The far-reaching ruling is likely to pave the way for similar bans throughout the US. Also today, the supreme court justices struck down limits on campaign spending in federal elections by political parties. In a 6-3 decision along ideological lines, the court held that the law’s “limits on political parties” coordinated expenditures violate the first amendment. The supreme court also declined to consider the legality of laws that restrict people aged 18 to 20 from purchasing or using firearms, but said it will consider whether bans on semiautomatic rifles, often called assault weapons, violate the second amendment. Trump earned more than $1.4b in income from family’s crypto ventures last year, financial disclosure report shows The US Office of Government Ethics released President Donald Trump’s annual financial disclosure report, showing more than $1.4b in income from his family’s crypto ventures in 2025. His earnings stem from digital assets that have profited from his policies. Trump received over $500m from World Liberty Financial, a crypto venture he and his sons co-founded. Trump reported another $635m from the sale of his $TRUMP meme coins. The president also reported over $80m in income from settlements with several media companies and millions in income from his company licensing his name to overseas property developers. OGE also made available US vice-president JD Vance’s annual financial disclosure. You can view both here. Tina Peters, a former Colorado county clerk convicted of participating in a scheme to pursue election conspiracy theories disseminated by Donald Trump, visited the US president at the White House, according to a post on Truth Social. “‘FREE TINA!’ became the rallying cry of the Republican Party over the past two years”, Trump wrote. “Tina Peters just came to the White House to thank me for getting her released from prison in Colorado”. Peters, while serving as Mesa county clerk, helped breach the county’s election computer systems in 2021 and allowed an unauthorized person to access voting equipment and election records. The breach was prompted amid baseless claims that mass voter fraud had caused Trump to lose the White House in the 2020 presidential election. Peters was convicted in 2024 of attempting to influence a public servant, conspiracy to commit criminal impersonation, violation of duty and other crimes by jurors in Mesa county. Colorado’s Democratic governor, Jared Polis, commuted Peters’ sentence, after Trump repeatedly urged Polis to pardon her as part of a continued effort to spread false information about the 2020 election, and she was released earlier this month. “It was an Hon
+
+DOC 20b2ed3c299bfaa0cbffc4a80aee26fc ‘Commanding heights of the economy’: the postwar blueprint that inspires Burnham
+A prime minister with ambitious plans for state ownership. Private companies that put profits before investment. A country struggling with onerous debts. The UK in 2026 with a new prime minister weighing up how and what price public utilities can be nationalised? No, this was Clement Attlee’s government in 1945, committed to taking over the commanding heights of the economy at a time when the country was on its uppers. History shows Andy Burnham would not be the first Labour politician to have plans to nationalise parts of the economy. Nor would he be alone in trying to do so at a time when the public finances are under pressure. The man certain to succeed Sir Keir Starmer thinks – as Attlee did – that state ownership forms part of the solution to Britain’s economic woes. He will have to go some to match the record of the postwar Labour administration. By 1951, Attlee’s government had nationalised 20% of the economy, as well as creating the NHS. In the 1970s, nationalisations were often emergency rescues of companies – such as Rolls-Royce and British Leyland – or sectors such as shipbuilding deemed too big to fail; in the 1940s they formed part of a plan to transform the workings of the economy. The Labour party had long argued for nationalisation. The original clause IV of its constitution – dating back to 1918 – called for the “common ownership of the means of production, distribution and the best obtainable system of popular administration and control of each industry or service”. It took the best part of three decades for wholesale common ownership to come about. In 1934, Labour drew up a radical programme to nationalise banking, land and those “basic industries” – fuel and power, transport, iron and steel – that had “failed the nation”. At the time, prospects for state ownership were bleak. Labour had been reduced to a rump in the 1931 election and was heading for another big defeat in 1935. But supporters of nationalisation had some things going for them. One was the legacy of the Great Depression, which – as with the 2008 financial crisis – had severely dented faith in free-market economics. Another was that the Soviet Union, with its command economy, had grown faster and had lower unemployment in the 1930s than the west. But what really counted was the experience of the second world war, when large chunks of UK industry were taken over by central government, which directed how resources and manpower should be used. As George Orwell noted in 1941: “The fact that we are at war has turned socialism from a textbook word into a realisable policy.” Booming wartime production meant the public was receptive to the idea that the government should have a bigger role in running the economy in peacetime. As a result, between 1945 and 1951 the Attlee administration pushed through the whole of the 1934 programme, with the exception of land and the commercial banks. The first nationalisation was of the Bank of England, which was brought under state control in 1946, followed by civil aviation in the same year. The nationalisation of coal and the telecommunications company Cable and Wireless took place in 1947, with British Rail, road haulage and electricity in state control by the end of 1948. Gas was nationalised in 1949, with iron and steel the last to be taken over by the state in 1951. Despite the poor state of the government’s finances after the second world war, there was no question of assets being appropriated by the state. Compensation to the owners of the mines and the big four rail companies was actually quite generous, which is why the nationalisation programme was relatively trouble-free. The government had no spare cash and was forced to be creative. It compensated owners by issuing them government bonds, in effect paying for private assets with fixed-interest IOUs. Ironically, the stiffest opposition was against the one nationalisation that survived the privatisations of the 1980s and 1990s: the NHS. Doctors were fiercely resistant to Nye Bevan’s plans – fearing that state control would adversely affect their relationship with patients and would cost them money through the loss of private patients. To get his proposals through, Bevan had to buy the doctors off – famously noting that he had been forced to “fill their mouths with gold”. For the next three decades, there was broad cross-party consensus about which parts of the economy should be in state hands. The coal and rail industries had been unprofitable for many years and it was thought by the Attlee government that they would be more efficient if less fragmented. A wartime report on coal said the industry required massive investment and extensive reorganisation – both of which were deemed more likely if they were run by the state. The idea that the nationalised industries in the 1970s were massively inefficient and grossly overstaffed compared with a leaner private sector is a myth. The coal and rail industries shrank in the 1950s and 1960s, wit
+
+DOC 20c3e6ae61f0d0f36a4226eebd43ba31 NPR retracts ‘inaccurate’ story saying supreme court justice Samuel Alito retiring
+The US public broadcasting organization National Public Radio (NPR) on Tuesday took the unusual step of formally retracting a major news story, after it published what seemed like a bombshell scoop that the supreme court justice Samuel Alito was retiring. The story was written by Nina Totenberg, 82, one of the most prominent chroniclers of the supreme court in American media. NPR later explained that Totenberg had misheard a court announcement about upcoming retirements. The nearly 1,200-word story was completely removed and replaced with the following editor’s note: “Earlier today we erroneously published a story saying that Supreme Court Justice Samuel Alito was retiring. He has not announced his retirement and we have retracted the story.” The opening paragraph of the story cited a “court announcement” that Alito was retiring, but no announcement had been made at the time of publication. Patricia McCabe, a spokesperson for the court, told NBC News that “NPR’s reporting regarding Justice Alito is inaccurate” and that “their reporting that there was any kind of court statement is inaccurate”. On Tuesday afternoon, NPR’s top editor, Thomas Evans, chalked the errant publication up to a “misunderstanding.” “Neither Justice Alito nor the Supreme Court Public Information Office has announced his retirement,” Evans said in the statement. “As soon as the error was realized, the story was retracted and removed from NPR’s website and an on-air correction was broadcast. We regret the error and any confusion this may have caused. This afternoon, Mrs. Totenberg will appear on All Things Considered to explain what happened. She has reached out to Justice Alito to apologize.” Journalistic ethics expert Kelly McBride, who serves as NPR’s public editor, published a story on Tuesday afternoon clarifying what happened. The error stemmed from Totenberg mishearing an announcement made by Chief Justice John Roberts about upcoming retirements. “NPR had the lengthy story about Alito’s retirement already written, because that’s what newsrooms do in anticipation of significant retirements and even deaths,” McBride wrote. “Totenberg spoke with both her intern, who was at the court with her, and NPR executive editor Krishnadev Calamur, and told them what she heard. Calamur surfaced the story that NPR had previously prepared for the day Alito did announce his retirement and published it.” Totenberg’s story is a sprawling account of Alito’s career on the court. “Throughout his tenure, he played a key role on the court, often leading the conservative charge, not just on abortion, but for expanded religious rights, against LGBTQ+ rights, against expanded voting rights, for the death penalty, against labor unions, and more,” she wrote. The story notes prominently that Alito wrote the opinion in the court’s historic 2022 decision overturning Roe v Wade. “In the history of the Supreme Court, the names of just a few justices are linked with a single very famous, or infamous, decision,” Totenberg, who has worked at NPR since 1975, wrote. “Chief Justice John Marshall for his groundbreaking decision in 1803, declaring that courts have the power to strike down laws that violate the Constitution. Chief Justice Roger Taney for his infamous decision in the Dred Scott case declaring that no African American, enslaved or free, could be a citizen of the United states, a decision that led in part to the Civil War; Chief Justice Earl Warren for his 1954 decision declaring racial segregation in public schools to be unconstitutional. “And in our own times, Alito’s name is indelibly linked with the court’s opinion overturning a half century’s worth of decisions declaring that women have a right to abortion.” But there’s also evidence that the story was still a work in progress. In the second-to-last paragraph, a Yale University law professor is quoted as saying that Alito “took sown [sic] Roe versus Wade. So that’s how he he [sic] will be forever remembered.”
+
+codex
+I have the relevant documents separated. Next step is writing the output file with conservative, document-specific facts only, and leaving non-market pieces with empty `facts` arrays.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+input_path = Path('all_batch_045.jsonl')
+output_path = Path('all_facts_045.jsonl')
+
+facts_by_doc = {
+    '1f734ba03026cab4a14f175e10b2dc7f': [
+        {
+            'claim': 'Deutsche Bank lifted its Aberdeen Group price target to 265 GBp from 235 GBp and maintained a Buy rating.',
+            'subject': 'Aberdeen Group',
+            'predicate': 'forecast',
+            'object': 'Deutsche Bank',
+            'direction': 'up',
+            'magnitude': '265 GBp from 235 GBp',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Aberdeen Group', 'Deutsche Bank'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Citi moved Aberdeen Group to a Buy rating with a 265 GBp price target.',
+            'subject': 'Aberdeen Group',
+            'predicate': 'forecast',
+            'object': 'Citi',
+            'direction': 'up',
+            'magnitude': '265 GBp',
+            'time': '2026-06-30',
+            'cause': 'Citi said Aberdeen Group\\'s potential upside relative to consensus estimates is not fully reflected in the current share price.',
+            'entities': ['Aberdeen Group', 'Citi'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'JPMorgan adjusted its Aberdeen Group target to 241 GBp from 240 GBp and kept an Overweight stance.',
+            'subject': 'Aberdeen Group',
+            'predicate': 'forecast',
+            'object': 'JPMorgan',
+            'direction': 'up',
+            'magnitude': '241 GBp from 240 GBp',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Aberdeen Group', 'JPMorgan'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Simply Wall St\\'s fair value estimate for Aberdeen Group increased to £2.24 per share from £2.15.',
+            'subject': 'Aberdeen Group',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '£2.24 from £2.15',
+            'time': '2026-06-30',
+            'cause': 'The model updated its revenue growth, net profit margin, future P/E, and discount rate inputs.',
+            'entities': ['Aberdeen Group', 'Simply Wall St'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Simply Wall St increased its Aberdeen Group revenue growth assumption to 102.28% from 92.47%.',
+            'subject': 'Aberdeen Group',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '102.28% from 92.47%',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Aberdeen Group', 'Simply Wall St'],
+            'confidence': 0.95,
+        },
+    ],
+    '1fa01116618cbd2435eaeb8e2dd1008d': [
+        {
+            'claim': 'The Reserve Bank of Australia held its cash rate target unchanged at 4.35% at its June 15 and 16 meeting.',
+            'subject': 'Reserve Bank of Australia',
+            'predicate': 'policy_action',
+            'object': 'Cash rate target',
+            'direction': 'flat',
+            'magnitude': '4.35%',
+            'time': 'June 15 and 16',
+            'cause': 'The board judged that holding steady would best balance its inflation and employment objectives.',
+            'entities': ['Reserve Bank of Australia', 'Australia'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The Reserve Bank of Australia said monetary policy needed to remain restrictive and that it would raise the cash rate further if necessary.',
+            'subject': 'Reserve Bank of Australia',
+            'predicate': 'statement',
+            'object': 'Cash rate target',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'The board cited excess demand and inflation risks.',
+            'entities': ['Reserve Bank of Australia', 'Australia'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Australia\\'s annual consumer price inflation was 4.0% in May and core inflation was 3.6%.',
+            'subject': 'Australia',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '4.0% and 3.6%',
+            'time': 'May',
+            'cause': None,
+            'entities': ['Australia', 'Reserve Bank of Australia'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Home prices in Sydney and Melbourne fell in recent months.',
+            'subject': 'Sydney and Melbourne housing market',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'recent months',
+            'cause': 'The RBA minutes linked the weakness to rate hikes and proposed tax changes for property investors.',
+            'entities': ['Sydney', 'Melbourne', 'Australia'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Brent crude fell roughly 10% in the week after the RBA\\'s June meeting period.',
+            'subject': 'Brent crude',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '10%',
+            'time': 'the week following June 15 and 16',
+            'cause': None,
+            'entities': ['Brent crude'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Futures markets priced only about 10 basis points of additional RBA tightening by year-end and 17 basis points of easing through 2027.',
+            'subject': 'Reserve Bank of Australia',
+            'predicate': 'forecast',
+            'object': 'Futures markets',
+            'direction': 'down',
+            'magnitude': '10 basis points and 17 basis points',
+            'time': 'by year-end and through 2027',
+            'cause': 'Brent crude fell roughly 10% after the June meeting period.',
+            'entities': ['Reserve Bank of Australia', 'Australia', 'Brent crude'],
+            'confidence': 0.95,
+        },
+    ],
+    '1fd50a31fa72fb3a6d33ac477bfd754a': [],
+    '1ff7b25d44be08752e6fecb7c90d790e': [
+        {
+            'claim': 'Hunan Province launched the second round of its provincial ecological and environmental protection inspection look-back campaign, with the first batch of seven teams fully deployed since June 13, 2026.',
+            'subject': 'Hunan Province',
+            'predicate': 'policy_action',
+            'object': 'Lead-zinc mining sector',
+            'direction': 'na',
+            'magnitude': 'seven inspection teams',
+            'time': 'since June 13, 2026',
+            'cause': None,
+            'entities': ['Hunan Province', 'China'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Some lead-zinc mines in Hunan suspended production because of the environmental inspections.',
+            'subject': 'Hunan lead-zinc mines',
+            'predicate': 'production_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'Hunan Province\\'s environmental inspections.',
+            'entities': ['Hunan Province', 'China', 'lead', 'zinc'],
+            'confidence': 0.93,
+        },
+    ],
+    '2031ae46d73675d5db1febb51d40f87b': [
+        {
+            'claim': 'The RBA minutes said policy needed to remain restrictive and that the board would take necessary steps, including potential rate hikes, to ensure price stability.',
+            'subject': 'Reserve Bank of Australia',
+            'predicate': 'statement',
+            'object': 'Cash rate',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'The board said the economy was running with excess demand and broad inflationary pressures.',
+            'entities': ['Reserve Bank of Australia', 'Australia'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'The RBA minutes said the housing market was softer than expected amid rate increases and tax adjustments.',
+            'subject': 'Australia housing market',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'Rate increases and tax adjustments.',
+            'entities': ['Australia', 'Reserve Bank of Australia'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'AUD/USD was trading 0.23% lower on the day at 0.6871 at the time of writing.',
+            'subject': 'AUD/USD',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '0.23%',
+            'time': '2026-06-30',
+            'cause': 'The article said the Australian Dollar remained weak after the hawkish RBA minutes.',
+            'entities': ['Australian Dollar', 'US Dollar', 'Reserve Bank of Australia'],
+            'confidence': 0.98,
+        },
+    ],
+    '204356591a4f6cfb3f131bb88aaa0b9b': [
+        {
+            'claim': 'Northrop Grumman received three U.S. Department of Defense contracts totaling about "'$68 million.'"',
+            'subject': 'Northrop Grumman',
+            'predicate': 'deal_or_contract',
+            'object': 'U.S. Department of Defense',
+            'direction': 'up',
+            'magnitude': '"'$68 million'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Northrop Grumman', 'U.S. Department of Defense'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Northrop Grumman received a "'$49 million contract action for Joint Tactical Ground Station sustainment.'"',
+            'subject': 'Northrop Grumman',
+            'predicate': 'deal_or_contract',
+            'object': 'Joint Tactical Ground Station program',
+            'direction': 'up',
+            'magnitude': '"'$49 million'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Northrop Grumman', 'Joint Tactical Ground Station', 'U.S. Department of Defense'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Northrop Grumman\\'s El Segundo facility received two contract modifications totaling "'$18.8 million for LEX wing extensions.'"',
+            'subject': 'Northrop Grumman',
+            'predicate': 'deal_or_contract',
+            'object': 'LEX wing extensions',
+            'direction': 'up',
+            'magnitude': '"'$18.8 million'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Northrop Grumman', 'LEX wing extensions', 'U.S. Air Force'],
+            'confidence': 0.97,
+        },
+    ],
+    '204f729932d84dd713d9e3dcade7c05e': [
+        {
+            'claim': 'Ramp\\'s study found that U.S. companies with the highest AI spending increased employment by about 10% after adopting AI.',
+            'subject': 'High AI-spending U.S. companies',
+            'predicate': 'demand_change',
+            'object': 'Labor',
+            'direction': 'up',
+            'magnitude': 'about 10%',
+            'time': 'between 2021 and early 2026',
+            'cause': 'The increase followed AI adoption in Ramp\\'s study.',
+            'entities': ['Ramp', 'Revelio Labs', 'United States'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Ramp\\'s study found that entry-level hiring at high AI-spending U.S. companies increased by about 12% after adopting AI.',
+            'subject': 'High AI-spending U.S. companies',
+            'predicate': 'demand_change',
+            'object': 'Entry-level labor',
+            'direction': 'up',
+            'magnitude': 'about 12%',
+            'time': 'between 2021 and early 2026',
+            'cause': 'The increase followed AI adoption in Ramp\\'s study.',
+            'entities': ['Ramp', 'Revelio Labs', 'United States'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Ramp\\'s study found that low-intensity AI adopters showed no statistically significant employment gains.',
+            'subject': 'Low-intensity AI adopters',
+            'predicate': 'demand_change',
+            'object': 'Labor',
+            'direction': 'flat',
+            'magnitude': None,
+            'time': 'between 2021 and early 2026',
+            'cause': None,
+            'entities': ['Ramp', 'Revelio Labs', 'United States'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Ramp said AI adoption rates were highest in information companies, followed by the financial and professional services sectors.',
+            'subject': 'AI adoption in U.S. industries',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Ramp', 'United States'],
+            'confidence': 0.9,
+        },
+    ],
+    '208f614bc1b96178f05ec224aca8d2b2': [
+        {
+            'claim': 'Nasdaq selected Pyth to distribute Nasdaq\\'s proprietary market data to blockchain applications and other software platforms.',
+            'subject': 'Nasdaq',
+            'predicate': 'deal_or_contract',
+            'object': 'Pyth',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Nasdaq', 'Pyth'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Nasdaq-Pyth partnership initially covers Nasdaq TotalView, Nasdaq\\'s depth-of-book data feed.',
+            'subject': 'Nasdaq TotalView',
+            'predicate': 'deal_or_contract',
+            'object': 'Pyth',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Nasdaq', 'Nasdaq TotalView', 'Pyth'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'In March, Nasdaq partnered with Kraken and Backed to develop infrastructure linking traditional equities with blockchain networks.',
+            'subject': 'Nasdaq',
+            'predicate': 'deal_or_contract',
+            'object': 'Kraken and Backed',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'March',
+            'cause': None,
+            'entities': ['Nasdaq', 'Kraken', 'Backed'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The SEC approved Nasdaq\\'s proposal in April to list Bitcoin index options tied to the Nasdaq Bitcoin Index, pending CFTC approval for trading.',
+            'subject': 'Nasdaq',
+            'predicate': 'policy_action',
+            'object': 'Bitcoin index options',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'April',
+            'cause': None,
+            'entities': ['Nasdaq', 'U.S. Securities and Exchange Commission', 'Commodity Futures Trading Commission', 'Nasdaq Bitcoin Index', 'Bitcoin'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Nasdaq partnered with CME Group to launch cryptocurrency index futures tracking a basket of seven digital assets including Bitcoin, Ether, Solana, and XRP.',
+            'subject': 'Nasdaq',
+            'predicate': 'deal_or_contract',
+            'object': 'CME Group',
+            'direction': 'na',
+            'magnitude': 'seven digital assets',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Nasdaq', 'CME Group', 'Bitcoin', 'Ether', 'Solana', 'XRP'],
+            'confidence': 0.95,
+        },
+    ],
+    '20972b25bffabe812369828d9a3766e2': [],
+    '20ac5fe3a5c630d8452eae94aa6cc806': [
+        {
+            'claim': 'Donald Trump\\'s annual financial disclosure report showed more than "'$1.4 billion in 2025 income from his family'"\\'s crypto ventures.',
+            'subject': 'Donald Trump',
+            'predicate': 'corporate_action',
+            'object': 'Family crypto ventures',
+            'direction': 'up',
+            'magnitude': 'more than "'$1.4 billion'"',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Donald Trump', 'United States'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Donald Trump reported over "'$500 million in income from World Liberty Financial.'"',
+            'subject': 'Donald Trump',
+            'predicate': 'corporate_action',
+            'object': 'World Liberty Financial',
+            'direction': 'up',
+            'magnitude': 'over "'$500 million'"',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Donald Trump', 'World Liberty Financial'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Donald Trump reported another "'$635 million in income from the sale of $TRUMP meme coins.'"',
+            'subject': 'Donald Trump',
+            'predicate': 'corporate_action',
+            'object': '"'$TRUMP meme coin'"',
+            'direction': 'up',
+            'magnitude': '"'$635 million'"',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Donald Trump', '"'$TRUMP meme coin'"'],
+            'confidence': 0.98,
+        },
+    ],
+    '20b2ed3c299bfaa0cbffc4a80aee26fc': [],
+    '20c3e6ae61f0d0f36a4226eebd43ba31': [],
+}
+
+docs = []
+total_facts = 0
+with input_path.open() as f:
+    for line in f:
+        doc = json.loads(line)
+        facts = facts_by_doc.get(doc['doc_id'])
+        if facts is None:
+            raise KeyError(f\"Missing facts mapping for {doc['doc_id']}\")
+        docs.append({
+            'doc_id': doc['doc_id'],
+            'title': doc['title'],
+            'facts': facts,
+        })
+        total_facts += len(facts)
+
+with output_path.open('w') as f:
+    for obj in docs:
+        f.write(json.dumps(obj, ensure_ascii=True) + '\\n')
+
+print(f\"docs processed: {len(docs)}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 31
+
+codex
+The output file is written. I’m doing a quick validation pass on `all_facts_045.jsonl` structure and record count before I stop.
+exec
+/bin/zsh -lc 'wc -l all_facts_045.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_045.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+p=Path('all_facts_045.jsonl')
+count=0
+for i,line in enumerate(p.read_text().splitlines(),1):
+    obj=json.loads(line)
+    assert 'doc_id' in obj and 'title' in obj and 'facts' in obj
+    for fact in obj['facts']:
+        for key in ['claim','subject','predicate','object','direction','magnitude','time','cause','entities','confidence']:
+            assert key in fact, (i,key)
+    count += 1
+print(count)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12
+
+codex
+docs processed: 12, total facts: 31
+tokens used
+29,285
+docs processed: 12, total facts: 31

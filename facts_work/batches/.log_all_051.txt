@@ -1,0 +1,287 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc4-1038-7b30-a176-a4829c60b385
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_051.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_051.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_051.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:19:35.391009Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_051.jsonl` and checking its structure first, then I’ll extract facts directly from that file and write `all_facts_051.jsonl` in the same directory.
+exec
+/bin/zsh -lc pwd in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc 'wc -l all_batch_051.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_051.jsonl
+
+ succeeded in 0ms:
+/Users/jamiepearcey/projects/research/market-color/facts_work/batches
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_051.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(i, sorted(obj.keys()))
+        print('title:', obj.get('title'))
+        print('body:', (obj.get('body_text') or '')[:500].replace('\\n',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+title: Another JOLT: Jobs Opening Smash Expectations, Despite Another Drop In Number Of Hires
+body: Another month, another whopping beat by the BLS JOLTS job openings report. One month after the April JOLTS report came out with a whopping 9-sigma beat to estimates, when it showed that in April the US added a whopping 731K job openings to 7.618 million (and up 520K from a year ago), smashing estimates of 6.9 million, moments ago the BLS reported that in May, the number of total job openings printed at 7.594 million, almost as if it was designed to post another improvement from last month's down
+
+2 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+title: New Asean Chamber of Commerce launched in Hong Kong will ‘fulfil long-felt need’
+body: New Asean Chamber of Commerce launched in Hong Kong will ‘fulfil long-felt need’ New business group launched at the South China Morning Post’s GBA-Asean Summit 2026 Setting up a new regional chamber of commerce will “fulfil a long-felt need” to bridge the gap between the Greater Bay Area and Asean, with Hong Kong acting as a “natural connector”, the business group’s inaugural chairman has said. But given existing agreements and bilateral relations between the city and individual member states of
+
+3 ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+title: Shanghai needed as finance hub, as Hong Kong ‘not enough’: proposal
+body: Shanghai should step up as finance hub, as Hong Kong ‘not enough’, proposal says Mainland hub is needed to ‘fully meet the special needs’ of Chinese firms expanding abroad, institute leader says in closed-door meeting Shanghai has been urged to build itself into a hub serving the rising outbound investment needs of Chinese firms, potentially increasing rivalry with Hong Kong as both cities race to augment their status as financial centres. The suggestion by Liu Xiaochun, vice-president of the Sh
+
+
+codex
+The file has 12 documents. I’ve verified the schema and I’m pulling the full set of titles and bodies now so I can extract only explicit, market-relevant claims without adding inference.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_051.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f'===== DOC {i} {obj[\"doc_id\"]} =====')
+        print('DATE:', obj['published_date'])
+        print('TITLE:', obj['title'])
+        print(obj['body_text'][:4000].replace('\\r',' '))
+        print('\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+===== DOC 1 3143d4db98b19bf0986f6ff8404995b2 =====
+DATE: 2026-06-30
+TITLE: Another JOLT: Jobs Opening Smash Expectations, Despite Another Drop In Number Of Hires
+Another month, another whopping beat by the BLS JOLTS job openings report. One month after the April JOLTS report came out with a whopping 9-sigma beat to estimates, when it showed that in April the US added a whopping 731K job openings to 7.618 million (and up 520K from a year ago), smashing estimates of 6.9 million, moments ago the BLS reported that in May, the number of total job openings printed at 7.594 million, almost as if it was designed to post another improvement from last month's downward revised 7.585MM (from 7.618MM), and once again smashed estimates of 7.296MM. While not as historic as last month's record 9-sigma beat, today's print was still a solid 2-sigma beat to the median estimate. It was also the 5th consecutive beat of estimates and 8th in the past 10! Where did the openings come from? According to the BLS,the notable increase came from an increase in wholesale trade (+71,000), but as can be seen from the table below, there were also increases in manufacturing and leisure and hospitality; on the other side, openings dropped in financial services, and private education. Notably, unlike last month's record increase in Professional and Business service job openings in April, May's increase for the category was a tame 12K to 1.485 million. Also of note, Federal government dropped by 14K to 83K, the second lowest print of 2026 and not much above the record low hit last August, even as the total number of government job openings rose driven by an increase in state and local. The continued strength in job openings prints, coupled with the modest increase in unemployed workers means that after 9 months of labor surplus, we now have a second consecutive month of more job openings than unemployed workes, and in May the surplus was 287K, the biggest surplus since Jan 2025, and a reversal to the "deficit" regime observed since last July. The latest JOLTS report also means that after falling back to 0.9x in March, in April the ratio of job openings rose over 1.0x and was the highest since January 2025. But while the job openings number was very strong for another month, this month we saw continued weakness in hires and barely any improvement in quits, In May, the number of Quits dropped to 5.170MM from 5.215MM, again approaching the post covid lows; quits - or the "take his job and shove it" indicator - rose modestly to 3.065MM from 3.043MM, and followed the 183K plunge in March. It goes without saying that a surge in job openings while hires are dropping, and few people are voluntarily leaving their jobs, while payrolls are growing (as we will find out on Thursday), leads one to scratch their head just what is going on here, besides data massaging of course. In any case, since this hires number feeds directly into the payrolls calculations (after netting out separations) this explains why the May payrolls report surged by 172K, even if the JOLTS implied number is barely a third as strong. Overall, this was a very strong JOLTS report, and shows that after some significant weakness in late 2025, US labor market has continued to stabilize throughout 2026. Of course, the report also lags the payrolls report by a month, which is why it gives us little insight into what Thurday's jobs report will be, although if the hires less separations dataset is any indication, it suggests that the June print will come well below expectations.
+
+
+===== DOC 2 31668a0f159703d5006c057335009197 =====
+DATE: 2026-06-30
+TITLE: New Asean Chamber of Commerce launched in Hong Kong will ‘fulfil long-felt need’
+New Asean Chamber of Commerce launched in Hong Kong will ‘fulfil long-felt need’ New business group launched at the South China Morning Post’s GBA-Asean Summit 2026 Setting up a new regional chamber of commerce will “fulfil a long-felt need” to bridge the gap between the Greater Bay Area and Asean, with Hong Kong acting as a “natural connector”, the business group’s inaugural chairman has said. But given existing agreements and bilateral relations between the city and individual member states of the Association of Southeast Asian Nations, analysts said the economic benefits introduced by the new chamber were likely to be more modest than dramatic. The Asean Chamber of Commerce was launched on Tuesday at the South China Morning Post’s GBA-Asean Summit 2026. Chief Executive John Lee Ka-chiu said he was confident the chamber would build on the close ties between Hong Kong and the 11-member bloc, and promote trade and people-to-people ties. Newly appointed chairman Daniel Fung Wah-kin said: “[The chamber] fulfils a long-felt need, which is to connect the 11 countries of Asean with the GBA … via Hong Kong, which is a natural connector between the two.” Describing the chamber as “the new kid on the block”, Fung said he was looking to grow the organisation organically, stressing the importance of embracing economies of all sizes to create a “win-win for everyone”.
+
+
+===== DOC 3 31686ca05b7d3b6860f85bc443fbca6c =====
+DATE: 2026-06-30
+TITLE: Shanghai needed as finance hub, as Hong Kong ‘not enough’: proposal
+Shanghai should step up as finance hub, as Hong Kong ‘not enough’, proposal says Mainland hub is needed to ‘fully meet the special needs’ of Chinese firms expanding abroad, institute leader says in closed-door meeting Shanghai has been urged to build itself into a hub serving the rising outbound investment needs of Chinese firms, potentially increasing rivalry with Hong Kong as both cities race to augment their status as financial centres. The suggestion by Liu Xiaochun, vice-president of the Shanghai Finance Institute and a senior banker with three decades of experience, was made in mid-June at a closed-door meeting hosted by China Finance 40, a Beijing think tank comprising many top Chinese financial regulators, bankers and academics. “Just as American multinationals expanded globally with New York as their financial anchor, China’s outbound firms face a phenomenon shaped by unique international circumstances, and cannot rely on financial centres in other countries,” said Liu, former head of Agricultural Bank of China’s Hong Kong branch and former president of Hangzhou-headquartered China Zheshang Bank, according to a transcript of his speech published last week. “China has Hong Kong, a mature international financial centre with the flexibility to respond to market changes, but that is not enough to fully meet the special needs of Chinese companies’ outbound expansion. In this regard, Shanghai needs to play a role.” “To boost its standing as an international financial centre, Shanghai must demonstrate that role through support for outbound Chinese firms,” Liu said. Behind Liu’s proposals is Shanghai’s ambition to make itself a global business hub. The city has the Yangtze River Delta at its back, more regional headquarters of multinational companies than any other mainland city and policy support from the central government.
+
+
+===== DOC 4 31d7f99e0391570a7fb28b8a31389994 =====
+DATE: 2026-06-30
+TITLE: Bitmine ETH Holdings Reach 5.7M After Joining Russell 1000
+Bitmine lifts Ether holdings to 5.7M as it joins Russell 1000 Bitmine purchased about $43 million worth of Ether last week as it entered the Russell 1000 Index, bringing it closer to its goal of owning 5% of ETH’s supply. Ether treasury company Bitmine Immersion Technologies added more than 27,000 Ether to its holdings last week as the firm joined the Russell index tracking the largest 1,000 US companies. Bitmine said Monday that after its latest $43 million purchase, it held just over 5.7 million Ether (ETH) bought at an average price of $1,569 per token and held 4.7% of the ETH supply of 120.7 million tokens, closer to its goal of owning 5% of Ether’s supply. Bitmine chairman Tom Lee said the past week “was a challenging one for crypto investors as ETH fell by 8%, even as Ethereum witnessed notable positive developments such as the creation of Ethlabs, and even the Bank of England softened its stance around stablecoins.” The latest Ether purchase adds to Bitmine’s lead as the largest public corporate holder of Ether. Meanwhile, its inclusion in the Russell 1000 means more investor demand for Bitmine shares, as many mutual funds, ETFs and pension funds track the Russell 1000 and must buy the stock once it's added. Related: Bitmine eyes dividend-paying preferred shares, echoing Strategy’s playbook “Being added to the Russell 1000 is expected to add hundreds and possibly thousands of additional institutional investors as equity owners of Bitmine," Lee said. Lee had said in May, when Bitmine was first considered for the Russell index, that up to 25% of the market cap of a stock included in the index is held by passive index funds. Shares in Bitmine (BMNR) gained 1.7% Monday to end trading at $13.80, but the company’s stock has slid 9% over the past trading week alongside Ether. Shares in Bitmine rose Monday, stemming losses over the past trading week. Source: Google Finance Meanwhile, rival crypto treasury firms Sharplink and Forward Industries, along with crypto exchange Gemini and crypto services firm Galaxy Digital, were also added to the Russell 3000 Index on Friday, which tracks the largest 3,000 US companies. Ether fell below $1,600 last week, with Lee commenting that “it is not surprising to see 'window dressing' leading to investors reducing their holdings in assets that have fallen in the past three months.” Magazine: Bitcoin slides to $58K, XRP hits $1 but onchain data promising: Market Moves More on the subject
+
+
+===== DOC 5 31ee742fe85a56ed9b8d5fcafcb0340d =====
+DATE: 2026-06-30
+TITLE: FDA lets Philip Morris market Zyn nicotine pouches as less harmful than cigarettes
+The Food and Drug Administration on Tuesday cleared Philip Morris-owned Zyn nicotine pouches to be marketed as less harmful than cigarettes, giving the tobacco giant a major regulatory win as the Trump administration loosens restrictions on nicotine products. The decision, first reported by Axios, allows 20 Zyn products to carry a modified-risk claim saying that switching from cigarettes to Zyn lowers the risk of mouth cancer, heart disease, lung cancer, stroke, emphysema and chronic bronchitis. Zyn pouches contain nicotine but not tobacco. They are placed between a user's gum and lip and have surged in popularity among conservatives, tech workers and others who promote them as a cleaner alternative to cigarettes and chewing tobacco or a productivity aid. The FDA decision does not mean Zyn is safe. The agency has said there is no safe tobacco product, that youth should not use tobacco products and that adults who do not use tobacco products should not start. Still, the order gives Philip Morris a powerful health-related claim for one of the fastest-growing products in the nicotine market, as cigarette sales continue to decline in the U.S. and major tobacco companies invest more heavily in smoke-free products. President Donald Trump, who backed restrictions on flavored e-cigarettes during his first term, reversed course during the 2024 campaign and promised to "save vaping." Since returning to office, his administration has taken a more industry-friendly approach, including by creating a pathway for some flavored e-cigarettes and nicotine pouches to remain on the market while they undergo FDA review. The shift has followed heavy lobbying from the tobacco and vaping industries, which have argued that adult smokers need more access to less harmful alternatives to cigarettes. "President Trump consistently pledged on the campaign trail to expand access to nicotine vapes, pouches, and other products that evidence shows help adults quit smoking," White House spokesperson Kush Desai told CNBC. "The only guiding factor behind the Trump administration's decision-making is Gold Standard Science." Zyn has also become a cultural marker in conservative politics. Former Fox News host Tucker Carlson helped popularize the brand on the right before later souring on Zyn and launching his own nicotine pouch brand, Alp. Nicotine pouches have also gained fans inside Trump's orbit. The Wall Street Journal reported that Health and Human Services Secretary Robert F. Kennedy Jr. uses nicotine pouches and that Trump recently asked Kennedy which pouches he used after a lunch with tobacco executives. The FDA had already authorized the same 20 Zyn products for sale in January 2025, but that earlier decision did not allow Swedish Match, the subsidiary of Philip Morris that makes Zyns, to market them as reducing disease risk. Tuesday's order goes further by allowing the company to make a specific lower-risk claim tied to several major smoking-related diseases. "FDA's review of modified risk products is intended to ensure that adult users have clear, science-based information about the relative harms of tobacco products, so they can make informed choices," Bret Koplow, acting director of the FDA's Center for Tobacco Products, said in a statement. "Today's decision allows these products to be marketed with a modified risk claim that informs adults who smoke about the lower risks associated with these products." The products covered by the order include Zyn Chill, Cinnamon, Citrus, Coffee, Cool Mint, Menthol, Peppermint, Smooth, Spearmint and Wintergreen, each in 3-milligram and 6-milligram nicotine strengths. "FDA's decision is an important moment for the more than 45 million legal-age nicotine consumers in America," Philip Morris U.S. CEO Stacey Kennedy said in a statement. "Today's news ensures these adults have access to accurate, science-based information, including FDA-authorized evidence that switching from cigarettes to ZYN reduces the risk of smoking-r
+
+
+===== DOC 6 326ab4d9e81626ffb274eb35ff0fcb63 =====
+DATE: 2026-06-30
+TITLE: Seven ways to get the most out of a window air conditioner during extreme heat in the US
+As the Fourth of July holiday weekend approaches, Americans are also preparing for a weeklong heatwave. The National Weather Service recommends wearing light clothing, staying hydrated, and ensuring access to air-conditioning or other cooling areas. If you live in an older home or apartment, you’re less likely to have central air and may have a window air conditioning unit instead, says Darcy Carbone, vice-president of sales at APA HVAC Technologies and a member of the residential buildings committee at the American Society of Heating, Refrigerating and Air-Conditioning Engineers. These units cool, circulate, filter and dehumidify air. Here’s what you need to know to use your window AC efficiently and safely. Choose between a window unit or portable AC Robert Polchinski, a professor at the New York City College of Technology who helps students enter the HVAC industry, agrees that most people opt for a window unit because it is affordable. Double-hung windows – which open and close vertically – are most suited for a window unit. Alternatively, a portable AC might be more compatible with your needs: for example, if your windows crank outward. However, portable units are typically more expensive, use more energy and are less effective at cooling spaces. Maintain your AC window unit When you bring out your AC unit from storage, it’s wise to go through this quick list of check-ups before using it. Taking the appropriate steps can help your AC unit last longer and protect you from unintended side effects. You should repeat these actions at the end of the season, too. Clean the filters: Start by cleaning the unit’s filter. If you remove the front panel, you’ll see the filter, which you can slide out. These are washable, Carbone explains. Shake off any debris, wash the filter by hand with a mild dish detergent, then rinse. If you want to clean the filter again while the unit is in the window, be sure to turn off and unplug the AC first. “Filters should be washed at the beginning of the season,” Polchinski says. “Generally, once a year should be enough. But depending on how dirty the air is in the environment, they may need to be cleaned more than once during the season.” Check the coils: Next, Carbone recommends assessing the AC’s coils. A unit has two sets of coils: evaporator coils and the condenser coils. Evaporator coils help remove hot air from your home and are located behind the filter. Condenser coils expel heat and are located at the back of the unit, near the vents. You’ll want to take care of these before the unit is in the window. Remove the unit’s outer casing, then use a vacuum with a hose attachment to clean off any dust and debris from the coils, says Polchinski. Allow condensation to drain: Air conditioning units create condensation, and that water has to go somewhere. Some have built-in pans, and some need to be precisely level, while others need to sit at a slope. Check the manufacturer’s guidelines to confirm what your unit requires. If it needs to sit on a slope, install it so that the unit’s rear is slightly tilted downward, which helps drain away any condensed water. “You don’t want to accumulate sitting water, which could lead to all kinds of bad scenarios, like a mold build-up or a potential spot for mosquito breeding,” Polchinski says. He also cautions that if the water is warm enough, this could lead to legionella, a type of bacteria that grows in water and can cause sickness. Store the unit correctly: Storage also matters, says Carbone. When summer is over, store the window unit upright, as it would be in the window – don’tflip it on its side, because this can damage the compressor. Know how an AC window unit can affect your health For a unit to make cold air, indoor air passes through a cooling coil, which results in condensation. This condensation needs to drain; otherwise, it can cause mold growth, explains Amy Li, an assistant professor at the University of Waterloo who studies how to improve indoor air
+
+
+===== DOC 7 329affad7b4247990d3c1d3ed8711500 =====
+DATE: 2026-06-30
+TITLE: LeBron James reportedly leaving Lakers, opening door for union with Curry at Warriors
+LeBron James looks set to leave the Los Angeles Lakers, with ESPN reporting he has told the team he will leave the team and continue his NBA career elsewhere. James, who will turn 42 during the 2026-27 season, won an NBA championship with the Lakers in 2020, two years after he joined. His longtime representative, Klutch Sports CEO Rich Paul, said that he is not retiring. “LeBron James is one of the greatest athletes in history,” said Jeanie Buss, part of the Lakers’ ownership group. “We will always be thankful for his eight years with the Lakers, including the title he led us to in 2020 under the toughest imaginable circumstances, and the countless records he broke in purple and gold. We wish him all the best in the future, both on the court and off. He will always be a cherished part of the Lakers family.” Reports on Monday indicated the Golden State Warriors are looking to sign James, setting up a union with his old rivals Stephen Curry and Draymond Green, whom James battled in the NBA finals as a member of the Cavaliers for four staright seasons from 2015 to 2018. The Warriors are also understood to be looking at signing Anthony Davis. The window for free agency negotiation opens at 6pm ET on Tuesday. Players cannot sign with a new team until the league’s offseason moratorium is lifted on 6 July. Green has not exercised his $27.6m option for this coming season in large part to allow his team flexibility to make other roster moves. “Personally, I’m always willing to work with the team on whatever is best, especially at this point in my career,” Green said on Tuesday. “So my decision to opt out was for a few reasons. As you all know, I’ve always taken the approach of working with the organization. I’ve been in one place for 14 years. It’s more of a family to me than anything.” It could be the move that convinces James to go to Golden State. He also has close relationships with Green, Curry and Warriors coach Steve Kerr. James is a 22-time All-Star, claiming the honor every year from 2005 to 2026 and has been league MVP four times, a total bettered only by Michael Jordan, Bill Russell and Kareem Abdul-Jabbar. James’s longevity – and brilliance – means he owns a host of NBA records, including most minutes played, most points scored and most All-Star appearances. Across his career he has averaged 26.8 points per game, 7.5 rebounds and 7.4 assists. He has also played long enough that last season his eldest son, Bronny, became his teammate at the Lakers.
+
+
+===== DOC 8 32a19ed0d5594f88c4eb5bf60cea1188 =====
+DATE: 2026-06-30
+TITLE: Barclays sees Turkey lira depreciation continuing under managed policy By Investing.com
+S&P 500 and Nasdaq post best quarter since 2020, Dow notches best H1 in five years Investing.com - Barclays expects the Turkish lira to continue its depreciation trend with authorities closely managing the pace of the currency’s decline. The bank said central bank policy easing will be accompanied by a slower pace of lira depreciation, designed to generate 1% in total monthly returns for long lira positions. Barclays views the managed lira policy as sustainable under current conditions. The strategy depends on continued decreases in oil prices and weak local demand for dollarization. The Turkish central bank has been implementing a policy framework that balances currency depreciation with controlled interest rate adjustments. Authorities aim to maintain predictable returns for lira holders while allowing gradual currency weakness. The sustainability of this approach remains tied to external factors including energy costs and domestic appetite for foreign currency holdings, according to Barclays. This article was generated with the support of AI and reviewed by an editor. For more information see our T&C.
+
+
+===== DOC 9 32c8b9eb943dd146a3d3d8882854a69e =====
+DATE: 2026-06-30
+TITLE: The top-25 stocks in the S&P 500 so far this year are dominated by chip and AI names | investingLive
+What a half-year for memory. The theme of this group writes itself: nine of the ten are semis/hardware, and the leaders are a memory-and-storage cohort. SanDisk, Micron, Western Digital and Seagate are all riding the NAND/HBM/DRAM shortage colliding with AI data-center demand — SanDisk had already nearly +570% in 2025 as a pure-play flash name leveraged to a global NAND shortage, and the move has only extended. Dell is the AI-server proxy in the group; Corning is the optical/glass infrastructure play. AMD and Applied Materials round it out as the GPU and wafer-fab-equipment exposure. What's equally remarkable is that this isn't about broader chip names. ; NVDA is only +6.28% and AVGO +8.32% YTD, a reminder that index-level leadership and best-stock leadership are very different things this year. If we extend the list to the top-25, it looks like this. The 11–25 band actually broadens the thesis past pure memory into the full AI-infrastructure stack: wafer-fab equipment (LRCX, KLAC, TER), optical/networking (LITE, COHR, CIEN — the transceiver and laser names), and the data-center power-and-cooling trade (VRT, GNRC, FIX, the last being an HVAC/mechanical contractor riding data-center construction). Qnity is the post-spin DuPont electronics-materials business. It's a truly one-theme market when you scale out though. If you had big bets on AI this year, you made incredible gains. If not, it was almost impossible to outperform. The two non-AI standouts are vaccine-maker Moderna at #15 — pipeline/data-driven, a different catalyst entirely — and DaVita at #23, which is dialysis and pure idiosyncratic story. Everything else in the top 25 is some flavor of the same secular bet. Moderna is a platform re-rating away from "COVID one-trick" toward diversified mRNA, which is still a fascinating technology despite the propaganda. The catalysts for the gain was an FDA advisory panel voted 9-0 for its flu vaccine mRNA-1010 in adults 50+, with a final FDA decision due August 5, 2026. Fundamentals are turning too — Q1 2026 revenue was $389M, up 264% YoY and well above consensus. But be careful: the stock trades at ~23x forward earnings on still-uncertain forward numbers. A warning is that insiders have been net sellers, and the sell-side hasn't signed off — the analyst rating skews to Hold/Reduce with price targets implying material downside. The real binary is the Phase 3 melanoma readout later in 2026.
+
+
+===== DOC 10 32cdabe7ad8eaafd25a6020092df5c99 =====
+DATE: 2026-06-30
+TITLE: US Supreme Court blocks firing of Fed governor
+US Supreme Court blocks firing of Fed governor Roula Khalaf, Editor of the FT, selects her favourite stories in this weekly newsletter. The US Supreme Court blocked President Donald Trump from firing Federal Reserve governor Lisa Cook, and investors are pivoting from the Magnificent Seven Big Tech stocks. Plus, foreign investors are worried the Japanese government is in danger of backsliding on corporate reforms. Mentioned in this podcast: Tell us your thoughts to enter a prize draw for a chance to win a pair of Bose QuietComfort Headphones worth £229. Over 18s only. Find full T&Cs here Prize Draw winners’ surnames and regions may be made available upon request, as required by the Advertising Standards Authority. If you do not want your information to be made available, please email [email protected] upon entry. For more information on your rights and how we use your data, please read our Privacy Policy. Want to get in touch? Email us at [email protected] Note: The FT does not use generative AI to voice its podcasts The FT News Briefing is produced by Victoria Craig, Sonja Hutson, Saffeya Ahmed, Katya Kumkova, and Fiona Symon. Our editor is Marc Filippino. Our show is mixed by Kelly Garry and Alex Higgins. Additional help from Gavin Kallmann, Michael Lello, Peter Barber and David da Silva. Our intern is Cole van Miltenburg. Our executive producer is Topher Forhecz. Flo Phillips is the FT’s global head of audio. The show’s theme music is by Metaphor Music.
+
+
+===== DOC 11 3338a7be6f40d82dec9c427f275c8cd5 =====
+DATE: 2026-06-30
+TITLE: German states see further drop in inflation pressures in June | investingLive
+Here are all the state readings released around the same time: - Bavaria CPI +2.5% vs +2.6% y/y prior - Saxony CPI +2.5% vs +2.7% y/y prior - North Rhine Westphalia CPI +2.1% vs +2.4% y/y prior - Baden Wuerttemberg CPI +2.1% vs +2.4% y/y prior This should be some added comfort for the ECB as with the French numbers earlier. It reflects a further decline in headline annual inflation in Germany, so there is no negative surprise to rush a July decision as potentially warned here. The monthly estimates also show inflation falling in Bavaria (-0.2%), North Rhine Westphalia (-0.4%), and Baden Wuerttemberg (-0.2%). Only Saxony (+0.2%) recorded a positive monthly inflation bump. But in terms of annual estimates, they are all lower when compared to May. As such, this likely points to the national reading later coming in around 2.4% at the balance. That will reflect a drop from the 2.6% seen in May last month. All in all, this should see the ECB take their foot off the gas and wait until after the summer before considering another rate hike. Traders are now pricing in just ~28 bps of rate hikes by year-end, as compared to ~30 bps before the inflation data today.
+
+
+===== DOC 12 3396c185e1fb9737cafb99ff2b2fd4dc =====
+DATE: 2026-06-30
+TITLE: As heartbroken Iran depart World Cup, Mexican hospitality offers rare warmth
+Iran’s bittersweet, logistically complicated, politically charged, and heartbreaking World Cup run found a silver lining in Mexico, where the men’s football team departed their base camp in Tijuana to a warm goodbye from fans in the border city. Iran were eliminated from the World Cup on Saturday, after Austria’s last-gasp equaliser against Algeria saw them drop out of the tournament’s eight best third-placed teams. Recommended Stories list of 4 items- list 1 of 4Iran bow out of World Cup: Late drama ends Team Melli’s knockout dream - list 2 of 4Heightened emotions in Iran after Team Melli knocked out of World Cup - list 3 of 4Stephen Eustaquio: Canada’s World Cup hero who braved personal tragedy - list 4 of 4‘Heroes for the future’: Canada celebrates team’s historic World Cup run It capped a dramatic 24 hours for Iran, who lost control of their fate for the knockout stage following a 1-1 draw with Egypt on Friday, which ended dramatically with an apparent last-ditch Iranian winner controversially ruled offside following a VAR check. The United States and Israel’s war on Iran dictated the logistics for Team Melli’s presence at the FIFA World Cup 2026. Iran shifted their base camp from Arizona to Tijuana not long before the tournament began, fearing visa complications. In rarely-seen stringent logistical conditions, the team was forced to depart for Mexico mere hours after the full-time whistle of their matches in the US, despite repeated requests from the Iranians to relocate their fixtures out of the country engaged in an active war against them. But from the moment Iran first touched down in Tijuana, Mexico welcomed the team with open arms. Fans thronged the perimeter of the team’s hotel before and after their travels for each group stage match, holding posters and waiting for autographs from players. ‘Hope our paths cross again’ The mutual love and respect that developed over three weeks made its way to social media and a global online audience that backed Team Melli through their off-pitch hardships. It was also on social media that the team’s media department thanked the people of Mexico for their hospitality. “Thank you for your professionalism, your support, and for covering not only our team’s sporting journey but also the unfair and unsportsmanlike treatment our delegation faced during its stay,” a message on X, posted by the Embassy of Iran in Mexico, read. “Your commitment to reporting the facts accurately and with integrity meant a great deal to us.” The message extended specific thanks to the residents of Tijuana, who welcomed the team with “generosity and genuine hospitality that made us feel right at home”. “For all of us, leaving Tijuana is truly difficult. The memories we built here, the friendships we forged, and the affection we received will forever remain in the hearts of every member of the Iranian National Team. “Thank you, and we hope our paths cross again,” the message read. ‘You’re Mexican now’ Videos on social media showed the Iranian team out and about in Tijuana as they autographed World Cup footballs and Panini sticker books and posed for photographs with fans. Iran’s ambassador to Mexico, Abolfazl Pasandideh, and Football Federation of Iran’s (FFIRI) secretary-general, Hedayat Mombeini, spoke to supporters and media representatives over the weekend and thanked Mexico for its hospitality. The Iranian embassy in Sarajevo also thanked Mexico for graciously hosting Iran, while simultaneously underscoring the US’s ill treatment of the team. “FIFA should exercise greater care in selecting future host nations, ensuring they are worthy hosts and committed to humanitarian principles,” the post on X read. Social media users touched by the bond that had developed between the two nations hoped Mexico would go far in the tournament with the backing of their Iranian supporters. The emotions were capped off on the day of Iran’s departure, when several fans sporting baseball hats adorned with the words “Iran, br
+
+
+
+codex
+I have enough context to write the output directly. I’m excluding the clearly non-market documents, and for the borderline ones I’m only keeping explicit statements or reported actions that are directly finance or policy relevant.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+
+rows = [
+  {
+    \"doc_id\": \"3143d4db98b19bf0986f6ff8404995b2\",
+    \"title\": \"Another JOLT: Jobs Opening Smash Expectations, Despite Another Drop In Number Of Hires\",
+    \"facts\": [
+      {\"claim\":\"U.S. job openings totaled 7.594 million in May, above the 7.296 million estimate.\",\"subject\":\"United States labor market\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"7.594 million vs 7.296 million estimate\",\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\",\"BLS JOLTS\"],\"confidence\":0.98},
+      {\"claim\":\"U.S. job openings in wholesale trade increased by 71,000 in May.\",\"subject\":\"U.S. wholesale trade job openings\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"+71,000\",\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.96},
+      {\"claim\":\"U.S. job openings increased in manufacturing and leisure and hospitality in May.\",\"subject\":\"U.S. manufacturing and leisure and hospitality job openings\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"up\",\"magnitude\":None,\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.88},
+      {\"claim\":\"U.S. financial services and private education job openings fell in May.\",\"subject\":\"U.S. financial services and private education job openings\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"down\",\"magnitude\":None,\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.9},
+      {\"claim\":\"U.S. federal government job openings fell by 14,000 to 83,000 in May.\",\"subject\":\"U.S. federal government job openings\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"-14,000 to 83,000\",\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.97},
+      {\"claim\":\"The May U.S. payrolls report increased by 172,000.\",\"subject\":\"U.S. nonfarm payrolls\",\"predicate\":\"event\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"172K\",\"time\":\"May\",\"cause\":None,\"entities\":[\"United States\"],\"confidence\":0.82}
+    ]
+  },
+  {
+    \"doc_id\": \"31668a0f159703d5006c057335009197\",
+    \"title\": \"New Asean Chamber of Commerce launched in Hong Kong will ‘fulfil long-felt need’\",
+    \"facts\": [
+      {\"claim\":\"The Asean Chamber of Commerce was launched in Hong Kong on Tuesday at the South China Morning Post’s GBA-Asean Summit 2026.\",\"subject\":\"Asean Chamber of Commerce\",\"predicate\":\"event\",\"object\":\"Hong Kong\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"Tuesday\",\"cause\":None,\"entities\":[\"Asean Chamber of Commerce\",\"Hong Kong\",\"ASEAN\"],\"confidence\":0.98},
+      {\"claim\":\"Hong Kong Chief Executive John Lee Ka-chiu said he expects the new Asean Chamber of Commerce to promote trade ties between Hong Kong and ASEAN.\",\"subject\":\"John Lee Ka-chiu\",\"predicate\":\"statement\",\"object\":\"Asean Chamber of Commerce\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"2026-06-30\",\"cause\":None,\"entities\":[\"John Lee Ka-chiu\",\"Hong Kong\",\"ASEAN\",\"Asean Chamber of Commerce\"],\"confidence\":0.9}
+    ]
+  },
+  {
+    \"doc_id\": \"31686ca05b7d3b6860f85bc443fbca6c\",
+    \"title\": \"Shanghai needed as finance hub, as Hong Kong ‘not enough’: proposal\",
+    \"facts\": [
+      {\"claim\":\"Liu Xiaochun said Shanghai should build itself into a financial hub that supports the outbound investment needs of Chinese companies.\",\"subject\":\"Shanghai\",\"predicate\":\"statement\",\"object\":\"Chinese outbound firms\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"mid-June\",\"cause\":\"rising outbound investment needs of Chinese firms\",\"entities\":[\"Shanghai\",\"Liu Xiaochun\",\"China\"],\"confidence\":0.94},
+      {\"claim\":\"Liu Xiaochun said Hong Kong is not enough to fully meet the special needs of Chinese companies expanding abroad.\",\"subject\":\"Hong Kong\",\"predicate\":\"statement\",\"object\":\"Chinese outbound firms\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"mid-June\",\"cause\":None,\"entities\":[\"Hong Kong\",\"Liu Xiaochun\",\"China\"],\"confidence\":0.95}
+    ]
+  },
+  {
+    \"doc_id\": \"31d7f99e0391570a7fb28b8a31389994\",
+    \"title\": \"Bitmine ETH Holdings Reach 5.7M After Joining Russell 1000\",
+    \"facts\": [
+      {\"claim\":\"Bitmine Immersion Technologies added more than 27,000 Ether to its holdings last week.\",\"subject\":\"Bitmine Immersion Technologies\",\"predicate\":\"corporate_action\",\"object\":\"Ether\",\"direction\":\"up\",\"magnitude\":\"more than 27,000 Ether\",\"time\":\"last week\",\"cause\":None,\"entities\":[\"Bitmine Immersion Technologies\",\"Ether\"],\"confidence\":0.98},
+      {\"claim\":\"Bitmine said its latest Ether purchase was about "'$43 million.","subject":"Bitmine Immersion Technologies","predicate":"corporate_action","object":"Ether","direction":"up","magnitude":"about $43 million","time":"last week","cause":None,"entities":["Bitmine Immersion Technologies","Ether"],"confidence":0.98},
+      {"claim":"Bitmine said it held just over 5.7 million Ether after its latest purchase.","subject":"Bitmine Immersion Technologies","predicate":"corporate_action","object":"Ether","direction":"up","magnitude":"just over 5.7 million Ether","time":"2026-06-30","cause":"latest Ether purchase","entities":["Bitmine Immersion Technologies","Ether"],"confidence":0.98},
+      {"claim":"Bitmine said its Ether was bought at an average price of $1,569 per token.","subject":"Bitmine Immersion Technologies","predicate":"corporate_action","object":"Ether","direction":"na","magnitude":"$1,569 per token","time":"2026-06-30","cause":None,"entities":["Bitmine Immersion Technologies","Ether"],"confidence":0.97},
+      {"claim":"Bitmine said its holdings represented 4.7% of Ether’s 120.7 million-token supply.","subject":"Bitmine Immersion Technologies","predicate":"other","object":"Ether supply","direction":"na","magnitude":"4.7% of 120.7 million tokens","time":"2026-06-30","cause":None,"entities":["Bitmine Immersion Technologies","Ether"],"confidence":0.97},
+      {"claim":"Bitmine joined the Russell 1000 Index.","subject":"Bitmine Immersion Technologies","predicate":"event","object":"Russell 1000 Index","direction":"na","magnitude":None,"time":"2026-06-30","cause":None,"entities":["Bitmine Immersion Technologies","Russell 1000 Index"],"confidence":0.97},
+      {"claim":"Bitmine shares rose 1.7% on Monday to close at $13.80.","subject":"Bitmine shares","predicate":"price_move","object":None,"direction":"up","magnitude":"1.7% to $13.80","time":"Monday","cause":None,"entities":["Bitmine Immersion Technologies"],"confidence":0.98},
+      {"claim":"Bitmine shares fell 9% over the past trading week.","subject":"Bitmine shares","predicate":"price_move","object":None,"direction":"down","magnitude":"9%","time":"the past trading week","cause":"alongside Ether'"'s decline\",\"entities\":[\"Bitmine Immersion Technologies\",\"Ether\"],\"confidence\":0.94},
+      {\"claim\":\"Ether fell by 8% over the past week.\",\"subject\":\"Ether\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"8%\",\"time\":\"the past week\",\"cause\":None,\"entities\":[\"Ether\",\"Ethereum\"],\"confidence\":0.97}
+    ]
+  },
+  {
+    \"doc_id\": \"31ee742fe85a56ed9b8d5fcafcb0340d\",
+    \"title\": \"FDA lets Philip Morris market Zyn nicotine pouches as less harmful than cigarettes\",
+    \"facts\": [
+      {\"claim\":\"The FDA cleared Philip Morris-owned Zyn nicotine pouches to be marketed as less harmful than cigarettes.\",\"subject\":\"FDA\",\"predicate\":\"policy_action\",\"object\":\"Zyn nicotine pouches\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"Tuesday\",\"cause\":None,\"entities\":[\"FDA\",\"Philip Morris\",\"Zyn\"],\"confidence\":0.99},
+      {\"claim\":\"The FDA decision allows 20 Zyn products to carry a modified-risk claim that switching from cigarettes to Zyn lowers disease risk.\",\"subject\":\"FDA\",\"predicate\":\"policy_action\",\"object\":\"20 Zyn products\",\"direction\":\"na\",\"magnitude\":\"20 products\",\"time\":\"Tuesday\",\"cause\":None,\"entities\":[\"FDA\",\"Philip Morris\",\"Zyn\"],\"confidence\":0.98},
+      {\"claim\":\"The FDA had already authorized the same 20 Zyn products for sale in January 2025.\",\"subject\":\"FDA\",\"predicate\":\"policy_action\",\"object\":\"20 Zyn products\",\"direction\":\"na\",\"magnitude\":\"20 products\",\"time\":\"January 2025\",\"cause\":None,\"entities\":[\"FDA\",\"Philip Morris\",\"Zyn\"],\"confidence\":0.96},
+      {\"claim\":\"U.S. cigarette sales are continuing to decline as major tobacco companies invest more heavily in smoke-free products.\",\"subject\":\"U.S. cigarette sales\",\"predicate\":\"demand_change\",\"object\":None,\"direction\":\"down\",\"magnitude\":None,\"time\":\"2026-06-30\",\"cause\":\"major tobacco companies are investing more heavily in smoke-free products\",\"entities\":[\"United States\",\"Philip Morris\"],\"confidence\":0.88}
+    ]
+  },
+  {
+    \"doc_id\": \"326ab4d9e81626ffb274eb35ff0fcb63\",
+    \"title\": \"Seven ways to get the most out of a window air conditioner during extreme heat in the US\",
+    \"facts\": []
+  },
+  {
+    \"doc_id\": \"329affad7b4247990d3c1d3ed8711500\",
+    \"title\": \"LeBron James reportedly leaving Lakers, opening door for union with Curry at Warriors\",
+    \"facts\": []
+  },
+  {
+    \"doc_id\": \"32a19ed0d5594f88c4eb5bf60cea1188\",
+    \"title\": \"Barclays sees Turkey lira depreciation continuing under managed policy By Investing.com\",
+    \"facts\": [
+      {\"claim\":\"Barclays expects the Turkish lira to continue depreciating under a managed policy.\",\"subject\":\"Turkish lira\",\"predicate\":\"forecast\",\"object\":None,\"direction\":\"down\",\"magnitude\":None,\"time\":\"2026-06-30\",\"cause\":\"authorities are closely managing the pace of the currency’s decline\",\"entities\":[\"Barclays\",\"Turkish lira\",\"Turkey\"],\"confidence\":0.98},
+      {\"claim\":\"Barclays said Turkish central bank easing will be accompanied by a slower pace of lira depreciation designed to generate 1% in total monthly returns for long lira positions.\",\"subject\":\"Turkish lira\",\"predicate\":\"forecast\",\"object\":\"long lira positions\",\"direction\":\"down\",\"magnitude\":\"1% total monthly returns\",\"time\":\"2026-06-30\",\"cause\":\"Turkish central bank policy easing with managed depreciation\",\"entities\":[\"Barclays\",\"Turkish lira\",\"Turkey\"],\"confidence\":0.95},
+      {\"claim\":\"Barclays said the managed lira policy is sustainable under current conditions.\",\"subject\":\"Turkish lira policy\",\"predicate\":\"statement\",\"object\":None,\"direction\":\"na\",\"magnitude\":None,\"time\":\"2026-06-30\",\"cause\":\"continued decreases in oil prices and weak local demand for dollarization\",\"entities\":[\"Barclays\",\"Turkey\",\"Turkish lira\"],\"confidence\":0.92}
+    ]
+  },
+  {
+    \"doc_id\": \"32c8b9eb943dd146a3d3d8882854a69e\",
+    \"title\": \"The top-25 stocks in the S&P 500 so far this year are dominated by chip and AI names | investingLive\",
+    \"facts\": [
+      {\"claim\":\"SanDisk had risen nearly 570% in 2025 before the latest extension of the move.\",\"subject\":\"SanDisk shares\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"nearly +570%\",\"time\":\"2025\",\"cause\":\"a global NAND shortage and AI data-center demand\",\"entities\":[\"SanDisk\"],\"confidence\":0.95},
+      {\"claim\":\"Nvidia was up 6.28% year to date.\",\"subject\":\"Nvidia shares\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"+6.28% YTD\",\"time\":\"year to date\",\"cause\":None,\"entities\":[\"Nvidia\"],\"confidence\":0.98},
+      {\"claim\":\"Broadcom was up 8.32% year to date.\",\"subject\":\"Broadcom shares\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"+8.32% YTD\",\"time\":\"year to date\",\"cause\":None,\"entities\":[\"Broadcom\"],\"confidence\":0.98},
+      {\"claim\":\"An FDA advisory panel voted 9-0 in favor of Moderna’s flu vaccine mRNA-1010 for adults aged 50 and older.\",\"subject\":\"Moderna\",\"predicate\":\"policy_action\",\"object\":\"mRNA-1010\",\"direction\":\"na\",\"magnitude\":\"9-0 vote\",\"time\":\"2026-06-30\",\"cause\":None,\"entities\":[\"Moderna\",\"FDA\"],\"confidence\":0.97},
+      {\"claim\":\"A final FDA decision on Moderna’s flu vaccine mRNA-1010 is due on August 5, 2026.\",\"subject\":\"FDA\",\"predicate\":\"event\",\"object\":\"Moderna mRNA-1010\",\"direction\":\"na\",\"magnitude\":None,\"time\":\"August 5, 2026\",\"cause\":None,\"entities\":[\"FDA\",\"Moderna\"],\"confidence\":0.97},
+      {\"claim\":\"Moderna reported first-quarter 2026 revenue of "'$389 million, up 264% year over year and above consensus.","subject":"Moderna","predicate":"corporate_action","object":None,"direction":"up","magnitude":"$389 million, up 264% YoY","time":"Q1 2026","cause":None,"entities":["Moderna"],"confidence":0.97}
+    ]
+  },
+  {
+    "doc_id": "32cdabe7ad8eaafd25a6020092df5c99",
+    "title": "US Supreme Court blocks firing of Fed governor",
+    "facts": [
+      {"claim":"The U.S. Supreme Court blocked President Donald Trump from firing Federal Reserve governor Lisa Cook.","subject":"U.S. Supreme Court","predicate":"policy_action","object":"Lisa Cook","direction":"na","magnitude":None,"time":"2026-06-30","cause":None,"entities":["U.S. Supreme Court","Donald Trump","Federal Reserve","Lisa Cook"],"confidence":0.98}
+    ]
+  },
+  {
+    "doc_id": "3338a7be6f40d82dec9c427f275c8cd5",
+    "title": "German states see further drop in inflation pressures in June | investingLive",
+    "facts": [
+      {"claim":"Bavaria'"'s CPI rose 2.5% year over year in June, down from 2.6% previously.\",\"subject\":\"Bavaria CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"2.5% vs 2.6% prior\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Bavaria\",\"Germany\"],\"confidence\":0.98},
+      {\"claim\":\"Saxony's CPI rose 2.5% year over year in June, down from 2.7% previously.\",\"subject\":\"Saxony CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"2.5% vs 2.7% prior\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Saxony\",\"Germany\"],\"confidence\":0.98},
+      {\"claim\":\"North Rhine-Westphalia's CPI rose 2.1% year over year in June, down from 2.4% previously.\",\"subject\":\"North Rhine-Westphalia CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"2.1% vs 2.4% prior\",\"time\":\"June\",\"cause\":None,\"entities\":[\"North Rhine-Westphalia\",\"Germany\"],\"confidence\":0.98},
+      {\"claim\":\"Baden-Wuerttemberg's CPI rose 2.1% year over year in June, down from 2.4% previously.\",\"subject\":\"Baden-Wuerttemberg CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"2.1% vs 2.4% prior\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Baden-Wuerttemberg\",\"Germany\"],\"confidence\":0.98},
+      {\"claim\":\"Bavaria's monthly inflation estimate fell 0.2% in June.\",\"subject\":\"Bavaria CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"-0.2%\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Bavaria\",\"Germany\"],\"confidence\":0.97},
+      {\"claim\":\"North Rhine-Westphalia's monthly inflation estimate fell 0.4% in June.\",\"subject\":\"North Rhine-Westphalia CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"-0.4%\",\"time\":\"June\",\"cause\":None,\"entities\":[\"North Rhine-Westphalia\",\"Germany\"],\"confidence\":0.97},
+      {\"claim\":\"Baden-Wuerttemberg's monthly inflation estimate fell 0.2% in June.\",\"subject\":\"Baden-Wuerttemberg CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"-0.2%\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Baden-Wuerttemberg\",\"Germany\"],\"confidence\":0.97},
+      {\"claim\":\"Saxony's monthly inflation estimate rose 0.2% in June.\",\"subject\":\"Saxony CPI\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"up\",\"magnitude\":\"+0.2%\",\"time\":\"June\",\"cause\":None,\"entities\":[\"Saxony\",\"Germany\"],\"confidence\":0.97},
+      {\"claim\":\"Traders priced in about 28 basis points of ECB rate hikes by year-end after the inflation data, down from about 30 basis points before the data.\",\"subject\":\"ECB rate-hike pricing\",\"predicate\":\"price_move\",\"object\":None,\"direction\":\"down\",\"magnitude\":\"~28 bps vs ~30 bps before\",\"time\":\"year-end\",\"cause\":\"inflation data released on 2026-06-30\",\"entities\":[\"ECB\",\"Germany\"],\"confidence\":0.95}
+    ]
+  },
+  {
+    \"doc_id\": \"3396c185e1fb9737cafb99ff2b2fd4dc\",
+    \"title\": \"As heartbroken Iran depart World Cup, Mexican hospitality offers rare warmth\",
+    \"facts\": []
+  }
+]
+
+with open('all_facts_051.jsonl', 'w') as f:
+    for row in rows:
+        f.write(json.dumps(row, ensure_ascii=True) + '\\n')
+
+print(f\"docs processed: {len(rows)}, total facts: {sum(len(r['facts']) for r in rows)}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 42
+
+codex
+docs processed: 12, total facts: 42
+tokens used
+23,536
+docs processed: 12, total facts: 42

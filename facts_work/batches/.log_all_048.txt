@@ -1,0 +1,474 @@
+2026-07-01T22:17:35.161467Z ERROR codex_core_skills::manager: failed to install system skills: io error while remove existing system skills dir: Directory not empty (os error 66)
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc2-4dfe-7540-84fd-a866eced289e
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_048.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_048.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_048.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:17:40.385742Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m going to inspect `all_batch_048.jsonl` to confirm structure and then run a local extractor against that file only, writing `all_facts_048.jsonl` in place.
+exec
+/bin/zsh -lc 'wc -l all_batch_048.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_048.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+p='all_batch_048.jsonl'
+with open(p) as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(f'LINE {i}:', sorted(obj.keys()))
+        print('TITLE:', obj.get('title'))
+        print('BODY:', (obj.get('body_text') or '')[:500].replace('\\n',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+LINE 1: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Silicon Valley donations make Colorado Democratic primary one of state’s most expensive
+BODY: Political groups funded by top tech executives have been homing in on one local race in Colorado, as the state’s Democratic primary vote gets under way on Tuesday. Democrat Manny Rutinel, who’s running in the competitive eighth congressional district for a seat in the House, has seen his campaign boosted with at least $2m in donations from committees led by the former Google CEO Eric Schmidt and crypto billionaire Chris Larsen. Rutinel is a progressive candidate running against former state repr
+
+LINE 2: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: MetaMask Launches Money Account With 4% DeFi Yield
+BODY: MetaMask launches stablecoin yield account with card spending MetaMask launches Money Account it says offers up to 4% variable APY on mUSD stablecoin balances and card spending, with DeFi-powered yield via vaults, excluding the UK and sanctioned jurisdictions. Update, June 30, 6:13 pm UTC: This article has been updated to correct the availability of MetaMask Money Account. Consensys said the Money Account is unavailable in the United Kingdom and sanctioned jurisdictions, not the European Union. 
+
+LINE 3: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Air Pollution
+BODY: Topics Air pollution continues to plague many of China's cities, bringing with it serious and costly health ailments. The government has responded with a variety of anti-smog measures, such as a ban on coal-toting trucks in highly polluting areas, restrictions on the number of cars that can be on roads and the shuttering of some factories not meeting environmental standards. Policy update aims to force older plants out of commission and accelerate low-carbon investment, but weak demand and coal-
+
+
+codex
+The file has 12 documents. I’ve confirmed the schema and I’m checking the full set of titles now so the extraction logic stays anchored to the actual mix of article types in this batch.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+p='all_batch_048.jsonl'
+with open(p) as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 281326e53deacf34c6c7c5a745e7168d | 2026-06-30 | Silicon Valley donations make Colorado Democratic primary one of state’s most expensive
+2. 28bb47f3ed7e2fcbb22470cc70469de1 | 2026-06-30 | MetaMask Launches Money Account With 4% DeFi Yield
+3. 29367031e070d27ec1ffb78012b337e5 | 2026-06-30 | Air Pollution
+4. 296260ae0e00a4329dd01edc5cac1f48 | 2026-06-30 | Crypto firms have spent $189 million so far on 2026 US election, report says
+5. 29a1219f4ad9d383c9b92816d1364369 | 2026-06-30 | World Cup schedule today: How to watch, TV channels & live stream
+6. 29ae53c47c055258189ad584ec4afcad | 2026-06-30 | Germany annual CPI inflation softens to 2.3% in June vs. 2.5% expected | FXStreet
+7. 2a2e051cfd48c756badab7c5defc43d0 | 2026-06-30 | Colorado Democrats choose between insurgent progressives and veteran incumbents
+8. 2a995c257f5845d4af3349ed95363d15 | 2026-06-30 | CSL club Zhejiang to earn US$319,000 after South Korean player’s World Cup foray
+9. 2c10c58ae8db2f74a0d2c1c5c606f03f | 2026-06-30 | [SMM Analysis]"Malaysia's 20MWh C&I BESS Project Begins Operation, Focusing on Demand-Side Energy Management"
+10. 2c1b5ad469e319caacaf01bcd983a9c2 | 2026-06-30 | Number of billionaires globally soars by 13% amid AI shares boom
+11. 2c4451e782437387722bedd7d180bfef | 2026-06-30 | How severe is Russia’s energy shortage because of Ukrainian strikes?
+12. 2c6a59ed0963660f4198670832927888 | 2026-06-30 | China reacts to Guo Wengui’s US prison sentence, highlighting fugitive status
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json, textwrap
+p='all_batch_048.jsonl'
+with open(p) as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print('='*80)
+        print(f\"{i}. {obj['doc_id']} | {obj['title']}\")
+        print(obj['body_text'][:4000].replace('\\r',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+================================================================================
+1. 281326e53deacf34c6c7c5a745e7168d | Silicon Valley donations make Colorado Democratic primary one of state’s most expensive
+Political groups funded by top tech executives have been homing in on one local race in Colorado, as the state’s Democratic primary vote gets under way on Tuesday. Democrat Manny Rutinel, who’s running in the competitive eighth congressional district for a seat in the House, has seen his campaign boosted with at least $2m in donations from committees led by the former Google CEO Eric Schmidt and crypto billionaire Chris Larsen. Rutinel is a progressive candidate running against former state representative and centrist Democrat Shannon Bird. During his campaign, he has focused on his Latino heritage and centered his platform around affordability and regulating Immigrations and Customs Enforcement (ICE). Technology and artificial intelligence are not topics he’s publicly waded into, but when he was a state representative, he supported two bills aimed at putting guardrails on AI, according to Axios. Bird, conversely, opposed a bill to regulate AI, saying it would restrain innovation in the state. Political spending on Rutinel’s campaign has made it one of the most expensive races in Colorado, outpacing other district and Senate races. The two top Super Pacs funded by tech dollars, which contributed to Rutinel’s campaign, are Somos Pac and You Can Push Back. Schmidt and his wife, Wendy, donated $2m to the Somos Pac, which supports Latino voter engagement, which then gave $1.3m to Rutinel’s campaign, according to Axios. You Can Push Back, which is entirely funded by the crypto mogul Larsen, donated nearly $1m to the Colorado lawmaker’s campaign. Rutinel also received millions in donations from Super Pacs focused on Latino candidates. Another chunk of funding for Rutinel came from individual employees from top AI and tech firms, including Anthropic, OpenAI, Google and Meta. Rutinel has received more than $265,000 from these donations, according to a campaign finance tracker created by the publication Transformer. Anthropic employees were the largest group of givers, with 57 people donating nearly $162,000 combined. This race in Colorado serves as an example of a stark rift that is forming among big tech donors. One cohort is throwing money behind candidates seen as lenient on AI regulations, while the other is backing political hopefuls who indicate they will rein in the breakneck growth of the technology. The donations to Rutinel’s campaign come after a showdown in a local congressional race in New York last week, where pro- and anti-AI groups spent a combined $24m to either oppose or support the Democratic candidate Alex Bores, a member of the state assembly who sponsored an AI safety bill. Similar scenarios played out during the primaries in North Carolina and California. Rutinel’s campaign did not respond to a request for comment.
+
+================================================================================
+2. 28bb47f3ed7e2fcbb22470cc70469de1 | MetaMask Launches Money Account With 4% DeFi Yield
+MetaMask launches stablecoin yield account with card spending MetaMask launches Money Account it says offers up to 4% variable APY on mUSD stablecoin balances and card spending, with DeFi-powered yield via vaults, excluding the UK and sanctioned jurisdictions. Update, June 30, 6:13 pm UTC: This article has been updated to correct the availability of MetaMask Money Account. Consensys said the Money Account is unavailable in the United Kingdom and sanctioned jurisdictions, not the European Union. MetaMask, a self-custodial wallet developed by Consensys, is launching a new product that it says lets users earn yield on its MetaMask USD (mUSD) stablecoin and spend it via a card exclusively on the Monad blockchain. The company on Tuesday announced the launch of Money Account, a product it says offers up to 4% variable annual percentage yield (APY) on eligible stablecoin deposits in supported jurisdictions. “Your balance earns the moment you add funds, and you can spend the moment you need to,” Consensys CEO Joe Lubin said in a statement seen by Cointelegraph. The launch comes amid ongoing debate over yield-bearing stablecoin products in the US, where the CLARITY Act includes provisions restricting the payment of interest or yield on payment stablecoins when tied to holding. Yield engine powered by DeFi vaults Money Account generates yield through decentralized finance (DeFi) lending strategies rather than issuer-paid interest, MetaMask senior director of product Johann Bornman told Cointelegraph. The system relies on two entirely separate mechanisms, separating how the stablecoin is backed from how yield is generated, Bornman said. A preview of MetaMask’s Money Account. Source: ConsenSys The first mechanism involves stablecoin backing. Bridge, a Stripe company, holds US dollar reserves and short-term Treasury bills that back mUSD on a 1:1 basis. Under this structure, the issuer does not pay any yield to holders. The second mechanism is the DeFi yield layer. When users deposit into a Money Account, funds are routed through onchain vault provider Veda, which allocates capital into established lending protocols such as Aave and Morpho. “Simply put, mUSD’s reserve backing and the yield users earn are structurally separate,” Bornman said, adding: “The yield doesn’t come from the issuer, it comes from DeFi protocol activity.” KYC and availability: UK among restricted geos The Money Account is rolling out globally on Tuesday, except in the United Kingdom and sanctioned jurisdictions, Bornman said. As MetaMask operates a self-custodial wallet, the platform itself does not require Know Your Customer checks, but KYC is required for any features that interact with regulated services, including fiat on-ramps and the MetaMask Card. Related: Trezor adds native USDt, USDC yield via Morpho integration “Money Account itself does not require KYC, users can hold mUSD and earn yield with the click of a button,” Bornman said. “Where KYC is required, those checks are carried out by third-party providers that operate those regulated services, not by MetaMask,” he added. The launch comes less than a year after MetaMask officially launched its wallet-native mUSD stablecoin in September 2025. MetaMask USD (mUSD) market capitalization since launch. Source: CoinGecko The stablecoin’s market capitalization briefly peaked above $100 million shortly after launch before slipping below $30 million, according to CoinGecko data. At the time of writing, mUSD’s market cap stood at $32 million, placing it among smaller US dollar-pegged stablecoins by market size. Magazine: Bitcoin decouples from tech stocks, Ether eyes ‘selling wave’: Market Moves More on the subject
+
+================================================================================
+3. 29367031e070d27ec1ffb78012b337e5 | Air Pollution
+Topics Air pollution continues to plague many of China's cities, bringing with it serious and costly health ailments. The government has responded with a variety of anti-smog measures, such as a ban on coal-toting trucks in highly polluting areas, restrictions on the number of cars that can be on roads and the shuttering of some factories not meeting environmental standards. Policy update aims to force older plants out of commission and accelerate low-carbon investment, but weak demand and coal-heavy production continue to constrain progress Eleven government agencies pledge infrastructure and financial support to put more than 1.6 million new-energy heavy trucks on the road China’s industry ministry raises nationwide replacement ratios and limits capacity transfers as steelmakers face oversupply and shrinking profits Artificial intelligence (AI) is no longer limited to answering questions — it is ordering bubble tea, booking flights and buying insurance. As AI agents increasingly act as autonomous personal shoppers, the volume and value of the transactions they execute are surging Authorities plan to expand carbon markets and tighten regulatory oversight on retired green-tech waste like electric vehicle batteries ‘Big Six’ state lenders outperformed smaller peers in 2025, as weak credit demand and intensifying competition continued to weigh on loan yields The landmark legislative overhaul consolidates dozens of laws to balance economic growth with ecological preservation, though questions over corporate penalties and enforcement remain The Ministry of Ecology and Environment plans a two-phase update to national standards, raising the bar for cities after years of steady improvement A civil suit in Zhejiang province highlights a common industry practice that allows producers to effectively pay others to dispose of hazardous materials on their behalf while sidestepping legal responsibility for paying their share of any clean-up bill
+
+================================================================================
+4. 296260ae0e00a4329dd01edc5cac1f48 | Crypto firms have spent $189 million so far on 2026 US election, report says
+June 30 (Reuters) - Cryptocurrency companies have spent $189 million so far to influence the 2026 U.S. midterm elections, outpacing their spending for the previous election cycle, according to a new report, opens new tab from Public Citizen, a consumer advocacy organization. More than one-third of all corporate money contributed to this year's November elections, and primary elections leading up to them, has come from the crypto industry, making it the top corporate political spender, the group said. Crypto was also the top corporate donor in the 2024 election cycle, when it contributed $170 million and many of the congressional candidates it boosted won their races. Companies in the artificial intelligence, big tech and online betting sectors have also contributed heavily. Combined with crypto, they have spent $294 million on the 2026 elections so far. In November, the full House of Representatives will be up for reelection, along with roughly a third of the Senate. "The big takeaway is that corporate money is playing a bigger role than ever in our elections, and it's only expanding," said Rick Claypool, a research director at Public Citizen and the author of the report. The organization tracked spending by political action committees, or PACs, which pool money from donors to contribute to candidates' campaigns or political causes. The report said Andreessen Horowitz, a major venture capital firm investing in crypto, along with Ripple Labs, Crypto.com-affiliated Foris DAX and Coinbase, were the top four contributors to political action committees focused on advancing corporate policies. The crypto industry won major public policy gains after its heavy spending in 2024, which ushered in a Congress ready to champion pro-crypto legislation that industry proponents said would put them on a more solid legal footing. Much of that cash came from super PACs, which can spend unlimited amounts of money, in a trend that looks likely to continue this year. Fairshake, a major super PAC dedicated to supporting pro-crypto candidates, has received $82 million in donations this cycle, Public Citizen said. The crypto industry's 2024 splurge paid off in part last year when Congress passed a law creating a federal framework for dollar-pegged crypto tokens known as stablecoins, which proponents say should help promote their broader adoption. That bill received bipartisan support in both the House and the Senate. The sector is pushing for additional measures, including legislation dubbed the Clarity Act that would create regulations for cryptocurrencies. Crypto companies say it is critical for the future of U.S. digital assets and necessary to fix core problems for crypto companies. That bill has stalled in the Senate and it is unclear if it will pass before the elections, in which Democrats are expected to take control of the House of Representatives. If the Senate fails to pass the bill this year, it is unlikely to become law in the foreseeable future, analysts said. Many Democrats oppose it out of concern that it does not do enough to prevent politicians, including President Donald Trump, from profiting off of crypto ventures. Trump, who courted crypto cash on the campaign trail and whose family has profited from its own token, has prioritized crypto reform during his second administration and the White House has been pushing hard for the bill, Reuters reported. Reporting by Hannah Lang in New York; Editing by Michelle Price and Edmund Klamann
+
+================================================================================
+5. 29a1219f4ad9d383c9b92816d1364369 | World Cup schedule today: How to watch, TV channels & live stream
+The last 32 continues with three more tantalising ties with World Cup co-hosts Mexico, tournament frontrunners France and dark horses Norway taking to the field once more. All three games promise plenty of drama and excitement. Erling Haaland and Kylian Mbappé will be two of the headline acts in Tuesday’s matches. Both players have hit the ground running, netting eight goals between them with more matches to come. Mexico can make the last 16 for the eighth time in the last nine World Cups while Ecuador are aiming to make that stage of the tournament for only the second time in their history having never won a World Cup knockout game before. Here is your complete guide on how to watch today’s World Cup games, including kick-off times, broadcast networks, and online streaming options. Côte d’Ivoire vs Norway Time (ET): 1pm Stadium: Dallas Stadium How to watch United States: Fox / Telemundo (Stream on Fubo) Canada: TSN (Stream) United Kingdom: BBC One (Stream) Australia: SBS (Stream) What to watch for Côte d’Ivoire have already made history by reaching the knockout rounds of a World Cup for the first time and there’s good reason to believe they can go even further. The Elephants have a formidable forward line and have scored in all three matches they have played at the tournament so far. Stale Solbakken rested his best players for Norway’s final group game against France, meaning Haaland, Martin Odegaard and the rest should be fresh for Tuesday’s last 32 tie. The Scandinavians have so far lived up to their billing as dark horses and are among the tournament’s most fearsome teams in quick transition. Player to watch: Yan Diomande, Côte d’Ivoire - The 19-year-old has been one of the breakout stars of the 2026 World Cup, becoming the only player this century to register 10+ chances created and 10+ dribbles in three World Cup matches. What to read France v Sweden Time (ET): 5pm Stadium: New York/New Jersey Stadium How to watch United States: Fox / Telemundo (Stream on Fubo) Canada: TSN (Stream) United Kingdom: ITV1 (Stream) Australia: SBS (Stream) What to watch for France have set the standard at the 2026 World Cup so far, winning three out of three and scoring 10 goals in the process. Their forward line of Mbappé, Ousmane Dembele and Michael Olise could be the most dangerous in the whole tournament, but can Didier Deschamps find the right midfield balance to prevent Les Bleus from being top-heavy? Speaking of top-heavy, Sweden boast two elite-level forwards in Viktor Gyokeres and Alexander Isak, but are comparatively lacking in other areas. Isak might have to play on the left wing to give Graham Potter’s side a semblance of structure against one of the tournament’s favourites. Player to watch: Kylian Mbappé, France - The Real Madrid forward has registered two goal contributions in each of his three appearances so far and is the player around whom France revolve. Everything is geared towards Mbappe in the final third. What to read Mexico v Ecuador Time (ET): 9pm Stadium: Estadio Azteca How to watch United States: Fox / Telemundo (Stream on Fubo) Canada: TSN (Stream) United Kingdom: ITV1 (Stream) Australia: SBS (Stream) What to watch for Mexico are one of just three teams to have a 100% record after three games of this World Cup. El Tri look to have peaked at the right time and will have home advantage in front of their own supporters at the Estadio Azteca which could be a difference-maker for Javier Aguirre’s team. Ecuador left it late to seal their place in the round of 32, coming from behind to beat Germany in their final group game. If they can maintain their attacking threat against Mexico, the defensive strength of Sebastian Beccacece’s team could determine the outcome of Tuesday’s encounter. Player to watch: Moises Caicedo, Ecuador - The Chelsea midfielder is one of the best two-way operators in the world and will be an important valve in the centre of the field for the visiting team to Estadio Azteca. Ecuador need him in top f
+
+================================================================================
+6. 29ae53c47c055258189ad584ec4afcad | Germany annual CPI inflation softens to 2.3% in June vs. 2.5% expected | FXStreet
+Annual inflation in Germany, as measured by the change in the Consumer Price Index (CPI), softened to 2.3% in June's flash estimate from 2.6% in May. This print came in below the market expectation of 2.5%. On a monthly basis, the CPI declined 0.3% following the 0.2% decrease recorded in May. The Harmonized Index of Consumer Prices, the European Central Bank's (ECB) preferred gauge of inflation, declined 0.2% on a monthly basis and rose 2.4% on a yearly basis. Both of these prints came in below analysts' estimates. The Euro (EUR) struggles to stay resilient against the US Dollar (USD) following these prints. The risk-averse market atmosphere amid the uncertainty surrounding the US-Iran talks and growing concerns over global inflation remaining sticky further support the USD. At the time of press, the EUR/USD pair was trading at below 1.1400, losing about 0.3% on a daily basis. What German inflation readings mean for the Euro? German inflation prints for June, even though they were weaker than expected, are unlikely to alter market pricing of the ECB policy outlook in a significant way. In their recent speeches, ECB policymakers voiced their willingness to cling to a tighter policy in case inflation in the Euro area doesn't show any signs of a steady cooldown. Still, the Euro could have a difficult time outperforming the USD, since the Federal Reserve (Fed) is widely expected to raise rates in response to inflation. Lagarde flags persistent inflation shocks as Euro resilience backs higher rates FXS Speechtracker assigned a speech score of 7.3 to ECB President Christine Lagarde's comments from her opening remarks at the ECB Forum on Central Banking on Monday. This score held above Lagarde’s historic 5.6 average, signalling a more forceful tone than usual. Emphasizing that the Euro area is “more likely to face shocks in coming years that push inflation away from target” pointed to a hawkish bias, as it underscored persistent upside risks to inflation rather than a quick return to price stability. Lagarde’s focus on Euro area resilience and the claim that past rate hikes are “more contained” in their impact on the economy reinforced scope for keeping policy tighter for longer. The assertion that resilience allows the ECB to raise rates “without fear it become a source of financial stress” supports a hawkish interpretation, suggesting that future tightening or a slower easing path remains firmly on the table. Inflation FAQs Inflation measures the rise in the price of a representative basket of goods and services. Headline inflation is usually expressed as a percentage change on a month-on-month (MoM) and year-on-year (YoY) basis. Core inflation excludes more volatile elements such as food and fuel which can fluctuate because of geopolitical and seasonal factors. Core inflation is the figure economists focus on and is the level targeted by central banks, which are mandated to keep inflation at a manageable level, usually around 2%. The Consumer Price Index (CPI) measures the change in prices of a basket of goods and services over a period of time. It is usually expressed as a percentage change on a month-on-month (MoM) and year-on-year (YoY) basis. Core CPI is the figure targeted by central banks as it excludes volatile food and fuel inputs. When Core CPI rises above 2% it usually results in higher interest rates and vice versa when it falls below 2%. Since higher interest rates are positive for a currency, higher inflation usually results in a stronger currency. The opposite is true when inflation falls. Although it may seem counter-intuitive, high inflation in a country pushes up the value of its currency and vice versa for lower inflation. This is because the central bank will normally raise interest rates to combat the higher inflation, which attract more global capital inflows from investors looking for a lucrative place to park their money. Formerly, Gold was the asset investors turned to in times of high inflation because it 
+
+================================================================================
+7. 2a2e051cfd48c756badab7c5defc43d0 | Colorado Democrats choose between insurgent progressives and veteran incumbents
+Colorado Democrats choose between insurgent progressives and veteran incumbents Colorado’s Democratic primaries on Tuesday will help answer a question the party has increasingly faced nationally: Are voters gravitating toward a younger, more progressive generation of leaders or sticking with established veterans? That choice is starkly reflected in the fight to represent the state’s 1st Congressional District, where incumbent Rep. Diana DeGette has been in office for as long as her challenger, a 29-year-old democratic socialist named Melat Kiros, has been alive. Likewise in the U.S. Senate race, Sen. John Hickenlooper has spent nearly three times as many years in public office as his challenger, state Sen. Julie Gonzales, who fashions herself as an “insurgent progressive.” And a similar, if smaller, divide separates the two Democrats competing for the U.S. House in the state’s lone swing district, a seat that will be one of the keys to controlling the chamber in President Donald Trump’s final two years in office. In the Democratic primary for governor, however, the opposite is the case: Colorado Attorney General Phil Weiser and U.S. Sen. Michael Bennet have struggled to meaningfully distinguish their agendas. Instead, the two Democrats have accused each other of pulling punches against Trump. Democratic socialists have another shot in Denver DeGette has comfortably controlled her House seat in Denver for nearly 30 years, then came Melat Kiros. In a March Democratic assembly, a process to decide which candidates get on the primary ballot, DeGette barely qualified as Kiros, a first-time candidate, blew past her with more than double the votes. While the assembly process is far from determinative of who will win Tuesday, it was a jolt for the Democratic establishment and DeGette, who’s been a progressive lawmaker herself. Then, in New York last week, two democratic socialists and a progressive beat out establishment-backed candidates — two of whom were incumbents — in Democratic primaries for U.S. House, energizing a movement that’s just finding some political purchase. Similar to the New York races, Kiros has the endorsement of Sen. Bernie Sanders, while DeGette is backed by Colorado’s established Democratic House delegation. A victory by Kiros in Colorado, while far from guaranteed, would work toward cementing the nascent but clear uprising of democratic socialist candidates, which has filled some Democratic leaders with anxiety. DeGette argues that experience in Congress is needed right now to combat Trump, while Kiros, a former attorney, accuses DeGette of ineffectiveness. Also running is University of Colorado Regent Wanda James, who may split the anti-DeGette vote. The ‘insurgent progressive’ versus the political veteran Gonzales, the state senator and self-fashioned “insurgent progressive,” is trying to kick Hickenlooper, the more centrist former governor of Colorado, out of his U.S. Senate seat. She’s leaning into the same arguments that others used in challenging establishment incumbents, including that Hickenlooper is an “incrementalist.” Gonzales has said she previously joined the Democratic Socialists of America in 2018, but that her membership has lapsed. Hickenlooper is favored in the statewide race. A swing district may help decide control of the House Colorado’s 8th Congressional District is a relatively new district that stretches from the northern suburbs of Denver up through farming country. Since its creation in 2021, it’s swung from Democratic to GOP control and is held now by Republican Rep. Gabe Evans. With Democrats aiming to take back control of the House and obstruct Trump’s agenda, the race is closely watched. Party leaders thought a moderate like state Rep. Shannon Bird was best equipped to challenge Evans, but the district is also heavily Hispanic and poorer than much of the rest of the state. That’s where Bird’s Democratic primary opponent state Rep. Manny Rutinel, who is Latino, has planted a flag, 
+
+================================================================================
+8. 2a995c257f5845d4af3349ed95363d15 | CSL club Zhejiang to earn US$319,000 after South Korean player’s World Cup foray
+Chinese club Zhejiang set to earn US$319,000 after South Korean player’s World Cup foray The club will earn that sum from Fifa Club Benefits Programme, which compensates teams whose players are away on national team duty Although China did not qualify for the World Cup, Chinese Super League (CSL) side Zhejiang FC have been dubbed by local media as the league’s “biggest winner” as they stand to receive more than two million yuan (US$294,000) in tournament subsidies. This is because of the Fifa Club Benefits Programme, which compensates clubs whose players are away on national team duty for several weeks. For the World Cup, Fifa announced last month that it had put aside a budget of about US$355 million. The CSL’s sole representative at the tournament was South Korean international Park Jin-seop, and when his World Cup campaign came to an end – following the Democratic Republic of Congo’s 3-1 victory over Uzbekistan on the final group stage match day on Saturday, eliminating the Koreans – his club, Zhejiang FC, secured a substantial payout. The scheme follows a daily-rated model, providing US$11,000 per day per player to their respective clubs, meaning teams with more players who stay longer receive higher payouts. Park, who was playing in his first World Cup finals, came on as a substitute in South Korea’s first match, a 2-1 win over the Czech Republic, and also in their third match, a 1-0 loss to South Africa. Calculated from May 31, when Park reported for national team duty, until June 28, when South Korea’s campaign ended, a total of 29 days had elapsed. Under this formula, Zhejiang will receive around US$319,000.
+
+================================================================================
+9. 2c10c58ae8db2f74a0d2c1c5c606f03f | [SMM Analysis]"Malaysia's 20MWh C&I BESS Project Begins Operation, Focusing on Demand-Side Energy Management"
+Recently, Malaysia’s Plus Xnergy Services Sdn Bhd announced that a 20MWh battery energy storage system, deployed at a large food manufacturing facility in Perak, Malaysia, has completed full-capacity grid connection and entered commercial operation. The project was jointly developed by Plus Xnergy and energy storage system supplier HyperStrong. It is positioned as a commercial and industrial self-consumption battery energy storage project, namely a SELCO BESS. Figure 1: Plus Xnergy’s 20MWh BESS project at a food manufacturing facility in Perak This energy storage system is not primarily designed for grid-side frequency regulation or large-scale renewable energy integration. Instead, it mainly serves the facility’s own electricity management needs. Its core operating logic is to charge during periods of lower electricity prices or lower power demand, and discharge during peak demand periods. In doing so, the system helps smooth the facility’s load curve, reduce Maximum Demand charges, and improve localised power supply stability to a certain extent. For manufacturing enterprises in Malaysia, the practical value of such projects lies in energy cost management. As electricity tariff mechanisms adjust and industrial users face rising power cost pressure, some energy-intensive manufacturers are beginning to pay more attention to the role of energy storage in peak shaving, demand management and power stability. Continuous production scenarios, such as food processing, heavy manufacturing, chemicals and metal processing, usually have relatively high and stable electricity loads, making it easier to establish the economic basis for energy storage projects. According to data provided by Plus Xnergy, under Malaysia’s Regulatory Period 4, or RP4, framework, this type of system is expected to generate electricity bill savings of approximately RM1.25 million per year for every 10MWh of storage capacity. However, the actual savings depend on factors such as the company’s load profile, peak-valley price spread, Maximum Demand charge structure and the operating strategy of the energy storage system. Therefore, the project’s real-world performance, particularly its actual cost-saving effect and investment payback period, will be important indicators for assessing the commercial value of C&I energy storage. Figure 2: The project uses containerised energy storage systems and mainly serves demand-side power management for C&I users The project uses HyperStrong’s HyperBlock III AC-coupled integrated BESS solution, with Plus Xnergy responsible for local engineering implementation. According to the company, the system integrates the direct current battery system with the power conversion system, improving system efficiency within a relatively compact footprint. The engineering, procurement, construction and commissioning process was completed in approximately 2.5 months. Beyond the technology itself, the project’s business model deserves greater attention. Plus Xnergy said it plans to promote similar projects through a zero-capital-expenditure Performance Sharing Agreement, or PSA. Under this model, Plus Xnergy is responsible for upfront investment, engineering construction and subsequent operation and maintenance. Industrial users do not need to make initial capital investments, but instead participate in the project through subsequent electricity cost savings or a benefit-sharing mechanism. This model can help lower the initial barrier for C&I users to adopt energy storage systems. However, its replicability still depends on whether project returns can remain sufficiently stable. For energy storage investors, factors such as the stability of the customer’s load profile, continuity of electricity tariff policies, equipment availability, O&M costs and contract duration will all affect long-term project returns. In particular, under a 15-year partnership model, managing battery degradation, changes in system efficiency and shifts in customer electric
+
+================================================================================
+10. 2c1b5ad469e319caacaf01bcd983a9c2 | Number of billionaires globally soars by 13% amid AI shares boom
+The number of billionaires in the world has jumped by 13% to a record 3,302 people, new figures show, as the super-rich accumulate wealth at an accelerating rate. Billionaires’ wealth grew by 25% on average in the year ended in April, compared with a 10.8% rise in average personal wealth around the world, the Swiss bank UBS found. There were 18 people who had amassed wealth between $50bn (£37.8bn) and $100bn, with a further 19 people who were worth more than $100bn. Of these people, 15 were based in the US. James Mazeau, an economist at the bank, said billionaires had benefited from the AI boom in the stock market. “Most [billionaire] wealth is tied to listed companies,” he said. “So part of the rise is due to equity markets. “The AI boom story is fuelling equity markets. In countries where there is a lot of participation and equity market, this is leading to an increase in wealth.”. The millionaire class has also been rapidly expanding, according to UBS, which found the global millionaire population reached more than 57.5 million last year. This was also helped by rising stock markets and, because the millionaire metric is measured in US dollars, a relatively weak greenback last year. The US, where more than 440,000 people became millionaires for the first time, made up almost half of the growth in 2025. In the UK alone, more than 43,000 people became millionaires last year. It comes as the gap between the world’s richest and poorest continues to grow. Last year, the World Inequality Report found fewer than 60,000 people – 0.001% of the world’s population – control three times as much wealth as the bottom half of humanity. There have been growing calls around the world for political leaders to increase taxes on the super-rich, amid concern that the wealthiest in society are also buying political power. The Tesla and SpaceX chief executive, Elon Musk, is the richest person in the world, with a net worth of $1tn, according to the Forbes rich list. It ranks Larry Page and Sergey Brin, the co-founders of Google, as second and third, with a net worth of $289bn and $266.6bn, respectively. The Sunday Times rich list ranked the Hinduja family as the richest in the UK, with a net worth of £35bn. Gopichand Hinduja, the billionaire head of the family with interests across oil, banking and real estate, died aged 85 last year. There were 156 UK-based billionaires in 2025, according to the newspaper’s rich list, which marked the biggest fall in its 37-year history, down from 165 the year before. Reports of the super-rich fleeing Britain have also proliferated in the past year, with many wealth advisers attributing the trend to the UK’s abolition of the non-dom tax regime. However, Paul Donovan, the chief economist at UBS, said many reports across Europe exaggerated the movement of wealthy people. “It is a relatively low number overall, and some of them subsequently went back,” he said. “But what you’re not seeing is them shutting their businesses and moving their businesses. The economic activity that is generated by the wealth holders tends not to follow them into tax exile. “This idea that the wealthy have suitcases packed by the door ready to go at the first sign of tax increase, this is just not happening.”
+
+================================================================================
+11. 2c4451e782437387722bedd7d180bfef | How severe is Russia’s energy shortage because of Ukrainian strikes?
+Ukrainian drone attacks on energy infrastructure are intensifying fuel shortages in Russia, triggering a rare admission from President Vladimir Putin of the gravity of the situation. In unusually candid public remarks to a meeting of senior officials on Sunday, Putin explicitly acknowledged that Ukrainian strikes had led to fuel rationing. Recommended Stories list of 3 items- list 1 of 3Russia-Ukraine war: Why has Putin rejected limits on long-range strikes? - list 2 of 3‘A concession to Zelenskyy’s ultimatum’: Ukraine’s triumph over Belarus - list 3 of 3Russian missile and drone attacks kill at least eight in Ukraine “You are well aware that problems for drivers and for businesses persist,” he said, according to Russian news agencies. “Unfortunately, there are still queues at petrol stations too.” “We have to reduce to a minimum the impact of terrorist attacks on our civilian targets and infrastructure,” he said, adding that the situation required “systemic measures that match the scale of current challenges”. Ukraine has stepped up attacks on Russian energy facilities in recent months, hitting Russia’s crude oil and refined products sales, its main source of export income and the main source of funding for its war efforts. Norsi, Russia’s fourth-largest oil refinery and the second-largest producer of petrol, suspended operations last week following a Ukrainian drone attack. The facility is located near Kstovo in the Nizhny Novgorod region, 450 kilometres (280 miles) east of Moscow. Ukraine’s military said it also struck Russia’s Orenburg gas processing plant, which has a capacity of 45 billion cubic metres of natural gas per year. It is located in the southern Urals near Russia’s border with Kazakhstan, more than 1,200km (750 miles) beyond the front lines in Ukraine Last week, Ukraine also used long-range drones to hit two oil facilities in Kerch in Crimea and the port of Kavkaz, used to bring fuel to the Russian front lines. Long-range drones also hit the Slavyansk and the Yaroslavl oil refineries, about 300 and 700 kilometres (190 and 435 miles) from the front line, respectively. Ukrainian President Volodymyr Zelenskyy said in the aftermath of the attack on Sunday that this meant “fewer resources serving Russia’s war machine”. “We continue our operations that weaken Russia’s ability to wage this war,” he wrote on X. What impact are Ukraine’s attacks having? Ukraine has been targeting Russia’s oil refineries, oil storage sites, oil and gas pumping stations and oil loading ports with strikes in that order of priority, according to Indra Overland, who heads the Norwegian Institute of International Affairs (NUPI)’s Center for Energy Research and is Associate Fellow at the Oxford Institute for Energy Studies. “At the refineries, the Ukrainians especially target the fluid catalytic cracking units. These are the ‘hearts’ of the refineries and are difficult, expensive and time-consuming to replace,” Overland told Al Jazeera. “Russia has attempted to cover some of them with scaffolding and nets, but these are ineffective against Ukraine’s most powerful home-grown weapons such as the FP-5.” The Flamingo FP-5 is a long-range missile, which can travel 3,000 kilometres (1,860 miles) and carry a payload of more than 1,000 kilogrammes (2,200lbs). It was developed by Ukrainian defence manufacturer Fire Point. Ukraine is specifically targeting Russia’s geographically vast energy infrastructure and especially “the system’s connective tissue”, Margarita Zavadskaya, senior research fellow at the Finnish Institute of International Affairs (FIIA), told Al Jazeera. Ukraine’s campaign has exposed how thinly protected and overstretched this critical infrastructure has become in the world’s largest country by landmass, Zavadskaya said. It is hard to say how much impact the resulting fuel crisis will have on Russia politically, however. It is “unlikely to produce regime collapse or mass revolutionary dynamics,” according to Zavadskaya. “The impact i
+
+================================================================================
+12. 2c6a59ed0963660f4198670832927888 | China reacts to Guo Wengui’s US prison sentence, highlighting fugitive status
+China reacts to Guo Wengui’s 30-year US prison sentence, highlighting fugitive status The self-exiled businessman convicted over billion-dollar fraud scheme is the subject of an Interpol red notice issued at Beijing’s request “Guo Wengui is a fugitive wanted under an Interpol red notice issued at the request of the Chinese government, and we have noted the relevant reports,” ministry spokesman Guo Jiakun said on Tuesday. The billionaire businessman, also known as Ho Wan Kwok and Miles Guo, was sentenced on Monday by Judge Analisa Torres for leading what prosecutors described as a complex conspiracy to defraud thousands of his online followers between 2018 and 2023. The funds were used to sustain Guo’s lavish lifestyle, which included a 50,000 sq ft (4,645-square metre) mansion, a US$3.5 million Ferrari, two US$36,000 mattresses, and a US$37 million luxury yacht, according to a 2023 statement from the US Attorney’s Office for the Southern District of New York. “Mr Guo to this day denies responsibility and exhibits no remorse for the harm that he has caused to so many people,” Torres said before handing down the sentence. She also ordered Guo to forfeit US$889 million in restitution. The US government seized around US$634 million in alleged fraud proceeds from 21 different bank accounts between September 2022 and March 2023, according to the federal prosecutor’s statement. Prosecutors said Guo had promised substantial returns to his supporters if they invested in his companies or projects, including G Fashion, his personal clothing brand, and G Clubs, a luxury travel and event services company. However, these entities were not legitimate businesses but fundraising vehicles used to swindle investors.
+
+
+codex
+I’ve got enough context to switch from inspection to extraction. I’m going to write `all_facts_048.jsonl` with a document-by-document mapping so the output stays explicit, atomic, and limited to claims supported by each article’s title and body text.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+infile = Path('all_batch_048.jsonl')
+outfile = Path('all_facts_048.jsonl')
+
+def fact(claim, subject, predicate, object=None, direction='na', magnitude=None, time=None, cause=None, entities=None, confidence=0.95):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities or [subject],
+        'confidence': confidence,
+    }
+
+facts_by_doc = {
+    '281326e53deacf34c6c7c5a745e7168d': [],
+    '28bb47f3ed7e2fcbb22470cc70469de1': [
+        fact(
+            claim='MetaMask launched Money Account on June 30, 2026, offering up to 4% variable APY on eligible mUSD stablecoin deposits.',
+            subject='MetaMask', predicate='corporate_action', object='Money Account', direction='up', magnitude='up to 4% variable APY', time='June 30, 2026',
+            cause=None, entities=['MetaMask', 'Consensys', 'MetaMask USD'], confidence=0.98,
+        ),
+        fact(
+            claim='MetaMask said Money Account rolled out globally on June 30, 2026, except in the United Kingdom and sanctioned jurisdictions.',
+            subject='MetaMask', predicate='corporate_action', object='Money Account', direction='na', magnitude=None, time='June 30, 2026',
+            cause=None, entities=['MetaMask', 'United Kingdom'], confidence=0.97,
+        ),
+        fact(
+            claim='Bridge holds US dollar reserves and short-term Treasury bills that back MetaMask USD on a 1:1 basis.',
+            subject='Bridge', predicate='other', object='MetaMask USD', direction='flat', magnitude='1:1', time='2026-06-30',
+            cause=None, entities=['Bridge', 'MetaMask USD', 'US Treasury bills'], confidence=0.94,
+        ),
+        fact(
+            claim='MetaMask said Money Account routes deposited funds through Veda into DeFi lending protocols such as Aave and Morpho to generate yield.',
+            subject='Money Account', predicate='demand_change', object='Aave and Morpho', direction='up', magnitude=None, time='2026-06-30',
+            cause='yield is generated through DeFi lending strategies rather than issuer-paid interest', entities=['Money Account', 'Veda', 'Aave', 'Morpho'], confidence=0.93,
+        ),
+        fact(
+            claim='MetaMask USD market capitalization stood at "'$32 million at the time of writing after previously peaking above $100 million and later slipping below $30 million.'"',
+            subject='MetaMask USD', predicate='price_move', object=None, direction='down', magnitude='"'$32 million from above $100 million peak'"', time='2026-06-30',
+            cause=None, entities=['MetaMask USD'], confidence=0.9,
+        ),
+    ],
+    '29367031e070d27ec1ffb78012b337e5': [
+        fact(
+            claim='China has used anti-smog measures including bans on coal-toting trucks in highly polluting areas, limits on cars on roads, and the shuttering of factories that do not meet environmental standards.',
+            subject='China', predicate='policy_action', object='polluting trucks, cars, and factories', direction='down', magnitude=None, time='2026-06-30',
+            cause='air pollution continues to plague many of China\\'s cities', entities=['China'], confidence=0.91,
+        ),
+        fact(
+            claim='A policy update in China aims to force older plants out of commission and accelerate low-carbon investment.',
+            subject='China', predicate='policy_action', object='older plants and low-carbon investment', direction='na', magnitude=None, time='2026-06-30',
+            cause=None, entities=['China'], confidence=0.9,
+        ),
+        fact(
+            claim='Eleven Chinese government agencies pledged infrastructure and financial support to put more than 1.6 million new-energy heavy trucks on the road.',
+            subject='China', predicate='policy_action', object='new-energy heavy trucks', direction='up', magnitude='more than 1.6 million', time='2026-06-30',
+            cause=None, entities=['China'], confidence=0.96,
+        ),
+        fact(
+            claim='China\\'s industry ministry raised nationwide replacement ratios and limited capacity transfers as steelmakers faced oversupply and shrinking profits.',
+            subject='China Ministry of Industry', predicate='policy_action', object='steelmaking capacity', direction='down', magnitude=None, time='2026-06-30',
+            cause='steelmakers face oversupply and shrinking profits', entities=['China', 'steelmakers'], confidence=0.93,
+        ),
+        fact(
+            claim='Chinese authorities plan to expand carbon markets and tighten regulatory oversight on retired green-tech waste such as electric-vehicle batteries.',
+            subject='China', predicate='policy_action', object='carbon markets and retired green-tech waste', direction='up', magnitude=None, time='2026-06-30',
+            cause=None, entities=['China', 'electric vehicle batteries'], confidence=0.94,
+        ),
+        fact(
+            claim='China\\'s Big Six state lenders outperformed smaller peers in 2025 as weak credit demand and intensifying competition weighed on loan yields.',
+            subject='China Big Six state lenders', predicate='price_move', object='smaller peers', direction='up', magnitude=None, time='2025',
+            cause='weak credit demand and intensifying competition weighed on loan yields', entities=['China Big Six state lenders'], confidence=0.89,
+        ),
+    ],
+    '296260ae0e00a4329dd01edc5cac1f48': [
+        fact(
+            claim='Cryptocurrency companies have spent "'$189 million so far to influence the 2026 US midterm elections, according to a Public Citizen report.'"',
+            subject='Cryptocurrency companies', predicate='corporate_action', object='2026 US midterm elections', direction='up', magnitude='"'$189 million'"', time='2026',
+            cause=None, entities=['Cryptocurrency companies', 'United States', 'Public Citizen'], confidence=0.98,
+        ),
+        fact(
+            claim='Crypto companies spent "'$170 million in the 2024 US election cycle, less than the $189 million reported so far for the 2026 cycle.'"',
+            subject='Cryptocurrency companies', predicate='corporate_action', object='2024 US election cycle', direction='down', magnitude='"'$170 million'"', time='2024',
+            cause=None, entities=['Cryptocurrency companies', 'United States'], confidence=0.95,
+        ),
+        fact(
+            claim='More than one-third of all corporate money contributed to the 2026 US November elections and related primaries has come from the crypto industry, according to Public Citizen.',
+            subject='Crypto industry', predicate='corporate_action', object='2026 US elections', direction='up', magnitude='more than one-third', time='2026',
+            cause=None, entities=['Crypto industry', 'United States', 'Public Citizen'], confidence=0.96,
+        ),
+        fact(
+            claim='Andreessen Horowitz, Ripple Labs, Crypto.com-affiliated Foris DAX and Coinbase were the top four contributors to political action committees focused on advancing corporate policies, according to the report.',
+            subject='Andreessen Horowitz, Ripple Labs, Foris DAX and Coinbase', predicate='corporate_action', object='political action committees', direction='up', magnitude='top four contributors', time='2026',
+            cause=None, entities=['Andreessen Horowitz', 'Ripple Labs', 'Foris DAX', 'Coinbase'], confidence=0.94,
+        ),
+        fact(
+            claim='Fairshake has received "'$82 million in donations in the 2026 election cycle, according to Public Citizen.'"',
+            subject='Fairshake', predicate='corporate_action', object='pro-crypto candidates', direction='up', magnitude='"'$82 million'"', time='2026',
+            cause=None, entities=['Fairshake', 'Public Citizen'], confidence=0.97,
+        ),
+        fact(
+            claim='Congress passed a law in 2025 creating a federal framework for dollar-pegged stablecoins.',
+            subject='US Congress', predicate='policy_action', object='dollar-pegged stablecoins', direction='na', magnitude=None, time='2025',
+            cause=None, entities=['US Congress', 'stablecoins', 'United States'], confidence=0.92,
+        ),
+        fact(
+            claim='The Clarity Act has stalled in the Senate and it is unclear whether it will pass before the 2026 elections.',
+            subject='Clarity Act', predicate='policy_action', object='US Senate', direction='flat', magnitude=None, time='2026',
+            cause=None, entities=['Clarity Act', 'US Senate', 'United States'], confidence=0.94,
+        ),
+    ],
+    '29a1219f4ad9d383c9b92816d1364369': [],
+    '29ae53c47c055258189ad584ec4afcad': [
+        fact(
+            claim='Germany\\'s annual CPI inflation softened to 2.3% in the June flash estimate from 2.6% in May.',
+            subject='Germany CPI', predicate='price_move', object=None, direction='down', magnitude='2.3% from 2.6%', time='June',
+            cause=None, entities=['Germany', 'Consumer Price Index'], confidence=0.99,
+        ),
+        fact(
+            claim='Germany\\'s June annual CPI reading of 2.3% came in below the market expectation of 2.5%.',
+            subject='Germany CPI', predicate='forecast', object='market expectation', direction='down', magnitude='2.3% vs 2.5%', time='June',
+            cause=None, entities=['Germany', 'Consumer Price Index'], confidence=0.98,
+        ),
+        fact(
+            claim='Germany\\'s CPI fell 0.3% month on month in June after a 0.2% decline in May.',
+            subject='Germany CPI', predicate='price_move', object=None, direction='down', magnitude='-0.3%', time='June',
+            cause=None, entities=['Germany', 'Consumer Price Index'], confidence=0.98,
+        ),
+        fact(
+            claim='Germany\\'s harmonized CPI fell 0.2% month on month and rose 2.4% year on year in June, and both readings were below analysts\\' estimates.',
+            subject='Germany HICP', predicate='price_move', object=None, direction='down', magnitude='-0.2% MoM and 2.4% YoY', time='June',
+            cause=None, entities=['Germany', 'Harmonized Index of Consumer Prices', 'European Central Bank'], confidence=0.97,
+        ),
+        fact(
+            claim='EUR/USD traded below 1.1400 and was down about 0.3% on the day after the German inflation data.',
+            subject='EUR/USD', predicate='price_move', object=None, direction='down', magnitude='about 0.3%', time='2026-06-30',
+            cause='German inflation prints were weaker than expected and the market was risk-averse amid uncertainty over US-Iran talks and concerns about sticky global inflation', entities=['EUR/USD', 'Euro', 'US Dollar', 'Germany'], confidence=0.93,
+        ),
+        fact(
+            claim='ECB President Christine Lagarde said the euro area is more likely to face shocks in coming years that push inflation away from target.',
+            subject='Christine Lagarde', predicate='statement', object='euro area inflation outlook', direction='up', magnitude=None, time='Monday',
+            cause=None, entities=['Christine Lagarde', 'European Central Bank', 'euro area'], confidence=0.92,
+        ),
+        fact(
+            claim='Christine Lagarde said euro area resilience allows the ECB to raise rates without fear of becoming a source of financial stress.',
+            subject='Christine Lagarde', predicate='statement', object='ECB rates', direction='up', magnitude=None, time='Monday',
+            cause='Lagarde said the impact of past rate hikes is more contained', entities=['Christine Lagarde', 'European Central Bank', 'euro area'], confidence=0.92,
+        ),
+    ],
+    '2a2e051cfd48c756badab7c5defc43d0': [],
+    '2a995c257f5845d4af3349ed95363d15': [
+        fact(
+            claim='FIFA set aside a budget of about "'$355 million for the World Cup Club Benefits Programme.'"',
+            subject='FIFA', predicate='corporate_action', object='Club Benefits Programme', direction='up', magnitude='about "'$355 million'"', time='last month',
+            cause=None, entities=['FIFA'], confidence=0.97,
+        ),
+        fact(
+            claim='The FIFA Club Benefits Programme pays clubs "'$11,000 per day for each player away on national team duty.'"',
+            subject='FIFA Club Benefits Programme', predicate='deal_or_contract', object='clubs', direction='na', magnitude='"'$11,000 per day per player'"', time='2026-06-30',
+            cause=None, entities=['FIFA Club Benefits Programme', 'FIFA'], confidence=0.98,
+        ),
+        fact(
+            claim='Zhejiang FC will receive around "'$319,000 from the FIFA Club Benefits Programme for Park Jin-seop'"\\'s 29 days of World Cup national team duty from May 31 to June 28.',
+            subject='Zhejiang FC', predicate='deal_or_contract', object='FIFA Club Benefits Programme', direction='up', magnitude='around "'$319,000'"', time='May 31 to June 28',
+            cause='Park Jin-seop was away on South Korea national team duty for 29 days', entities=['Zhejiang FC', 'FIFA Club Benefits Programme', 'Park Jin-seop', 'South Korea'], confidence=0.99,
+        ),
+    ],
+    '2c10c58ae8db2f74a0d2c1c5c606f03f': [
+        fact(
+            claim='Plus Xnergy Services said its 20MWh battery energy storage system at a food manufacturing facility in Perak completed full-capacity grid connection and entered commercial operation.',
+            subject='Plus Xnergy Services', predicate='corporate_action', object='20MWh battery energy storage system in Perak', direction='up', magnitude='20MWh', time='Recently',
+            cause=None, entities=['Plus Xnergy Services', 'HyperStrong', 'Malaysia'], confidence=0.98,
+        ),
+        fact(
+            claim='The Perak battery storage project was jointly developed by Plus Xnergy and HyperStrong.',
+            subject='Plus Xnergy Services', predicate='deal_or_contract', object='HyperStrong', direction='na', magnitude=None, time='2026-06-30',
+            cause=None, entities=['Plus Xnergy Services', 'HyperStrong', 'Malaysia'], confidence=0.96,
+        ),
+        fact(
+            claim='Plus Xnergy said that under Malaysia\\'s RP4 framework, this type of storage system is expected to generate electricity bill savings of about RM1.25 million per year for every 10MWh of capacity.',
+            subject='Commercial and industrial battery energy storage systems in Malaysia', predicate='forecast', object='electricity bills', direction='down', magnitude='approximately RM1.25 million per year for every 10MWh', time='under Malaysia\\'s RP4 framework',
+            cause='the systems charge during lower-price or lower-demand periods and discharge during peak demand periods', entities=['Malaysia', 'Plus Xnergy Services'], confidence=0.95,
+        ),
+        fact(
+            claim='The engineering, procurement, construction and commissioning process for the Perak battery project was completed in about 2.5 months.',
+            subject='Perak battery energy storage project', predicate='corporate_action', object=None, direction='na', magnitude='approximately 2.5 months', time='2026-06-30',
+            cause=None, entities=['Perak battery energy storage project', 'Plus Xnergy Services', 'HyperStrong'], confidence=0.94,
+        ),
+        fact(
+            claim='Plus Xnergy said it plans to promote similar battery storage projects through a zero-capital-expenditure Performance Sharing Agreement model.',
+            subject='Plus Xnergy Services', predicate='corporate_action', object='Performance Sharing Agreement model', direction='up', magnitude=None, time='2026-06-30',
+            cause=None, entities=['Plus Xnergy Services', 'Malaysia'], confidence=0.95,
+        ),
+    ],
+    '2c1b5ad469e319caacaf01bcd983a9c2': [
+        fact(
+            claim='The number of billionaires globally rose 13% to a record 3,302 people.',
+            subject='Global billionaires', predicate='price_move', object=None, direction='up', magnitude='13% to 3,302', time='year ended in April',
+            cause=None, entities=['Global billionaires'], confidence=0.98,
+        ),
+        fact(
+            claim='Average billionaire wealth grew 25% in the year ended in April, compared with a 10.8% rise in average personal wealth worldwide, according to UBS.',
+            subject='Billionaire wealth', predicate='price_move', object='average personal wealth worldwide', direction='up', magnitude='25% vs 10.8%', time='year ended in April',
+            cause=None, entities=['UBS', 'Global billionaires'], confidence=0.98,
+        ),
+        fact(
+            claim='UBS said the AI boom in the stock market fueled billionaire wealth growth because most billionaire wealth is tied to listed companies.',
+            subject='AI shares', predicate='price_move', object='billionaire wealth', direction='up', magnitude=None, time='year ended in April',
+            cause='the AI boom lifted equity markets', entities=['UBS', 'AI shares', 'equity markets'], confidence=0.95,
+        ),
+        fact(
+            claim='The global millionaire population exceeded 57.5 million last year.',
+            subject='Global millionaires', predicate='price_move', object=None, direction='up', magnitude='more than 57.5 million', time='last year',
+            cause='rising stock markets and a relatively weak US dollar', entities=['Global millionaires', 'US Dollar', 'UBS'], confidence=0.95,
+        ),
+        fact(
+            claim='More than 440,000 people in the United States became millionaires for the first time last year.',
+            subject='United States', predicate='price_move', object='millionaires', direction='up', magnitude='more than 440,000', time='last year',
+            cause=None, entities=['United States', 'millionaires'], confidence=0.96,
+        ),
+        fact(
+            claim='More than 43,000 people in the United Kingdom became millionaires last year.',
+            subject='United Kingdom', predicate='price_move', object='millionaires', direction='up', magnitude='more than 43,000', time='last year',
+            cause=None, entities=['United Kingdom', 'millionaires'], confidence=0.95,
+        ),
+    ],
+    '2c4451e782437387722bedd7d180bfef': [
+        fact(
+            claim='Vladimir Putin said on Sunday that Ukrainian strikes had led to fuel rationing and queues at petrol stations in Russia.',
+            subject='Russia fuel market', predicate='supply_change', object=None, direction='down', magnitude=None, time='Sunday',
+            cause='Ukrainian strikes on Russian energy infrastructure', entities=['Russia', 'Vladimir Putin', 'Ukraine'], confidence=0.97,
+        ),
+        fact(
+            claim='Ukraine\\'s attacks in recent months have hit Russia\\'s crude oil and refined products sales, which are Russia\\'s main source of export income and war funding.',
+            subject='Russia crude oil and refined products sales', predicate='demand_change', object=None, direction='down', magnitude=None, time='recent months',
+            cause='Ukrainian attacks on Russian energy facilities', entities=['Russia', 'Ukraine', 'crude oil', 'refined products'], confidence=0.93,
+        ),
+        fact(
+            claim='Norsi, Russia\\'s fourth-largest oil refinery and second-largest producer of petrol, suspended operations last week after a Ukrainian drone attack.',
+            subject='Norsi refinery', predicate='production_change', object=None, direction='down', magnitude=None, time='last week',
+            cause='a Ukrainian drone attack', entities=['Norsi refinery', 'Russia', 'Ukraine'], confidence=0.99,
+        ),
+        fact(
+            claim='Ukraine said it struck Russia\\'s Orenburg gas processing plant, which has capacity of 45 billion cubic metres of natural gas per year.',
+            subject='Orenburg gas processing plant', predicate='event', object=None, direction='na', magnitude='45 billion cubic metres per year', time='2026-06-30',
+            cause='a Ukrainian strike', entities=['Orenburg gas processing plant', 'Russia', 'Ukraine', 'natural gas'], confidence=0.97,
+        ),
+        fact(
+            claim='Ukraine hit two oil facilities in Kerch in Crimea and the port of Kavkaz last week.',
+            subject='Oil facilities in Kerch and the port of Kavkaz', predicate='event', object=None, direction='na', magnitude='two oil facilities', time='last week',
+            cause='long-range drone attacks by Ukraine', entities=['Kerch', 'Crimea', 'port of Kavkaz', 'Ukraine', 'Russia'], confidence=0.95,
+        ),
+        fact(
+            claim='Long-range drones also hit the Slavyansk and Yaroslavl oil refineries.',
+            subject='Slavyansk and Yaroslavl oil refineries', predicate='event', object=None, direction='na', magnitude=None, time='2026-06-30',
+            cause='long-range drone attacks by Ukraine', entities=['Slavyansk oil refinery', 'Yaroslavl oil refinery', 'Ukraine', 'Russia'], confidence=0.95,
+        ),
+    ],
+    '2c6a59ed0963660f4198670832927888': [
+        fact(
+            claim='Guo Wengui was sentenced in the United States to 30 years in prison for leading a fraud scheme that prosecutors said defrauded thousands of online followers between 2018 and 2023.',
+            subject='Guo Wengui', predicate='sanction', object='United States prison sentence', direction='na', magnitude='30 years', time='Monday',
+            cause='prosecutors said he led a fraud scheme', entities=['Guo Wengui', 'United States'], confidence=0.98,
+        ),
+        fact(
+            claim='Judge Analisa Torres ordered Guo Wengui to forfeit "'$889 million in restitution.'"',
+            subject='Guo Wengui', predicate='sanction', object='restitution', direction='down', magnitude='"'$889 million'"', time='Monday',
+            cause='the fraud conviction', entities=['Guo Wengui', 'Analisa Torres', 'United States'], confidence=0.98,
+        ),
+        fact(
+            claim='The US government seized about "'$634 million in alleged fraud proceeds from 21 bank accounts between September 2022 and March 2023.'"',
+            subject='US government', predicate='sanction', object='Guo Wengui bank accounts', direction='down', magnitude='about "'$634 million'"', time='September 2022 to March 2023',
+            cause='alleged fraud proceeds', entities=['United States', 'Guo Wengui'], confidence=0.97,
+        ),
+        fact(
+            claim='Prosecutors said G Fashion and G Clubs were not legitimate businesses but fundraising vehicles used to swindle investors.',
+            subject='G Fashion and G Clubs', predicate='statement', object='investors', direction='na', magnitude=None, time='2026-06-30',
+            cause=None, entities=['G Fashion', 'G Clubs', 'Guo Wengui'], confidence=0.93,
+        ),
+    ],
+}
+
+docs = []
+with infile.open() as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+
+with outfile.open('w') as out:
+    total_facts = 0
+    for obj in docs:
+        facts = facts_by_doc[obj['doc_id']]
+        total_facts += len(facts)
+        rec = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        out.write(json.dumps(rec, ensure_ascii=False) + '\\n')
+
+print(f\"docs processed: {len(docs)}, total facts: {total_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 49
+
+codex
+Wrote [all_facts_048.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_048.jsonl).
+
+docs processed: 12, total facts: 49
+tokens used
+30,642
+Wrote [all_facts_048.jsonl](/Users/jamiepearcey/projects/research/market-color/facts_work/batches/all_facts_048.jsonl).
+
+docs processed: 12, total facts: 49

@@ -1,0 +1,3 @@
+Created `all_facts_024.jsonl` in `/Users/jamiepearcey/projects/research/market-color/facts_work/batches` from `all_batch_024.jsonl` only.
+
+`docs processed: 12, total facts: 61`

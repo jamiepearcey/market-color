@@ -1,0 +1,3 @@
+VERDICT: TIE
+
+Both correctly identify the context lacks Central Asia data and cite the same specific root cause (US–Israel war on Iran disrupting supply, Strait of Hormuz uncertainty, freight costs) with equivalent groundedness and attribution.

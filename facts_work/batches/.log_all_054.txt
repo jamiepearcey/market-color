@@ -1,0 +1,521 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc4-8555-7a41-8b82-8046a994e299
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_054.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_054.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_054.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:20:05.168466Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m processing `all_batch_054.jsonl` locally and will first inspect its structure and a few sample records so I can extract only explicit market facts and write the output in the required order.
+exec
+/bin/zsh -lc 'wc -l all_batch_054.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_054.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+path='all_batch_054.jsonl'
+with open(path) as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print(f'RECORD {i}')
+        print(obj.keys())
+        print(obj['doc_id'])
+        print(obj['title'][:300])
+        print(obj['body_text'][:800].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+RECORD 1
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+3d3e0dfdcb1c47317373591ad4d765e9
+Silver rebounds as Fed hike bets cap gains ahead US jobs data | FXStreet
+Silver (XAG/USD) rebounds on Tuesday and trades around $58.80, up 0.96% at the time of writing, after finding support near $56.60 earlier in the day. Despite the recovery, the white metal continues to trade in an unfavorable fundamental environment as markets maintain expectations that the Federal Reserve's (Fed) next policy move will be another interest rate hike. According to the CME FedWatch tool, investors now see nearly an 80% chance that the Fed will deliver at least one additional rate hike before the end of the year. Higher interest rates increase the opportunity cost of holding non-yielding assets such as Silver, continuing to weigh on investor demand for precious metals. Market attention is now turning to the United States (US) Job Openings and Labor Turnover Survey (JOLTS) data 
+---
+RECORD 2
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+3d840608a7ed4d4f5ed781214487beb8
+Upside room for precious metals is limited, and consumption in the platinum spot market is weak [SMM daily review]
+Upside room for precious metals is limited, and consumption in the platinum spot market is weak [SMM daily review] Platinum prices drifted lower today. With ongoing uncertainties surrounding the U.S.-Iran situation and repeated swings in market rate hike expectations, precious metals futures are likely to continue swinging wildly, limiting upside room. In early trading, the most-traded GFEX platinum contract PT2608 closed at 388.9 yuan/g, down 3.29%. The inverted spread between the SGE Pt9995 best ask price and GFEX PT2608 narrowed to around 4 yuan/g. In the spot market, mainstream quotations for platinum ranged from a discount of 1 yuan/g to a premium of 1 yuan/g against the PT2608 contract. Mainstream quotations against the contract were basically flat compared to the previous trading da
+---
+RECORD 3
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+3d899df8136fef4c90baf437917e3b3a
+Gold price in Malaysia: Rates on June 30 | FXStreet
+Gold prices fell in Malaysia on Tuesday, according to data compiled by FXStreet. The price for Gold stood at 520.77 Malaysian Ringgits (MYR) per gram, down compared with the MYR 525.52 it cost on Monday. The price for Gold decreased to MYR 6,074.14 per tola from MYR 6,129.58 per tola a day earlier. | Unit measure | Gold Price in MYR | |---|---| | 1 Gram | 520.77 | | 10 Grams | 5,207.69 | | Tola | 6,074.14 | | Troy Ounce | 16,198.11 | FXStreet calculates Gold prices in Malaysia by adapting international prices (USD/MYR) to the local currency and measurement units. Prices are updated daily based on the market rates taken at the time of publication. Prices are just for reference and local rates could diverge slightly. Gold FAQs Gold has played a key role in human’s history as it has been wide
+---
+
+codex
+The batch is small enough to handle directly. I’m reading all 12 records now so I can extract facts doc by doc without adding unsupported inferences.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+path='all_batch_054.jsonl'
+with open(path) as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 3d3e0dfdcb1c47317373591ad4d765e9 | 2026-06-30 | Silver rebounds as Fed hike bets cap gains ahead US jobs data | FXStreet
+2. 3d840608a7ed4d4f5ed781214487beb8 | 2026-06-30 | Upside room for precious metals is limited, and consumption in the platinum spot market is weak [SMM daily review]
+3. 3d899df8136fef4c90baf437917e3b3a | 2026-06-30 | Gold price in Malaysia: Rates on June 30 | FXStreet
+4. 3e05de5f391ef750b8d30d1217070f57 | 2026-06-30 | EGA (Emirates Global Aluminium) has successfully exceeded 400,000 mt/y - Shanghai Metals Market (SMM)
+5. 3e3876c40e956ea988a5e0058ab5b46a | 2026-06-30 | German Retail Sales beat forecasts: Why Euro is struggling? | FXStreet
+6. 3f28d6b80a423ddca9b97ef76b0cf8ec | 2026-06-30 | Circle shares sink 16% after Open USD reveal, analysts say fears are 'overblown'
+7. 3f33b4db5bca7ae5992ad0ef2ae50273 | 2026-06-30 | Maddy Cusack’s eating habits changed after manager’s comment, girlfriend tells inquest
+8. 3ffd9df5ed685882ab879c819de12644 | 2026-06-30 | Top 5 World Cup knockout shocks – Paraguay win hurts Germany again
+9. 401e5b457f3886bdfa374246dd1e301a | 2026-06-30 | Why is Australian Dollar falling despite RBA Minutes indicating rate hike possibility? | FXStreet
+10. 408458f41cd810d8311dcc85dcab90e6 | 2026-06-30 | American Airlines brings grab-and-go lounge to New York's JFK
+11. 40cd3031c0532db619a05c787ea6d920 | 2026-06-30 | Palestine weekly: Israel accelerates land grabs in Gaza, West Bank
+12. 40ed5ec190234957986016640b1883c9 | 2026-06-30 | Stingray Announces Receipt of Management Cease Trade Order
+
+codex
+Several documents are clearly non-market items and will return empty fact lists. I’m opening the full text for the market-facing records plus any edge cases that mention corporate or regulatory actions.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json, textwrap
+path='all_batch_054.jsonl'
+with open(path) as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        print('='*100)
+        print(f\"IDX {i} DOC {obj['doc_id']}\")
+        print(obj['title'])
+        print('-'*100)
+        print(textwrap.fill(obj['body_text'].replace('\\n',' '), width=120))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+====================================================================================================
+IDX 1 DOC 3d3e0dfdcb1c47317373591ad4d765e9
+Silver rebounds as Fed hike bets cap gains ahead US jobs data | FXStreet
+----------------------------------------------------------------------------------------------------
+Silver (XAG/USD) rebounds on Tuesday and trades around $58.80, up 0.96% at the time of writing, after finding support
+near $56.60 earlier in the day. Despite the recovery, the white metal continues to trade in an unfavorable fundamental
+environment as markets maintain expectations that the Federal Reserve's (Fed) next policy move will be another interest
+rate hike. According to the CME FedWatch tool, investors now see nearly an 80% chance that the Fed will deliver at least
+one additional rate hike before the end of the year. Higher interest rates increase the opportunity cost of holding non-
+yielding assets such as Silver, continuing to weigh on investor demand for precious metals. Market attention is now
+turning to the United States (US) Job Openings and Labor Turnover Survey (JOLTS) data for May, due at 14:00 GMT.
+Economists expect employers to have posted 7.3M job openings, down from 7.618M in April. A sharper-than-expected
+slowdown in the labor market could temper expectations for further monetary tightening, while a stronger reading would
+reinforce bets on additional rate hikes. Beyond the JOLTS report, the key event of the week will be Thursday's US
+Nonfarm Payrolls (NFP) report for June. Investors will closely monitor labor market data after Fed Chair Kevin Warsh
+stated that the central bank's forward guidance is no longer well-suited to the current monetary policy environment.
+Silver FAQs Silver is a precious metal highly traded among investors. It has been historically used as a store of value
+and a medium of exchange. Although less popular than Gold, traders may turn to Silver to diversify their investment
+portfolio, for its intrinsic value or as a potential hedge during high-inflation periods. Investors can buy physical
+Silver, in coins or in bars, or trade it through vehicles such as Exchange Traded Funds, which track its price on
+international markets. Silver prices can move due to a wide range of factors. Geopolitical instability or fears of a
+deep recession can make Silver price escalate due to its safe-haven status, although to a lesser extent than Gold's. As
+a yieldless asset, Silver tends to rise with lower interest rates. Its moves also depend on how the US Dollar (USD)
+behaves as the asset is priced in dollars (XAG/USD). A strong Dollar tends to keep the price of Silver at bay, whereas a
+weaker Dollar is likely to propel prices up. Other factors such as investment demand, mining supply – Silver is much
+more abundant than Gold – and recycling rates can also affect prices. Silver is widely used in industry, particularly in
+sectors such as electronics or solar energy, as it has one of the highest electric conductivity of all metals – more
+than Copper and Gold. A surge in demand can increase prices, while a decline tends to lower them. Dynamics in the US,
+Chinese and Indian economies can also contribute to price swings: for the US and particularly China, their big
+industrial sectors use Silver in various processes; in India, consumers’ demand for the precious metal for jewellery
+also plays a key role in setting prices. Silver prices tend to follow Gold's moves. When Gold prices rise, Silver
+typically follows suit, as their status as safe-haven assets is similar. The Gold/Silver ratio, which shows the number
+of ounces of Silver needed to equal the value of one ounce of Gold, may help to determine the relative valuation between
+both metals. Some investors may consider a high ratio as an indicator that Silver is undervalued, or Gold is overvalued.
+On the contrary, a low ratio might suggest that Gold is undervalued relative to Silver. Author Ghiles Guezout is a
+Market Analyst with a strong background in stock market investments, trading, and cryptocurrencies. He combines
+fundamental and technical analysis skills to identify market opportunities.
+
+====================================================================================================
+IDX 2 DOC 3d840608a7ed4d4f5ed781214487beb8
+Upside room for precious metals is limited, and consumption in the platinum spot market is weak [SMM daily review]
+----------------------------------------------------------------------------------------------------
+Upside room for precious metals is limited, and consumption in the platinum spot market is weak [SMM daily review]
+Platinum prices drifted lower today. With ongoing uncertainties surrounding the U.S.-Iran situation and repeated swings
+in market rate hike expectations, precious metals futures are likely to continue swinging wildly, limiting upside room.
+In early trading, the most-traded GFEX platinum contract PT2608 closed at 388.9 yuan/g, down 3.29%. The inverted spread
+between the SGE Pt9995 best ask price and GFEX PT2608 narrowed to around 4 yuan/g. In the spot market, mainstream
+quotations for platinum ranged from a discount of 1 yuan/g to a premium of 1 yuan/g against the PT2608 contract.
+Mainstream quotations against the contract were basically flat compared to the previous trading day, with most traders
+quoting at parity with the most-traded contract but seeing difficulty in closing deals. A small portion of spot platinum
+with current-month invoices was quoted at a modest premium. Most upstream enterprises showed limited willingness to sell
+due to low absolute prices, while downstream demand was limited and the wait-and-see sentiment was strong. Overall,
+platinum trading was relatively sluggish today. Data Source Statement: Except for publicly available information, all
+other data are processed by SMM based on publicly available information, market communication, and relying on SMM's
+internal database model. They are for reference only and do not constitute decision-making recommendations. Register to
+Continue Reading Gain access to the latest insights in metals and new energy Already have an account?Sign in here
+
+====================================================================================================
+IDX 3 DOC 3d899df8136fef4c90baf437917e3b3a
+Gold price in Malaysia: Rates on June 30 | FXStreet
+----------------------------------------------------------------------------------------------------
+Gold prices fell in Malaysia on Tuesday, according to data compiled by FXStreet. The price for Gold stood at 520.77
+Malaysian Ringgits (MYR) per gram, down compared with the MYR 525.52 it cost on Monday. The price for Gold decreased to
+MYR 6,074.14 per tola from MYR 6,129.58 per tola a day earlier. | Unit measure | Gold Price in MYR | |---|---| | 1 Gram
+| 520.77 | | 10 Grams | 5,207.69 | | Tola | 6,074.14 | | Troy Ounce | 16,198.11 | FXStreet calculates Gold prices in
+Malaysia by adapting international prices (USD/MYR) to the local currency and measurement units. Prices are updated
+daily based on the market rates taken at the time of publication. Prices are just for reference and local rates could
+diverge slightly. Gold FAQs Gold has played a key role in human’s history as it has been widely used as a store of value
+and medium of exchange. Currently, apart from its shine and usage for jewelry, the precious metal is widely seen as a
+safe-haven asset, meaning that it is considered a good investment during turbulent times. Gold is also widely seen as a
+hedge against inflation and against depreciating currencies as it doesn’t rely on any specific issuer or government.
+Central banks are the biggest Gold holders. In their aim to support their currencies in turbulent times, central banks
+tend to diversify their reserves and buy Gold to improve the perceived strength of the economy and the currency. High
+Gold reserves can be a source of trust for a country’s solvency. Central banks added 1,136 tonnes of Gold worth around
+$70 billion to their reserves in 2022, according to data from the World Gold Council. This is the highest yearly
+purchase since records began. Central banks from emerging economies such as China, India and Turkey are quickly
+increasing their Gold reserves. Gold has an inverse correlation with the US Dollar and US Treasuries, which are both
+major reserve and safe-haven assets. When the Dollar depreciates, Gold tends to rise, enabling investors and central
+banks to diversify their assets in turbulent times. Gold is also inversely correlated with risk assets. A rally in the
+stock market tends to weaken Gold price, while sell-offs in riskier markets tend to favor the precious metal. The price
+can move due to a wide range of factors. Geopolitical instability or fears of a deep recession can quickly make Gold
+price escalate due to its safe-haven status. As a yield-less asset, Gold tends to rise with lower interest rates, while
+higher cost of money usually weighs down on the yellow metal. Still, most moves depend on how the US Dollar (USD)
+behaves as the asset is priced in dollars (XAU/USD). A strong Dollar tends to keep the price of Gold controlled, whereas
+a weaker Dollar is likely to push Gold prices up. (An automation tool was used in creating this post.) Author Composed
+of a group of economic journalists and FX experts, the FXStreet content team produces and oversees all content published
+on FXStreet. It provides a purely journalistic approach to the Forex market.
+
+====================================================================================================
+IDX 4 DOC 3e05de5f391ef750b8d30d1217070f57
+EGA (Emirates Global Aluminium) has successfully exceeded 400,000 mt/y - Shanghai Metals Market (SMM)
+----------------------------------------------------------------------------------------------------
+EGA Expands Secondary Aluminum Capacity to 400,000 mt/Year, Plans Further Growth in Europe and US EGA (Emirates Global
+Aluminium) has successfully exceeded 400,000 mt/year of total secondary aluminum capacity across the UAE, Europe, and
+the US by adding capacity at its Al Taweelah recycling plant and planning to acquire the Italian aluminum recycling
+enterprise Eco Green. In addition, another 200,000 mt/year secondary aluminum capacity project is under construction in
+Europe and the US. On the acquisition front, EGA completed acquisitions of secondary aluminum plants in Germany and the
+US in 2024: EGA Light Metals Germany will expand its capacity to more than 6 times the original level and build a second
+site near Hannover, adding 150,000 mt/year of capacity, expected to be completed by 2028; EGA Spectro Alloys in
+Minnesota, US, plans to complete the first-phase expansion in 2025, adding 65,000 mt/year capacity, and add another
+35,000 mt/year capacity in 2027. In addition, in April this year, EGA announced its intention to acquire an 80% stake in
+Italy's Eco Green, and this acquisition plan is currently pending regulatory approval.Data Source Statement: Except for
+publicly available information, all other data are processed by SMM based on publicly available information, market
+communication, and relying on SMM's internal database model. They are for reference only and do not constitute decision-
+making recommendations.
+
+====================================================================================================
+IDX 5 DOC 3e3876c40e956ea988a5e0058ab5b46a
+German Retail Sales beat forecasts: Why Euro is struggling? | FXStreet
+----------------------------------------------------------------------------------------------------
+EUR/CAD depreciates after two days of gains, trading around 1.6220 during the early European hours on Tuesday. The
+currency cross remains subdued as the Euro (EUR) holds losses following the release of German Retail Sales data.
+Germany’s retail sector saw a surprise rebound in May, with consumer spending jumping 1.1% month-on-month and 1.8%
+annually, comfortably beating market forecasts, according to Destatis. However, the strong consumer data is being
+balanced by retreating energy prices, causing markets to pare back aggressive European Central Bank (ECB) rate hike
+expectations. While Oxford Economics and Capital Economics project that ECB interest rates have peaked, traders are
+still factoring in one final quarter-point increase to 2.50%, looking ahead to Tuesday's preliminary German inflation
+data for definitive direction. The downside of the EUR/CAD cross could be limited as the commodity-linked Canadian
+Dollar (CAD) struggles under the weight of lower oil prices. Lower oil prices put downward pressure on the loonie dollar
+as Canada is one of the largest crude exporters. Crude oil prices face downward pressure as traders monitor potential
+United States (US)-Iran talks in Doha later in the day amid a fragile interim ceasefire. Reuters cited KCM Trade Chief
+Market Analyst Tim Waterer, who noted that while investors are pricing in hopes for a positive outcome, a true
+normalization of oil flows through the Strait of Hormuz remains unseen. "The market is cautiously hopeful but still
+hedging its bets until we see more tangible signs of de-escalation," Waterer stated. Economic Indicator Retail Sales
+(YoY) The Retail Sales released by the Statistisches Bundesamt Deutschland is a measure of changes in sales of the
+German retail sector. It shows the performance of the retail sector in the short term. Percent changes reflect the rate
+of changes of such sales.The changes are widely followed as an indicator of consumer spending. The positive economic
+growth anticipates "Bullish" for the EUR, while a low reading is seen as negative, or bearish, for the EUR. Read
+more.Author Akhtar Faruqui is a Forex Analyst based in New Delhi, India. With a keen eye for market trends and a passion
+for dissecting complex financial dynamics, he is dedicated to delivering accurate and insightful Forex news and
+analysis.
+
+====================================================================================================
+IDX 6 DOC 3f28d6b80a423ddca9b97ef76b0cf8ec
+Circle shares sink 16% after Open USD reveal, analysts say fears are 'overblown'
+----------------------------------------------------------------------------------------------------
+Circle shares sink 16% after Open USD reveal, analysts say fears are 'overblown' Quick Take - William Blair reiterated
+its Outperform rating on CRCL, calling Tuesday’s selloff a buying opportunity. - Circle CEO Jeremy Allaire said the
+company welcomes competition and will continue expanding the USDC ecosystem. We'd love your feedback. Circle shares fell
+more than 16% on Tuesday after Open Standard announced Open USD, a new stablecoin backed by more than 140 companies
+including Visa, Stripe, Mastercard, BlackRock and Coinbase, as investors weighed the potential competitive threat to
+USDC. Analysts at William Blair said the sell-off was an overreaction, arguing that Circle's first-mover advantage,
+liquidity and payments infrastructure leave it well positioned despite a high-profile rival like OUSD. In a research
+note, William Blair reiterated its Outperform rating on Circle and said investors should view the rout as an opportunity
+to buy. The firm argued that competition in the stablecoin market is "inevitable" and ultimately validates the sector's
+potential. "We see competitive concerns as overblown," analysts Andrew Jeffrey and Adib Choudhury wrote, pointing to
+USDC's roughly $74 billion market capitalization, deep liquidity and Circle Payments Network, the company's stablecoin
+payments infrastructure. New entrants will struggle to replicate Circle's model, they argued. The pair were also
+skeptical of Open Standard's pitch. The project harped that Open USD will share most of the earnings from its reserves
+with participating businesses when it hits the market later this year. But Jeffries and Choudhury argue that Circle
+already offers similar incentives to partners and that OUSD is "a solution searching for a problem." The analysts also
+compared Open USD to past payments consortiums like MCX and Paze, saying they struggled "to gain traction against
+established networks." Circle CEO speaks up Circle CEO Jeremy Allaire struck a similar tone in a post on X shortly after
+the announcement, saying USDC remains "the most trusted, widely adopted, institutional-ready stablecoin in the world."
+Allaire said Circle would continue investing in expanding its ecosystem across banks, payment companies, capital markets
+firms and enterprises while giving partners more ways to become "economic stakeholders" in the growth of the USDC
+network. He added that the company welcomed continued innovation and competition and would keep building infrastructure
+for a "stablecoin-native internet financial system." Paolo Ardoino, CEO of primary Circle rival Tether, struck a similar
+tone on social media Tuesday, saying "Welcome OUSD. Player 2 has entered the game." Disclaimer: The Block is an
+independent media outlet that delivers news, research, and data. As of November 2023, Foresight Ventures is a majority
+investor of The Block. Foresight Ventures invests in other companies in the crypto space. Crypto exchange Bitget is an
+anchor LP for Foresight Ventures. The Block continues to operate independently to deliver objective, impactful, and
+timely information about the crypto industry. Here are our current financial disclosures. © 2026 The Block. All Rights
+Reserved. This article is provided for informational purposes only. It is not offered or intended to be used as legal,
+tax, investment, financial, or other advice.
+
+====================================================================================================
+IDX 7 DOC 3f33b4db5bca7ae5992ad0ef2ae50273
+Maddy Cusack’s eating habits changed after manager’s comment, girlfriend tells inquest
+----------------------------------------------------------------------------------------------------
+The girlfriend of the late Sheffield United player Maddy Cusack has told an inquest that Cusack’s former manager
+Jonathan Morgan called her a “psycho” and that her eating habits changed after he allegedly made a comment referencing
+her weight. Grace Riglar, who played for Sheffield United for one season alongside Cusack, fought back tears multiple
+times during an emotional and lengthy evidence session at Chesterfield coroner’s court on Tuesday. At one stage she had
+to take a break while being cross-examined by lawyers representing Sheffield United. Riglar, who described Cusack as a
+“very caring soul who always wanted the best for people”, said that after Morgan arrived at Sheffield United in February
+2023, he summoned any players who were in relationships to a meeting. When Riglar and Cusack subsequently met with
+Morgan – a meeting Riglar told the inquest made Cusack “uncomfortable” – he issued rules for player-relationships,
+including that “if he was to be annoyed with any one of us, the other can’t hold a grudge against him”. Morgan, who is
+scheduled to give evidence to the hearing on Monday, is representing himself at the inquest and personally questioned
+Riglar. During that questioning they disagreed on whether or not Cusack had an injury that Morgan claimed would have
+ruled her out of playing in his first match in charge. Riglar said Cusack felt it was a “personal attack” from Morgan to
+not start her. Cusack was found dead at her family’s home in Derbyshire on 20 September 2023, at the age of 27. Riglar
+described noticing that Cusack was “fidgety, very erratic and scrolling on Indeed looking at jobs” during a trip they
+took together to Matlock earlier in the month, but Riglar said she was unsure whether she was aware at that time that
+Cusack had recently been prescribed medication for her anxiety. The 25-year-old centre-back, who plays for Norwich City
+and won their player-of-the-year award last season while helping them win promotion to the third tier, spent one season
+at Sheffield United in 2022-23. Riglar said she “wouldn’t have known where to go to if I had any problems” during her
+time in Sheffield, compared with her good experiences in regards to that at other clubs. The club’s legal team later put
+questions to Riglar and claimed she should have been aware of who the safeguarding officer was. The player said she had
+no recollection of that. The court heard that Riglar was not offered a new contract at Sheffield United at the end of
+the 2022-23 campaign, whereas Cusack was given a full-time one. Riglar therefore moved to play for Lewes in the summer
+of 2023. Asked if she thought her having to move away from Sheffield affected Cusack, Riglar replied: “I don’t think it
+was ideal but it’s part of football”, before beginning to cry when asked if she thought Cusack had been “lonely”, to
+which she said she did not think so. Riglar said Cusack had expressed to her that she was “anxious about him coming”, in
+reference to learning Morgan was likely becoming Sheffield United’s manager, with Riglar adding that there had been a
+“really good environment” under the previous manager Neil Redfearn, the former Barnsley midfielder and ex-Leeds United
+men’s team manager. Redfearn resigned from his role in November 2022 after two years in charge. Riglar said Cusack felt
+uncomfortable when Morgan was managing at a previous club earlier in Cusack’s career and he had “called her psycho from
+the sideline” during a match, adding: “She was a tough character so I don’t think she’d ever let anyone know those kinds
+of comments would affect her, but they did make her uncomfortable.” Riglar also said she was told by Cusack that Morgan
+had referenced her weight, saying: “After one session she said Mr Morgan had made some kind of comment about her fitness
+or her weight or something, I can’t fully remember [but] after that her eating habits changed a bit, [she made] slight
+tweaks in her habits that probably weren’t the healthiest.” Morgan later questioned Riglar as to whether or not she
+could be certain of those comments as she had not heard them first-hand, asking: “So, just to confirm, you don’t
+[personally] recall me calling Maddy ‘fat’?”, to which Riglar replied: “No.” Asked what factors she believed contributed
+to Cusack’s death, Riglar said Morgan joining Sheffield United was a “big part”, adding: “You can’t blame one person but
+I do think that was a big reason.” The court also heard evidence on Tuesday from Cusack’s line manager from her dual
+role at the club’s marketing department, Eoin Doyle. Cusack was earning a combined £38,000 per annum across the two
+roles for about 50 hours per week. Doyle described Cusack as a “good, trustworthy employee”. He recalled a conversation
+with Cusack in August 2023 where she appeared to have “sunken into herself” and that when she had asked for time off
+work in September 2023 he had said “take as much time as you need”. Doyle also said Morgan had “expressed concern” about
+Cusack’s demeanour in the weeks leading up to her death. The inquest continues on Wednesday. - In the UK and Ireland,
+Samaritans can be contacted on freephone 116 123. In the US, you can call or text the National Suicide Prevention
+Lifeline on 988, chat on 988lifeline.org, or text HOME to 741741 to connect with a crisis counselor. In Australia, the
+crisis support service Lifeline is 13 11 14. Other international helplines can be found at befrienders.org
+
+====================================================================================================
+IDX 8 DOC 3ffd9df5ed685882ab879c819de12644
+Top 5 World Cup knockout shocks – Paraguay win hurts Germany again
+----------------------------------------------------------------------------------------------------
+Monday’s action in the FIFA World Cup 2026 added another chapter to the book of all-time knockout upsets in the
+tournament, with title contenders Germany stunned by Paraguay at the round of 32 stage, adding yet more spice to an
+event that has already delivered plenty of drama at the group stage. Al Jazeera takes a look at the top five upsets in
+World Cup knockout history: Recommended Stories list of 4 items- list 1 of 4Can Ivory Coast spoil Norway’s party in the
+World Cup’s round of 32? - list 2 of 4VIDEO: World Cup Day 19: Morocco beats Netherlands; Germany crashes out - list 3
+of 4Morocco beat Netherlands in last-32 shootout to march on again at World Cup - list 4 of 4Brazil beat Japan with
+injury-time winner to reach World Cup last 16 1. Germany vs Paraguay (2026) Jose Canale wrote his name in the history
+books, steering longshots Paraguay to a thrilling shootout win over four-time champions Germany in the round of 32 of
+the 2026 World Cup. Many thought Paraguay would be sent home packing after the group stage when the USA thrashed them in
+their tournament opener, but the South Americans turned their pain into purpose in no time, knocking out Germany 4-3 on
+penalties for the biggest upset in World Cup knockout history. 2. Germany vs Bulgaria (1994) Germany have been on the
+receiving end of more than one knockout upset – and this one dates back to the 1994 World Cup on American soil. In their
+first-ever and only meeting at the World Cup, minnows Bulgaria toppled the defending champions in the quarterfinals,
+sealing a come-from-behind 2-1 victory over Germany that went down as one of the biggest shocks of the competition. 3.
+Italy vs South Korea (2002) A rare golden goal decided Italy’s fate at the 2002 World Cup when co-hosts South Korea
+knocked them out in the round of 16. The Italians got off to a promising start when Christian Vieri gave them an early
+lead, but South Korea’s Seol Ki-Hyun struck a late equaliser, and Ahn Jung-Hwan sealed the deal, becoming the third of
+just four to score a golden goal at the global finals. The 2-1 victory helped South Korea achieve a deep run at the
+tournament as they finished fourth, their best result in the World Cup to date. 4. Brazil vs Germany (2014) Germany
+handed Brazil an infamous 7-1 semifinal thrashing at the 2014 World Cup, breaking Brazilian hearts on their own soil.
+Five players found the net for Germany, with Oscar netting a 90th-minute consolation for Brazil – capping a humiliating
+result which left Brazil coach Luiz Felipe Scolari calling it the “worst day of my life”. Germany went on to win that
+tournament, lifting their fourth world title. 5. Morocco vs Portugal (2022) Morocco – who stunned the Netherlands on
+Monday to reach the round of 16 – are no strangers to pulling off an upset, especially against European teams. At the
+2022 World Cup in Qatar, the Atlas Lions tamed Cristiano Ronaldo-led Portugal, beating them 1-0 in the quarterfinals
+despite finishing the game with 10 players. The monumental victory saw Morocco become the first African and Arab side to
+reach the World Cup semifinals.
+
+====================================================================================================
+IDX 9 DOC 401e5b457f3886bdfa374246dd1e301a
+Why is Australian Dollar falling despite RBA Minutes indicating rate hike possibility? | FXStreet
+----------------------------------------------------------------------------------------------------
+AUD/USD extends its decline for a third consecutive day on Tuesday, trading near 0.6870 during Asian hours. The
+Australian Dollar (AUD) remains subdued following the release of the Reserve Bank of Australia’s (RBA) latest meeting
+minutes and key Purchasing Managers’ Index (PMI) data from China. The RBA June monetary policy meeting minutes revealed
+that while the board views current financial conditions as somewhat tight, it remains prepared to implement further rate
+hikes if necessary to ensure price stability. The central bank highlighted that the ongoing conflict in the Middle East
+poses a dual threat to the economic outlook, presenting significant upside risks to inflation alongside downside risks
+to overall growth. On the economic data front, China, Australia’s close trading partner, showed stronger-than-expected
+resilience in June. The official Manufacturing PMI edged up to 50.3 from the previous 50.0, beating market expectations
+of 50.1. Simultaneously, the NBS Non-Manufacturing PMI improved to 50.2 from May's 50.1, comfortably defying the
+consensus forecast of a contractionary 49.9 print and signaling expansion across both sectors. The AUD/USD pair faces
+downward pressure as the US Dollar (USD) capitalizes on rising hawkish sentiment surrounding the Federal Reserve's (Fed)
+policy outlook. According to the CME FedWatch tool, traders are now pricing in a nearly 60% probability of a Fed
+interest rate hike by September. This shift in sentiment has heightened focus on this week's key US labor market
+reports, culminating in Thursday’s Nonfarm Payrolls data, which will provide fresh clues regarding the Fed's interest
+rate trajectory. Forecasters currently anticipate June job growth to come in at 114,000, with the Unemployment Rate
+expected to hold flat at 4.3%. The Greenback is also receiving safe-haven support from ongoing geopolitical uncertainty
+surrounding US-Iran relations. US President Donald Trump stated that the two nations are set to hold fresh talks on
+Tuesday in Doha, Qatar, following a weekend of hostilities in the Middle East, CNBC reported. However, Tehran has
+contradicted this claim, stating that no negotiation meetings are scheduled with Washington at any level, as Iran
+remains focused on implementing its existing memorandum of understanding rather than entering final agreement talks.
+Australian Dollar FAQs One of the most significant factors for the Australian Dollar (AUD) is the level of interest
+rates set by the Reserve Bank of Australia (RBA). Because Australia is a resource-rich country another key driver is the
+price of its biggest export, Iron Ore. The health of the Chinese economy, its largest trading partner, is a factor, as
+well as inflation in Australia, its growth rate and Trade Balance. Market sentiment – whether investors are taking on
+more risky assets (risk-on) or seeking safe-havens (risk-off) – is also a factor, with risk-on positive for AUD. The
+Reserve Bank of Australia (RBA) influences the Australian Dollar (AUD) by setting the level of interest rates that
+Australian banks can lend to each other. This influences the level of interest rates in the economy as a whole. The main
+goal of the RBA is to maintain a stable inflation rate of 2-3% by adjusting interest rates up or down. Relatively high
+interest rates compared to other major central banks support the AUD, and the opposite for relatively low. The RBA can
+also use quantitative easing and tightening to influence credit conditions, with the former AUD-negative and the latter
+AUD-positive. China is Australia’s largest trading partner so the health of the Chinese economy is a major influence on
+the value of the Australian Dollar (AUD). When the Chinese economy is doing well it purchases more raw materials, goods
+and services from Australia, lifting demand for the AUD, and pushing up its value. The opposite is the case when the
+Chinese economy is not growing as fast as expected. Positive or negative surprises in Chinese growth data, therefore,
+often have a direct impact on the Australian Dollar and its pairs. Iron Ore is Australia’s largest export, accounting
+for $118 billion a year according to data from 2021, with China as its primary destination. The price of Iron Ore,
+therefore, can be a driver of the Australian Dollar. Generally, if the price of Iron Ore rises, AUD also goes up, as
+aggregate demand for the currency increases. The opposite is the case if the price of Iron Ore falls. Higher Iron Ore
+prices also tend to result in a greater likelihood of a positive Trade Balance for Australia, which is also positive of
+the AUD. The Trade Balance, which is the difference between what a country earns from its exports versus what it pays
+for its imports, is another factor that can influence the value of the Australian Dollar. If Australia produces highly
+sought after exports, then its currency will gain in value purely from the surplus demand created from foreign buyers
+seeking to purchase its exports versus what it spends to purchase imports. Therefore, a positive net Trade Balance
+strengthens the AUD, with the opposite effect if the Trade Balance is negative. Author Akhtar Faruqui is a Forex Analyst
+based in New Delhi, India. With a keen eye for market trends and a passion for dissecting complex financial dynamics, he
+is dedicated to delivering accurate and insightful Forex news and analysis.
+
+====================================================================================================
+IDX 10 DOC 408458f41cd810d8311dcc85dcab90e6
+American Airlines brings grab-and-go lounge to New York's JFK
+----------------------------------------------------------------------------------------------------
+American Airlines is planning to open a new grab-and-go lounge at New York's John F. Kennedy International Airport by
+the end of this year, its first new facility at the airport in more than four years as it continues its fight for high-
+paying customers to close a profit gap with Delta Air Lines and United Airlines. The new lounge, a 3,700-square-foot
+space, will include a barista bar with hot and iced coffee drinks as well as hot and cold food travelers can grab.
+Airlines have been adding more of these short-visit lounges in recent years to give credit card holders and big spenders
+access to spaces without crowding larger airport clubs. United announced its first in late 2022, for Denver
+International Airport. Airlines and credit card companies alike have raised the entry requirements or scaled back on
+freebies like guest passes to avoid overcrowding. American opened the first of its grab-and-go lounges, which it calls
+Provisions, at Charlotte Douglas International Airport in North Carolina, last year. American operates out of JFK's
+Terminal 8, which is shared by its Oneworld Alliance partners, Japan Airlines, Alaska Airlines, British Airways and
+others. It has a trio of high-end lounges for business-class travelers, first-class passengers and other frequent flyer
+elites for long-haul trips, which the airline opened there in 2022. It also operates an Admirals Club there that is used
+more for lounge membership customers. American hasn't updated its New York space lately like it has with those in other
+cities like Chicago and Austin, Texas.
+
+====================================================================================================
+IDX 11 DOC 40cd3031c0532db619a05c787ea6d920
+Palestine weekly: Israel accelerates land grabs in Gaza, West Bank
+----------------------------------------------------------------------------------------------------
+Earlier this month, Israeli ministers had described their expanding colonial project in the language of intent – with
+Finance Minister Bezalel Smotrich announcing the “cancellation” of the Hebron Accords, and Israeli broadcasters
+reporting on the government cabinet’s intended “quiet annexation” of Gaza. This week, that vision began to take physical
+shape. In Hebron, Israeli forces brought heavy machinery into the Ibrahimi Mosque and began installing steel beams over
+its open courtyard – a structural alteration the mosque’s director called a fundamental change to the ancient site’s
+historic character; Israeli authorities have also blocked the Muslim call to prayer there for a week and a half.
+Recommended Stories list of 3 items- list 1 of 3Israeli attacks kill eight people in Gaza and a teenager in the West
+Bank - list 2 of 3The next British PM should steer clear of Starmer’s shameful legacy - list 3 of 3The Take: The path
+from Gaza to Trump’s return In Gaza, Smotrich announced that the Settlement Administration he heads had “completed
+plans” for three settlements in the north of the Strip and called on Prime Minister Benjamin Netanyahu to approve them.
+And along the so-called “Yellow Line” demarcating Israeli control within Gaza, Israeli forces pushed their cement
+markers further west, expanding the territory under their control. Annexation, from blueprint to build If the Ibrahimi
+Mosque works were the week’s most visible construction, the quieter colonialist building happened across the West Bank’s
+outpost system, where the state moved to entrench settlement infrastructure that even Israeli law had viewed as illegal.
+Israeli authorities declared 465 dunums (0.465 square kilometers) of land near Sinjil, north of Ramallah, as “state
+land”, a designation the Colonization and Wall Resistance Commission said was intended to retroactively legalise the
+Givat Haroeh outpost – converted into an official settlement in 2023 – and to stitch it into the surrounding settlement
+bloc along Route 60. Settlers, meanwhile, carved new bypass roads on private Palestinian land near Kobar and Beitillu
+and erected fencing to seize land for a new outpost between al-Mazraa ash-Sharqiya and Kafr Malek, according to Wafa and
+local activist networks. In Gaza, Israel’s land-grabbing project advanced. Smotrich said the groundwork for three
+northern settlements was complete, arguing Jewish settlement would form a security belt for Israeli border communities.
+Netanyahu, separately, said Israel was pushing towards taking 70 percent of Gaza. The UN’s Office for the Coordination
+of Humanitarian Affairs (OCHA) reported that around midnight on June 23, near Beit Lahiya, a quadcopter reportedly
+dropped incendiary munitions that set three displacement tents ablaze, after which forces placed a yellow cement block
+near the families’ shelters – an expansion of the line, OCHA noted, along which the UN human rights office has recorded
+the killing of nearly 200 Palestinians since October. OCHA now assesses 65 percent of Gaza as “access-restricted”. A war
+on children, named and counted On June 23, the UN Independent International Commission of Inquiry found that Israeli
+forces had deliberately targeted and killed Palestinian children – at least 20,179 between October 2023 and October
+2025, roughly 30 percent of all of those killed. The commission said the deliberate killing of children was a key
+element establishing genocidal intent. Israel rejected the report as a “libelous sham”. Days later, the Israeli human
+rights group B’Tselem reported that Israeli forces had killed 241 Palestinian children and teenagers in the occupied
+West Bank since October 2023, describing it as the product of a policy enabling the killing of Palestinians with
+virtually no accountability. Recent days supplied new names for both reports. On June 29, in el-Bireh, adjacent to
+Ramallah, 15-year-old Ahmad Jawad Jaber was shot in the head and chest during an Israeli raid and died on the way to
+hospital; the governor of Ramallah, Laila Ghannam, called it “a clear-cut execution in broad daylight”. In Gaza,
+according to medical sources and Wafa, 13-year-old Eileen al-Farra died of shrapnel wounds, eight-year-old Malik Abu
+Shaweesh was killed near Deir el-Balah, and on the evening of June 29, an Israeli strike on a tent in al-Mawasi – a zone
+designated “safe” under the ceasefire – killed Diana Abu Daraz, 23, and her infant daughter Suwar. Settlers, fires and a
+rare prosecution In the Ramallah-area communities of Dar Fazaa and East Taybeh, OCHA’s latest report recorded 11 settler
+attacks since a new outpost was established nearby in May, with settlers seizing the only water points and cutting
+supply to more than 200 people – part of a slow emptying that has cleared nine of 10 Bedouin communities along the same
+road. The state’s response to the wave of settler violence was, in isolated instances, punitive. Israeli prosecutors
+charged six settlers – five minors and an 18-year-old – over the June 14 arson at Deir Dibwan, in which masked
+assailants torched vehicles and a mosque, and Israeli forces demolished homes in a settler outpost at Beit Anot on June
+25. But both the charges and the settlement demolitions drew protests from settler leaders, and they took place during a
+week in which, Wafa reported, settler raids and arson continued daily – and in which an Israeli parliament bill to ban
+Red Cross visits to Palestinian prisoners failed only because ultra-Orthodox lawmakers were boycotting coalition votes.
+Gaza: ceasefire killings In Gaza, nearly nine months into a nominal ceasefire, the post-ceasefire death toll climbed to
+at least 1,045, according to the Gaza Ministry of Health. Israeli strikes in the past week – separate to those
+previously mentioned – have included a June 25 strike on Beit Lahiya that killed one person, a June 26 strike that hit a
+vehicle near Maghazi camp, killing three police officers, a June 27 strike that in al-Mawasi that killed two siblings.
+The Ministry of Health warned that roughly half of Gaza’s dialysis machines had stopped working for lack of supplies, as
+Israel continues to bar entry of critical medical supplies; OCHA reported the humanitarian effort in Gaza remains less
+than 25 percent funded.
+
+====================================================================================================
+IDX 12 DOC 40ed5ec190234957986016640b1883c9
+Stingray Announces Receipt of Management Cease Trade Order
+----------------------------------------------------------------------------------------------------
+MONTREAL, June 30, 2026 (GLOBE NEWSWIRE) -- Stingray Group Inc. (TSX: RAY) ("Stingray" or the "Corporation") today
+announced that, further to its news release dated June 22, 2026, regarding the Corporation's application to the Autorité
+des marchés financiers (the "AMF") for a temporary management cease trade order (the "MCTO") to be imposed in respect of
+its delay in filing its audited consolidated financial statements for the year ended March 31, 2026, management's
+discussion and analysis thereof and the CEO and CFO certificates associated therewith and its annual information form
+for the year ended March 31, 2026 (collectively, the "Required Filings"), the AMF has granted the MCTO. The MCTO
+prohibits the chief executive officer and the chief financial officer of the Corporation, as well as the directors of
+the Corporation, from trading in securities of the Corporation for so long as the Required Filings are not filed. The
+MCTO does not generally affect the ability of other persons to trade the securities of Stingray pending the filing of
+the Required Filings via SEDAR+. Additionally, for so long as the Required Filings are not filed, Stingray will not,
+directly or indirectly, issue securities or acquire securities from an insider or employee of the Corporation except in
+accordance with legally binding obligations to do so existing as of June 30, 2026. As previously disclosed, the delay in
+filing the Required Filings is due to the fact that Stingray's auditor has not completed the required work to conclude
+its audit. Stingray understands that the unanticipated delay in completing the audit of its consolidated financial
+statements for the year ended March 31, 2026 is in large part due to the complexity of integrating the acquisitions
+completed in said financial year (including that of TuneIn Holdings, Inc.). Stingray remains committed to completing the
+filings as soon as practicable, which is expected to be no later than August 29, 2026. The MCTO will be in effect until
+the Required Filings are completed. In accordance with National Policy 12-203 – Management Cease Trade Orders (the
+"Policy"), Stingray will provide bi-weekly status updates by way of news releases for so long as the Required Filings
+remain outstanding. Stingray does not anticipate any additional specified defaults under the Policy. Stingray confirms
+that as of the date of this news release there is no material information concerning the affairs of Stingray that has
+not been generally disclosed.
+
+
+codex
+I have enough context to write the output directly. The remaining work is mapping each record to a tight set of explicit claims, keeping non-market stories empty and avoiding any inference beyond the article text.
+codex
+I’m writing `all_facts_054.jsonl` now with a hand-curated mapping for each `doc_id`, then I’ll validate the line count and report the final document and fact totals in a single line.

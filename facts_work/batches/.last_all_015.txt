@@ -1,0 +1,1 @@
+docs processed: 12, total facts: 65

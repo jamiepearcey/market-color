@@ -24,7 +24,7 @@ from typing import Any
 import index_corpus as ic  # embed, _client, _epoch, _date_ordinal, _chunked
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_FACTS_GLOB = str(HERE / "facts_work" / "batches" / "energy_facts_*.jsonl")
+DEFAULT_FACTS_GLOB = str(HERE / "facts_work" / "batches" / "*_facts_*.jsonl")
 DEFAULT_FACTS_PARQUET = HERE / "facts_work" / "facts.parquet"
 FACTS_COLLECTION = "market_color_facts"
 
@@ -71,11 +71,19 @@ def merge_facts(facts_glob: str, corpus: Path) -> list[dict[str, Any]]:
                 continue
             doc_id = rec.get("doc_id")
             m = meta.get(doc_id, (doc_id, None, None, None, None, rec.get("title")))
-            for i, f in enumerate(rec.get("facts", []) or []):
-                claim = (f.get("claim") or "").strip()
+            facts_list = rec.get("facts") or []
+            if not isinstance(facts_list, list):
+                continue
+            for i, f in enumerate(facts_list):
+                if not isinstance(f, dict):
+                    continue
+                claim = str(f.get("claim") or "").strip()
                 if not claim:
                     continue
-                ents = [norm_entity(x) for x in (f.get("entities") or []) if x]
+                raw_ents = f.get("entities")
+                if not isinstance(raw_ents, list):
+                    raw_ents = []
+                ents = [norm_entity(x) for x in raw_ents if x and isinstance(x, str)]
                 # fold subject/object ONLY if they look like entities (not clauses);
                 # never fold `cause` (it is free-text and pollutes the node set).
                 for extra in (f.get("subject"), f.get("object")):
@@ -83,21 +91,185 @@ def merge_facts(facts_glob: str, corpus: Path) -> list[dict[str, Any]]:
                         ents.append(norm_entity(extra))
                 # keep entities that look like nodes: <= 5 words, drop sentence-fragments.
                 ents = sorted({e for e in ents if e and 1 < len(e) <= 48 and len(e.split()) <= 5})
+                def _s(key: str) -> str | None:
+                    v = f.get(key)
+                    return None if v is None or v == "" else str(v)
+
+                try:
+                    conf = float(f.get("confidence") or 0.0)
+                except (TypeError, ValueError):
+                    conf = 0.0
                 out.append({
                     "fact_id": fact_id(doc_id, i, claim),
                     "doc_id": doc_id, "source_name": m[1], "published_date": m[2],
                     "published_utc": m[3], "url": m[4], "doc_title": m[5],
-                    "claim": claim, "subject": f.get("subject"), "predicate": f.get("predicate"),
-                    "object": f.get("object"), "direction": f.get("direction"),
-                    "magnitude": f.get("magnitude"), "time": f.get("time"),
-                    "cause": f.get("cause"), "entities": ents,
-                    "confidence": float(f.get("confidence") or 0.0), "desk": "energy",
+                    "claim": claim, "subject": _s("subject"), "predicate": _s("predicate"),
+                    "object": _s("object"), "direction": _s("direction"),
+                    "magnitude": _s("magnitude"), "time": _s("time"),
+                    "cause": _s("cause"), "entities": ents,
+                    "confidence": conf,
                 })
-    return out
+    # dedup (same doc may appear in more than one batch file)
+    seen: set[str] = set()
+    deduped = []
+    for f in out:
+        if f["fact_id"] in seen:
+            continue
+        seen.add(f["fact_id"])
+        deduped.append(f)
+    return deduped
+
+
+# --------------------------------------------------------------------------- #
+# Canonicalization: merge near-duplicate entity nodes, resolve causes to nodes
+# --------------------------------------------------------------------------- #
+def _token_jaccard(a: str, b: str) -> float:
+    ta, tb = set(a.split()), set(b.split())
+    return len(ta & tb) / max(1, len(ta | tb))
+
+
+def canonicalize_entities(facts: list[dict[str, Any]], provider: str, model: str,
+                          sim_floor: float = 0.92) -> dict[str, Any]:
+    """Merge near-duplicate entities (embedding cosine >= sim_floor AND a lexical
+    guard: token overlap or substring) via union-find; canonical form = the most
+    frequent surface form. Returns {"map": {entity->canonical}, "vecs": {canonical->vec}}.
+    """
+    import numpy as np
+    from collections import Counter
+
+    count: Counter = Counter()
+    for f in facts:
+        count.update(f["entities"])
+    ents = sorted(count)
+    if not ents:
+        return {"map": {}, "vecs": {}}
+    vecs = []
+    for chunk in ic._chunked(ents, 256):
+        vecs.extend(ic.embed(provider, model, chunk, ic.DEFAULT_OLLAMA_URL, None))
+    mat = np.asarray(vecs, dtype="float32")
+    mat /= np.linalg.norm(mat, axis=1, keepdims=True) + 1e-9
+
+    parent = list(range(len(ents)))
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    # chunked all-pairs cosine to bound memory on large vocabularies
+    step = 1024
+    for s in range(0, len(ents), step):
+        sims = mat[s:s + step] @ mat.T
+        rows, cols = np.nonzero(sims >= sim_floor)
+        for r, c in zip(rows.tolist(), cols.tolist()):
+            i, j = s + r, c
+            if i >= j:
+                continue
+            a, b = ents[i], ents[j]
+            if _token_jaccard(a, b) >= 0.5 or a in b or b in a:
+                ri, rj = find(i), find(j)
+                if ri != rj:
+                    parent[rj] = ri
+
+    groups: dict[int, list[int]] = {}
+    for i in range(len(ents)):
+        groups.setdefault(find(i), []).append(i)
+    emap: dict[str, str] = {}
+    cvecs: dict[str, Any] = {}
+    merged = 0
+    for members in groups.values():
+        canon_i = max(members, key=lambda i: (count[ents[i]], -len(ents[i])))
+        canon = ents[canon_i]
+        cvecs[canon] = mat[canon_i]
+        for i in members:
+            emap[ents[i]] = canon
+        merged += len(members) - 1
+    print(f"[canon] entities {len(ents)} -> {len(groups)} nodes ({merged} near-dups merged)",
+          file=sys.stderr)
+    return {"map": emap, "vecs": cvecs}
+
+
+def resolve_causes(facts: list[dict[str, Any]], canon: dict[str, Any],
+                   provider: str, model: str, sim_floor: float = 0.60) -> None:
+    """Resolve each fact's free-text `cause` to canonical entity nodes:
+    (1) word-boundary containment of an entity name in the cause text (longest
+    matches win), else (2) embedding top-1 >= sim_floor. Sets f["cause_entities"].
+    """
+    import re as _re
+    import numpy as np
+
+    cvecs = canon["vecs"]
+    names = sorted(cvecs, key=len, reverse=True)
+    mat = np.asarray([cvecs[n] for n in names], dtype="float32") if names else None
+
+    pending: list[tuple[dict[str, Any], str]] = []
+    for f in facts:
+        cause = f.get("cause")
+        f["cause_entities"] = []
+        if not cause:
+            continue
+        low = norm_entity(str(cause))
+        hits = []
+        for n in names:
+            if len(n) < 3:
+                continue
+            if _re.search(rf"(?<![a-z0-9]){_re.escape(n)}(?![a-z0-9])", low):
+                if not any(n in h for h in hits):  # skip subsets of an already-matched name
+                    hits.append(n)
+            if len(hits) >= 3:
+                break
+        if hits:
+            f["cause_entities"] = hits
+        else:
+            pending.append((f, str(cause)))
+    if pending and mat is not None:
+        vecs = []
+        for chunk in ic._chunked([c for _, c in pending], 256):
+            vecs.extend(ic.embed(provider, model, chunk, ic.DEFAULT_OLLAMA_URL, None))
+        q = np.asarray(vecs, dtype="float32")
+        q /= np.linalg.norm(q, axis=1, keepdims=True) + 1e-9
+        sims = q @ mat.T
+        for (f, _), row in zip(pending, sims, strict=True):
+            best = int(np.argmax(row))
+            if float(row[best]) >= sim_floor:
+                f["cause_entities"] = [names[best]]
+    total = sum(1 for f in facts if f.get("cause"))
+    resolved = sum(1 for f in facts if f["cause_entities"])
+    print(f"[canon] causes resolved to entity nodes: {resolved}/{total}", file=sys.stderr)
 
 
 def cmd_build(args: argparse.Namespace) -> int:
+    import numpy as np
+
     facts = merge_facts(args.facts_glob, Path(args.corpus))
+    if not facts:
+        raise RuntimeError("no facts merged")
+
+    # 1) embed all claims (kept in memory; the fact set is small)
+    claim_vecs: list[list[float]] = []
+    for batch in ic._chunked(facts, 64):
+        claim_vecs.extend(ic.embed(args.embedding_provider, args.embedding_model,
+                                   [f["claim"] for f in batch], ic.DEFAULT_OLLAMA_URL, None))
+
+    # 2) per-fact desk via embedding zero-shot vs DESK_ANCHORS (replaces the old
+    #    hardcoded desk: facts inherit the desk their CLAIM is about)
+    anchor_keys = list(ic.DESK_ANCHORS)
+    avecs = ic.embed(args.embedding_provider, args.embedding_model,
+                     [ic.DESK_ANCHORS[k] for k in anchor_keys], ic.DEFAULT_OLLAMA_URL, None)
+    am = np.asarray(avecs, dtype="float32")
+    am /= np.linalg.norm(am, axis=1, keepdims=True) + 1e-9
+    for f, v in zip(facts, claim_vecs, strict=True):
+        desks = ic.assign_desks(v, am, anchor_keys)
+        f["desk"], f["desks"] = desks[0], desks
+
+    # 3) entity canonicalization + cause -> entity-node resolution
+    canon = canonicalize_entities(facts, args.embedding_provider, args.embedding_model)
+    emap = canon["map"]
+    for f in facts:
+        f["entities"] = sorted({emap.get(e, e) for e in f["entities"]})
+    resolve_causes(facts, canon, args.embedding_provider, args.embedding_model)
+
     # persist facts.parquet
     import pyarrow as pa, pyarrow.parquet as pq
     pq.write_table(pa.Table.from_pylist(facts), args.out_parquet)
@@ -105,42 +277,45 @@ def cmd_build(args: argparse.Namespace) -> int:
     # entity stats
     from collections import Counter
     ent_count: Counter = Counter()
+    desk_count: Counter = Counter()
     for f in facts:
         ent_count.update(f["entities"])
+        desk_count[f["desk"]] += 1
     print(f"[build] facts={len(facts)}  unique_entities={len(ent_count)}  "
           f"causal_facts={sum(1 for f in facts if f.get('cause'))}", file=sys.stderr)
+    print("[build] desks: " + ", ".join(f"{d}={c}" for d, c in desk_count.most_common()),
+          file=sys.stderr)
     print("[build] top entities: " + ", ".join(f"{e}({c})" for e, c in ent_count.most_common(12)),
           file=sys.stderr)
 
-    # embed claims -> Qdrant
+    # 4) upsert -> Qdrant
     client = ic._client(args.qdrant_url, None)
     from qdrant_client.http import models
-    dims = None
-    for batch in ic._chunked(facts, 64):
-        vecs = ic.embed(args.embedding_provider, args.embedding_model,
-                        [f["claim"] for f in batch], ic.DEFAULT_OLLAMA_URL, None)
-        if dims is None:
-            dims = len(vecs[0])
-            if args.recreate and client.collection_exists(FACTS_COLLECTION):
-                client.delete_collection(FACTS_COLLECTION)
-            if not client.collection_exists(FACTS_COLLECTION):
-                client.create_collection(
-                    collection_name=FACTS_COLLECTION, on_disk_payload=True,
-                    vectors_config=models.VectorParams(
-                        size=dims, distance=models.Distance.COSINE,
-                        quantization_config=models.TurboQuantization(
-                            turbo=models.TurboQuantQuantizationConfig(
-                                bits=models.TurboQuantBitSize("bits2"), always_ram=True))))
-                for fld, sc in (("entities", models.PayloadSchemaType.KEYWORD),
-                                ("predicate", models.PayloadSchemaType.KEYWORD),
-                                ("published_ordinal", models.PayloadSchemaType.INTEGER),
-                                ("published_epoch", models.PayloadSchemaType.INTEGER)):
-                    try:
-                        client.create_payload_index(FACTS_COLLECTION, field_name=fld, field_schema=sc)
-                    except Exception:
-                        pass
+    dims = len(claim_vecs[0])
+    if args.recreate and client.collection_exists(FACTS_COLLECTION):
+        client.delete_collection(FACTS_COLLECTION)
+    if not client.collection_exists(FACTS_COLLECTION):
+        client.create_collection(
+            collection_name=FACTS_COLLECTION, on_disk_payload=True,
+            vectors_config=models.VectorParams(
+                size=dims, distance=models.Distance.COSINE,
+                quantization_config=models.TurboQuantization(
+                    turbo=models.TurboQuantQuantizationConfig(
+                        bits=models.TurboQuantBitSize("bits2"), always_ram=True))))
+        for fld, sc in (("entities", models.PayloadSchemaType.KEYWORD),
+                        ("cause_entities", models.PayloadSchemaType.KEYWORD),
+                        ("desk", models.PayloadSchemaType.KEYWORD),
+                        ("desks", models.PayloadSchemaType.KEYWORD),
+                        ("predicate", models.PayloadSchemaType.KEYWORD),
+                        ("published_ordinal", models.PayloadSchemaType.INTEGER),
+                        ("published_epoch", models.PayloadSchemaType.INTEGER)):
+            try:
+                client.create_payload_index(FACTS_COLLECTION, field_name=fld, field_schema=sc)
+            except Exception:
+                pass
+    for i in range(0, len(facts), 64):
         pts = []
-        for f, v in zip(batch, vecs, strict=True):
+        for f, v in zip(facts[i:i + 64], claim_vecs[i:i + 64], strict=True):
             pd = f.get("published_date")
             pl = dict(f)
             pl["published_ordinal"] = ic._date_ordinal(pd) if pd else 0

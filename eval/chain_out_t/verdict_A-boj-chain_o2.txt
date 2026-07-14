@@ -1,0 +1,2 @@
+VERDICT: B
+Both trace the same causal chain (yen weakness + energy spike → inflation above 2% + wage-price dynamics → normalisation to 1.00%), but B is more grounded, adding attributed nuance ([18] price trends still slightly below 2%, [17] markets pricing only 22bps) that sharpens why the signal is forward-looking.

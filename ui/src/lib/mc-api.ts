@@ -153,6 +153,131 @@ export const getRun = (id: number) => json<Run>(`/runs/${id}`);
 export const triggerRun = (date?: string) =>
   json<Run>("/runs", { method: "POST", body: JSON.stringify({ date: date ?? null }) });
 
+// --- graph (transmission map) ------------------------------------------------
+export interface GraphNode {
+  id: string;
+  count: number;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  weight: number;
+  /** true = directed cause → effect edge (from `cause_entities`); false = undirected co-occurrence */
+  causal: boolean;
+}
+
+export interface Graph {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
+/** Raw Qdrant fact payload (fields are best-effort — render defensively). */
+export interface FactPayload {
+  fact_id?: string;
+  doc_id?: string;
+  claim?: string;
+  subject?: string;
+  predicate?: string;
+  object?: string | null;
+  direction?: string;
+  magnitude?: string;
+  time?: string;
+  cause?: string | null;
+  entities?: string[];
+  cause_entities?: string[];
+  confidence?: number;
+  desk?: string;
+  source_name?: string;
+  published_date?: string;
+  published_utc?: string;
+  url?: string;
+  doc_title?: string;
+  title?: string;
+}
+
+export interface EntityFacts {
+  entity: string;
+  facts: FactPayload[];
+}
+
+export const getGraph = (p: {
+  desk?: string;
+  since?: string;
+  until?: string;
+  minWeight?: number;
+  maxNodes?: number;
+}) => {
+  const q = new URLSearchParams();
+  if (p.desk) q.set("desk", p.desk);
+  if (p.since) q.set("since", p.since);
+  if (p.until) q.set("until", p.until);
+  if (p.minWeight != null) q.set("min_weight", String(p.minWeight));
+  if (p.maxNodes != null) q.set("max_nodes", String(p.maxNodes));
+  const qs = q.toString();
+  return json<Graph>(`/graph${qs ? `?${qs}` : ""}`);
+};
+
+export const getEntityFacts = (name: string, desk?: string) => {
+  const q = new URLSearchParams({ name });
+  if (desk) q.set("desk", desk);
+  return json<EntityFacts>(`/graph/entity?${q.toString()}`);
+};
+
+// --- briefs ------------------------------------------------------------------
+export interface BriefRef {
+  date: string;
+  desk: string;
+}
+
+export interface BriefMover {
+  symbol?: string;
+  name?: string;
+  close?: number;
+  ret_1d?: number;
+  zscore_20d?: number;
+}
+
+export interface BriefSectionFact {
+  claim?: string;
+  source_name?: string;
+  published_date?: string;
+  url?: string;
+  corroboration?: number;
+  is_new?: boolean;
+}
+
+export interface BriefSection {
+  kind?: "driver" | "no_driver" | string;
+  anchor?: string;
+  title?: string;
+  chains?: [string, string, string][];
+  facts?: BriefSectionFact[];
+}
+
+/** Sibling <desk>.json payload — schema owned by the brief generator; every
+ *  field is optional so old/fixture briefs still render. */
+export interface BriefData {
+  fixture?: boolean;
+  desk?: string;
+  date?: string;
+  generated_utc?: string;
+  movers?: BriefMover[];
+  sections?: BriefSection[];
+  new_fact_count?: number;
+}
+
+export interface Brief {
+  date: string;
+  desk: string;
+  markdown: string;
+  data: BriefData | null;
+}
+
+export const getBriefs = () => json<BriefRef[]>("/briefs");
+export const getBrief = (date: string, desk: string) =>
+  json<Brief>(`/briefs/${encodeURIComponent(date)}/${encodeURIComponent(desk)}`);
+
 // --- reports ---------------------------------------------------------------
 export const getReports = () => json<Report[]>("/reports");
 export const getReport = (id: number) => json<Report>(`/reports/${id}`);

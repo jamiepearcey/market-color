@@ -90,7 +90,7 @@ const server = http.createServer(async (req, res) => {
     } catch {
       return sendJson(res, 400, { error: "invalid JSON body" });
     }
-    const sub = pathname.slice(4) || "/"; // strip "/api"
+    const sub = (req.url || "/").slice(4) || "/"; // strip "/api", keep the ?query
     const { status, json } = await handleApi(req.method, sub, body);
     return sendJson(res, status, json);
   }

@@ -1,0 +1,3 @@
+Wrote `all_facts_038.jsonl` and validated it has 12 JSON lines matching the 12 input documents.
+
+`docs processed: 12, total facts: 51`

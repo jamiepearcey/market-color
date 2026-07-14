@@ -1,0 +1,719 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fbc-6aa3-7e91-b858-0887b8ac3129
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_036.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_036.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_036.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:11:14.885675Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_036.jsonl` to confirm its structure, then I’ll extract title/body-supported market facts and write `all_facts_036.jsonl` in the same order.
+exec
+/bin/zsh -lc 'wc -l all_batch_036.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_036.jsonl
+
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_036.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj = json.loads(line)
+        print(f'DOC {i}:', sorted(obj.keys()))
+        print('TITLE:', obj.get('title'))
+        print('BODY:', (obj.get('body_text') or '')[:500].replace('\\n',' '))
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Why Tenable (TENB) Is Up 22.9% After Winning FedRAMP High and IL5 Cloud Clearance
+BODY: - Tenable Holdings, Inc. recently announced that its Tenable One Cloud Exposure platform achieved FedRAMP High and Impact Level 5 authorization, enabling the company to support highly sensitive U.S. federal, defense and intelligence environments. - This certification deepens Tenable's access to mission-critical government workloads, strengthening its position with public-sector customers that require rigorous cloud security assurances. - We'll now explore how this new FedRAMP High and IL5 author
+
+DOC 2: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: LINE IN ATHENS NAMED NO.1 AS INAUGURAL LIST OF EUROPE'S 50 BEST BARS 2026 IS UNVEILED
+BODY: - Line in Athens ranks No.1 in the first edition of Europe's 50 Best Bars, sponsored by Perrier - Salvatore Calabrese wins the Roku Industry Icon Award - London's Waltz (No.23) is awarded the Three Cents Best New Opening Award - The Siete Misterios Best Cocktail Menu Award is given to Edinburgh's Panda & Sons (No.20) - De Vie (No.34), Paris wins the Ketel One Sustainable Bar Award - The SevenRooms Best Bar Design Award goes to Hide, Budapest - Mirror Bar (No.8) receives the Michter's Art of Hosp
+
+DOC 3: ['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+TITLE: Frequent AI chatbot users more likely to believe anti-vaccine myths, poll finds
+BODY: Adults in the US who frequently seek out health advice from artificial intelligence chatbots are more likely to believe myths about vaccines, according to a poll released on Tuesday by health research firm KFF. The survey, which was conducted in May and polled a representative sample of 2,480 US adults, found that use of AI tools and chatbots correlated with belief in falsehoods such as vaccines causing autism or that the measles vaccine poses more danger than the corresponding virus. The connec
+
+
+codex
+The batch is small, 12 documents. I’m reading all titles and bodies now so I can extract only explicit, market-relevant claims and avoid pulling in non-market items.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+with open('all_batch_036.jsonl') as f:
+    for idx, line in enumerate(f, 1):
+        obj = json.loads(line)
+        print(f'--- DOC {idx} | {obj[\"doc_id\"]} | {obj[\"published_date\"]} ---')
+        print(obj['title'])
+        print((obj.get('body_text') or '').replace('\\n',' ')[:2000])
+        print()
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+--- DOC 1 | 008c0da9746a977712236eeb778b8f49 | 2026-06-30 ---
+Why Tenable (TENB) Is Up 22.9% After Winning FedRAMP High and IL5 Cloud Clearance
+- Tenable Holdings, Inc. recently announced that its Tenable One Cloud Exposure platform achieved FedRAMP High and Impact Level 5 authorization, enabling the company to support highly sensitive U.S. federal, defense and intelligence environments. - This certification deepens Tenable's access to mission-critical government workloads, strengthening its position with public-sector customers that require rigorous cloud security assurances. - We'll now explore how this new FedRAMP High and IL5 authorization could influence Tenable's investment narrative and long-term federal exposure. Rare earth metals are the new gold rush. Find out which 30 stocks are leading the charge. Tenable Holdings Investment Narrative Recap To own Tenable, you need to believe exposure management can become a core security layer as attack surfaces grow and compliance tightens, and that Tenable One can translate that need into durable, recurring revenue. The new FedRAMP High and IL5 authorization could reinforce the near term federal growth catalyst by opening more sensitive workloads to Tenable, but it also heightens the key risk that a slowdown or disruption in U.S. public sector spending could weigh heavily on results. The recent announcement that Tenable is working with OpenAI through the Daybreak Cyber Partner Program fits directly alongside the FedRAMP milestone. Both developments speak to Tenable's effort to deepen its value in complex, high stakes environments, with AI powered workflows and stringent certifications supporting the thesis that Tenable One can win larger, platform level deals, even as competition from bundled cloud and security suites remains an ongoing concern. Yet despite this progress, investors should be aware that growing reliance on federal and large platform deals could magnify the impact of any slowdown in... Tenable Holdings' narrative projects $1.3 billion revenue and $61.4 million earnings by 2029. This requires 7.2% yearly revenue growth and a $73.2 million earnin
+
+--- DOC 2 | 0097e6104cbada020df44cf3a8c41c5b | 2026-06-30 ---
+LINE IN ATHENS NAMED NO.1 AS INAUGURAL LIST OF EUROPE'S 50 BEST BARS 2026 IS UNVEILED
+- Line in Athens ranks No.1 in the first edition of Europe's 50 Best Bars, sponsored by Perrier - Salvatore Calabrese wins the Roku Industry Icon Award - London's Waltz (No.23) is awarded the Three Cents Best New Opening Award - The Siete Misterios Best Cocktail Menu Award is given to Edinburgh's Panda & Sons (No.20) - De Vie (No.34), Paris wins the Ketel One Sustainable Bar Award - The SevenRooms Best Bar Design Award goes to Hide, Budapest - Mirror Bar (No.8) receives the Michter's Art of Hospitality Award and The Best Bar in Slovakia - Giorgio Bargiani wins the Altos Bartenders' Bartender Award; the Connaught Bar (No.10) is named The Best Bar in the UK, sponsored by Monkey Shoulder AMSTERDAM, July 1, 2026 /PRNewswire/ -- The list of Europe's 50 Best Bars 2026 was announced this evening during a live awards ceremony in Amsterdam. The event celebrated the first annual edition of this new ranking from 50 Best, the organisation behind The World's 50 Best Bars. For the full 1-50 list, click here. Line in Athens leads the ranking, named The Best Bar in Europe, sponsored by Perrier, and The Best Bar in Greece. Renowned for its fermentation-led approach, producing house-made wines, beers and ingredients that are reused across its menu, Line blends experimental techniques with accessible flavours. The 2026 list features bars from 22 cities. Other bars in the top five are The Bar in Front of the Bar (No.2); Sips (No.3), The Best Bar in Spain, sponsored by Torres Brandy; Himkok (No.4), The Best Bar in Norway, sponsored by Nikka Whisky and Bar Nouveau (No.5), The Best Bar in France, sponsored by Rémy Martin. The Best Bar in Italy, sponsored by Disaronno, is Moebius Milano (No.6). Nouvelle Vague (No.16) claims The Best Bar in Albania, sponsored by Polot 1882. Wax On (No.17) is The Best Bar in Germany, sponsored by Mr Black, while Bird (No.24) secures The Best Bar in Denmark, sponsored by Mancino Vermouth. Alma Prague (No.25) is The Best Bar in Czechia. Tjoget (No.37) is The B
+
+--- DOC 3 | 00ac95647d2f94d4b741ef167da066b9 | 2026-06-30 ---
+Frequent AI chatbot users more likely to believe anti-vaccine myths, poll finds
+Adults in the US who frequently seek out health advice from artificial intelligence chatbots are more likely to believe myths about vaccines, according to a poll released on Tuesday by health research firm KFF. The survey, which was conducted in May and polled a representative sample of 2,480 US adults, found that use of AI tools and chatbots correlated with belief in falsehoods such as vaccines causing autism or that the measles vaccine poses more danger than the corresponding virus. The connection remained while controlling for factors such as age, race, education and political partisanship. Concern over how AI may spread misinformation and influence public opinion has long been an issue among researchers and health officials. A large percentage of Americans have begun turning to AI chatbots for medical advice, repeated polls show, with another KFF survey from March finding that about a third of US adults seek out health advice from AI. AI firms have also acknowledged the prevalence of queries about medical matters. “Health is already one of the most common ways people use ChatGPT, with hundreds of millions of people asking health and wellness questions each week,” OpenAI said in a January blog post announcing the creation of a specialized ChatGPT Health tool. Among US adults who use AI tools to find health information at least once a week, KFF’s poll found that 35% of them believe that it is “definitely or probably true” that measles, mumps and rubella (MMR) vaccines have been proven to cause autism in children. Only 20% of US adults who do not use AI for health hold a similar belief, while 29% of US adults who occasionally consult AI for health believe that myth, according to the poll. The falsehood that MMR vaccines cause autism is a key pillar of the anti-vaccine movement, which has gained additional influence after the Covid-19 pandemic and appointment of Robert F Kennedy Jr as the US health secretary. Kennedy and others associated with the anti-vaccine movem
+
+--- DOC 4 | 00b5c6f5436e22ce704a55474fdeb024 | 2026-06-30 ---
+Australian Dollar: Downside bias but support holds against US Dollar – UOB | FXStreet
+United Overseas Bank’s (UOB) Quek Ser Leang notes that AUD/USD remains under mild pressure, with intraday bias tilted lower after a narrow range session. Any decline is expected to stay within 0.6865–0.6900, with a clear break below 0.6865 seen as unlikely. Over 1–3 weeks, a move above 0.6940 would negate downside targets, while the broader trend still points toward 0.6707. Australian Dollar stays under mild pressure "24-HOUR VIEW: Yesterday, we indicated that AUD “is likely to trade in a range between 0.6880 and 0.6920.” AUD then traded within a narrower range of 0.6878/0.6904, closing largely unchanged at 0.6886 (-0.06%). While the slight increase in downward momentum tilts the bias toward the downside today, any decline is likely to be contained within a 0.6865/0.6900 range. AUD is unlikely to break clearly below 0.6865." "1-3 WEEKS VIEW: After holding a negative AUD view for more than a week, we highlighted the following yesterday (29 Jun, spot at 0.6895): “Downward momentum is starting to ease. A break above 0.6940 (‘strong resistance’ was at 0.6950 last Friday) would indicate that 0.6835 is out of reach.” We continue to hold the same view for now." (This article was created with the help of an Artificial Intelligence tool and reviewed by an editor.) Author The FXStreet Insights Team is a group of journalists that handpicks selected market observations published by renowned experts. The content includes notes by commercial as well as additional insights by internal and external analysts.
+
+--- DOC 5 | 00c1a20d71bba099e3edaa0c9f37fe9b | 2026-06-30 ---
+6 Smart Tax Strategies Investors With $1M+ Are Using to Protect Wealth in 2026
+According to Charles Schwab, investors who work with financial, tax, and wealth advisors may identify strategies that can improve the tax efficiency of their portfolios and potentially enhance after-tax returns. Instead of searching for a financial advisor on your own, AdviserMatch asks you a few questions about your goals and situation to pair you with advisors who fit your needs. This can streamline what is otherwise a time-consuming process. AdviserMatch connects individuals with financial advisors who can help with retirement planning, investment strategy, and broader financial guidance. Consultations are no-obligation, and services vary by advisor. It only takes two minutes. 6 Smart Tax Strategies High-Net-Worth Investors Use to Protect Wealth 1. Give your portfolio a strong tax plan Tax exposure is a constant concern for investors, especially those with a diversified portfolio. A 2017 Elsevier study found that financial advisors generally have lower portfolio turnover than other advisors, which can help reduce taxes. These advisors will also develop other tax-efficient investing strategies that reduce drag, increase after-tax returns, and make your wealth transfer-ready. Overall, a 2020 Vanguard study estimated that certain advisor services could add about 3% in net returns annually for some investors, though results vary and are not guaranteed after fees and market effects. 2. Shelter Your Income and Reduce Your Tax Bill Beyond looking at deductions, a qualified advisor could help high earners implement these tax-saving strategies: - Maximize deductions (charitable, mortgage, business expenses) - Use tax-advantaged accounts (401(k), IRA, HSA, FSA) - Shift into more tax-efficient investments (municipal bonds, ETFs, long-term gains) - Restructure your business (LLC, S-Corp, or trust-based strategies) 3. Leverage Credits to Reduce Taxes Beyond Adjusted Gross Income An advisor will have knowledge of tax credits that high earners can use to save on their taxes, in
+
+--- DOC 6 | 00da4119259589656ef7509f6eb98776 | 2026-06-30 ---
+WhatsApp to let users go by usernames, not phone numbers
+WhatsApp will let users go by usernames instead of phone numbers, closing a longstanding privacy gap on the app used by more than three billion people. The Meta-owned platform said on Monday that it has begun letting users reserve unique usernames before a wider rollout later this year when people will be able to choose to be found and contacted only by their handles. Recommended Stories list of 4 items- list 1 of 4US asks Anthropic to block global access to top AI models: Why it matters - list 2 of 4Why do AI models struggle with online hate speech detection? - list 3 of 4US House committee reaches bipartisan deal on social media rules for kids - list 4 of 4China takes US crown for world’s fastest supercomputer WhatsApp said the change was designed as a core privacy feature with no public directory of usernames and no autocomplete suggestions, meaning users will need to know someone’s exact username to reach them for the first time. WhatsApp offers end-to-end encrypted communication across smartphones, tablets and desktop computers. Until now, it has allowed users to be contacted by anyone who has their phone number. The app said in a blog post that over the “coming months”, users will get the option to be found and contacted only by their username, and not their number. It wasn’t more specific about the timeline. “We have designed this as a core privacy feature,” Alice Newton-Rex, WhatsApp’s vice president of product, told reporters. “People will need to know your exact username to contact you for the first time,” she said. WhatsApp’s current privacy settings are limited to blocking individual users and silencing unknown callers. The app also allows users to add a profile name, but that’s only displayed in chat groups for other people who don’t have the user’s contact info saved. A scramble for unique usernames While people in the United States still prefer text messaging to WhatsApp, the app is widely used in Europe, Asia and much of the rest of the world. Catchy
+
+--- DOC 7 | 00e51164a8f7edbf2064b451d4ec4082 | 2026-06-30 ---
+Brompton sells stakes to Decathlon and Chinese Labubu backer
+The French sports gear retailer Decathlon and a Chinese investment group that was an early backer of Labubu soft toys have bought stakes in the British folding bike maker Brompton, as its boss said the cycling market was recovering from a slump in sales. Decathlon has acquired a 10% stake in the manufacturer while BA Capital has bought 5% in a deal understood to collectively be worth about £18m. Brompton said the new investments would enable staff, including the chief executive, Will Butler-Adams, and long-term investors to realise some cash from the sale of shares, while also bringing in market knowledge, supply chain efficiency and technology from the brand’s new investors. “We are in this partnership to learn,” Butler-Adams said of the new deal with Decathlon Pulse, the chain’s investment arm which has previously backed brands including the bike computer maker Magene and sports watch Coros. He said BA Capital, which also holds a stake in the bicycle brand Tenways as well as Labubu maker Pop Mart, would bring expertise on China, which is now Brompton’s biggest market. Franck Vigo, the chief executive of Decathlon Pulse, said: “What convinced us goes beyond the product: we share the same values, a strong culture of quality, and a long-term vision of sustainable urban mobility. This partnership is about scaling that model while preserving what makes Brompton truly unique.” Brompton bikes, which cost from £999 to almost £6,000 for a top-of-the-range titanium ebike, will for the first time will go into dedicated “Brompton corners” in a handful of Decathlon stores. “We want to bring our bikes to a wider audience,” Butler-Adams said. He said that, despite cost of living challenges which continue to hold back sales of new bikes in Europe, the industry was now “over the worst” after a slump in sales following a pandemic boom and “cycling is in the ascendant.” He said cities around the world were adding bike lanes amid increasing interest in healthy living and pollution-fr
+
+--- DOC 8 | 0118c00348aa119f79ec563e254a4f4e | 2026-06-30 ---
+Apple iPhone 18 Pro secrets leaked in Tata Electronics hack: What we know
+Hackers have stolen more than 630 gigabytes of confidential data from Tata Electronics, one of Apple’s key suppliers in India, and then released the documents, exposing details of parts, supplier information and photos of the iPhone 18 Pro, which is to launch in September. Tata Electronics is a major global electronics manufacturing company for companies such as Apple and Tesla. Reports said the ransomware group World Leaks is behind the publication of the stolen data files. The breach offers a rare insight into something Apple has guarded for years – how its global supply chain actually works. Apple said it is concerned about the leak and is investigating it. Here’s what we know about the leak and why it matters: What do we know about the leak? World Leaks claimed responsibility for the breach on its dark web leak site on June 12, posting more than 200,000 files totalling over 630 gigabytes, according to the Reuters news agency. Tata Electronics confirmed the cybersecurity incident publicly. The files include detailed information on the iPhone 18 Pro from chips on its main circuit board to battery parts and camera modules and which supplier provides what part. There’s also information on which suppliers are competing for contracts to provide specific parts – details that could reveal where Apple is vulnerable and where the tech giant has the power to choose between multiple vendors. Paolo Pescatore, founder and analyst at the technology research and advisory firm PP Foresight, said the leak has exposed more than just the specific images of the iPhone 18 Pro. “The bigger issue is the exposure of sensitive supplier and component information that Apple would never willingly put in the public domain,” he told Al Jazeera. “It potentially gives rivals, suppliers, counterfeiters and bad actors a rare glimpse into how Apple’s supply chain is structured and where it may be exposed.” How did the leak happen? Tata Electronics said it has restricted internal access and is repo
+
+--- DOC 9 | 01b40de78db9b9b19f7e9b785f1db032 | 2026-06-30 ---
+Trump administration's AI crackdown opens door for China to close gap
+The Trump administration's crackdown on Anthropic's leading artificial intelligence models is looking like a gift to the country's top adversary in the AI race: China After a two-week shutdown due to an export control directive, Anthropic was allowed by the White House on Friday to release its powerful Mythos 5 model to some companies and federal agencies, though its Fable 5 model remains off the market. OpenAI, meanwhile, also said on Friday it would limit the rollout of its GPT 5.6 models following a government request. The two leading U.S. AI model developers have been in a race against each other and tech giants like Google to develop the most advanced technology, with the U.S. government opening the door to speedy AI development by limiting regulatory hurdles. Doing otherwise, according to many tech execs and Trump administration officials, would restrict domestic AI to the benefit of China, which has been rapidly catching up to the U.S. But as Anthropic adheres to the U.S. government's national security concerns, Chinese companies are launching models that rival frontier labs in some capabilities. According to researchers, Zhipu's GLM 5.2, released earlier this month, can perform on par with top U.S. labs on some cyber benchmarks, even equaling Mythos' capabilities. "Many smart people/AI insiders are saying GLM-5.2 is the first Chinese AI model to match and often beat the American big lab public AI models with no compromises," wrote venture capitalist Marc Andreessen, in a post on X over the weekend. "Incredible timing given current events." Sam Bresnick, a research fellow at Georgetown's Center for Security and Emerging Technology, called the recent developments "a pretty good wake-up call," and Jefferies strategist Christopher Wood wrote in a report to clients, citing industry sources, that GLM 5.2 "is almost equal to Anthropic as a competitor for the corporate market and is just one quarter of the cost in terms of cost per token." Even former Trump crypto a
+
+--- DOC 10 | 01c225bd131a815d1840c898e28c07e2 | 2026-06-30 ---
+Waymo and Uber make critical robotaxi move in major U.S. market
+Look at the robotaxi partnership map closely in 2026, and the pattern that keeps emerging is one of constant reshuffling. Uber Technologies Inc. (UBER) and Alphabet's (GOOG) Waymo confirmed their robotaxi pilot in Phoenix, Arizona, has ended, Reuters reports. The companies framed it not as a failure, but as a graduation. The pilots end, exclusivity deals shift, and new cities are added almost weekly. The Uber and Waymo news fits that pattern, but the reasoning behind it tells you something important about where this industry is actually heading. "Phoenix was our first pilot market with Waymo and was an intentionally limited deployment, reaching just over a dozen vehicles dedicated to the program," Uber said in a statement. "We learned a lot from that collaboration, which helped us to quickly scale Austin and Atlanta, where hundreds of Waymo AVs are available exclusively on Uber." The Phoenix-deployed Waymo vehicles are not being retired, but are pivoting to autonomous deliveries through DoorDash — a competitor to Uber Eats. Waymo called the pilot "productive" and said it "paved the way for future expansions and partnerships across the globe." What the end of Phoenix pilot actually signals My read of this announcement is that it is less about Phoenix specifically and more about how both companies are managing their broader relationship. Automotive World reports that Waymo operates a fleet of approximately 4,000 automated vehicles across the U.S. Waymo also reports that today, Waymo's driverless rides are available exclusively through Uber in just Austin and Atlanta. More Uber: In nine other markets, including Phoenix, San Francisco, Los Angeles, and Miami, riders access Waymo primarily through its own app, Waymo reports. Uber said it plans to partner with another AV company in Phoenix, though it did not disclose which one. That detail is key. Uber is not exiting Phoenix's autonomous vehicle market but is diversifying who it works with there. CEO Dara Khosrowshahi has
+
+--- DOC 11 | 02108e109d52ea8e7a272e5c0b5a6aca | 2026-06-30 ---
+Japan aims to catch up on drone warfare by tapping Ukraine’s experience
+Japan aims to catch up on drone warfare by tapping Ukraine’s experience Analysts say Japan wants to accelerate production of drones to protect its territory given its shortage of military manpower Complementing this strategy, Japanese companies are also collaborating closely with their European counterparts to manufacture anti-submarine drones. “The entire international community has witnessed how warfare has changed since the outbreak of the Ukraine war and Japan, like other countries, is now very much focused on the development of drones that will be carrying out much of the fighting on the future battlefield,” said Masayuki Masuda, director of Chinese studies at the National Institute of Defence Studies, the official think tank of Japan’s Ministry of Defence. “Comparing the relative powers of Russia and Ukraine at the start of the war, it is clear that Ukraine has done very well and a good part of that is due to drones.” While technology is a key focus, Japan also recognises the importance of possessing large numbers of drones that are easy and cheap to manufacture, according to Masuda. “Quantity is just as important as quality in this area, but Japan has many small companies that could very quickly produce large numbers of cheap drones in great quantities should they be needed,” he said.
+
+--- DOC 12 | 0212a82217141c62b612fd0adc11d7b1 | 2026-06-30 ---
+Why scientists are alarmed by Nepal’s worsening bird flu outbreak
+Nepal’s bird flu outbreak spreads, breeding pandemic mutation fears Nepal has culled 600,000 birds as H5N1 sweeps Kathmandu, closing the capital’s only zoo and raising fears it could mutate to infect humans The outbreak began in eastern Nepal in March before reaching the densely populated valley around mid-June – a development that health experts say raises the risk of human exposure. More than 60 poultry farms across the Nepalese capital and nearby Kavre district have been affected, with authorities racing to contain what has become the country’s most serious bird flu crisis in years. “It’s mostly spreading inside Kathmandu and few places are remaining to cull the infected birds,” Mukul Upadhyaya, a senior veterinary officer at Nepal’s Department of Livestock Services, told This Week in Asia. “We have identified crows carrying the pathogen to be transmitting the infection from one location to another in and around Kathmandu.” More than three dozen birds and animals have since died, including a leopard, though authorities have yet to disclose a full death toll amid allegations of a cover-up.
+
+
+codex
+I’ve got the full batch. Next step is writing the output file with one object per input document, preserving order and using empty `facts` where the document doesn’t support market-relevant claims.
+exec
+/bin/zsh -lc "python - <<'PY'
+import json
+from pathlib import Path
+
+out = [
+  {
+    'doc_id': '008c0da9746a977712236eeb778b8f49',
+    'title': 'Why Tenable (TENB) Is Up 22.9% After Winning FedRAMP High and IL5 Cloud Clearance',
+    'facts': [
+      {
+        'claim': 'Tenable stock was up 22.9% after the company won FedRAMP High and Impact Level 5 cloud clearance.',
+        'subject': 'Tenable Holdings, Inc.',
+        'predicate': 'price_move',
+        'object': None,
+        'direction': 'up',
+        'magnitude': '22.9%',
+        'time': '2026-06-30',
+        'cause': 'Tenable One Cloud Exposure achieved FedRAMP High and Impact Level 5 authorization.',
+        'entities': ['Tenable Holdings, Inc.', 'Tenable One Cloud Exposure', 'FedRAMP', 'Impact Level 5'],
+        'confidence': 0.98,
+      },
+      {
+        'claim': 'Tenable One Cloud Exposure achieved FedRAMP High and Impact Level 5 authorization.',
+        'subject': 'Tenable One Cloud Exposure',
+        'predicate': 'corporate_action',
+        'object': 'FedRAMP High and Impact Level 5 authorization',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Tenable Holdings, Inc.', 'Tenable One Cloud Exposure', 'FedRAMP', 'Impact Level 5'],
+        'confidence': 0.96,
+      },
+      {
+        'claim': 'Tenable said the new FedRAMP High and IL5 authorization could reinforce a near-term federal growth catalyst by opening more sensitive workloads to Tenable.',
+        'subject': 'Tenable Holdings, Inc.',
+        'predicate': 'forecast',
+        'object': 'U.S. federal business',
+        'direction': 'up',
+        'magnitude': None,
+        'time': 'near term',
+        'cause': 'The authorization opens more sensitive workloads to Tenable.',
+        'entities': ['Tenable Holdings, Inc.', 'FedRAMP', 'Impact Level 5', 'United States'],
+        'confidence': 0.85,
+      },
+      {
+        'claim': 'Tenable is working with OpenAI through the Daybreak Cyber Partner Program.',
+        'subject': 'Tenable Holdings, Inc.',
+        'predicate': 'deal_or_contract',
+        'object': 'OpenAI',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Tenable Holdings, Inc.', 'OpenAI', 'Daybreak Cyber Partner Program'],
+        'confidence': 0.88,
+      },
+      {
+        'claim': \"Tenable Holdings' narrative projects "'$1.3 billion of revenue and $61.4 million of earnings by 2029.",
+        '"'subject': 'Tenable Holdings, Inc.',
+        'predicate': 'forecast',
+        'object': None,
+        'direction': 'na',
+        'magnitude': '"'$1.3 billion revenue and $61.4 million earnings'"',
+        'time': 'by 2029',
+        'cause': None,
+        'entities': ['Tenable Holdings, Inc.'],
+        'confidence': 0.82,
+      },
+    ],
+  },
+  {
+    'doc_id': '0097e6104cbada020df44cf3a8c41c5b',
+    'title': \"LINE IN ATHENS NAMED NO.1 AS INAUGURAL LIST OF EUROPE'S 50 BEST BARS 2026 IS UNVEILED\",
+    'facts': [],
+  },
+  {
+    'doc_id': '00ac95647d2f94d4b741ef167da066b9',
+    'title': 'Frequent AI chatbot users more likely to believe anti-vaccine myths, poll finds',
+    'facts': [
+      {
+        'claim': 'OpenAI said in January that hundreds of millions of people ask ChatGPT health and wellness questions each week.',
+        'subject': 'OpenAI',
+        'predicate': 'statement',
+        'object': 'ChatGPT',
+        'direction': 'na',
+        'magnitude': 'hundreds of millions of people each week',
+        'time': 'January',
+        'cause': None,
+        'entities': ['OpenAI', 'ChatGPT'],
+        'confidence': 0.86,
+      },
+    ],
+  },
+  {
+    'doc_id': '00b5c6f5436e22ce704a55474fdeb024',
+    'title': 'Australian Dollar: Downside bias but support holds against US Dollar – UOB | FXStreet',
+    'facts': [
+      {
+        'claim': 'AUD/USD closed at 0.6886, down 0.06%, after trading in a 0.6878 to 0.6904 range.',
+        'subject': 'AUD/USD',
+        'predicate': 'price_move',
+        'object': 'US Dollar',
+        'direction': 'down',
+        'magnitude': '-0.06%',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Australian Dollar', 'US Dollar', 'AUD/USD'],
+        'confidence': 0.97,
+      },
+      {
+        'claim': 'UOB said any further AUD/USD decline is likely to be contained within a 0.6865 to 0.6900 range.',
+        'subject': 'AUD/USD',
+        'predicate': 'forecast',
+        'object': 'US Dollar',
+        'direction': 'down',
+        'magnitude': '0.6865-0.6900',
+        'time': '24-hour view',
+        'cause': 'a slight increase in downward momentum',
+        'entities': ['United Overseas Bank', 'Australian Dollar', 'US Dollar', 'AUD/USD'],
+        'confidence': 0.93,
+      },
+      {
+        'claim': 'UOB said AUD/USD is unlikely to break clearly below 0.6865.',
+        'subject': 'AUD/USD',
+        'predicate': 'forecast',
+        'object': 'US Dollar',
+        'direction': 'down',
+        'magnitude': '0.6865',
+        'time': '24-hour view',
+        'cause': None,
+        'entities': ['United Overseas Bank', 'Australian Dollar', 'US Dollar', 'AUD/USD'],
+        'confidence': 0.91,
+      },
+      {
+        'claim': 'UOB said a break above 0.6940 would indicate that 0.6835 is out of reach for AUD/USD.',
+        'subject': 'AUD/USD',
+        'predicate': 'forecast',
+        'object': 'US Dollar',
+        'direction': 'up',
+        'magnitude': '0.6940',
+        'time': '1-3 weeks',
+        'cause': 'downward momentum is starting to ease',
+        'entities': ['United Overseas Bank', 'Australian Dollar', 'US Dollar', 'AUD/USD'],
+        'confidence': 0.9,
+      },
+    ],
+  },
+  {
+    'doc_id': '00c1a20d71bba099e3edaa0c9f37fe9b',
+    'title': '6 Smart Tax Strategies Investors With "'$1M+ Are Using to Protect Wealth in 2026'"',
+    'facts': [],
+  },
+  {
+    'doc_id': '00da4119259589656ef7509f6eb98776',
+    'title': 'WhatsApp to let users go by usernames, not phone numbers',
+    'facts': [
+      {
+        'claim': 'WhatsApp has begun letting users reserve unique usernames before a wider rollout later in 2026.',
+        'subject': 'WhatsApp',
+        'predicate': 'corporate_action',
+        'object': 'usernames feature',
+        'direction': 'na',
+        'magnitude': None,
+        'time': 'later this year',
+        'cause': None,
+        'entities': ['WhatsApp', 'Meta Platforms'],
+        'confidence': 0.96,
+      },
+      {
+        'claim': 'WhatsApp said that over the coming months users will be able to be found and contacted only by their username instead of their phone number.',
+        'subject': 'WhatsApp',
+        'predicate': 'forecast',
+        'object': 'users',
+        'direction': 'na',
+        'magnitude': None,
+        'time': 'over the coming months',
+        'cause': 'the change is designed as a core privacy feature',
+        'entities': ['WhatsApp', 'Meta Platforms'],
+        'confidence': 0.94,
+      },
+      {
+        'claim': 'WhatsApp said the app is used by more than three billion people.',
+        'subject': 'WhatsApp',
+        'predicate': 'statement',
+        'object': None,
+        'direction': 'na',
+        'magnitude': 'more than three billion people',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['WhatsApp', 'Meta Platforms'],
+        'confidence': 0.9,
+      },
+    ],
+  },
+  {
+    'doc_id': '00e51164a8f7edbf2064b451d4ec4082',
+    'title': 'Brompton sells stakes to Decathlon and Chinese Labubu backer',
+    'facts': [
+      {
+        'claim': 'Decathlon acquired a 10% stake in Brompton.',
+        'subject': 'Decathlon',
+        'predicate': 'deal_or_contract',
+        'object': 'Brompton',
+        'direction': 'na',
+        'magnitude': '10%',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Decathlon', 'Brompton'],
+        'confidence': 0.98,
+      },
+      {
+        'claim': 'BA Capital acquired a 5% stake in Brompton.',
+        'subject': 'BA Capital',
+        'predicate': 'deal_or_contract',
+        'object': 'Brompton',
+        'direction': 'na',
+        'magnitude': '5%',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['BA Capital', 'Brompton'],
+        'confidence': 0.98,
+      },
+      {
+        'claim': 'The Decathlon and BA Capital stake purchases in Brompton are understood to be collectively worth about £18 million.',
+        'subject': 'Brompton',
+        'predicate': 'deal_or_contract',
+        'object': 'Decathlon and BA Capital investment',
+        'direction': 'na',
+        'magnitude': 'about £18m',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Brompton', 'Decathlon', 'BA Capital'],
+        'confidence': 0.92,
+      },
+      {
+        'claim': 'Brompton said the new investments would let staff, its chief executive and long-term investors realize cash from share sales and would bring market knowledge, supply-chain efficiency and technology from the new investors.',
+        'subject': 'Brompton',
+        'predicate': 'statement',
+        'object': 'Decathlon and BA Capital investment',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Brompton', 'Decathlon', 'BA Capital'],
+        'confidence': 0.88,
+      },
+      {
+        'claim': 'Brompton bikes will be sold in dedicated Brompton corners in a handful of Decathlon stores for the first time.',
+        'subject': 'Brompton',
+        'predicate': 'deal_or_contract',
+        'object': 'Decathlon stores',
+        'direction': 'na',
+        'magnitude': 'a handful of stores',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Brompton', 'Decathlon'],
+        'confidence': 0.9,
+      },
+      {
+        'claim': 'Brompton chief executive Will Butler-Adams said the cycling industry is over the worst of its post-pandemic sales slump.',
+        'subject': 'Cycling market',
+        'predicate': 'statement',
+        'object': None,
+        'direction': 'up',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': 'the market is recovering from a slump in sales after the pandemic boom',
+        'entities': ['Brompton', 'Cycling market'],
+        'confidence': 0.84,
+      },
+    ],
+  },
+  {
+    'doc_id': '0118c00348aa119f79ec563e254a4f4e',
+    'title': 'Apple iPhone 18 Pro secrets leaked in Tata Electronics hack: What we know',
+    'facts': [
+      {
+        'claim': 'Hackers stole more than 630 gigabytes of confidential data from Tata Electronics and released the documents.',
+        'subject': 'Tata Electronics',
+        'predicate': 'event',
+        'object': None,
+        'direction': 'na',
+        'magnitude': 'more than 630 gigabytes',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Tata Electronics'],
+        'confidence': 0.97,
+      },
+      {
+        'claim': 'Reuters reported that World Leaks posted more than 200,000 Tata Electronics files totaling over 630 gigabytes on June 12.',
+        'subject': 'World Leaks',
+        'predicate': 'event',
+        'object': 'Tata Electronics',
+        'direction': 'na',
+        'magnitude': 'more than 200,000 files totaling over 630 gigabytes',
+        'time': 'June 12',
+        'cause': None,
+        'entities': ['World Leaks', 'Tata Electronics', 'Reuters'],
+        'confidence': 0.94,
+      },
+      {
+        'claim': 'Tata Electronics confirmed the cybersecurity incident publicly.',
+        'subject': 'Tata Electronics',
+        'predicate': 'statement',
+        'object': None,
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Tata Electronics'],
+        'confidence': 0.94,
+      },
+      {
+        'claim': 'Apple said it is concerned about the leak and is investigating it.',
+        'subject': 'Apple',
+        'predicate': 'statement',
+        'object': 'Tata Electronics data leak',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Apple', 'Tata Electronics'],
+        'confidence': 0.95,
+      },
+      {
+        'claim': 'The leaked files include detailed information about iPhone 18 Pro parts, suppliers and supplier competition for contracts.',
+        'subject': 'iPhone 18 Pro',
+        'predicate': 'event',
+        'object': 'supplier and component information',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': 'Hackers released Tata Electronics documents.',
+        'entities': ['Apple', 'iPhone 18 Pro', 'Tata Electronics'],
+        'confidence': 0.93,
+      },
+    ],
+  },
+  {
+    'doc_id': '01b40de78db9b9b19f7e9b785f1db032',
+    'title': \"Trump administration's AI crackdown opens door for China to close gap\",
+    'facts': [
+      {
+        'claim': 'Anthropic resumed release of its Mythos 5 model to some companies and federal agencies on Friday after a two-week shutdown caused by an export control directive.',
+        'subject': 'Anthropic',
+        'predicate': 'policy_action',
+        'object': 'Mythos 5',
+        'direction': 'na',
+        'magnitude': 'two-week shutdown',
+        'time': 'Friday',
+        'cause': 'an export control directive',
+        'entities': ['Anthropic', 'Mythos 5', 'United States'],
+        'confidence': 0.95,
+      },
+      {
+        'claim': 'Anthropic said its Fable 5 model remains off the market.',
+        'subject': 'Anthropic',
+        'predicate': 'corporate_action',
+        'object': 'Fable 5',
+        'direction': 'na',
+        'magnitude': None,
+        'time': 'Friday',
+        'cause': 'government national security concerns',
+        'entities': ['Anthropic', 'Fable 5', 'United States'],
+        'confidence': 0.9,
+      },
+      {
+        'claim': 'OpenAI said on Friday that it would limit the rollout of its GPT 5.6 models following a government request.',
+        'subject': 'OpenAI',
+        'predicate': 'policy_action',
+        'object': 'GPT 5.6',
+        'direction': 'na',
+        'magnitude': None,
+        'time': 'Friday',
+        'cause': 'a government request',
+        'entities': ['OpenAI', 'GPT 5.6', 'United States'],
+        'confidence': 0.96,
+      },
+      {
+        'claim': 'Researchers said Zhipu released GLM 5.2 earlier in June and that it can perform on par with top U.S. labs on some cyber benchmarks.',
+        'subject': 'Zhipu',
+        'predicate': 'corporate_action',
+        'object': 'GLM 5.2',
+        'direction': 'na',
+        'magnitude': None,
+        'time': 'earlier this month',
+        'cause': None,
+        'entities': ['Zhipu', 'GLM 5.2', 'United States', 'China'],
+        'confidence': 0.88,
+      },
+      {
+        'claim': 'Jefferies strategist Christopher Wood wrote that GLM 5.2 is almost equal to Anthropic for the corporate market and costs one quarter as much per token.',
+        'subject': 'GLM 5.2',
+        'predicate': 'statement',
+        'object': 'Anthropic',
+        'direction': 'down',
+        'magnitude': 'one quarter of the cost per token',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['GLM 5.2', 'Anthropic', 'Jefferies', 'Christopher Wood', 'Zhipu'],
+        'confidence': 0.84,
+      },
+    ],
+  },
+  {
+    'doc_id': '01c225bd131a815d1840c898e28c07e2',
+    'title': 'Waymo and Uber make critical robotaxi move in major U.S. market',
+    'facts': [
+      {
+        'claim': 'Uber and Waymo said their robotaxi pilot in Phoenix, Arizona, has ended.',
+        'subject': 'Uber Technologies Inc.',
+        'predicate': 'corporate_action',
+        'object': 'Waymo Phoenix robotaxi pilot',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Uber Technologies Inc.', 'Waymo', 'Phoenix, Arizona'],
+        'confidence': 0.98,
+      },
+      {
+        'claim': 'Uber said the Phoenix Waymo pilot was an intentionally limited deployment that reached just over a dozen vehicles dedicated to the program.',
+        'subject': 'Uber Technologies Inc.',
+        'predicate': 'statement',
+        'object': 'Waymo Phoenix robotaxi pilot',
+        'direction': 'na',
+        'magnitude': 'just over a dozen vehicles',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Uber Technologies Inc.', 'Waymo', 'Phoenix, Arizona'],
+        'confidence': 0.93,
+      },
+      {
+        'claim': 'Waymo vehicles deployed in Phoenix are being redirected to autonomous deliveries through DoorDash.',
+        'subject': 'Waymo',
+        'predicate': 'corporate_action',
+        'object': 'DoorDash',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': 'the Phoenix robotaxi pilot ended',
+        'entities': ['Waymo', 'DoorDash', 'Phoenix, Arizona'],
+        'confidence': 0.95,
+      },
+      {
+        'claim': 'Uber said hundreds of Waymo autonomous vehicles are available exclusively on Uber in Austin and Atlanta.',
+        'subject': 'Uber Technologies Inc.',
+        'predicate': 'statement',
+        'object': 'Waymo',
+        'direction': 'na',
+        'magnitude': 'hundreds of vehicles',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Uber Technologies Inc.', 'Waymo', 'Austin, Texas', 'Atlanta, Georgia'],
+        'confidence': 0.9,
+      },
+      {
+        'claim': 'Uber said it plans to partner with another autonomous-vehicle company in Phoenix.',
+        'subject': 'Uber Technologies Inc.',
+        'predicate': 'forecast',
+        'object': 'another autonomous-vehicle company',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Uber Technologies Inc.', 'Phoenix, Arizona'],
+        'confidence': 0.88,
+      },
+    ],
+  },
+  {
+    'doc_id': '02108e109d52ea8e7a272e5c0b5a6aca',
+    'title': 'Japan aims to catch up on drone warfare by tapping Ukraine’s experience',
+    'facts': [
+      {
+        'claim': 'Japan wants to accelerate drone production to protect its territory because it faces a shortage of military manpower.',
+        'subject': 'Japan',
+        'predicate': 'production_change',
+        'object': 'drones',
+        'direction': 'up',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': 'a shortage of military manpower',
+        'entities': ['Japan', 'Ukraine'],
+        'confidence': 0.94,
+      },
+      {
+        'claim': 'Japanese companies are collaborating closely with European counterparts to manufacture anti-submarine drones.',
+        'subject': 'Japanese companies',
+        'predicate': 'deal_or_contract',
+        'object': 'European counterparts',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Japan', 'Europe', 'Japanese companies'],
+        'confidence': 0.93,
+      },
+      {
+        'claim': 'Masayuki Masuda said Japan has many small companies that could quickly produce large numbers of cheap drones if needed.',
+        'subject': 'Japan',
+        'predicate': 'statement',
+        'object': 'drone production capacity',
+        'direction': 'up',
+        'magnitude': 'large numbers of cheap drones',
+        'time': '2026-06-30',
+        'cause': None,
+        'entities': ['Japan', 'Masayuki Masuda'],
+        'confidence': 0.86,
+      },
+    ],
+  },
+  {
+    'doc_id': '0212a82217141c62b612fd0adc11d7b1',
+    'title': 'Why scientists are alarmed by Nepal’s worsening bird flu outbreak',
+    'facts': [
+      {
+        'claim': 'Nepal has culled 600,000 birds as the H5N1 outbreak spread through Kathmandu.',
+        'subject': 'Nepal',
+        'predicate': 'supply_change',
+        'object': 'poultry',
+        'direction': 'down',
+        'magnitude': '600,000 birds',
+        'time': '2026-06-30',
+        'cause': 'the H5N1 outbreak spread through Kathmandu',
+        'entities': ['Nepal', 'Kathmandu', 'H5N1'],
+        'confidence': 0.98,
+      },
+      {
+        'claim': 'More than 60 poultry farms in Kathmandu and nearby Kavre district have been affected by the bird flu outbreak.',
+        'subject': 'Nepal poultry sector',
+        'predicate': 'event',
+        'object': 'poultry farms in Kathmandu and Kavre district',
+        'direction': 'na',
+        'magnitude': 'more than 60 poultry farms',
+        'time': '2026-06-30',
+        'cause': 'the bird flu outbreak',
+        'entities': ['Nepal', 'Kathmandu', 'Kavre district', 'H5N1'],
+        'confidence': 0.96,
+      },
+      {
+        'claim': 'Nepal closed Kathmandu’s only zoo because of the bird flu outbreak.',
+        'subject': 'Nepal',
+        'predicate': 'policy_action',
+        'object': 'Kathmandu’s only zoo',
+        'direction': 'na',
+        'magnitude': None,
+        'time': '2026-06-30',
+        'cause': 'the H5N1 outbreak',
+        'entities': ['Nepal', 'Kathmandu', 'H5N1'],
+        'confidence': 0.9,
+      },
+      {
+        'claim': 'More than three dozen birds and animals, including a leopard, have died in Nepal’s bird flu outbreak.',
+        'subject': 'Nepal',
+        'predicate': 'event',
+        'object': 'birds and animals',
+        'direction': 'down',
+        'magnitude': 'more than three dozen',
+        'time': '2026-06-30',
+        'cause': 'the bird flu outbreak',
+        'entities': ['Nepal', 'H5N1'],
+        'confidence': 0.91,
+      },
+    ],
+  },
+]
+
+# preserve exact input order and titles from source file
+src = Path('all_batch_036.jsonl')
+rows = [json.loads(line) for line in src.read_text().splitlines()]
+by_id = {item['doc_id']: item for item in out}
+ordered = []
+for row in rows:
+    item = by_id[row['doc_id']]
+    item = {'doc_id': row['doc_id'], 'title': row['title'], 'facts': item['facts']}
+    ordered.append(item)
+
+with open('all_facts_036.jsonl', 'w') as f:
+    for item in ordered:
+        f.write(json.dumps(item, ensure_ascii=True) + '\\n')
+
+print(f\"docs processed: {len(ordered)}, total facts: {sum(len(item['facts']) for item in ordered)}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 41
+
+codex
+docs processed: 12, total facts: 41
+tokens used
+24,442
+docs processed: 12, total facts: 41

@@ -1,0 +1,3 @@
+Wrote `all_facts_032.jsonl` in the current directory.
+
+`docs processed: 12, total facts: 63`

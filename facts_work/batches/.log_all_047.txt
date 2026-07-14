@@ -1,0 +1,557 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fc2-4e01-74b1-af9c-3b6c6b3dcfcd
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_047.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_047.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_047.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:17:40.385719Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_047.jsonl` to confirm its structure and then I’ll generate `all_facts_047.jsonl` directly from that file only.
+exec
+/bin/zsh -lc 'wc -l all_batch_047.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_047.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_047.jsonl') as f:
+    for i, line in enumerate(islice(f, 3), 1):
+        obj = json.loads(line)
+        print(f\"DOC {i}: keys={sorted(obj.keys())}\")
+        print(obj['doc_id'], obj['title'][:160].replace('\\n',' '))
+        print(obj['body_text'][:500].replace('\\n',' ') if obj.get('body_text') else '')
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+2416ff48f1a5b8c5cfc97834b0e19271 US April CaseShiller 20-city house price index +1.1% y/y vs +0.9% expected | investingLive
+- Prior was +0.8% y/y - Monthly prices vs -0.1% - Prior monthly -0.2% From the FHFA: - Yearly vs +1.7% prior - Monthly vs +0.1% prior There are some signs that housing is starting to tick up in the US and you can see it in housing-related stocks lately. Much of that is a function of oil prices coming down and the threat of broader inflation dwindling but it's been a long, rough recession in US housing that could be reversed on positive cyclical factors as stock markets continue to rise and unemp
+---
+DOC 2: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+242c8a390b2036856d66ddcced36f222 Myro (MYRO) Price Predictions 2025 to 2030 | Will It Rebound? • Benzinga
+Analysts are forecasting that Myro (MYRO) could reach $0.050 by 2030. Feeling confident about this MYRO price prediction? You can trade Myro on Coinbase—and if you're new to the platform, you could earn up to $400 in rewards by completing a few quick educational lessons and making your first qualifying trade. Myro (MYRO), a meme coin launched on the Solana blockchain in November 2023, is inspired by Solana cofounder Raj Gokal’s dog. Built on Solana’s efficient proof-of-participation network boas
+---
+DOC 3: keys=['body_text', 'doc_id', 'published_date', 'source_name', 'title', 'url']
+2455bfdd7582ca01f3dd0d5512345956 DR Congo out to derail England’s title charge at World Cup: All to know
+Five wins to go. How can your team reach the final and win World Cup 2026? Click here to find out. Who: England vs DR Congo What: FIFA World Cup 2026 – round of 32 Where: Atlanta Stadium, Atlanta, US When: Wednesday, July 1, at noon (16:00 GMT) How to follow: We will have all the build-up on Al Jazeera Sport from 13:00 GMT before our live text commentary stream. Recommended Stories list of 4 items- list 1 of 4At the World Cup, the media has set up a moral checkpoint - list 2 of 4Top 5 World Cup 
+---
+
+codex
+I’ve confirmed there are 12 input documents. Next I’m scanning all titles and article text so I can extract only explicit market facts and leave non-market items empty.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_047.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        obj = json.loads(line)
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['source_name']} | {obj['title']}\")
+        body = (obj.get('body_text') or '').replace('\\n',' ')
+        print(body[:1200])
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 2416ff48f1a5b8c5cfc97834b0e19271 | 2026-06-30 | ForexLive | US April CaseShiller 20-city house price index +1.1% y/y vs +0.9% expected | investingLive
+- Prior was +0.8% y/y - Monthly prices vs -0.1% - Prior monthly -0.2% From the FHFA: - Yearly vs +1.7% prior - Monthly vs +0.1% prior There are some signs that housing is starting to tick up in the US and you can see it in housing-related stocks lately. Much of that is a function of oil prices coming down and the threat of broader inflation dwindling but it's been a long, rough recession in US housing that could be reversed on positive cyclical factors as stock markets continue to rise and unemployment stays low. It's taken some time for buyers to get used to 6% mortgages again but it doesn't look like those 3% mortgages for 30 years are coming back any time soon, maybe ever.
+---
+2. 242c8a390b2036856d66ddcced36f222 | 2026-06-30 | Benzinga | Myro (MYRO) Price Predictions 2025 to 2030 | Will It Rebound? • Benzinga
+Analysts are forecasting that Myro (MYRO) could reach $0.050 by 2030. Feeling confident about this MYRO price prediction? You can trade Myro on Coinbase—and if you're new to the platform, you could earn up to $400 in rewards by completing a few quick educational lessons and making your first qualifying trade. Myro (MYRO), a meme coin launched on the Solana blockchain in November 2023, is inspired by Solana cofounder Raj Gokal’s dog. Built on Solana’s efficient proof-of-participation network boasting 10,000 nodes globally, Myro facilitates swift, tax-free transactions appealing to a broad audience. While rooted in meme culture, Myro distinguishes itself by leveraging the Solana blockchain’s capabilities and fostering community engagement. Beyond its playful origins, Myro aims to provide practical utility through exclusive merchandise, event access and innovative tools like the MYRO Buy Bot and Social-Fi Mobile App to bridge the gap between meme-driven hype and real-world application. 2025 Myro Price Prediction Technical indicators reflect a bearish sentiment and the Fear & Greed Index has an Extreme Fear reading of 25. Despite the long-term price prediction, CoinCodex’s analysis sug
+---
+3. 2455bfdd7582ca01f3dd0d5512345956 | 2026-06-30 | Al Jazeera | DR Congo out to derail England’s title charge at World Cup: All to know
+Five wins to go. How can your team reach the final and win World Cup 2026? Click here to find out. Who: England vs DR Congo What: FIFA World Cup 2026 – round of 32 Where: Atlanta Stadium, Atlanta, US When: Wednesday, July 1, at noon (16:00 GMT) How to follow: We will have all the build-up on Al Jazeera Sport from 13:00 GMT before our live text commentary stream. Recommended Stories list of 4 items- list 1 of 4At the World Cup, the media has set up a moral checkpoint - list 2 of 4Top 5 World Cup knockout shocks – Paraguay win hurts Germany again - list 3 of 4Paraguay declares holiday after beating Germany in World Cup upset - list 4 of 4As heartbroken Iran depart World Cup, Mexican hospitality offers rare warmth England continue their bid for the 2026 World Cup title, facing first-timers, the Democratic Republic of Congo, in Wednesday’s round of 32 meeting. After coming out of their group with an unbeaten record, the Three Lions will look to roar into the next phase. But with an uninspiring draw and laboured victory marring their recent form, Thomas Tuchel and his side will take nothing for granted against DR Congo, who are enjoying a dream run with their first-ever knockout appeara
+---
+4. 2513c78794afb1e484677d289b53918b | 2026-06-30 | Al Jazeera | What privacy settings has WhatsApp changed?
+Change is coming for some three billion users of the world’s favourite messaging platform, WhatsApp. The social media app owned by Meta will allow users to be identified by usernames instead of phone numbers, it said on Monday. WhatsApp is used in more than 180 countries and 60 languages, the platform says. Recommended Stories list of 3 items- list 1 of 3WhatsApp to let users go by usernames, not phone numbers - list 2 of 3Screen time calculator: How much of your life is spent on social media? - list 3 of 3Telegram challenges India app ban, calls move unconstitutional Users will soon be able to reserve unique handles, with a wider rollout planned for later this year. The move is designed to improve privacy on the platform amid longstanding scrutiny over its data protection practices. So what is changing, and how can you grab a handle no one else has? What change has WhatsApp announced? Users will soon be able to swap the phone numbers displayed on WhatsApp with usernames, the company said. Under the new system, which will commence later this year, users will be able to choose to be “findable” and contacted by their handles only. The app said it has already begun allowing some users
+---
+5. 254934ad34f788fc87ab1cc19ea555fa | 2026-06-30 | Yahoo Finance | Time to Sound the Alarm on Archer Aviation?
+Archer Aviation (NYSE: ACHR), an early mover in the nascent market for electric vertical takeoff-and-landing (eVTOL) aircraft, set a record high of $17.14 per share on Feb. 18, 2021. Today, it trades at less than $5. Is it time to sound the alarm on this fallen stock? Why did Archer Aviation's stock crash? Before Archer went public through a merger with a special purpose acquisition company (SPAC), it claimed it could produce 10 eVTOLs in 2024 and 250 eVTOLs in 2025. But as of this writing, it has only manufactured two test aircraft and one full-scale Midnight aircraft. Missed Nvidia in 2009? This Rare Signal Is Flashing Again. In 2009, a "Double Down" signal flashed for a little-known chipmaker called Nvidia. For the first time in years, that same "Total Conviction" signal is flashing for a company 1/100th the size of Nvidia. Continue » The Midnight can carry a single pilot and four passengers, travel up to 100 miles, and reach a maximum speed of 150 miles per hour. However, it has a lower top speed and a shorter range than Joby Aviation's (NYSE: JOBY) S4 eVTOL. Joby is also further along in the FAA certification process for its U.S. commercial flights than Archer. Those setbacks 
+---
+6. 258ef251ad2c6015d101d2340bda4b22 | 2026-06-30 | Guardian Business | US supreme court strikes down limits on campaign spending
+One of the last remaining barriers between wealthy donors sending unlimited funds to federal political candidates fell after the US supreme court struck down a lower court ruling that limited spending by political parties in support of their candidates. “A BIG WIN FOR REPUBLICANS and, more importantly, The First Amendment!” wrote Donald Trump in a post on Truth Social. The first amendment of the US constitution includes protections for free speech, and the supreme court has repeatedly ruled that campaign spending is a form of speech. The case, National Republican Senatorial Committee v Federal Election Commission, stems from a 2022 lawsuit by JD Vance, Republican former congressman Steve Chabot of Ohio, the National Republican Senatorial Committee and the National Republican Congressional Committee, challenging the Federal Election Commission’s enforcement of limits on so-called “coordinated party expenditures”. The US supreme court has chipped away at restrictions on political donations and spending over the last two decades. The Citizens United v FEC ruling of 2010 struck down federal restrictions on corporate spending by independent groups influencing elections, followed in 2014
+---
+7. 25cffb64c9b3b49f2cd043d29e0c54e3 | 2026-06-30 | FXStreet News | ECB’s Nagel: Middle East situation is still very opaque | FXStreet
+European Central Bank (ECB) Governing Council Member and President of the Deutsche Bundesbank, Joachim Nagel, said during the European trading session on Tuesday that inflation risks in the Eurozone have not vanished, citing that the Middle East situation is still “very opaque”. Additional remarks Inflation will stay significantly above target. Probability that inflation will stay on elevated level. Too early to make call on rate hikes. Retreat of energy price was a surprise. Market Reaction No immediate impact is seen in the Euro (EUR) following remarks from ECB's Nagel. At press time, EUR/USD trades 0.15% lower to near 1.1400. ECB FAQs The European Central Bank (ECB) in Frankfurt, Germany, is the reserve bank for the Eurozone. The ECB sets interest rates and manages monetary policy for the region. The ECB primary mandate is to maintain price stability, which means keeping inflation at around 2%. Its primary tool for achieving this is by raising or lowering interest rates. Relatively high interest rates will usually result in a stronger Euro and vice versa. The ECB Governing Council makes monetary policy decisions at meetings held eight times a year. Decisions are made by heads of
+---
+8. 25e2825b5a169af8a90bbed668b3cda6 | 2026-06-30 | Yahoo Finance | Phoenix Education Partners Schedules Third Quarter 2026 Earnings Conference Call
+PHOENIX, June 30, 2026--(BUSINESS WIRE)--Phoenix Education Partners, Inc. (NYSE: PXED), the parent company of University of Phoenix, today announced it will host a conference call on Tuesday, July 14, 2026, at 2:00 p.m. MST (5:00 p.m. EDT) to discuss its results for third quarter ended May 31, 2026. Financial results will be released the same day after the markets close. The call can be accessed by webcast on the Phoenix Education Partners website at www.phoenixeducationpartners.com. Please register in the Investor Relations section of the site 15 minutes prior to the call. The call can also be accessed by dialing (800) 715-9871 (domestic) or +1 (646) 307-1963 (toll), using conference ID: 8113013. The webcast will be archived for 30 days and the call replay for seven days. To access the call replay, dial (800) 770-2030 (domestic) or +1(609) 800-9909 (toll), using conference ID: 8113013, or visit the Investor Relations section of the Phoenix Education Partners website. About Phoenix Education Partners, Inc. Phoenix Education Partners, Inc. is the parent company of University of Phoenix, a pioneer in online education for working adults. Founded in 1976, University of Phoenix provides
+---
+9. 265fbc874517878c5185744b249f68a3 | 2026-06-30 | Al Jazeera | Chinese billionaire Guo Wengui gets 30 years in US prison for huge fraud
+A self-exiled billionaire Chinese business tycoon has been sentenced to 30 years in a United States prison for financial fraud that a federal judge said cost more than 1,000 people worldwide hundreds of millions of dollars. Guo Wengui, who fled China a decade ago and reinvented himself in the US as a critic of the Chinese Communist Party (CCP), was sentenced on Monday in a Manhattan court by Judge Analisa Torres. Recommended Stories list of 3 items- list 1 of 3The $3.7bn man: Inside one of US’s biggest Medicare frauds - list 2 of 3Somali intelligence helps US arrest alleged leader of Minnesota fraud - list 3 of 3US Supreme Court backs Trump’s firings; Fed’s Cook reserved as exception Guo, once believed to be among China’s wealthiest men, was also ordered to forfeit $889m in restitution. A jury unanimously found Guo guilty of fraud, various securities offences, wire fraud and money laundering in 2024. The FBI arrested him the year before in his luxury Manhattan apartment overlooking Central Park. At Monday’s sentencing, Torres said Guo, also known as Miles Guo and Ho Wan Kwok, “preyed on those seeking to bring Democracy to China”, taking their money so he could live lavishly. In cou
+---
+10. 2692988d62b01aee8803d68e66ace185 | 2026-06-30 | Yahoo Finance | Alcoa Announces Strategic Acquisition of South32’s Bauxite, Alumina, and Aluminum Assets for $4.1 billion
+Alcoa Announces Strategic Acquisition of South32’s Bauxite, Alumina, and Aluminum Assets for $4.1 billion - Reinforces Alcoa's position as a leading pure-play upstream aluminum company with an expanded portfolio of world-class bauxite, alumina, and aluminum assets - South32 upfront consideration of $4.1 billion in cash and stock plus a contingent value right of up to $750 million, with payments based on agreed revenue-sharing linked to future alumina and aluminum prices - Expected to generate significant synergies of approximately $900 million in net present value - Expected to be accretive to Alcoa's earnings per share and free cash flow immediately following closing - Significantly enhances a critical source of production globally, strengthening Alcoa's ability to serve customers at scale - Investor conference call scheduled for today at 7:00pm EDT / July 1 at 9:00am AEST PITTSBURGH, June 30, 2026--(BUSINESS WIRE)--Alcoa Corporation (NYSE: AA, ASX: AAI) ("Alcoa" or the "Company") today announced that it has entered into a definitive agreement to acquire South32 Limited's (ASX: S32, LSE: S32.L, JSE: S32) ("South32") interests in bauxite mine, alumina refinery and aluminum smelter 
+---
+11. 26cc36a560c3cfffab7f5aabd8de0673 | 2026-06-30 | FXStreet News | Gold flat below $4,050 as Fed hike bets, US-Iran jitters cap recovery | FXStreet
+Gold (XAU/USD) struggles to build on its intraday recovery from the lowest level since November 2025, touched earlier this Tuesday, and trades below $4,050, nearly unchanged during the first half of the European session. Against the backdrop of renewed Mideast tensions, mixed signals on US-Iran talks assist the safe-haven US Dollar (USD) to attract fresh buyers and stall its recent pullback from the highest level since May 2025. Moreover, elevated expectations for Federal Reserve (Fed) interest rate hikes favor the USD bulls, warranting caution before positioning for any further move higher for the bullion. Media reports suggested that the US and Iran have agreed to "stand down" following an exchange of strikes in and around the Strait of Hormuz over the past few days, with both countries accusing each other of violating the ceasefire agreement. Adding to this, US President Donald Trump wrote on Truth Social that Iran had requested a meeting, and it will take place in Qatar's capital, Doha, on Tuesday. However, Deputy Iranian Foreign Minister Kazem Gharibabadi denied that there were plans for technical talks this week. This keeps geopolitical risk premiums in play and benefits the 
+---
+12. 275c20c32eafed4b2d2459e913762150 | 2026-06-30 | Guardian Business | US supreme court agrees to hear challenges to assault-weapons bans
+The US supreme court will consider whether bans on AR-15 rifles and similar semiautomatic firearms are constitutional. The justices said on Tuesday they will hear appeals challenging bans in Connecticut and the Chicago area in the next term. The high court’s announcement comes on the heels of two recent victories for second amendment attorneys and advocates. On 18 July the court sided with a Texas man and prospective gun owner who argued that policies that bar marijuana users from ownership violate the second amendment. The following week, the court’s conservative majority struck down a Hawaii law that prohibits people from bringing a gun on to private property without the consent of the property’s owner. The upcoming cases are the court’s latest steps toward clarifying the doctrine set in place by the 2022 Bruen decision, which requires gun laws to pass a “history and tradition test”, said Hayley Lawrence, the executive director of the Center for Firearms Law at Duke Law School. “Bruen was this enormous sea change in constitutional interpretation. It bakes in judicial discretion, and supreme court justices don’t like how lower courts are applying the test they created,” she said. 
+---
+
+codex
+I have the document set mapped out. I’m opening the few market-heavy articles in full now so the extracted claims stay atomic and tied to exact figures and dates from the text.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids = {'242c8a390b2036856d66ddcced36f222','254934ad34f788fc87ab1cc19ea555fa','2692988d62b01aee8803d68e66ace185','26cc36a560c3cfffab7f5aabd8de0673','25cffb64c9b3b49f2cd043d29e0c54e3'}
+with open('all_batch_047.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        if obj['doc_id'] in ids:
+            print('DOC_ID:', obj['doc_id'])
+            print('TITLE:', obj['title'])
+            print(obj['body_text'])
+            print('\\n' + '='*80 + '\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC_ID: 242c8a390b2036856d66ddcced36f222
+TITLE: Myro (MYRO) Price Predictions 2025 to 2030 | Will It Rebound? • Benzinga
+Analysts are forecasting that Myro (MYRO) could reach $0.050 by 2030. Feeling confident about this MYRO price prediction? You can trade Myro on Coinbase—and if you're new to the platform, you could earn up to $400 in rewards by completing a few quick educational lessons and making your first qualifying trade. Myro (MYRO), a meme coin launched on the Solana blockchain in November 2023, is inspired by Solana cofounder Raj Gokal’s dog. Built on Solana’s efficient proof-of-participation network boasting 10,000 nodes globally, Myro facilitates swift, tax-free transactions appealing to a broad audience. While rooted in meme culture, Myro distinguishes itself by leveraging the Solana blockchain’s capabilities and fostering community engagement. Beyond its playful origins, Myro aims to provide practical utility through exclusive merchandise, event access and innovative tools like the MYRO Buy Bot and Social-Fi Mobile App to bridge the gap between meme-driven hype and real-world application. 2025 Myro Price Prediction Technical indicators reflect a bearish sentiment and the Fear & Greed Index has an Extreme Fear reading of 25. Despite the long-term price prediction, CoinCodex’s analysis suggests that purchasing Myro now may not be advisable. 2026 Myro Price Prediction For 2026, February is predicted to be the most bullish month, potentially seeing a 178.43% price increase from its current value. 2030 Myro Price Prediction By 2030, Myro is projected to grow substantially, with the forecast implying a potential return on investment of 353.67%, reflecting a strongly bullish sentiment for the year. Reasons to Invest in Myro Myro’s integration with the Solana blockchain, its community-driven nature and the possibility of high returns associated with meme coin volatility are among the reasons to invest in it. Investors should consider: - Solana Blockchain Integration: Myro’s foundation on the Solana blockchain provides potential advantages in terms of transaction speed and efficiency. Solana’s high throughput and low fees contribute to Myro’s usability and appeal. - Utility and Development: The project’s efforts to develop practical utilities such as the MYRO Buy Bot and Social-Fi Mobile App could move the token beyond meme status. If these features gain traction, they could add real-world value to it. - Potential for High Returns: The cryptocurrency market is known for its volatility and meme coins in particular can experience significant price swings. While investing in meme coins is risky, it is also possible to see substantial returns for those who time their investments well. Factors That Could Slow Myro’s Growth Because it’s a meme coin, Myro is volatile with values heavily influenced by fleeting hype and speculative trends. If the initial enthusiasm declines or if negative sentiment takes hold, Myro’s price could experience a sharp decline. The perception of meme coins as purely speculative assets could deter serious long-term investors and limit sustained growth. Myro’s dependence on the Solana blockchain also makes it vulnerable – any issues affecting the Solana network, such as outages or security breaches, could impact Myro’s performance. Although the project is trying to transcend its meme status through initiatives like the MYRO Buy Bot and Social-Fi Mobile App, the success of the features is uncertain. If Myro fails to deliver on these promises or there is not sustained user engagement, its growth could be hindered. Price Predictions from Analysts According to CoinCodex, Myro’s price history reveals a significant range, reaching its all-time high of $0.445979 on March 9, 2024, after hitting an all-time low of $0.002125 on Nov. 14, 2023. Since its peak, Myro’s lowest price point was $0.010249 (cycle low) and its highest price since that low was $0.013344 (cycle high). The Myro price prediction is bearish with the Fear & Greed Index indicating a level of fear at 43. Myro’s circulating supply is 944.2 million MYRO out of a maximum supply of 1 billion MYRO. Regarding market capitalization, Myro has notable positions in the Solana ecosystem, ranking No. 12 in the Solana Network sector, No. 96 in the Meme Coins sector and No. 58 in the broader Solana Coins & Tokens sector. Market Sentiment and Social Trends According to Coinbase (as of April 11), MYRO generated moderate social media discussion, with 423 unique individuals contributing to online conversations, placing it at No. 165 regarding overall mentions and activities. News coverage of Myro has declined, with zero recent news articles published. On X, sentiment leans toward neutrality with 89.61% of posts expressing a neutral stance. Bullish sentiment accounts for 10.39% of posts while bearish sentiment represents only 0.73% based on a sample of 915 posts. Reddit posts tended to have more downvotes than upvotes while comments tended to receive more upvotes than downvotes. Speculative Demand and Hype Cycles Like many meme coins, Myro experiences significant price fluctuations driven by speculative demand and hype cycles which are characterized by rapid price surges fueled by social media buzz, influencer endorsements and the fear of missing out. A surge of interest can attract more investors and drive the price higher. Still, the rallies are often unsustainable because they are not usually based on fundamental value or long-term utility. As hype subsides, speculative demand declines leading to sharp price corrections. This volatility makes Myro a high-risk investment where timing is crucial. Investors who capitalize on hype cycles should know the potential for substantial losses because the market can shift abruptly. Broader Market Factors MYRO’s price movements are also influenced by broader macroeconomic conditions including Bitcoin and Ethereum’s performance, Federal Reserve policies and overall risk appetite in the crypto market. Historically, meme coins have closely followed Bitcoin's trajectory, so MYRO will likely see a speculative interest surge if BTC enters a bull market. Conversely, meme coins suffer heavier losses than more fundamentally driven assets during bearish market conditions. Frequently Asked Questions What is Myro and why is it gaining attention in the crypto market? Myro (MYRO) is a meme coin launched on the Solana blockchain in November 2023, inspired by Solana cofounder Raj Gokal’s dog. Unlike typical meme coins, Myro is developing tools like a Social-Fi app and MYRO Buy Bot to create real-world utility. Despite recent bearish momentum, its viral branding, fast Solana-based transactions and early community engagement have drawn investor interest. What are the price predictions for Myro (MYRO) in 2025? Analysts forecast MYRO could trade between $0.012285 and $0.041902 in 2025 with an average expected price of $0.024363. CoinCodex projects a 229.3% increase by May 10. However, current technical indicators are bearish and the Fear & Greed Index sits at 25 (Extreme Fear) suggesting caution in the short term. Could Myro reach new highs by 2030? By 2030, MYRO is forecast to reach as high as $0.050579 with an average price around $0.047891. This implies a potential return on investment of over 350% from current levels provided market sentiment improves and Myro delivers on its road map. A bullish scenario may unfold if broader crypto markets rally and Myro gains wider adoption.
+
+================================================================================
+
+DOC_ID: 254934ad34f788fc87ab1cc19ea555fa
+TITLE: Time to Sound the Alarm on Archer Aviation?
+Archer Aviation (NYSE: ACHR), an early mover in the nascent market for electric vertical takeoff-and-landing (eVTOL) aircraft, set a record high of $17.14 per share on Feb. 18, 2021. Today, it trades at less than $5. Is it time to sound the alarm on this fallen stock? Why did Archer Aviation's stock crash? Before Archer went public through a merger with a special purpose acquisition company (SPAC), it claimed it could produce 10 eVTOLs in 2024 and 250 eVTOLs in 2025. But as of this writing, it has only manufactured two test aircraft and one full-scale Midnight aircraft. Missed Nvidia in 2009? This Rare Signal Is Flashing Again. In 2009, a "Double Down" signal flashed for a little-known chipmaker called Nvidia. For the first time in years, that same "Total Conviction" signal is flashing for a company 1/100th the size of Nvidia. Continue » The Midnight can carry a single pilot and four passengers, travel up to 100 miles, and reach a maximum speed of 150 miles per hour. However, it has a lower top speed and a shorter range than Joby Aviation's (NYSE: JOBY) S4 eVTOL. Joby is also further along in the FAA certification process for its U.S. commercial flights than Archer. Those setbacks -- along with its lack of meaningful revenue, steep losses, and high valuation -- make Archer a less appealing eVTOL stock than Joby. However, Archer's indicative (non-committal) backlog still swelled to $6 billion at the end of 2025 with pending orders for roughly 1,200 aircraft. Its biggest investor, Stellantis, still plans to help the company ramp up its production after the FAA fully certifies its first commercial flights. Archer's early customers include United Airlines and Abu Dhabi Aviation, which will use the Midnight for last-mile "airport to home" air taxi flights, and Andruil, which has been co-developing a hybrid eVTOL defense aircraft with the company. Archer believes it can eventually produce 650 aircraft annually with Stellantis after the FAA greenlights its first flights. Unlike Joby, which will mainly sell its own first-party eVTOLs, Archer plans to produce eVTOLs for third-party customers. Both companies will launch their own first-party air taxi services, but Uber will directly integrate Joby's flights into its Uber Air platform. It's too early to sound the alarm Archer's progress is sluggish, and it has clear disadvantages against Joby. But from 2026 to 2028, analysts expect its revenue to rise from $9.5 million to $428.4 million as it ramps up its production. With a market cap of $3.6 billion, it still looks reasonably valued at 7 times its 2028 sales. Joby, with a market cap of $8.5 billion, looks pricier at 19 times its 2028 sales.
+
+================================================================================
+
+DOC_ID: 25cffb64c9b3b49f2cd043d29e0c54e3
+TITLE: ECB’s Nagel: Middle East situation is still very opaque | FXStreet
+European Central Bank (ECB) Governing Council Member and President of the Deutsche Bundesbank, Joachim Nagel, said during the European trading session on Tuesday that inflation risks in the Eurozone have not vanished, citing that the Middle East situation is still “very opaque”. Additional remarks Inflation will stay significantly above target. Probability that inflation will stay on elevated level. Too early to make call on rate hikes. Retreat of energy price was a surprise. Market Reaction No immediate impact is seen in the Euro (EUR) following remarks from ECB's Nagel. At press time, EUR/USD trades 0.15% lower to near 1.1400. ECB FAQs The European Central Bank (ECB) in Frankfurt, Germany, is the reserve bank for the Eurozone. The ECB sets interest rates and manages monetary policy for the region. The ECB primary mandate is to maintain price stability, which means keeping inflation at around 2%. Its primary tool for achieving this is by raising or lowering interest rates. Relatively high interest rates will usually result in a stronger Euro and vice versa. The ECB Governing Council makes monetary policy decisions at meetings held eight times a year. Decisions are made by heads of the Eurozone national banks and six permanent members, including the President of the ECB, Christine Lagarde. In extreme situations, the European Central Bank can enact a policy tool called Quantitative Easing. QE is the process by which the ECB prints Euros and uses them to buy assets – usually government or corporate bonds – from banks and other financial institutions. QE usually results in a weaker Euro. QE is a last resort when simply lowering interest rates is unlikely to achieve the objective of price stability. The ECB used it during the Great Financial Crisis in 2009-11, in 2015 when inflation remained stubbornly low, as well as during the covid pandemic. Quantitative tightening (QT) is the reverse of QE. It is undertaken after QE when an economic recovery is underway and inflation starts rising. Whilst in QE the European Central Bank (ECB) purchases government and corporate bonds from financial institutions to provide them with liquidity, in QT the ECB stops buying more bonds, and stops reinvesting the principal maturing on the bonds it already holds. It is usually positive (or bullish) for the Euro. Author Sagar Dua is associated with the financial markets from his college days. Along with pursuing post-graduation in Commerce in 2014, he started his markets training with chart analysis.
+
+================================================================================
+
+DOC_ID: 2692988d62b01aee8803d68e66ace185
+TITLE: Alcoa Announces Strategic Acquisition of South32’s Bauxite, Alumina, and Aluminum Assets for $4.1 billion
+Alcoa Announces Strategic Acquisition of South32’s Bauxite, Alumina, and Aluminum Assets for $4.1 billion - Reinforces Alcoa's position as a leading pure-play upstream aluminum company with an expanded portfolio of world-class bauxite, alumina, and aluminum assets - South32 upfront consideration of $4.1 billion in cash and stock plus a contingent value right of up to $750 million, with payments based on agreed revenue-sharing linked to future alumina and aluminum prices - Expected to generate significant synergies of approximately $900 million in net present value - Expected to be accretive to Alcoa's earnings per share and free cash flow immediately following closing - Significantly enhances a critical source of production globally, strengthening Alcoa's ability to serve customers at scale - Investor conference call scheduled for today at 7:00pm EDT / July 1 at 9:00am AEST PITTSBURGH, June 30, 2026--(BUSINESS WIRE)--Alcoa Corporation (NYSE: AA, ASX: AAI) ("Alcoa" or the "Company") today announced that it has entered into a definitive agreement to acquire South32 Limited's (ASX: S32, LSE: S32.L, JSE: S32) ("South32") interests in bauxite mine, alumina refinery and aluminum smelter operations in a cash and stock transaction for an upfront consideration of approximately $4.1 billion. The transaction represents an implied enterprise value of approximately $4.7 billion when including net debt primarily related to normal course financing leases. Alcoa has also agreed to provide South32 with a contingent value right (CVR) of up to $750 million. The acquisition will add a high-quality, low-cost, and globally diversified set of mining, refining and smelting assets, further strengthening Alcoa's mine-to-metal platform, expanding its global footprint and increasing the Company's ability to generate sustainable long-term value for shareholders. The acquisition also advances Alcoa's disciplined, value-creating growth strategy and enhances its position as a leading pure-play upstream aluminum company with a more competitive portfolio of world-class assets in strategically important regions around the globe. South32's operations are a strong strategic fit within Alcoa. Alcoa's proven operating model, technical expertise, and commercial capabilities are expected to unlock meaningful performance improvements and synergies across the combined portfolio. Greater scale and integration are expected to reduce complexity, lower costs, and improve competitiveness while strengthening supply chain resilience across key jurisdictions. At the same time, the transaction is anticipated to deliver broad benefits to stakeholders worldwide. It enhances Alcoa's secure and reliable global aluminum supply at a time of accelerating demand for critical minerals and metals. It reinforces Alcoa's long-term commitment and investment in Australia and Brazil and establishes a new presence in South Africa. By strengthening industrial capacity in these regions, the transaction will support economic resilience and thousands of direct and indirect jobs across local communities.
+
+================================================================================
+
+DOC_ID: 26cc36a560c3cfffab7f5aabd8de0673
+TITLE: Gold flat below $4,050 as Fed hike bets, US-Iran jitters cap recovery | FXStreet
+Gold (XAU/USD) struggles to build on its intraday recovery from the lowest level since November 2025, touched earlier this Tuesday, and trades below $4,050, nearly unchanged during the first half of the European session. Against the backdrop of renewed Mideast tensions, mixed signals on US-Iran talks assist the safe-haven US Dollar (USD) to attract fresh buyers and stall its recent pullback from the highest level since May 2025. Moreover, elevated expectations for Federal Reserve (Fed) interest rate hikes favor the USD bulls, warranting caution before positioning for any further move higher for the bullion. Media reports suggested that the US and Iran have agreed to "stand down" following an exchange of strikes in and around the Strait of Hormuz over the past few days, with both countries accusing each other of violating the ceasefire agreement. Adding to this, US President Donald Trump wrote on Truth Social that Iran had requested a meeting, and it will take place in Qatar's capital, Doha, on Tuesday. However, Deputy Iranian Foreign Minister Kazem Gharibabadi denied that there were plans for technical talks this week. This keeps geopolitical risk premiums in play and benefits the safe-haven USD. Meanwhile, renewed US-Iran hostilities sparked fears of inflation, which, along with the Fed's more hawkish tilt, bolsters bets for higher interest rates. According to the CME Group's FedWatch Tool, traders are still pricing in around a 63% chance that the US central bank will raise borrowing costs in September and assigning over an 80% probability of a move by the end of this year. The outlook, in turn, is seen as another factor contributing to the bid tone surrounding the USD and driving flows away from the non-yielding Gold, which now seems to have found acceptance below the $4,000 psychological mark. Furthermore, the Japanese Yen (JPY) plunged to a fresh four-decade low vs the USD, causing collateral damage in precious metal markets. Traders now look to Tuesday's US economic docket, featuring the Conference Board's Consumer Confidence Index and JOLTS Job Openings data. The focus, however, will be on Fed Chair Kevin Warsh's appearance on Thursday at the European Central Bank (ECB) Forum in Sintra. Apart from this, the popularly known Nonfarm Payrolls (NFP) report will offer cues about the Fed's policy path, which will drive the USD and influence the Gold price. XAU/USD 4-hour chart Gold stalls intraday recovery from YTD low; bearish potential seems intact Against the backdrop of the recent repeated failures near the 100-period Simple Moving Average (SMA) on the 4-hour chart, acceptance below the $4,000 mark could be seen as a fresh trigger for the XAU/USD bears. Meanwhile, the Moving Average Convergence Divergence (MACD) indicator sits just below the zero line with a small negative reading, hinting at waning downside momentum rather than a clear recovery. However, the Relative Strength Index (RSI) near 34 flirts with oversold territory, suggesting that selling pressure could start to tire without yet signalling a confirmed bullish reversal. Any meaningful recovery back above the $4,000 mark, however, is likely to confront an immediate hurdle near the $4,045 region, above which the Gold price could aim to reclaim the $4,100 mark. A further move up could attract fresh sellers and remain capped near the 100-period SMA at $4,180.34. A sustained break above this barrier would be needed to alleviate the current bearish bias and open the door to a more constructive recovery phase. (The technical analysis of this story was written with the help of an AI tool.) US Dollar FAQs The US Dollar (USD) is the official currency of the United States of America, and the ‘de facto’ currency of a significant number of other countries where it is found in circulation alongside local notes. It is the most heavily traded currency in the world, accounting for over 88% of all global foreign exchange turnover, or an average of $6.6 trillion in transactions per day, according to data from 2022. Following the second world war, the USD took over from the British Pound as the world’s reserve currency. For most of its history, the US Dollar was backed by Gold, until the Bretton Woods Agreement in 1971 when the Gold Standard went away. The most important single factor impacting on the value of the US Dollar is monetary policy, which is shaped by the Federal Reserve (Fed). The Fed has two mandates: to achieve price stability (control inflation) and foster full employment. Its primary tool to achieve these two goals is by adjusting interest rates. When prices are rising too quickly and inflation is above the Fed’s 2% target, the Fed will raise rates, which helps the USD value. When inflation falls below 2% or the Unemployment Rate is too high, the Fed may lower interest rates, which weighs on the Greenback. In extreme situations, the Federal Reserve can also print more Dollars and enact quantitative easing (QE). QE is the process by which the Fed substantially increases the flow of credit in a stuck financial system. It is a non-standard policy measure used when credit has dried up because banks will not lend to each other (out of the fear of counterparty default). It is a last resort when simply lowering interest rates is unlikely to achieve the necessary result. It was the Fed’s weapon of choice to combat the credit crunch that occurred during the Great Financial Crisis in 2008. It involves the Fed printing more Dollars and using them to buy US government bonds predominantly from financial institutions. QE usually leads to a weaker US Dollar. Quantitative tightening (QT) is the reverse process whereby the Federal Reserve stops buying bonds from financial institutions and does not reinvest the principal from the bonds it holds maturing in new purchases. It is usually positive for the US Dollar.
+
+================================================================================
+
+
+codex
+I’ve finished the extraction mapping and I’m writing `all_facts_047.jsonl` now, preserving input order and using empty fact lists for non-market documents.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from collections import OrderedDict
+
+published = {}
+docs = []
+with open('all_batch_047.jsonl') as f:
+    for line in f:
+        obj = json.loads(line)
+        docs.append(obj)
+        published[obj['doc_id']] = obj['published_date']
+
+facts_by_id = {
+    '2416ff48f1a5b8c5cfc97834b0e19271': [
+        {
+            'claim': 'The US April Case-Shiller 20-city house price index rose 1.1% year over year, versus 0.9% expected.',
+            'subject': 'S&P CoreLogic Case-Shiller 20-City Composite Home Price Index',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '+1.1% y/y vs +0.9% expected',
+            'time': 'April',
+            'cause': None,
+            'entities': ['United States', 'S&P CoreLogic Case-Shiller 20-City Composite Home Price Index'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The US April Case-Shiller 20-city house price index fell 0.1% month over month.',
+            'subject': 'S&P CoreLogic Case-Shiller 20-City Composite Home Price Index',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '-0.1%',
+            'time': 'April',
+            'cause': None,
+            'entities': ['United States', 'S&P CoreLogic Case-Shiller 20-City Composite Home Price Index'],
+            'confidence': 0.96,
+        },
+    ],
+    '242c8a390b2036856d66ddcced36f222': [
+        {
+            'claim': 'Analysts forecast that Myro could reach "'$0.050 by 2030.'"',
+            'subject': 'Myro',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$0.050'"',
+            'time': '2030',
+            'cause': None,
+            'entities': ['Myro', 'CoinCodex', 'Solana'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Analysts forecast that MYRO could trade between "'$0.012285 and $0.041902 in 2025, with an average expected price of $0.024363.'"',
+            'subject': 'Myro',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$0.012285 to $0.041902; average $0.024363'"',
+            'time': '2025',
+            'cause': None,
+            'entities': ['Myro', 'CoinCodex'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'For 2026, February is predicted to be MYRO’s most bullish month, with a potential 178.43% price increase from its current value.',
+            'subject': 'Myro',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '178.43%',
+            'time': 'February 2026',
+            'cause': None,
+            'entities': ['Myro'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'MYRO reached an all-time high of "'$0.445979 on March 9, 2024, after hitting an all-time low of $0.002125 on Nov. 14, 2023.'"',
+            'subject': 'Myro',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$0.002125 to $0.445979'"',
+            'time': 'Nov. 14, 2023 to March 9, 2024',
+            'cause': None,
+            'entities': ['Myro'],
+            'confidence': 0.96,
+        },
+    ],
+    '2455bfdd7582ca01f3dd0d5512345956': [],
+    '2513c78794afb1e484677d289b53918b': [
+        {
+            'claim': 'WhatsApp said it will let users be identified by usernames instead of phone numbers, with a wider rollout planned for later this year.',
+            'subject': 'WhatsApp',
+            'predicate': 'corporate_action',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'later this year',
+            'cause': 'to improve privacy on the platform',
+            'entities': ['WhatsApp', 'Meta Platforms'],
+            'confidence': 0.98,
+        },
+    ],
+    '254934ad34f788fc87ab1cc19ea555fa': [
+        {
+            'claim': 'Archer Aviation shares fell from a record high of "'$17.14 on Feb. 18, 2021 to less than $5 as of the article date.'"',
+            'subject': 'Archer Aviation',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$17.14 to less than $5'"',
+            'time': 'Feb. 18, 2021 to 2026-06-30',
+            'cause': None,
+            'entities': ['Archer Aviation'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Archer Aviation said before going public that it could produce 10 eVTOLs in 2024 and 250 in 2025, but as of the article date it had manufactured only two test aircraft and one full-scale Midnight aircraft.',
+            'subject': 'Archer Aviation',
+            'predicate': 'production_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '2 test aircraft and 1 full-scale Midnight aircraft versus targets of 10 in 2024 and 250 in 2025',
+            'time': '2024 to 2026-06-30',
+            'cause': None,
+            'entities': ['Archer Aviation', 'Midnight'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Archer Aviation’s indicative backlog reached "'$6 billion at the end of 2025, with pending orders for roughly 1,200 aircraft.'"',
+            'subject': 'Archer Aviation',
+            'predicate': 'demand_change',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$6 billion; roughly 1,200 aircraft'"',
+            'time': 'end of 2025',
+            'cause': None,
+            'entities': ['Archer Aviation'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Analysts expect Archer Aviation revenue to rise from "'$9.5 million in 2026 to $428.4 million in 2028 as it ramps up production.'"',
+            'subject': 'Archer Aviation',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$9.5 million to $428.4 million'"',
+            'time': '2026 to 2028',
+            'cause': 'as it ramps up its production',
+            'entities': ['Archer Aviation'],
+            'confidence': 0.97,
+        },
+    ],
+    '258ef251ad2c6015d101d2340bda4b22': [],
+    '25cffb64c9b3b49f2cd043d29e0c54e3': [
+        {
+            'claim': 'Joachim Nagel said inflation risks in the Eurozone have not vanished because the Middle East situation is still very opaque.',
+            'subject': 'Eurozone',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'the Middle East situation is still very opaque',
+            'entities': ['Eurozone', 'European Central Bank', 'Joachim Nagel', 'Middle East'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Joachim Nagel said Eurozone inflation will stay significantly above target.',
+            'subject': 'Eurozone inflation',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Eurozone', 'European Central Bank', 'Joachim Nagel'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Joachim Nagel said it is too early to make a call on rate hikes.',
+            'subject': 'European Central Bank',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['European Central Bank', 'Joachim Nagel'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'At press time, EUR/USD traded 0.15% lower near 1.1400.',
+            'subject': 'EUR/USD',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '0.15%',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['EUR/USD', 'Euro', 'US Dollar'],
+            'confidence': 0.98,
+        },
+    ],
+    '25e2825b5a169af8a90bbed668b3cda6': [
+        {
+            'claim': 'Phoenix Education Partners will host a conference call on July 14, 2026 to discuss results for the third quarter ended May 31, 2026.',
+            'subject': 'Phoenix Education Partners',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'July 14, 2026',
+            'cause': None,
+            'entities': ['Phoenix Education Partners', 'University of Phoenix'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'Phoenix Education Partners said its financial results will be released on July 14, 2026 after the markets close.',
+            'subject': 'Phoenix Education Partners',
+            'predicate': 'event',
+            'object': None,
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'July 14, 2026',
+            'cause': None,
+            'entities': ['Phoenix Education Partners'],
+            'confidence': 0.99,
+        },
+    ],
+    '265fbc874517878c5185744b249f68a3': [],
+    '2692988d62b01aee8803d68e66ace185': [
+        {
+            'claim': 'Alcoa entered into a definitive agreement to acquire South32’s bauxite, alumina, and aluminum assets for upfront consideration of approximately "'$4.1 billion in cash and stock.'"',
+            'subject': 'Alcoa',
+            'predicate': 'deal_or_contract',
+            'object': 'South32',
+            'direction': 'na',
+            'magnitude': '"'$4.1 billion'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Alcoa', 'South32'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'The Alcoa-South32 transaction represents an implied enterprise value of approximately "'$4.7 billion when including net debt.'"',
+            'subject': 'Alcoa',
+            'predicate': 'deal_or_contract',
+            'object': 'South32',
+            'direction': 'na',
+            'magnitude': '"'$4.7 billion'"',
+            'time': '2026-06-30',
+            'cause': 'including net debt primarily related to normal course financing leases',
+            'entities': ['Alcoa', 'South32'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Alcoa agreed to provide South32 with a contingent value right of up to "'$750 million linked to future alumina and aluminum prices.'"',
+            'subject': 'Alcoa',
+            'predicate': 'deal_or_contract',
+            'object': 'South32',
+            'direction': 'na',
+            'magnitude': 'up to "'$750 million'"',
+            'time': '2026-06-30',
+            'cause': 'payments are based on agreed revenue-sharing linked to future alumina and aluminum prices',
+            'entities': ['Alcoa', 'South32', 'Alumina', 'Aluminum'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Alcoa said the acquisition is expected to generate approximately "'$900 million in net present value synergies.'"',
+            'subject': 'Alcoa',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$900 million'"',
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Alcoa', 'South32'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Alcoa said the acquisition is expected to be accretive to earnings per share and free cash flow immediately following closing.',
+            'subject': 'Alcoa',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'immediately following closing',
+            'cause': None,
+            'entities': ['Alcoa', 'South32'],
+            'confidence': 0.97,
+        },
+    ],
+    '26cc36a560c3cfffab7f5aabd8de0673': [
+        {
+            'claim': 'Gold traded below "'$4,050 and was nearly unchanged during the first half of the European session on Tuesday.'"',
+            'subject': 'Gold',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': 'below "'$4,050'"',
+            'time': 'Tuesday',
+            'cause': None,
+            'entities': ['Gold', 'XAU/USD'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Gold’s recovery was capped by elevated Federal Reserve rate-hike expectations and renewed US-Iran tensions that supported the US Dollar.',
+            'subject': 'Gold',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': 'elevated Federal Reserve rate-hike expectations and renewed US-Iran tensions supported the US Dollar',
+            'entities': ['Gold', 'Federal Reserve', 'United States', 'Iran', 'US Dollar'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Traders were pricing in around a 63% chance that the Federal Reserve would raise borrowing costs in September and more than an 80% probability of a move by year-end.',
+            'subject': 'Federal Reserve',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '63% chance in September; over 80% probability by year-end',
+            'time': 'September and end of this year',
+            'cause': None,
+            'entities': ['Federal Reserve', 'CME FedWatch Tool'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'The Japanese yen fell to a fresh four-decade low against the US dollar.',
+            'subject': 'Japanese yen',
+            'predicate': 'price_move',
+            'object': 'US Dollar',
+            'direction': 'down',
+            'magnitude': None,
+            'time': '2026-06-30',
+            'cause': None,
+            'entities': ['Japanese yen', 'US Dollar'],
+            'confidence': 0.97,
+        },
+    ],
+    '275c20c32eafed4b2d2459e913762150': [],
+}
+
+out_path = 'all_facts_047.jsonl'
+count_docs = 0
+count_facts = 0
+with open(out_path, 'w') as out:
+    for doc in docs:
+        facts = facts_by_id.get(doc['doc_id'], [])
+        rec = {
+            'doc_id': doc['doc_id'],
+            'title': doc['title'],
+            'facts': facts,
+        }
+        out.write(json.dumps(rec, ensure_ascii=True) + '\\n')
+        count_docs += 1
+        count_facts += len(facts)
+
+print(f'docs processed: {count_docs}, total facts: {count_facts}')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 26
+
+codex
+The output file is written. I’m doing a quick validation pass on line count and JSON structure, then I’ll return the processing summary exactly as requested.
+exec
+/bin/zsh -lc 'wc -l all_facts_047.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_047.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+count=0
+facts=0
+with open('all_facts_047.jsonl') as f:
+    for line in f:
+        obj=json.loads(line)
+        assert set(obj)=={'doc_id','title','facts'}
+        assert isinstance(obj['facts'], list)
+        facts += len(obj['facts'])
+        count += 1
+print(count, facts)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 26
+
+codex
+docs processed: 12, total facts: 26
+tokens used
+33,719
+docs processed: 12, total facts: 26

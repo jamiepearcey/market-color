@@ -1,0 +1,911 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fb2-c5f2-72a3-9067-e6c379ec4ffb
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_017.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_017.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_017.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:00:41.727292Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_017.jsonl` to determine the document structure and then I’ll generate `all_facts_017.jsonl` directly from that file, without using any network access.
+exec
+/bin/zsh -lc 'wc -l all_batch_017.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_017.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from itertools import islice
+with open('all_batch_017.jsonl') as f:
+    for i,line in enumerate(islice(f,3),1):
+        obj=json.loads(line)
+        print('DOC',i)
+        print(obj.keys())
+        print(obj['doc_id'])
+        print(obj['title'][:200])
+        print(obj['body_text'][:800].replace('\\n',' '))
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 1
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+63316e1e041e8882d21ce76cc1bff11d
+Europe's record heat has overwhelmed Paris mortuaries and left families in distress
+Europe’s record heat has overwhelmed Paris mortuaries and left families in distress Europe’s record heat has overwhelmed Paris mortuaries and left families in distress PARIS (AP) — Every few minutes, the mortuary owner’s phone rings. Since a record-smashing heat wave started taking lives and storage space for bodies in Paris and beyond, the funeral directors and mourning families calling him mostly have the same question: Do you have room for one more? With all 32 places in his cold room taken, Zouhaeir Hertelli reluctantly has to gently say “Non,” over and over and over again. “We’re facing a really catastrophic situation,” he said. “I’m getting hundreds of calls.” As the historic heat wave shifted its deadly temperatures eastward this weekend to other parts of Europe, France began counti
+---
+DOC 2
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+633fd96df8a9ca05b3ed45d3c325ca36
+Tesla's Quarterly Earnings Preview: What You Need to Know
+Valued at a market cap of $1.4 trillion, Tesla, Inc. (TSLA) is a leading electric vehicle and clean energy company that designs, manufactures, leases, and sells electric vehicles, battery energy storage systems, and solar energy products across the United States, China, and international markets. It also develops advanced autonomous driving, artificial intelligence, battery, and powertrain technologies, serving residential, commercial, industrial, and automotive customers worldwide. The Austin, Texas-based company is set to announce its fiscal Q2 2026 results soon. Analysts expect Tesla to report an EPS of $0.27, unchanged from the year-ago quarter. However, it has missed Wall Street's earnings estimates in each of the last four quarters. More News from Barchart For fiscal 2026, analysts e
+---
+DOC 3
+dict_keys(['doc_id', 'source_name', 'published_date', 'url', 'title', 'body_text'])
+660fdd3c0c3588850b54744fb9e8baeb
+Nigeria IDs critical minerals to shift from oil - The Northern Miner
+Nigeria says it has found a significant critical minerals area as Africa’s largest oil producer seeks to diversify its economy and join the race to supply battery and technology metals for the energy transition. Kaduna state in the country’s northwest contains high-grade deposits of platinum group metals, gold, nickel, copper, lithium, and rare earth elements, officials said at the the African Natural Resources and Energy Investment Summit in Abuja last week. Private company Steron Mining made the finds in collaboration with the Nigerian Geological Survey Agency. The Kaduna find represents a “world-class” mineral province and one of the most significant developments in the country’s mining sector in recent years, Nigeria’s Minister of Solid Minerals Development, Dele Alake, told the confer
+---
+
+codex
+I have 12 documents. Next I’m scanning all titles and body snippets so I can classify which ones contain extractable market facts versus non-market content before writing the output file.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_017.jsonl') as f:
+    for i,line in enumerate(f,1):
+        obj=json.loads(line)
+        body=obj['body_text'].replace('\\n',' ')
+        print(f\"{i}. {obj['doc_id']} | {obj['published_date']} | {obj['source_name']}\")
+        print(obj['title'])
+        print(body[:500])
+        print('---')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 63316e1e041e8882d21ce76cc1bff11d | 2026-06-29 | AP Top News
+Europe's record heat has overwhelmed Paris mortuaries and left families in distress
+Europe’s record heat has overwhelmed Paris mortuaries and left families in distress Europe’s record heat has overwhelmed Paris mortuaries and left families in distress PARIS (AP) — Every few minutes, the mortuary owner’s phone rings. Since a record-smashing heat wave started taking lives and storage space for bodies in Paris and beyond, the funeral directors and mourning families calling him mostly have the same question: Do you have room for one more? With all 32 places in his cold room taken, 
+---
+2. 633fd96df8a9ca05b3ed45d3c325ca36 | 2026-06-29 | Yahoo Finance
+Tesla's Quarterly Earnings Preview: What You Need to Know
+Valued at a market cap of $1.4 trillion, Tesla, Inc. (TSLA) is a leading electric vehicle and clean energy company that designs, manufactures, leases, and sells electric vehicles, battery energy storage systems, and solar energy products across the United States, China, and international markets. It also develops advanced autonomous driving, artificial intelligence, battery, and powertrain technologies, serving residential, commercial, industrial, and automotive customers worldwide. The Austin, 
+---
+3. 660fdd3c0c3588850b54744fb9e8baeb | 2026-06-29 | Northern Miner
+Nigeria IDs critical minerals to shift from oil - The Northern Miner
+Nigeria says it has found a significant critical minerals area as Africa’s largest oil producer seeks to diversify its economy and join the race to supply battery and technology metals for the energy transition. Kaduna state in the country’s northwest contains high-grade deposits of platinum group metals, gold, nickel, copper, lithium, and rare earth elements, officials said at the the African Natural Resources and Energy Investment Summit in Abuja last week. Private company Steron Mining made t
+---
+4. 66374733ae70aa2f6b86fa7827069a1c | 2026-06-29 | Kitco News
+Guinea plans regional gold refining hub as West African race intensifies
+Guinea aims to become a regional gold refining hub, its mines minister said, joining a broader push by West African producers to process bullion locally rather than exporting it to the Middle East and beyond. The move underscores efforts to retain more value at home as gold prices remain high. “If each (West African) country has a refinery, there is no problem,” Mines Minister Bouna Sylla told Reuters over the weekend. “If your refinery is not competitive, it will fail or succeed because of econ
+---
+5. 6653e48e9505370a25eadb9bcff13b18 | 2026-06-29 | Al Jazeera
+What’s behind the anti-corruption crackdown in Iraq?
+A number of senior politicians have been detained in a wave of arrests. For more than two decades, corruption has been a serious issue in Iraq. The oil-rich nation has consistently been ranked as one of the most corrupt in the world. Recommended Stories list of 4 items- list 1 of 4Iraq’s corruption crackdown is a start, not a solution - list 2 of 4Iran shifts economic focus to essentials during war uncertainty - list 3 of 4Who is Ali al-Zaidi, the businessman named as Iraq’s PM-designate? - list
+---
+6. 6708d93e7edf66d483c053f2c6e52b76 | 2026-06-29 | AP Top News
+Paraguay stuns Germany, Morocco and Brazil also advance in World Cup Round of 32, in photos
+Paraguay beat Germany in a penalty shootout, a shocking result early in the World Cup Round of 32. The Germans missed three penalty kicks to lose the shootout 4-3 after a 1-1 draw in Foxborough, Massachusetts. Germany is a four-time World Cup champion, tied for the second most in history. Another shootout followed, with Morocco eliminating the Netherlands 3-2 on penalty kicks in Guadalupe, Mexico, near Monterrey. Ismael Saibari scored the decisive goal that sent the Dutch to their earliest World
+---
+7. 6736c503ebf526856e98ee17f050e8bd | 2026-06-29 | ForexLive
+The US strategic petroleum reserve (SPR) falls to the lowest level since 1983 | investingLive
+The Strategic Petroleum Reserve (SPR) fell by 5.5 million barrels this week to 325.7 million barrels, pushing inventories to their lowest level since 1983. Crude oil prices are moving higher today, with WTI up $1.78 to $71.02 after trading as low as $69.32 earlier in the session. The price has climbed to within a few cents of the day's high at $71.09, signaling improved buying interest after last week's sharp decline. From a technical perspective, crude has moved back above its 100-hour moving a
+---
+8. 67ad2c59349a7161fb021a6ac84bcba0 | 2026-06-29 | Metal.com (SMM)
+[SMM Aluminum Flash News] Global Competition for Aluminum Scrap Intensifies as Circular Economy Becomes Industry Focus
+[SMM Aluminum Flash News] Global Competition for Aluminum Scrap Intensifies as Circular Economy Becomes Industry Focus Aluminum scrap is rapidly emerging as a strategic resource as the global industry accelerates its transition toward low-carbon production. Secondary aluminum requires only around 5% of the energy needed for primary production, making recycled metal increasingly attractive for both economic and environmental reasons. However, tightening scrap availability has intensified global c
+---
+9. 688de33cf2750d797f497e71c4578245 | 2026-06-29 | ForexLive
+Morgan Stanley sees European equities broadening as AI volatility drives diversification | investingLive
+Falling oil prices are providing a constructive tailwind for European equities, reducing the energy cost burden that has weighed on the region through the first half of the year. The US-Iran memorandum of understanding has acted as a near-term catalyst for renewed inflows, though the more durable driver appears to be investor anxiety around AI-related volatility rather than a fundamental re-rating of European growth prospects. With Brent seen as supportive in a $70 to $90 range, European banks, 
+---
+10. 68af2e37a7b4476775d274be5914f342 | 2026-06-29 | Guardian Business
+‘Buy the haystack’: how tracker funds beat searching for shares
+Tracker funds have been around for about half a century, providing investors with access to a range of assets without them having to make difficult and risky decisions. Built to follow the fortunes of a given financial market index, trackers do not need management teams, which means they generally come with low charges. If you have a workplace pension, you probably already invested in one without realising it. If you want to start investing, you are likely to be directed towards a tracker fund. 
+---
+11. 68f3b84e74ece1307b815e01e93b1971 | 2026-06-29 | Metal.com (SMM)
+[SMM Coking Coal and Coke Daily Brief] 20260629 - Shanghai Metals Market (SMM)
+[SMM Coking Coal & Coke Daily Commentary] Coking Coal Market: Linfen low-sulphur coking coal is quoted at 2,050 yuan/mt. Coking coal side, coal mine production remains restricted and there is temporarily no inventory pressure. Additionally, rumors of a coal mine accident in a certain region have stimulated market sentiment. In the short term, the coking coal market may hold up well. Coke Market: The nationwide average price of quasi-first-grade metallurgical coke - dry quenching is 2,035 yuan/mt
+---
+12. 69dbae94943dfbf201a3dbb9fa3c3bac | 2026-06-29 | BBC World
+One big win and three defeats for Trump in dramatic day at Supreme Court
+- Published On the second-to-last day of Supreme Court decisions for this term, the justices delivered a big win for Donald Trump. But beneath the headline-generating ruling on expansive presidential power, the court gave some indications that this particular president may not always get what he wants – and the three liberal justices may have a few unexpected allies amongst the six conservative justices on the high court. Here's a look at the three biggest takeaways from an eventful Monday morni
+---
+
+codex
+I’ve isolated the market-relevant items. I’m pulling the full text for those documents now so the extracted claims stay atomic and explicitly grounded in the source wording.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids=[2,3,4,7]
+with open('all_batch_017.jsonl') as f:
+    docs=list(map(json.loads,f))
+for i in ids:
+    o=docs[i-1]
+    print(f\"DOC {i}: {o['title']}\")
+    print(o['body_text'])
+    print('\\n'+'='*80+'\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 2: Tesla's Quarterly Earnings Preview: What You Need to Know
+Valued at a market cap of $1.4 trillion, Tesla, Inc. (TSLA) is a leading electric vehicle and clean energy company that designs, manufactures, leases, and sells electric vehicles, battery energy storage systems, and solar energy products across the United States, China, and international markets. It also develops advanced autonomous driving, artificial intelligence, battery, and powertrain technologies, serving residential, commercial, industrial, and automotive customers worldwide. The Austin, Texas-based company is set to announce its fiscal Q2 2026 results soon. Analysts expect Tesla to report an EPS of $0.27, unchanged from the year-ago quarter. However, it has missed Wall Street's earnings estimates in each of the last four quarters. More News from Barchart For fiscal 2026, analysts expect the electric vehicle giant to report an EPS of $1.19, up 9.2% from $1.09 in fiscal 2025. Moreover, EPS is projected to surge 41.2% year-over-year to $1.68 in fiscal 2027. Shares of Tesla have soared 17.9% over the past 52 weeks, underperforming the S&P 500 Index's ($SPX) 19.8% return. Nevertheless, the stock has exceeded the State Street Consumer Discretionary Select Sector SPDR ETF's (XLY) 5.5% rise over the period. Shares of Tesla fell 3.6% following its Q1 2026 results on Apr. 22 as investors reacted negatively to the company's sharply increased spending plans and expectations for negative free cash flow for the remainder of 2026. Although Tesla reported Q1 revenue of $22.4 billion and positive free cash flow of $1.44 billion, the management raised 2026 capital expenditure guidance to $25 billion, highlighting a "very big capital investment phase" tied to autonomous vehicles and humanoid robots. Analysts' consensus view on TSLA stock is cautiously optimistic, with a "Moderate Buy" rating overall. Among 42 analysts covering the stock, 16 indicate "Strong Buy," two suggest "Moderate Buy," 19 have a "Hold," and five advise "Strong Sell." This configuration is slightly more bullish than three months ago, with 15 analysts suggesting a "Strong Buy."
+
+================================================================================
+
+DOC 3: Nigeria IDs critical minerals to shift from oil - The Northern Miner
+Nigeria says it has found a significant critical minerals area as Africa’s largest oil producer seeks to diversify its economy and join the race to supply battery and technology metals for the energy transition. Kaduna state in the country’s northwest contains high-grade deposits of platinum group metals, gold, nickel, copper, lithium, and rare earth elements, officials said at the the African Natural Resources and Energy Investment Summit in Abuja last week. Private company Steron Mining made the finds in collaboration with the Nigerian Geological Survey Agency. The Kaduna find represents a “world-class” mineral province and one of the most significant developments in the country’s mining sector in recent years, Nigeria’s Minister of Solid Minerals Development, Dele Alake, told the conference. “Nigeria is positioning itself among emerging destinations for strategic mineral resources and sustainable mining investment,” Alake told reporters at the summit, highlighting the growing importance of critical minerals in clean energy supply chains. Industry observers caution that significant hurdles remain before the discoveries can be translated into large-scale production. Infrastructure constraints, power shortages, artisanal mining activity and regulatory challenges continue to weigh on the development of Nigeria’s mining industry. Lithium The announcement coincided with the disclosure by Steron Mining that exploration work at its Abuja-area operation had identified about 3.3 million tonnes of lithium reserves. Company geologists said the broader project hosts an estimated 94.8 million tonnes of mineral resources, including lithium-bearing ore and granitic rock. The company didn’t disclose a lithium grade, resource classification or contained lithium estimate. The discoveries come as governments and manufacturers worldwide scramble to secure supplies of lithium and other battery metals needed for electric vehicles, energy storage systems and renewable energy infrastructure. Nigeria’s lithium potential has attracted growing international interest. Chinese companies, including Jiuling Lithium and Canmax Technologies, have committed more than $1.3 billion toward processing facilities in the country, including Kaduna state, while foreign investors continue to acquire exploration and mining licences across several states. The government has increasingly emphasized domestic beneficiation, seeking to move beyond the export of raw ore and build local processing capacity. During the recent summit, Steron said it already processes lithium ore locally before export in line with federal policies aimed at increasing value addition within Nigeria.
+
+================================================================================
+
+DOC 4: Guinea plans regional gold refining hub as West African race intensifies
+Guinea aims to become a regional gold refining hub, its mines minister said, joining a broader push by West African producers to process bullion locally rather than exporting it to the Middle East and beyond. The move underscores efforts to retain more value at home as gold prices remain high. “If each (West African) country has a refinery, there is no problem,” Mines Minister Bouna Sylla told Reuters over the weekend. “If your refinery is not competitive, it will fail or succeed because of economics, not politics.” President Mamady Doumbouya last week banned raw gold exports with immediate effect as the world’s top bauxite producer seeks to retain more value domestically. Guinea refinery among Africa’s largest Guinea has built a new refinery capable of processing output from across the region, Sylla said, describing it as among the largest in Africa. Bangaly Steve Toure, deputy head of Guinea’s Mining Investment Fund, said separately the $30 million plant would initially process 530 metric tons (about 17 million ounces) a year, rising to 733 tons at full capacity. Commercial operations are expected in July following final approvals. Africa’s top gold producer Ghana, along with Mali and Burkina Faso, is also racing to develop a domestic refining hub to capture more value from bullion. Guinea’s industrial gold output is dominated by AngloGold Ashanti and Nordgold. West Africa produced about 11 million ounces in 2025, based on industry estimates. Sylla said Guinea produced roughly 2.32 million ounces last year, worth about $7 billion, but retains less than 1% of that value domestically. “It is not just about revenue and jobs,” he said. “Countries like the UAE do not produce gold but built refining capacity to stimulate broader economic growth. We want to create the same value chain.” Guinea is preparing a decree to encourage local refining and plans reforms to formalize artisanal production and improve traceability by 2026, Sylla and Toure said. The refinery, structured as a public-private partnership, is part of a wider push to develop downstream industries, mirroring similar efforts in Guinea’s bauxite sector, they added. (By Maxwell Akalaare Adombila; Editing by Mark Potter)
+
+================================================================================
+
+DOC 7: The US strategic petroleum reserve (SPR) falls to the lowest level since 1983 | investingLive
+The Strategic Petroleum Reserve (SPR) fell by 5.5 million barrels this week to 325.7 million barrels, pushing inventories to their lowest level since 1983. Crude oil prices are moving higher today, with WTI up $1.78 to $71.02 after trading as low as $69.32 earlier in the session. The price has climbed to within a few cents of the day's high at $71.09, signaling improved buying interest after last week's sharp decline. From a technical perspective, crude has moved back above its 100-hour moving average at $70.80. However, traders will remember that on June 22, the price briefly broke above that same moving average before quickly rotating back to the downside. As a result, buyers still need to prove they can sustain the move. If the price can remain above the 100-hour moving average, the next upside target comes in at the 200-hour moving average near $72.91. Above that, the 200-day moving average at $73.84 becomes the next major hurdle. A break above both of those levels would significantly improve the longer-term technical outlook and shift the bias back in favor of the bulls. Since peaking at $96.86 on June 3, crude oil has fallen sharply, reaching a low of $68.56 last Friday. That decline may be in the process of running its course, but confirmation will come only if buyers can keep the price above the 100-hour moving average and build momentum toward the key resistance levels outlined. Here's the full SPR history going back to the reserve's first fill. A few things stand out: The rise (1977–2009): The SPR filled steadily, with the biggest single-year jump in 1981 (+120M barrels) driven by anxiety over the Iranian Revolution and the Iran-Iraq War. After 9/11, President Bush ordered an aggressive refill that pushed the reserve to its all-time peak of 727M barrels in January 2010. The modern drawdowns: The 2022 Biden release of ~180M barrels was by far the largest in history — roughly 6× larger than the Katrina release and nearly 2/3 of total SPR stocks at the time. The reserve dropped to its lowest level since the early 1980s. Right now: At 325.7M barrels, the SPR is at its lowest since 1983 — and with the Trump administration's coordinated IEA release of 172M barrels announced in March 2026 currently underway, it will go lower still. That release alone is comparable in scale to the entire Biden drawdown.
+
+================================================================================
+
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+ids=[8,9,11]
+with open('all_batch_017.jsonl') as f:
+    docs=list(map(json.loads,f))
+for i in ids:
+    o=docs[i-1]
+    print(f\"DOC {i}: {o['title']}\")
+    print(o['body_text'])
+    print('\\n'+'='*80+'\\n')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+DOC 8: [SMM Aluminum Flash News] Global Competition for Aluminum Scrap Intensifies as Circular Economy Becomes Industry Focus
+[SMM Aluminum Flash News] Global Competition for Aluminum Scrap Intensifies as Circular Economy Becomes Industry Focus Aluminum scrap is rapidly emerging as a strategic resource as the global industry accelerates its transition toward low-carbon production. Secondary aluminum requires only around 5% of the energy needed for primary production, making recycled metal increasingly attractive for both economic and environmental reasons. However, tightening scrap availability has intensified global competition. Europe is estimated to require an additional 1 million tones of aluminum scrap to meet its circular economy goals, while China has increased scrap imports and India is seeking to secure overseas supply amid concerns over potential EU export restrictions. At the same time, major investments in recycling capacity, together with carbon policies such as the EU's CBAM, are reinforcing the importance of recycled aluminum. Industry observers believe future competitiveness will increasingly depend on access to scrap resources, recycling efficiency and low-carbon supply chains.Data Source Statement: Except for publicly available information, all other data are processed by SMM based on publicly available information, market communication, and relying on SMM's internal database model. They are for reference only and do not constitute decision-making recommendations.
+
+================================================================================
+
+DOC 9: Morgan Stanley sees European equities broadening as AI volatility drives diversification | investingLive
+Falling oil prices are providing a constructive tailwind for European equities, reducing the energy cost burden that has weighed on the region through the first half of the year. The US-Iran memorandum of understanding has acted as a near-term catalyst for renewed inflows, though the more durable driver appears to be investor anxiety around AI-related volatility rather than a fundamental re-rating of European growth prospects. With Brent seen as supportive in a $70 to $90 range, European banks, real assets and commodity-linked sectors stand to benefit from the inflation environment without facing the earnings drag that a spike toward $150 would trigger. --- Morgan Stanley says European equities are drawing fresh inflows as AI volatility pushes investors to diversify, with semis, banks and copper-linked metals among its top sector picks for the second half. Summary: - European equities have matched the S&P 500 year-to-date, with both indices up roughly 7 to 8 percent, recovering from conflict-driven lows - Around 90 percent of Europe's year-to-date index gains are attributable to AI-exposed sectors including semiconductors, tech hardware, capital goods, and copper-linked metals and mining, which together represent about 15 percent of the index - Morgan Stanley's Chief European Equity Strategist says the primary driver of renewed diversification interest is volatility in the AI complex rather than the US-Iran MOU alone, with investors seeking to broaden exposure without exiting AI entirely - Consensus earnings growth for European equities is forecast above 16 percent for the current year, with 55 percent of index revenues derived from outside Europe, limiting direct exposure to weak domestic economic conditions - Sectors benefiting from inflation, including banks, real assets and AI-linked names, collectively account for roughly 60 percent of European earnings - Europe's valuation discount to the US on a sector-neutral, Mag7-excluded basis broke out of a decade-long widening trend at the start of this year and has continued to narrow - Morgan Stanley's top sector overweights are semiconductors, metals and mining led by copper, banks, capital goods, and utilities European equities have quietly drawn level with the S&P 500 on a year-to-date basis, with both indices up in the range of 7 to 8 percent, and Morgan Stanley's Chief European Equity Strategist Marina Zavolock argues the rally has more room to run as investors begin rotating away from concentrated AI exposure in the United States. Speaking on the bank's Thoughts on the Market podcast, Zavolock said the near-term catalyst for renewed European inflows was the US-Iran memorandum of understanding and the associated decline in oil prices, but that the more powerful underlying force is discomfort with volatility in the AI trade. Investors, she said, are not looking to exit artificial intelligence positions but are increasingly seeking to add diversifying exposure alongside them, and Europe is benefiting from that impulse. A common misconception, Zavolock argued, is that weak European PMI readings and sluggish GDP growth translate directly into poor equity returns. That link is weaker than most assume. Morgan Stanley's latest global exposure guide shows that only 45 percent of European index revenues are generated domestically, with the balance spread across global markets including the United States. Of that domestic slice, the bulk sits in banks and defensive sectors rather than consumer-facing industries that would be directly vulnerable to ECB rate increases. The AI connection is also stronger than the index composition suggests. Semiconductors, tech hardware, capital goods, and copper-linked metals and mining collectively account for around 15 percent of the European index by weight, and those sectors are responsible for nearly 90 percent of the index's year-to-date performance, moving as aggressively as comparable AI pockets within the US market. Outside the AI complex, Zavolock pointed to the earnings environment as underappreciated. Consensus forecasts put European earnings growth above 16 percent for the current year, a figure she described as genuinely healthy. Banks, which trade at around 10 times price-to-earnings and are delivering double-digit earnings upgrades alongside buybacks and dividends, are seen as a key diversification play and a structural beneficiary of a steeper yield curve. With inflation-sensitive sectors including banks, real assets and AI-exposed names accounting for roughly 60 percent of the earnings base, the index is better positioned for the current macro environment than its reputation implies. Valuation also supports the case. A decade-long widening in Europe's discount to the US, measured on a sector-neutral basis excluding the Magnificent Seven, broke decisively at the start of this year and has continued to close. Zavolock sees that narrowing as having further to go. Her model's top sector rankings are led by semiconductors, followed by metals and mining with copper as the primary driver, banks, capital goods, and utilities. The latter she flagged as significantly under-owned relative to US peers, with the renewable energy transition providing an additional earnings tailwind beyond the AI infrastructure theme.
+
+================================================================================
+
+DOC 11: [SMM Coking Coal and Coke Daily Brief] 20260629 - Shanghai Metals Market (SMM)
+[SMM Coking Coal & Coke Daily Commentary] Coking Coal Market: Linfen low-sulphur coking coal is quoted at 2,050 yuan/mt. Coking coal side, coal mine production remains restricted and there is temporarily no inventory pressure. Additionally, rumors of a coal mine accident in a certain region have stimulated market sentiment. In the short term, the coking coal market may hold up well. Coke Market: The nationwide average price of quasi-first-grade metallurgical coke - dry quenching is 2,035 yuan/mt. On the news front, some steel mills have accepted a 50 yuan/mt increase for wet-quenched coke and a 55 yuan/mt increase for dry-quenched coke, to be implemented at 0:00 on July 1, 2026. Supply side, some coke producers are still making losses, and raw material coking coal remains relatively tight, so their willingness to raise production is low, and coke supply is relatively stable. In addition, most coke producers sell as they produce, and some are operating with zero inventory. Demand side, hot metal production at steel mill blast furnaces currently stays at high levels, providing firm support for coke rigid demand. In summary, high hot metal production supports rigid demand, along with firm cost support. In the short term, the coke market may hold up well, and the ninth round of coke price hike is expected to be implemented. [SMM Steel]
+
+================================================================================
+
+
+codex
+I’ve got enough context to write the extraction. I’m generating `all_facts_017.jsonl` now with one output object per input document, preserving input order and leaving `facts` empty where the article does not contain explicit market facts.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+
+facts_by_doc = {
+    '63316e1e041e8882d21ce76cc1bff11d': [],
+    '633fd96df8a9ca05b3ed45d3c325ca36': [
+        {
+            'claim': 'Analysts expect Tesla to report EPS of "'$0.27 for fiscal Q2 2026, unchanged from the year-ago quarter.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'flat',
+            'magnitude': '"'$0.27'"',
+            'time': 'fiscal Q2 2026',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Tesla has missed Wall Street earnings estimates in each of the last four quarters.',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'other',
+            'object': 'Wall Street earnings estimates',
+            'direction': 'down',
+            'magnitude': 'last four quarters',
+            'time': 'last four quarters',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Analysts expect Tesla to report fiscal 2026 EPS of "'$1.19, up 9.2% from $1.09 in fiscal 2025.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$1.19, up 9.2%'"',
+            'time': 'fiscal 2026',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Tesla EPS is projected to rise 41.2% year over year to "'$1.68 in fiscal 2027.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$1.68, 41.2%'"',
+            'time': 'fiscal 2027',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Tesla shares rose 17.9% over the past 52 weeks.',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'price_move',
+            'object': 'Tesla shares',
+            'direction': 'up',
+            'magnitude': '17.9%',
+            'time': 'past 52 weeks',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Tesla shares fell 3.6% after its Q1 2026 results on Apr. 22.',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'price_move',
+            'object': 'Tesla shares',
+            'direction': 'down',
+            'magnitude': '3.6%',
+            'time': 'Apr. 22',
+            'cause': \"investors reacted negatively to Tesla's sharply increased spending plans and expectations for negative free cash flow for the remainder of 2026\",
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Tesla reported Q1 revenue of "'$22.4 billion.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '"'$22.4 billion'"',
+            'time': 'Q1 2026',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Tesla reported positive free cash flow of "'$1.44 billion in Q1 2026.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'other',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$1.44 billion'"',
+            'time': 'Q1 2026',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Tesla raised its 2026 capital expenditure guidance to "'$25 billion.'"',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'corporate_action',
+            'object': '2026 capital expenditure guidance',
+            'direction': 'up',
+            'magnitude': '"'$25 billion'"',
+            'time': '2026',
+            'cause': 'a very big capital investment phase tied to autonomous vehicles and humanoid robots',
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Analysts have an overall Moderate Buy rating on Tesla stock.',
+            'subject': 'Tesla, Inc.',
+            'predicate': 'statement',
+            'object': 'TSLA stock',
+            'direction': 'na',
+            'magnitude': 'Moderate Buy',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Tesla, Inc.'],
+            'confidence': 0.88,
+        },
+    ],
+    '660fdd3c0c3588850b54744fb9e8baeb': [
+        {
+            'claim': 'Officials said Kaduna state in northwestern Nigeria contains high-grade deposits of platinum group metals, gold, nickel, copper, lithium, and rare earth elements.',
+            'subject': 'Kaduna state, Nigeria',
+            'predicate': 'supply_change',
+            'object': 'platinum group metals, gold, nickel, copper, lithium, and rare earth elements',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'last week',
+            'cause': None,
+            'entities': ['Nigeria', 'Kaduna State', 'platinum group metals', 'gold', 'nickel', 'copper', 'lithium', 'rare earth elements'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Steron Mining said exploration at its Abuja-area operation identified about 3.3 million tonnes of lithium reserves.',
+            'subject': 'Steron Mining',
+            'predicate': 'supply_change',
+            'object': 'lithium reserves',
+            'direction': 'up',
+            'magnitude': 'about 3.3 million tonnes',
+            'time': '2026-06-29',
+            'cause': 'exploration work at its Abuja-area operation',
+            'entities': ['Steron Mining', 'Nigeria', 'lithium'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Steron Mining geologists said the broader Abuja-area project hosts an estimated 94.8 million tonnes of mineral resources, including lithium-bearing ore and granitic rock.',
+            'subject': 'Steron Mining',
+            'predicate': 'supply_change',
+            'object': 'mineral resources at the Abuja-area project',
+            'direction': 'up',
+            'magnitude': '94.8 million tonnes',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Steron Mining', 'Nigeria', 'lithium'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Chinese companies including Jiuling Lithium and Canmax Technologies have committed more than "'$1.3 billion toward processing facilities in Nigeria, including Kaduna state.'"',
+            'subject': 'Jiuling Lithium and Canmax Technologies',
+            'predicate': 'deal_or_contract',
+            'object': 'processing facilities in Nigeria',
+            'direction': 'up',
+            'magnitude': 'more than "'$1.3 billion'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Jiuling Lithium', 'Canmax Technologies', 'Nigeria', 'Kaduna State'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Steron Mining said it already processes lithium ore locally before export in line with Nigerian federal policies aimed at increasing value addition.',
+            'subject': 'Steron Mining',
+            'predicate': 'production_change',
+            'object': 'lithium ore in Nigeria',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'during the recent summit',
+            'cause': 'Nigerian federal policies aimed at increasing value addition',
+            'entities': ['Steron Mining', 'Nigeria', 'lithium'],
+            'confidence': 0.9,
+        },
+    ],
+    '66374733ae70aa2f6b86fa7827069a1c': [
+        {
+            'claim': 'Guinea aims to become a regional gold refining hub.',
+            'subject': 'Guinea',
+            'predicate': 'statement',
+            'object': 'regional gold refining hub',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'to retain more value at home as gold prices remain high',
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'President Mamady Doumbouya banned raw gold exports from Guinea with immediate effect last week.',
+            'subject': 'Guinea',
+            'predicate': 'policy_action',
+            'object': 'raw gold exports',
+            'direction': 'down',
+            'magnitude': None,
+            'time': 'last week',
+            'cause': 'Guinea seeks to retain more value domestically',
+            'entities': ['Guinea', 'Mamady Doumbouya', 'gold'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'Guinea has built a new refinery that Mines Minister Bouna Sylla said is capable of processing output from across the region.',
+            'subject': 'Guinea',
+            'predicate': 'corporate_action',
+            'object': 'new gold refinery',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'Guinea’s new refinery cost "'$30 million.'"',
+            'subject': 'Guinea',
+            'predicate': 'corporate_action',
+            'object': 'new refinery',
+            'direction': 'na',
+            'magnitude': '"'$30 million'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Guinea'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Guinea’s new refinery will initially process 530 metric tons a year.',
+            'subject': 'Guinea',
+            'predicate': 'production_change',
+            'object': 'new refinery',
+            'direction': 'up',
+            'magnitude': '530 metric tons a year',
+            'time': 'initially',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Guinea’s new refinery is planned to process 733 metric tons a year at full capacity.',
+            'subject': 'Guinea',
+            'predicate': 'production_change',
+            'object': 'new refinery',
+            'direction': 'up',
+            'magnitude': '733 metric tons a year',
+            'time': 'at full capacity',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Commercial operations at Guinea’s new refinery are expected in July following final approvals.',
+            'subject': 'Guinea',
+            'predicate': 'forecast',
+            'object': 'new refinery commercial operations',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'July',
+            'cause': 'following final approvals',
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Guinea produced roughly 2.32 million ounces of gold last year, worth about "'$7 billion.'"',
+            'subject': 'Guinea',
+            'predicate': 'production_change',
+            'object': 'gold',
+            'direction': 'na',
+            'magnitude': '2.32 million ounces, about "'$7 billion'"',
+            'time': 'last year',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Guinea retains less than 1% of the value of its gold production domestically.',
+            'subject': 'Guinea',
+            'predicate': 'other',
+            'object': 'domestic value retention from gold production',
+            'direction': 'down',
+            'magnitude': 'less than 1%',
+            'time': 'last year',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Guinea is preparing a decree to encourage local refining and plans reforms to formalize artisanal production and improve traceability by 2026.',
+            'subject': 'Guinea',
+            'predicate': 'policy_action',
+            'object': 'local refining and artisanal gold production',
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'by 2026',
+            'cause': None,
+            'entities': ['Guinea', 'gold'],
+            'confidence': 0.93,
+        },
+    ],
+    '6653e48e9505370a25eadb9bcff13b18': [],
+    '6708d93e7edf66d483c053f2c6e52b76': [],
+    '6736c503ebf526856e98ee17f050e8bd': [
+        {
+            'claim': 'The US Strategic Petroleum Reserve fell by 5.5 million barrels this week to 325.7 million barrels, the lowest level since 1983.',
+            'subject': 'US Strategic Petroleum Reserve',
+            'predicate': 'supply_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '5.5 million barrels to 325.7 million barrels',
+            'time': 'this week',
+            'cause': None,
+            'entities': ['United States Strategic Petroleum Reserve', 'United States'],
+            'confidence': 0.99,
+        },
+        {
+            'claim': 'WTI crude oil was up "'$1.78 to $71.02 after trading as low as $69.32 earlier in the session.'"',
+            'subject': 'WTI crude oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': '"'$1.78 to $71.02'"',
+            'time': 'today',
+            'cause': None,
+            'entities': ['WTI crude oil'],
+            'confidence': 0.98,
+        },
+        {
+            'claim': 'WTI crude oil moved back above its 100-hour moving average at "'$70.80.'"',
+            'subject': 'WTI crude oil',
+            'predicate': 'price_move',
+            'object': '100-hour moving average',
+            'direction': 'up',
+            'magnitude': '"'$70.80'"',
+            'time': 'today',
+            'cause': None,
+            'entities': ['WTI crude oil'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'After peaking at "'$96.86 on June 3, crude oil fell to a low of $68.56 last Friday.'"',
+            'subject': 'crude oil',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'down',
+            'magnitude': '"'$96.86 to $68.56'"',
+            'time': 'June 3 to last Friday',
+            'cause': None,
+            'entities': ['crude oil'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'The Trump administration announced a coordinated IEA release of 172 million barrels in March 2026 that is currently underway.',
+            'subject': 'Trump administration',
+            'predicate': 'policy_action',
+            'object': 'coordinated IEA release',
+            'direction': 'down',
+            'magnitude': '172 million barrels',
+            'time': 'March 2026',
+            'cause': None,
+            'entities': ['Trump administration', 'International Energy Agency', 'United States Strategic Petroleum Reserve'],
+            'confidence': 0.91,
+        },
+    ],
+    '67ad2c59349a7161fb021a6ac84bcba0': [
+        {
+            'claim': 'Secondary aluminum requires only around 5% of the energy needed for primary production.',
+            'subject': 'secondary aluminum',
+            'predicate': 'other',
+            'object': 'energy needed for primary aluminum production',
+            'direction': 'down',
+            'magnitude': 'around 5%',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['secondary aluminum', 'primary aluminum'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Europe is estimated to require an additional 1 million tonnes of aluminum scrap to meet its circular economy goals.',
+            'subject': 'Europe',
+            'predicate': 'demand_change',
+            'object': 'aluminum scrap',
+            'direction': 'up',
+            'magnitude': 'an additional 1 million tonnes',
+            'time': '2026-06-29',
+            'cause': 'to meet its circular economy goals',
+            'entities': ['Europe', 'aluminum scrap'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'China has increased aluminum scrap imports.',
+            'subject': 'China',
+            'predicate': 'demand_change',
+            'object': 'aluminum scrap imports',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['China', 'aluminum scrap'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'India is seeking to secure overseas aluminum scrap supply amid concerns over potential EU export restrictions.',
+            'subject': 'India',
+            'predicate': 'demand_change',
+            'object': 'overseas aluminum scrap supply',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'concerns over potential EU export restrictions',
+            'entities': ['India', 'European Union', 'aluminum scrap'],
+            'confidence': 0.94,
+        },
+        {
+            'claim': 'Major investments in recycling capacity and carbon policies such as the EU CBAM are reinforcing the importance of recycled aluminum.',
+            'subject': 'European Union',
+            'predicate': 'policy_action',
+            'object': 'recycled aluminum',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': 'major investments in recycling capacity and carbon policies such as the EU CBAM',
+            'entities': ['European Union', 'Carbon Border Adjustment Mechanism', 'recycled aluminum'],
+            'confidence': 0.84,
+        },
+    ],
+    '688de33cf2750d797f497e71c4578245': [
+        {
+            'claim': 'Falling oil prices are providing a constructive tailwind for European equities by reducing the region\\'s energy cost burden.',
+            'subject': 'European equities',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'through the first half of the year',
+            'cause': 'falling oil prices reduced the energy cost burden',
+            'entities': ['European equities', 'oil prices'],
+            'confidence': 0.88,
+        },
+        {
+            'claim': 'The US-Iran memorandum of understanding acted as a near-term catalyst for renewed inflows into European equities.',
+            'subject': 'European equities',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': 'near-term',
+            'cause': 'the US-Iran memorandum of understanding',
+            'entities': ['European equities', 'United States', 'Iran'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Morgan Stanley said investor anxiety around AI-related volatility is a more durable driver of diversification into European equities than the US-Iran memorandum of understanding.',
+            'subject': 'Morgan Stanley',
+            'predicate': 'statement',
+            'object': 'European equities',
+            'direction': 'na',
+            'magnitude': None,
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Morgan Stanley', 'European equities'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'Morgan Stanley sees Brent in a "'$70 to $90 range as supportive for European banks, real assets, and commodity-linked sectors.'"',
+            'subject': 'Morgan Stanley',
+            'predicate': 'forecast',
+            'object': 'Brent crude oil',
+            'direction': 'flat',
+            'magnitude': '"'$70 to $90'"',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['Morgan Stanley', 'Brent crude oil', 'European banks', 'commodity-linked sectors'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Morgan Stanley said European equities and the S&P 500 were both up roughly 7% to 8% year to date.',
+            'subject': 'European equities',
+            'predicate': 'price_move',
+            'object': 'S&P 500',
+            'direction': 'up',
+            'magnitude': 'roughly 7% to 8%',
+            'time': 'year to date',
+            'cause': None,
+            'entities': ['European equities', 'S&P 500'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Morgan Stanley said about 90% of Europe\\'s year-to-date index gains came from AI-exposed sectors including semiconductors, tech hardware, capital goods, and copper-linked metals and mining.',
+            'subject': 'European equities',
+            'predicate': 'price_move',
+            'object': 'AI-exposed sectors',
+            'direction': 'up',
+            'magnitude': 'about 90%',
+            'time': 'year to date',
+            'cause': 'gains in AI-exposed sectors including semiconductors, tech hardware, capital goods, and copper-linked metals and mining',
+            'entities': ['European equities', 'semiconductors', 'technology hardware', 'capital goods', 'copper', 'metals and mining'],
+            'confidence': 0.95,
+        },
+        {
+            'claim': 'Morgan Stanley forecast consensus earnings growth above 16% for European equities for the current year.',
+            'subject': 'European equities',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'above 16%',
+            'time': 'current year',
+            'cause': None,
+            'entities': ['European equities', 'Morgan Stanley'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'Morgan Stanley said 55% of European equity index revenues are derived from outside Europe.',
+            'subject': 'European equities',
+            'predicate': 'other',
+            'object': 'index revenues',
+            'direction': 'na',
+            'magnitude': '55%',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['European equities', 'Europe'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'Morgan Stanley said sectors benefiting from inflation, including banks, real assets, and AI-linked names, account for roughly 60% of European earnings.',
+            'subject': 'European equities',
+            'predicate': 'other',
+            'object': 'earnings base',
+            'direction': 'na',
+            'magnitude': 'roughly 60%',
+            'time': '2026-06-29',
+            'cause': None,
+            'entities': ['European equities', 'banks', 'real assets'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'Morgan Stanley\\'s top sector overweights in Europe are semiconductors, metals and mining led by copper, banks, capital goods, and utilities.',
+            'subject': 'Morgan Stanley',
+            'predicate': 'statement',
+            'object': 'European sectors',
+            'direction': 'na',
+            'magnitude': None,
+            'time': 'second half',
+            'cause': None,
+            'entities': ['Morgan Stanley', 'Europe', 'semiconductors', 'metals and mining', 'copper', 'banks', 'capital goods', 'utilities'],
+            'confidence': 0.93,
+        },
+    ],
+    '68af2e37a7b4476775d274be5914f342': [],
+    '68f3b84e74ece1307b815e01e93b1971': [
+        {
+            'claim': 'Linfen low-sulphur coking coal is quoted at 2,050 yuan/mt.',
+            'subject': 'Linfen low-sulphur coking coal',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '2,050 yuan/mt',
+            'time': '20260629',
+            'cause': None,
+            'entities': ['Linfen low-sulphur coking coal'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Coal mine production remains restricted, and there is temporarily no inventory pressure in the coking coal market.',
+            'subject': 'coking coal market',
+            'predicate': 'production_change',
+            'object': None,
+            'direction': 'down',
+            'magnitude': None,
+            'time': '20260629',
+            'cause': None,
+            'entities': ['coking coal'],
+            'confidence': 0.9,
+        },
+        {
+            'claim': 'Rumors of a coal mine accident in a certain region have stimulated coking coal market sentiment.',
+            'subject': 'coking coal market',
+            'predicate': 'statement',
+            'object': None,
+            'direction': 'up',
+            'magnitude': None,
+            'time': '20260629',
+            'cause': 'rumors of a coal mine accident in a certain region',
+            'entities': ['coking coal'],
+            'confidence': 0.77,
+        },
+        {
+            'claim': 'The nationwide average price of quasi-first-grade metallurgical coke dry quenching is 2,035 yuan/mt.',
+            'subject': 'quasi-first-grade metallurgical coke dry quenching',
+            'predicate': 'price_move',
+            'object': None,
+            'direction': 'na',
+            'magnitude': '2,035 yuan/mt',
+            'time': '20260629',
+            'cause': None,
+            'entities': ['metallurgical coke'],
+            'confidence': 0.97,
+        },
+        {
+            'claim': 'Some steel mills have accepted a 50 yuan/mt increase for wet-quenched coke to be implemented at 0:00 on July 1, 2026.',
+            'subject': 'steel mills',
+            'predicate': 'deal_or_contract',
+            'object': 'wet-quenched coke',
+            'direction': 'up',
+            'magnitude': '50 yuan/mt',
+            'time': '0:00 on July 1, 2026',
+            'cause': None,
+            'entities': ['steel mills', 'wet-quenched coke'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Some steel mills have accepted a 55 yuan/mt increase for dry-quenched coke to be implemented at 0:00 on July 1, 2026.',
+            'subject': 'steel mills',
+            'predicate': 'deal_or_contract',
+            'object': 'dry-quenched coke',
+            'direction': 'up',
+            'magnitude': '55 yuan/mt',
+            'time': '0:00 on July 1, 2026',
+            'cause': None,
+            'entities': ['steel mills', 'dry-quenched coke'],
+            'confidence': 0.96,
+        },
+        {
+            'claim': 'Some coke producers are still making losses and have low willingness to raise production, leaving coke supply relatively stable.',
+            'subject': 'coke producers',
+            'predicate': 'production_change',
+            'object': 'coke supply',
+            'direction': 'flat',
+            'magnitude': None,
+            'time': '20260629',
+            'cause': 'losses and relatively tight raw material coking coal',
+            'entities': ['coke producers', 'coke', 'coking coal'],
+            'confidence': 0.92,
+        },
+        {
+            'claim': 'Most coke producers sell as they produce, and some are operating with zero inventory.',
+            'subject': 'coke producers',
+            'predicate': 'supply_change',
+            'object': 'coke inventory',
+            'direction': 'down',
+            'magnitude': 'zero inventory for some producers',
+            'time': '20260629',
+            'cause': None,
+            'entities': ['coke producers', 'coke'],
+            'confidence': 0.91,
+        },
+        {
+            'claim': 'Hot metal production at steel mill blast furnaces stays at high levels, supporting rigid coke demand.',
+            'subject': 'steel mill blast furnaces',
+            'predicate': 'demand_change',
+            'object': 'coke',
+            'direction': 'up',
+            'magnitude': None,
+            'time': '20260629',
+            'cause': 'high hot metal production',
+            'entities': ['steel mills', 'hot metal', 'coke'],
+            'confidence': 0.93,
+        },
+        {
+            'claim': 'SMM said the ninth round of coke price hikes is expected to be implemented in the short term.',
+            'subject': 'metallurgical coke',
+            'predicate': 'forecast',
+            'object': None,
+            'direction': 'up',
+            'magnitude': 'ninth round of price hike',
+            'time': 'short term',
+            'cause': 'high hot metal production supports rigid demand along with firm cost support',
+            'entities': ['metallurgical coke', 'SMM'],
+            'confidence': 0.9,
+        },
+    ],
+    '69dbae94943dfbf201a3dbb9fa3c3bac': [],
+}
+
+input_path = 'all_batch_017.jsonl'
+output_path = 'all_facts_017.jsonl'
+count_docs = 0
+count_facts = 0
+with open(input_path) as f_in, open(output_path, 'w') as f_out:
+    for line in f_in:
+        obj = json.loads(line)
+        facts = facts_by_doc[obj['doc_id']]
+        out = {
+            'doc_id': obj['doc_id'],
+            'title': obj['title'],
+            'facts': facts,
+        }
+        f_out.write(json.dumps(out, ensure_ascii=True) + '\\n')
+        count_docs += 1
+        count_facts += len(facts)
+print(f'{count_docs} docs processed, {count_facts} facts')
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+12 docs processed, 55 facts
+
+codex
+12 docs processed, 55 facts
+tokens used
+30,885
+12 docs processed, 55 facts

@@ -43,11 +43,20 @@ The fix is not more taxonomy — it's **real full article text to ground on**. T
     │   direction/magnitude/time/cause/entities/confidence, with provenance)
     ▼
  graph_experiment.py
-    │   merge facts → facts.parquet → embed CLAIMs → Qdrant "market_color_facts"
-    │   (entities indexed = graph adjacency)
+    │   merge facts (all desks) → per-fact desks (claim zero-shot) → entity
+    │   canonicalization (near-dup merge) → cause → entity resolution
+    │   → facts.parquet → embed CLAIMs → Qdrant "market_color_facts"
     │   search = SEED (vector) → EXPAND (1-hop shared entities) → CAUSAL CHAINS
     ▼
- grounded, transmission-aware market color   (per desk, point-in-time, cited)
+ [4] PRICES  prices.py                     [5] BRIEF  render_brief.py
+    │   keyless daily OHLC, 29 instruments     │   per-desk morning note: price
+    │   → ret_1d + 20d z-score → movers        │   movers → fact subgraph →
+    ▼                                          ▼   chains + citations + abstain
+ data/prices/prices.parquet  ──────────►  data/briefs/dt=YYYY-MM-DD/<desk>.{md,json}
+    │
+    ▼
+ run_pipeline.sh  (the live loop: crawl→index→facts→graph→bridge→prices→briefs,
+                   idempotent, cron-able)      eval/run_eval.py (frozen regression)
 ```
 
 ---
@@ -61,7 +70,12 @@ The fix is not more taxonomy — it's **real full article text to ground on**. T
 | `scrape_news_feeds.py` | Older RSS-headline-only scraper (superseded by crawler for bodies; kept for feed validation). | `... python scrape_news_feeds.py --validate` |
 | `index_corpus.py` | **Retrieval index.** Ports the "fast Qdrant" recipe (TurboQuant bits2 + oversampling/rescore). Embeds real `title+body`. Adds: (1) **quality gate** `is_real_article()` (drops section/listing/report/nav/stub pages, ~15%); (2) **per-article desks** via embedding zero-shot vs `DESK_ANCHORS` (fixes source-level mis-tagging); (3) **score-floor abstention** (`--min-score` → `no_strong_match`). Point-in-time (`published_ordinal` day-range + `published_epoch` as-of). | `uv run --with 'qdrant-client>=1.15' --with 'duckdb>=1.0' --with fastembed --with python-dateutil python index_corpus.py index --recreate` then `... search --desk energy --min-score 0.45 --query "..."` |
 | `graph_experiment.py` | **GraphRAG experiment.** Merges Codex fact batches → `facts.parquet`; light entity canonicalization; embeds each `claim` into Qdrant `market_color_facts` with entities as a KEYWORD payload (the graph adjacency). `search` = seed (vector) → expand (1-hop via shared entities) → causal chains. | `... python graph_experiment.py build --recreate` then `... search --query "..."` |
-| `facts_work/` | Codex fact-extraction workspace: batch inputs, prompt template, parallel driver `run_codex_batches.sh`, per-batch `energy_facts_*.jsonl`, merged `facts.parquet`. | `MAXP=3 bash facts_work/run_codex_batches.sh` |
+| `facts_work/` | Codex fact-extraction workspace: batch inputs, prompt template, parallel driver `run_codex_batches.sh` (prefix-aware, resume-safe), per-batch `*_facts_*.jsonl`, merged `facts.parquet`. | `PREFIX=all MAXP=3 bash facts_work/run_codex_batches.sh` |
+| `make_fact_batches.py` | Queues **new** quality-gated docs into extraction batches (skips doc_ids already extracted or already queued) — the incremental path the pipeline uses. | `uv run --with 'duckdb>=1.0' python make_fact_batches.py --prefix all` |
+| `prices.py` + `config/instruments.json` | **Price layer.** Keyless daily OHLC for 29 desk-mapped instruments (Stooq symbols, yfinance fallback while Stooq is PoW-walled) → `data/prices/prices.parquet` with `ret_1d` + `zscore_20d`; `movers` prints the desk's significant moves. | `uv run --with httpx --with pyarrow --with duckdb --with yfinance python prices.py fetch` |
+| `render_brief.py` | **The last mile.** Deterministic per-desk brief: price movers → fact subgraph (seed → shared-entity expansion, desk+window+as-of scoped, score-floor gated) → entity→entity causal chains, source corroboration, citations, NEW flags, and explicit **no-clear-driver** abstention sections. Writes `data/briefs/dt=<date>/<desk>.{md,json}`. | `uv run --with 'qdrant-client>=1.15' --with 'duckdb>=1.0' --with fastembed --with numpy --with pyarrow python render_brief.py --all-desks` |
+| `run_pipeline.sh` | **The live loop.** crawl → index → new-doc fact batches → codex drain → graph build → bridge → prices → all-desk briefs. Idempotent per stage, cron example in the header, `SKIP_FACTS=1` for a fast refresh. | `./run_pipeline.sh` |
+| `eval/` | Frozen retrieval regression: 30 cases (19 retrieval / 7 abstain / 4 as-of point-in-time), exit 1 on failure. Never weaken a case to make it pass. | `uv run --with 'qdrant-client>=1.15' --with fastembed --with 'duckdb>=1.0' python eval/run_eval.py` |
 
 See `docs/decisions.md` for *why* each choice was made, and `docs/sourcing-research.md` for the premium-wire / vendor research.
 
@@ -93,18 +107,23 @@ See `docs/decisions.md` for *why* each choice was made, and `docs/sourcing-resea
 
 ## Roadmap
 
-1. **Entity/cause canonicalization** → true entity→entity causal graph (multi-hop transmission).
-2. **Subgraph → grounded desk brief renderer** (the last mile: retrieval → the actual market-color note, with citations).
-3. **Scale facts to all desks** (same pipeline, more Codex batches).
-4. **Structured-data layer** (CDS/spreads/reserves/World Bank/IMF/BIS) for impact-mapping use cases.
-5. Broaden sources for EM/commodity/political coverage.
+Done 2026-07-01 (see decisions D16–D20): ~~entity/cause canonicalization~~, ~~brief renderer~~,
+~~facts for all desks~~, ~~price layer~~, ~~live pipeline loop~~, ~~eval regression suite~~,
+~~UI transmission map + briefs~~.
+
+Next:
+1. **Grounded-generation pass over the brief JSON** (LLM prose render of the fact subgraph — optional layer on top of the deterministic brief, never a replacement).
+2. **Abstention-floor calibration / reranking** (the one failing eval case: absent-topic queries scoring just above the floor on surface overlap).
+3. **Structured-data layer beyond prices** (CDS/spreads/reserves/World Bank/IMF/BIS) for impact-mapping use cases.
+4. Broaden sources for EM/commodity/political coverage (ACLED, shipping, ag, EM-regional).
+5. Community detection + per-community summaries (GraphRAG "global" mode) now that facts span all desks.
 
 ---
 
 ## Runtime / environment notes
 
 - **Python via `uv run --with ...`** (no project venv). Python 3.14 present; scripts pin deps per-invocation.
-- **Qdrant**: local binary at `../news-narrative-explainer/v3/tmp/qdrant-bin/qdrant` (v1.18.2, arm64), storage in `qdrant_storage/`. Start with `QDRANT__STORAGE__STORAGE_PATH=... <binary>`. (Docker `qdrant/qdrant` also works.)
+- **Qdrant**: the docker-compose `qdrant` service on :6333 is the live store (collections `market_color`, `market_color_facts`, `market_facts` — all rebuildable from parquet: `index_corpus.py index --recreate`, `graph_experiment.py build --recreate`, `bridge_facts_to_market_facts.py --recreate`). The old local binary at `../news-narrative-explainer/v3/tmp/qdrant-bin/qdrant` + `qdrant_storage/` still exists but is superseded.
 - **Embeddings**: fastembed `all-MiniLM-L6-v2` (384-d, local, no server). Ollama also present (`all-minilm`, `embeddinggemma`, `Qwen3-4B-Instruct`).
 - **LLM for fact extraction**: **no Groq/Anthropic/OpenAI API keys in env.** Fact extraction runs on **Codex CLI** (`codex exec`, ChatGPT auth, free, non-interactive). NB: the "never spawn codex from Claude (hangs)" caution is the *interactive* TUI only — `codex exec -C <dir> -s workspace-write --skip-git-repo-check - < prompt` run in the background is fine.
 - Local Qwen3-4B (Ollama) is the fallback fact extractor if Codex is unavailable.

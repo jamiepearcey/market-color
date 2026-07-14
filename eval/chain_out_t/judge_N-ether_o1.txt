@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did Ether fall about 8 percent over the past week?
+
+ANSWER A:
+Ether fell roughly 8% over the past week (down 8.2% to about $1,587) as broad crypto weakness gripped the market [2][4]. The main driver was renewed U.S. dollar strength—the Japanese yen slid to a 40-year low and USD/JPY broke above 162.00, its highest since 1986—which pressured risk assets like crypto [4][8]. Dollar strength was itself tied to markets repricing Federal Reserve rate expectations, with investors prioritizing portfolio protection over fundamentals [6][7]. Additional pressure came from muted onchain demand, shrinking transaction fees, and Strategy's plan to potentially sell over $1 billion in bitcoin, which added caution to an already thin market [4]. Quarter-end "window dressing," as investors trimmed holdings in assets that had fallen over the prior three months, also contributed [2].
+
+ANSWER B:
+Ether fell about 8% over the past week—dropping 8.2% over seven days to roughly $1,587—driven primarily by a weakening Japanese yen (at a 40-year low) that boosted the US dollar and pressured risk assets like crypto [4][6]. The selloff was compounded by muted onchain demand, shrinking transaction fees, and caution from Strategy's plan to potentially sell over $1 billion in bitcoin [4]. Ether-specific pressure also came from $274 million in Ether ETF outflows that week [8] and "window dressing," as investors reduced holdings in assets that had fallen over the prior three months ahead of quarter-end [2]. More broadly, the crypto market faced steady spot Bitcoin ETF outflows, a hawkish Fed under Kevin Warsh, a dollar at 12-month highs, and capital rotating into AI-linked semiconductor stocks [9]. Note the context gives slightly varying figures for the weekly decline (8.2% [4] vs. 8.8% [5]), but all point to the same drivers.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

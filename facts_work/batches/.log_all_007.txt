@@ -1,0 +1,430 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fad-1e76-7871-8d42-2218f94f2cdf
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_007.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_007.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_007.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T21:54:31.616776Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_007.jsonl` to determine its structure and volume, then I’ll extract market-relevant atomic facts per document and write `all_facts_007.jsonl` in the same order.
+exec
+/bin/zsh -lc 'wc -l all_batch_007.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_007.jsonl
+
+exec
+/bin/zsh -lc "sed -n '1,3p' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "0da60b29b7422ac32b1ccfd4d20fc294", "source_name": "AP Top News", "published_date": "2026-06-29", "url": "https://apnews.com/article/germany-shooting-stade-1f81410d7a730dfe759c6ebc92626cda", "title": "Shooting in northern Germany leaves 6 people dead. Suspected shooter arrested", "body_text": "Shooting in northern Germany leaves 6 people dead. Suspected shooter arrested Shooting in northern Germany leaves 6 people dead. Suspected shooter arrested BERLIN (AP) — A shooting at a youth welfare facility in northern Germany on Monday left six people dead in what officials believe may have stemmed from a custody dispute. The suspected shooter was arrested. Five people – four women and one man – died at the scene of the shooting in Stade, police said. A sixth, also an adult, died later at a hospital. All six were employees of the youth center or its affiliates, they said. “The police are investigating the motive and the exact course of events under high pressure,” Daniela Behrens, interior minister for the Lower Saxony region, told a news conference, adding that it was an extremely violent crime in cold blood, “apparently in a custody dispute.” Police said several people were wounded, some of them seriously, German news agency dpa reported, but they did not give a specific figure or information on the victims’ identity. Police said the shooting took place in the facility on Dankersstrasse, a street south of the town center. The facility includes temporary accommodation for pregnant women or young mothers with children. AP correspondent Karen Chammas reports on a shooting in northern Germany. A main suspect was arrested, while another two people were subject to “police measures” on suspicion of involvement, police said in a statement. They didn’t elaborate. Video footage after the shooting showed a large police presence, along with other emergency service personnel and several ambulances on a residential street. Germany’s gun laws are more restrictive than those in the United States, and mass shootings are rare but not unheard of. Vitali Mertens, who lives across the street from the scene, said he heard gunshots and “the whole area was cordoned off right away.” Stade has about 50,000 inhabitants and is located about 40 kilometers (25 miles) from Hamburg."}
+{"doc_id": "1036dcd012991de77d60a6c816f57c12", "source_name": "AP Top News", "published_date": "2026-06-29", "url": "https://apnews.com/article/afghanistan-pakistan-airstrikes-militants-eaf84d1a19cd5e5df750511c310ae906", "title": "Pakistani airstrikes kill 36 civilians in Afghanistan and wound 160, officials say", "body_text": "Pakistani airstrikes kill 36 civilians in Afghanistan and wound 160, officials say Pakistani airstrikes kill 36 civilians in Afghanistan and wound 160, officials say KABUL, Afghanistan (AP) — Pakistani forces’ ground operations and strikes killed at least 36 civilians in Afghanistan overnight and wounded more than 160 others, Afghan officials said Monday, as tensions between the neighbors escalated. One Afghan official said the attacks would be met with retaliation. Pakistan said the operations were launched in response to militant attacks across Pakistan. Security forces carried out a ground operation along the border late Sunday, followed by strikes against militant hideouts and safe havens, killing 29 fighters, Pakistan’s Information Minister Attaullah Tarar said. Afghanistan condemned the strikes in Paktia, Paktika, and Kunar provinces as a “cowardly act of aggression” and an “act of brutality.” Hayatullah Mohajer Farahi, the deputy minister for publications at the Ministry of Information and Culture, said Afghanistan would respond “in due time.” Hamdullah Fitrat, the deputy spokesperson for Afghanistan’s Taliban government, said Pakistani forces targeted a home in Paktia’s Chamkani district, killing an older man and a child, while other family members were wounded. When residents gathered to rescue people, the area was struck again, killing 28 villagers and wounding 158, he said. Six people, mostly women and children, were killed in a village in Giyan district, Paktika province, when another home was struck, he said. A civilian home in Kunar province was also hit, causing no casualties but killing some 30 livestock. The U.N. Assistance Mission in Afghanistan independently confirmed that at least 28 civilians were killed and 49 others were wounded in the strikes, including women and children. It added that the figures were preliminary and could increase. Pakistani officials said an uneasy calm prevailed along the border Monday, with security forces remaining on high alert. Envoys are summoned over the attacks On Monday, Afghanistan and Pakistan summoned each other’s top diplomats to protest the attacks. Zia Ahmad Takal, the Afghanistan Foreign Ministry’s deputy spokesperson, accused Islamabad of repeatedly blaming Afghanistan for security incidents inside Pakistan without “credible evidence.” Pakistan’s behavior “seriously harms the atmosphere of trust between the two countries, good neighborly relations and the security and stability of the region,” Takal said. Pakistan’s Ministry of Foreign Affairs said it summoned Afghanistan’s top diplomat in Islamabad to protest the involvement of Afghan nationals in recent attacks, including one in Karachi over the weekend. Militant attacks targeting Pakistan’s police and security forces have surged in recent years. Authorities have blamed the Pakistani Taliban, or TTP, and allied militant groups for most of the violence. The Pakistani Taliban are separate from but allied with the Afghan Taliban that returned to power in 2021. Tarar, the Pakistani information minister, shared three videos on X that he said showed projectiles striking sprawling camps and safe havens of Jamaat-ul-Ahrar and Fitna al-Khawarij in Afghanistan’s Paktia, Paktika and Kunar provinces. Tarar said the overnight strikes killed “terrorists” and destroyed weapons and ammunition stockpiles. Pakistan uses the phrase “Khawarij” to refer to Indian-backed Pakistani Taliban and other militants. Jamaat-ul-Ahrar is a breakaway faction of the Pakistani Taliban. Tarar said Pakistan’s counter-terrorism campaign “will continue at full pace to wipe out the menace of foreign-sponsored and supported terrorism from the country.” India, however, denied any involvement, with Foreign Ministry spokesperson Randhir Jaiswal calling the statements “baseless allegations.” Pakistan should “look inwards, take credible action against the terror infrastructure on its territory,” he said. Pakistan launches operation after assault in Karachi The Pakistani security operation followed a militant attack targeting the regional headquarters of the paramilitary Rangers in Karachi that killed three soldiers. Security forces killed three attackers and arrested another assailant, whom the military identified as a wounded Afghan national. Jamaat-ul-Ahrar claimed responsibility for the Karachi attack. Officials in Pakistan claimed one Afghan suspect was captured following the attack, saying that “Afghan soil and Afghan nationals continue to be used to orchestrate terrorist attacks inside Pakistan.” Police later released the statement of the wounded Afghan detainee, who said the Karachi attack was planned by Jamaat‑ul‑Ahrar, though it was unclear if the confession was made under duress. Sunday’s cross-border strikes and ground operation came less than three weeks after Pakistan’s military launched airstrikes on what it said were militant hideouts in Afghanistan. They ended about a month of relative calm following what Islamabad had described as an “open war” between the neighboring countries, despite international efforts to broker a lasting peace. The escalation follows months of military action. Hundreds of people have been killed in cross-border fighting since February, when Afghanistan launched retaliatory strikes after Pakistan carried out airstrikes inside Afghan territory. Multiple rounds of talks have failed to secure a lasting ceasefire. China hosted the two sides in April and Beijing later said Pakistan and Afghanistan had agreed not to escalate their conflict and to explore a solution. ___ Fraser reported from Ankara, Turkey. Associated Press writer Munir Ahmed contributed from Islamabad."}
+{"doc_id": "10757b2dfc75a378fc9d6947d9a23199", "source_name": "Yahoo Finance", "published_date": "2026-06-29", "url": "https://finance.yahoo.com/markets/options/articles/mcdonalds-corp-stock-may-hit-130002046.html", "title": "McDonald's Corp Stock May Have Hit Bottom - Ways to Play MCD Stock", "body_text": "McDonald's Corp. (MCD) stock has tumbled based on fears about how gas prices have affected sales. But it may have been overdone, especially now that gas prices are falling. This article looks at ways to play MCD stock using out-of-the-money puts and in-the-money calls. MCD closed at $269.76 on Friday, June 26, up from a recent trough of $264.54 on June 25. Moreover, it's well below a 3-month peak of $311.36 on April 17. More News from Barchart However, based on our analysis of its strong free cash flow (FCF), MCD stock could still be worth almost $300 per share, 11% higher. Price Targets for MCD Stock I discussed this in a May 10 Barchart article, \"McDonald's Stock Falls Through 1-Year Lows - Are Sales Slowdown Fears Overdone?\" I showed that MCD could be worth $299.16 per share, based on analysts' revenue forecasts and using a 26% FCF margin forecast (i.e., its trailing 12-month FCF margin). For example, analysts project revenue between $28.5 billion this year and $30.17 billion next year, or $29.335 billion over the next 12 months (NTM). That implies, using its average 26% FCF margin (over the last 12 months), McDonald's Corp. could generate $7.63 billion in free cash flow (FCF). And, using a 3.6% FCF yield, as shown in my article, the fair market value (FMV) is $212 billion: $7.63b FCF / 0.0359 = $212.5 billion FMV That is 10.6% higher than Friday's market cap calculation of $191.7 billion, according to Yahoo! Finance. In other words, the price target (PT) is almost $300: $212.5b / $191.7b = 1.109 $269.76 price x 1.109 = $299.16 PT Other analysts agree. They even have higher PTs. For example, Yahoo! Finance's average analyst survey PT is $330.94, Barchart's is $330.59, and AnaChart's is $351.90. However, there is no guarantee that MCD will rise to these higher price targets. So, there are ways to play it, as I discussed in last month's Barchart article on MCD. For one, an investor can sell short one-month out-of-the-money puts. That way, they can set a lower potential buy-in and also collect income while waiting. In addition, some investors can use this income (each month) to help defray the purchase of a 6-month in-the-money (ITM) MCD call option. Shorting 1-Month ITM MCD Calls For example, the $260.00 put option strike price expiring July 31 has a midpoint premium of $3.08 per put contract. That strike price is 3.6% lower than Friday's close for the next 34 days."}
+
+codex
+The batch is small enough to handle directly. I’m listing the documents first so I can separate clearly market-relevant pieces from non-market items before writing the output file.
+exec
+/bin/zsh -lc "jq -r '[.doc_id,.source_name,.published_date,.title] | @tsv' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+0da60b29b7422ac32b1ccfd4d20fc294	AP Top News	2026-06-29	Shooting in northern Germany leaves 6 people dead. Suspected shooter arrested
+1036dcd012991de77d60a6c816f57c12	AP Top News	2026-06-29	Pakistani airstrikes kill 36 civilians in Afghanistan and wound 160, officials say
+10757b2dfc75a378fc9d6947d9a23199	Yahoo Finance	2026-06-29	McDonald's Corp Stock May Have Hit Bottom - Ways to Play MCD Stock
+1144a8225757a80770fe8abf5e839d15	Foreign Policy	2026-06-29	The Supreme Court Pushes Back on Trump’s Fed Assault
+119d88ae9a26e8e052bf88188001054e	FXStreet News	2026-06-29	Just like Fed, is BoJ’s independence under threat? | FXStreet
+11ec69296d9658a98878677f839151e5	BBC World	2026-06-29	Ebola in DR Congo: Mass gatherings banned in Kinshasa to contain spread
+12797ba4f67f480ecaad464612bd7b32	AP Top News	2026-06-29	US and Iran pause strikes but disagree over next steps on talks
+1309b035fe9474758a67ad74bad7f098	IMF News	2026-06-29	2026 IMF MENA Research Conference
+136c62982957f2508e2bce6a7092d93b	Cointelegraph	2026-06-29	Coinbase and OKX Attempt to Swoop up EU Users Affected by MiCA Restrictions
+13c49ebd9df8040f08f62dca7a00901c	IMF News	2026-06-29	Islamic Republic of Mauritania: Requests for an Extended Arrangement Under the Extended Fund Facility and Arrangement Under the Extended Credit Facility, Cancellation of the Current Arrangements Under the Extended Fund Facility and the Extended Credit Facility, and Fifth Review Under the Resilience and Sustainability Facility Arrangement-Press Release; Staff Report; and Statement by the Executive Director for the Islamic Republic of Mauritania
+14d71e9394749ef73bf000126a3a2f99	Yahoo Finance	2026-06-29	Pinnacle Silver and Gold names Auramet as lead financier for El Potrero gold-silver project
+15371f3bccb46ba04ffca8710b6693ee	Decrypt	2026-06-29	Meta Unveils New Tech That Uses AI to Translate Brain Activity Into Text—Without Surgery - Decrypt
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"10757b2dfc75a378fc9d6947d9a23199\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"1144a8225757a80770fe8abf5e839d15\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+The Supreme Court Pushes Back on Trump’s Fed Assault
+The Supreme Court Pushes Back on Trump’s Fed Assault Tampering with the Federal Reserve’s independence proved to be a bridge too far. Welcome to FP Free Week. To celebrate America’s 250th birthday, our entire site is completely unlocked this week only. Enjoy the article. The U.S. Supreme Court ruled on Monday that President Donald Trump’s “purported” firing of Federal Reserve Board member Lisa Cook last summer was improper, in yet another blow to Trump’s yearslong effort to emasculate the world’s most important central bank. Interestingly, the court also issued a ruling in a separate case upholding Trump’s ability to fire members of a different body: the Federal Trade Commission. That ruling overturned nearly a century-old legal precedent. The U.S. Supreme Court ruled on Monday that President Donald Trump’s “purported” firing of Federal Reserve Board member Lisa Cook last summer was improper, in yet another blow to Trump’s yearslong effort to emasculate the world’s most important central bank. Interestingly, the court also issued a ruling in a separate case upholding Trump’s ability to fire members of a different body: the Federal Trade Commission. That ruling overturned nearly a century-old legal precedent. Yet the contrast between the two rulings is not an accident: It’s precisely because the U.S. Federal Reserve is, by statute and tradition, a very special creation. It also matters a lot in terms of the fate of the U.S. and global economies. “Not only the fact of independence but also the appearance of independence is key to the Federal Reserve’s design,” wrote Chief Justice John Roberts in the majority opinion in the Cook case. The backstory: Last August, Trump ramped up his war on the Federal Reserve after years of frustration that it wasn’t lowering interest rates like he wanted to goose economic growth. (They were not lower because inflation wasn’t either.) He unleashed lawfare against then-Federal Reserve Chair Jerome Powell and tried to get him to quit, but Powell saw out his term this spring, when he was replaced by a Trump appointee. In the meantime, Trump wanted to further stack the deck by removing what he saw as troublesome Federal Reserve governors who were on Powell’s side. Bill Pulte, Trump’s housing administrator, found a way to allege that Cook, a Fed governor with a term guaranteed until 2038, had committed mortgage fraud. That tactic is a favorite of his—he also used it against Letitia James, the New York state attorney general who investigated Trump for some of his financial dealings. (Pulte is currently Trump’s nominee to oversee the entire U.S. intelligence community.) Trump fired Cook, citing the mortgage fraud allegations. Cook denied the allegations and filed a lawsuit challenging the firing, and a lower federal court ruled that she could keep her job while that lawsuit played out in court. The Trump administration then asked the Supreme Court to stay that ruling and allow her firing to go through. The Supreme Court rejected the request, ruling that the administration had overreached in firing her without due process, and that she was afforded those protections specifically because the Federal Reserve is different from other federal agencies and always has been. There were U.S. national banks in the old days, and in the early 20th century an actual one, after the Federal Reserve was created to bring U.S. financial stewardship up to the level that Europe achieved in the 17th century. They were all ring-fenced to shepherd the economy free from political interference. “The protection from removal enjoyed by Governors of the Federal Reserve is consistent with the Constitution. The Founders knew from experience the calamities that could arise from even the ‘suspicion’ of political manipulation of monetary policy,” Roberts wrote in the majority opinion. The opinion was surprisingly close, given the contentious oral arguments in January. The three liberal judges, joined by Justices Brett Kavanaugh and John Roberts, overcame the dissents of the conservative judges, led by Justice Clarence Thomas. But it was Kavanaugh who put it most concisely, in his concurrence with the majority opinion. “Even temporary uncertainty about the status of the Federal Reserve could spark political upheaval, including confusion about whether the President could immediately remove multiple Governors at will, as well as turmoil in the U. S. and world economies. I would not go down that road,” Kavanaugh wrote. The dissenting judges had their say, but at the end of the day, the majority ruled that a special institution—the lighthouse guiding all the ships of the economic world—merits special treatment, because that was how it was born and what it was meant to be. Importantly, Roberts did write in a footnote that the ruling does not forbid Trump from trying again to fire Cook if he wants; however, if he did so, she would be entitled to seek judicial review according to the procedures laid out in the ruling. “We see no reason to leave the public in limbo, or to sow doubt as to the status of one of our Nation’s (and the world’s) most important financial institutions. Although we appreciate that others may see matters differently, we would not so quickly unsettle this ‘special arrangement’ sanctioned by history,” Roberts wrote in the majority opinion.
+
+ succeeded in 0ms:
+McDonald's Corp Stock May Have Hit Bottom - Ways to Play MCD Stock
+McDonald's Corp. (MCD) stock has tumbled based on fears about how gas prices have affected sales. But it may have been overdone, especially now that gas prices are falling. This article looks at ways to play MCD stock using out-of-the-money puts and in-the-money calls. MCD closed at $269.76 on Friday, June 26, up from a recent trough of $264.54 on June 25. Moreover, it's well below a 3-month peak of $311.36 on April 17. More News from Barchart However, based on our analysis of its strong free cash flow (FCF), MCD stock could still be worth almost $300 per share, 11% higher. Price Targets for MCD Stock I discussed this in a May 10 Barchart article, "McDonald's Stock Falls Through 1-Year Lows - Are Sales Slowdown Fears Overdone?" I showed that MCD could be worth $299.16 per share, based on analysts' revenue forecasts and using a 26% FCF margin forecast (i.e., its trailing 12-month FCF margin). For example, analysts project revenue between $28.5 billion this year and $30.17 billion next year, or $29.335 billion over the next 12 months (NTM). That implies, using its average 26% FCF margin (over the last 12 months), McDonald's Corp. could generate $7.63 billion in free cash flow (FCF). And, using a 3.6% FCF yield, as shown in my article, the fair market value (FMV) is $212 billion: $7.63b FCF / 0.0359 = $212.5 billion FMV That is 10.6% higher than Friday's market cap calculation of $191.7 billion, according to Yahoo! Finance. In other words, the price target (PT) is almost $300: $212.5b / $191.7b = 1.109 $269.76 price x 1.109 = $299.16 PT Other analysts agree. They even have higher PTs. For example, Yahoo! Finance's average analyst survey PT is $330.94, Barchart's is $330.59, and AnaChart's is $351.90. However, there is no guarantee that MCD will rise to these higher price targets. So, there are ways to play it, as I discussed in last month's Barchart article on MCD. For one, an investor can sell short one-month out-of-the-money puts. That way, they can set a lower potential buy-in and also collect income while waiting. In addition, some investors can use this income (each month) to help defray the purchase of a 6-month in-the-money (ITM) MCD call option. Shorting 1-Month ITM MCD Calls For example, the $260.00 put option strike price expiring July 31 has a midpoint premium of $3.08 per put contract. That strike price is 3.6% lower than Friday's close for the next 34 days.
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"119d88ae9a26e8e052bf88188001054e\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Just like Fed, is BoJ’s independence under threat? | FXStreet
+When talking about central bank independence, most of the focus has been on Donald Trump’s pressure on the Federal Reserve. But a similar story, a quieter one for now, seems to be happening on the other side of the Pacific: Japan’s government may be testing the Bank of Japan’s independence just as the country tries to leave decades of ultra-loose monetary policy behind. Welcome to another chapter of politics meddling in central bank decisions. Donald Trump and the Fed, the most recent precedent Since the return of Donald Trump to the White House in January 2025, one man he has criticized and has threatened to lay off several times is the former Federal Reserve (Fed) Chairman Jerome Powell. All these reprimands were for a simple reason: not lowering interest rates quickly, as Trump desired. To increase his control over Federal Open Market Committee (FOMC) voting, US President Trump also appointed one of his top economic advisors, Stephen Miran, to fill the remaining time in former Fed Governor Adriana Kugler’s term, who stepped down after she was accused of violating the central bank’s ethics rules. During his term, Miran always went against the grain and voted for large interest rate cuts, while others called for caution due to Trump’s tariff policies. Meanwhile, the nomination of current Fed Chair Kevin Warsh by US President Trump, who was confirmed in May this year, was also made on the expectation that he would pursue his economic agenda – lowering interest rates. US President Trump also faced criticism from several global and central bank leaders for publicly criticizing former Fed Chair Powell and attacking the Fed's autonomy, calling it damage to the central bank’s independence. This also raised concerns over the credibility of the US Dollar (USD), Treasury Yields, and other US assets. Takaichi pushes central bank to align with government In the last Bank of Japan (BoJ) June policy meeting, the majority of officials decided to raise interest rates by 25 basis points (bps) to 1%, as markets expected, bringing the rate to its highest level in 31 years. However, the Summary of Opinions (SoP) of the meeting showed that the decision wasn’t unanimous: Prime Minister Sanae Takaichi’s newly appointed board member, Toichiro Asada, was the only one voting against the interest-rate hike, citing risks to output and jobs from the Middle East conflict. "The downside risks to production and employment may disrupt the virtuous cycle between wages and prices. In the worst-case scenario, this could potentially push Japan back to deflation," one member was quoted as saying in the summary, while the view is widely seen as that of Asada, Reuters reported. This leaves little doubt about his commitment to Takaichi’s desires to stick with an ultra-loose monetary policy. While disagreements among central bank officials are notorious and normal, the dissent vote by Asada – the appointee of a prime minister who very explicitly has vowed to abandon austerity in favor of aggressive fiscal expansion – has raised eyebrows. Market experts view the BoJ Asada’s dissenting vote as political pressure from Tokyo, which has been seen as supporting loose fiscal conditions. “The dovish dissenting vote by Asada and the BoJ’s decision this month to halt bond tapering next fiscal year may reflect the influence of political pressure to some extent,” analysts at JP Morgan said. After a landslide victory in general elections last year, PM Takaichi said in a policy speech in the Parliament that the new government will break “excessive fiscal austerity” and won’t hesitate in increasing spending in areas like artificial intelligence (AI), chips and shipbuilding to lift Japan's potential growth, Reuters reported. Takaichi’s leadership campaign also included a mission to revive former Japanese PM Shinzo Abe’s economic vision of cheap borrowing and high public spending, also known as “Abenomics”. Hours before the June rate hike by the Bank of Japan, economic policy minister Minoru Kiuchi said he “strongly” expected the central bank to “coordinate closely” with the government, the Japan Times reports. The Yen doesn’t like doves in the BoJ Asada could be the first of many doves to land in the Bank of Japan. Knowing the fact that PM Takaichi is set to fill one more member to the BoJ’s board as a replacement for Junko Nakagawa – whose tenure will be completed in a few days – and two more by the year-end, this scenario could prove to be even worse for the Japanese Yen (JPY), which is already close to 162.00 against the US Dollar, the lowest level seen in over 40 years. In this context, market experts believe that the BoJ could fasten the monetary tightening pace before the arrival of more doves at the helm. “The BOJ may not have much time left to continue raising rates toward the neutral rate,” analysts at Mitsubishi UFJ Morgan Stanley Securities said. “It may therefore try to reduce the degree of monetary accommodation as much as possible by next summer.” Meanwhile, the BoJ SoP of the June policy meeting also showed that one board member said Japan's policy rate must be brought “closer to the estimated neutral rate of around 2% at a pace of once every few months. The more the BoJ looks constrained by politics, the harder it will be to keep confidence in the Yen. Japan’s exit from ultra-loose policy was never going to be smooth, but if central bank independence becomes the next casualty, the turbulence for the Yen seen so far may only be a little taste of what’s to come. Bank of Japan FAQs The Bank of Japan (BoJ) is the Japanese central bank, which sets monetary policy in the country. Its mandate is to issue banknotes and carry out currency and monetary control to ensure price stability, which means an inflation target of around 2%. The Bank of Japan embarked in an ultra-loose monetary policy in 2013 in order to stimulate the economy and fuel inflation amid a low-inflationary environment. The bank’s policy is based on Quantitative and Qualitative Easing (QQE), or printing notes to buy assets such as government or corporate bonds to provide liquidity. In 2016, the bank doubled down on its strategy and further loosened policy by first introducing negative interest rates and then directly controlling the yield of its 10-year government bonds. In March 2024, the BoJ lifted interest rates, effectively retreating from the ultra-loose monetary policy stance. The Bank’s massive stimulus caused the Yen to depreciate against its main currency peers. This process exacerbated in 2022 and 2023 due to an increasing policy divergence between the Bank of Japan and other main central banks, which opted to increase interest rates sharply to fight decades-high levels of inflation. The BoJ’s policy led to a widening differential with other currencies, dragging down the value of the Yen. This trend partly reversed in 2024, when the BoJ decided to abandon its ultra-loose policy stance. A weaker Yen and the spike in global energy prices led to an increase in Japanese inflation, which exceeded the BoJ’s 2% target. The prospect of rising salaries in the country – a key element fuelling inflation – also contributed to the move. Author Sagar Dua is associated with the financial markets from his college days. Along with pursuing post-graduation in Commerce in 2014, he started his markets training with chart analysis.
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"136c62982957f2508e2bce6a7092d93b\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"12797ba4f67f480ecaad464612bd7b32\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Coinbase and OKX Attempt to Swoop up EU Users Affected by MiCA Restrictions
+Coinbase, Kraken and OKX move to swoop up EU users affected by MiCA restrictions Several exchanges that have already been authorized by EU regulators are attempting to bring in users from companies unlicensed under the Markets in Crypto-Assets rules, offering transfer bonuses and prizes. [Correction, June 30, UTC 12:52 - Corrects Bybit executive's comments in eighth paragraph.] Cryptocurrency exchanges already approved to operate in European Union member states under the soon-to-be enforced Markets in Crypto-Assets (MiCA) framework are incentivizing users from companies that failed to gain license approval. With MiCA restrictions set to be enforced starting on July 1, executives of cryptocurrency exchanges including Coinbase and OKX have taken to social media to sway users from soon-to-be unauthorized companies, like Binance and Bybit Global. The world’s largest crypto exchange, Binance, said that it would restrict services for EU-based users after withdrawing its MiCA application last week. Bybit Global on Monday said access to services for users in the European Economic Area “will be progressively limited” starting on July 1, though its Bybit EU arm is authorized to operate under MiCA through its Austrian licensee. As of Monday, regulators in EU member states had approved 244 total licenses for crypto companies under MiCA. Of those, about a quarter (57) came from Germany’s Federal Financial Supervisory Authority, or BaFin. Authorities in Greece, Hungary, Poland, Portugal and Romania had not issued any licenses as of Friday. Erald Ghoos, CEO of OKX Europe, said on Monday that the exchange would offer 8% on new deposits, suggesting that Binance and Bybit users transfer their funds. Coinbase CEO Brian Armstrong said on Friday that the company would offer a 5% transfer bonus for users before July 13, about two weeks after MiCA takes effect. Kraken, also authorized under MiCA, offered a $1.1 million prize draw for euro deposits. Source: OKX CEO Mingxing “Star” Xu Under MiCA, crypto companies offering services to EU-based users in 27 countries must be licensed as a Crypto-Asset Service Provider (CASP) by a regulator in one of the member states. While many exchanges, including Coinbase, FalconX, Kraken and OKX, have obtained licenses to operate after the June 30 deadline, the absence of others could significantly impact the region's crypto market. Related: Binance faces EU service limits next week as MiCA rules take effect As Bybit pulls back in EEA, MENA business expands While Bybit moves to limit its services in the EEA, the company is ramping up business in the Middle East. Derek Dai, Bybit’s head for the Middle East and North Africa, said at a Tel Aviv event on Sunday that the company was stepping up efforts to build in the region. Bybit MENA head Derek Dai (left) and Collider partner Eylon Aviv (right) at Sunday's event in Tel Aviv. Source: Cointelegraph “Our business strategy for MENA has been to differentiate marketing and business plans to make sure that each group of customers are well served,” said Dai. “We are creating halal products that meet the needs of more conservative customers in a number of the Arabic countries while focusing on derivative products that are of interest to younger investors in Morocco who are starting to develop their trading skills and interests.” Magazine: Bitcoin slides to $58K, XRP hits $1 but onchain data promising: Market Moves More on the subject
+
+ succeeded in 0ms:
+US and Iran pause strikes but disagree over next steps on talks
+US and Iran pause strikes but disagree over next steps on talks US and Iran pause strikes but disagree over next steps on talks DUBAI, United Arab Emirates (AP) — The United States and Iran on Monday separately announced they will send delegations to Qatar this week, though Tehran insisted it has not agreed to meet with the U.S. “at any level” after attacks across the Persian Gulf over the weekend challenged negotiations to end the war. U.S. President Donald Trump said the Islamic Republic had requested a meeting with U.S. counterparts and that they planned to convene Tuesday in Doha, Qatar. But one of Iran’s senior negotiators denied talks had been scheduled. And the spokesman for Iran’s Foreign Ministry said Tehran was sending its delegation to Qatar, a key mediator in the negotiations, to discuss terms of the interim deal without involving the U.S. Hostilities mounted in recent days in the Strait of Hormuz, through which a fifth of the world’s oil had been shipped before war began. After four days of trading strikes, both sides appeared to pause their attacks Monday. The U.S. and Iran agreed to an interim deal earlier this month that calls for Tehran to dilute its stockpile of enriched uranium. It also waives U.S.-backed oil sanctions on the country, calls for free traffic through the Strait of Hormuz and gives each side 60 days to hammer out broader agreements. Confusion mounts over next round of Iran-US talks After Trump said Monday morning on social media that the U.S. and Iran planned to meet, White House press secretary Karoline Leavitt told Fox News’ “Fox & Friends” that special envoy Steve Witkoff and Jared Kushner, the president’s son-in-law, were flying to Qatar. Pakistan, also a key mediator, had said talks between Iran and the U.S. would resume Tuesday. But Kazem Gharibabadi, a senior negotiator for Iran, said in comments published by Iranian state media that no talks had been confirmed. And Esmail Baghaei, spokesman for Iran’s Foreign Ministry, said that its delegation was traveling to Qatar this week to discuss the planned release of frozen Iranian assets and other issues related to the deal. “There are no negotiation meetings with the U.S. side at any level scheduled in the coming days,” Baghaei said. However, that left open the possibility messages being passed to the Qataris between the two sides. Increased tension in waterway vital to world energy supplies During the war that began Feb. 28, Iran’s attacks and threats stopped cargo ships and tankers from moving through the Strait of Hormuz, creating a global energy crisis. In recent days, Iran has twice attacked vessels in the strait — including a tanker filled with Qatari crude — following efforts to open Oman’s territorial waters to both inbound and outbound traffic from the Persian Gulf. The attacks drew retaliatory American airstrikes and raised concerns that negotiations to reach a formal end to the war could be disrupted. Iran launched drone and missile attacks targeting Bahrain and Kuwait on Sunday. The strait has long been considered an international waterway despite being in Iran and Oman’s territorial waters. The Trump administration was operating Monday on the understanding that the U.S. and Iran are standing down after the recent back-and-forth strikes and that vessels can move freely through the Strait of Hormuz, said a U.S. official who requested anonymity to discuss the sensitive negotiations. Iran’s president, U.S. official say $6 billion coming to Iran The U.S. official also said that Qatar planned to release $6 billion in frozen Iranian assets that would be used to purchase U.S. food products for the Iranian people. Iranian President Masoud Pezeshkian had announced the expected release of funds earlier Monday in comments published by the state-run IRNA news agency. Pezeshkian, a reformist within Iran’s theocracy, is the highest-ranking official within Iran to reference the release of the funds held by Qatar. Oman, Iran discuss possible fees for ships transiting the strait Oman’s foreign minister, Badr al-Busaidi, said Monday that Oman and Iran are considering charging service-related fees for commercial ships transiting the Strait of Hormuz. Al-Busaidi said services could include water safety measures, pollution prevention, navigational assistance and preparedness for incidents such as fires. He told Radio Monte Carlo that Oman does not support imposing transit fees on ships. “This is internationally forbidden,” he said, “and we are abiding by these rules.” But there had never been any fees charged in the strait — and other Gulf Arab states and the U.S. firmly oppose the imposition of any costs for transit. Iran and France clash over clearing mines from strait An Iranian official warned France against “provocations” Monday after French President Emmanuel Macron posted on X that France and others were coordinating efforts to clear mines from the Strait of Hormuz. Kazem Gharibabadi, an Iranian deputy foreign minister, said on X that under the interim deal “demining is carried out solely by Iran and by no other country.” Macron’s post came after he greeted Sultan Haitham bin Tariq of Oman ahead of high-level diplomatic talks in Paris. Lebanon’s president says it will deploy troops as part of deal with Israel Lebanese President Joseph Aoun separately said Monday that Lebanon is determined to deploy troops along its entire southern border as part of a framework agreement with Israel signed Friday. He made the remark while meeting with Adm. Brad Cooper, the top U.S. military commander in the Middle East. The deal was rejected by the Iran-backed Hezbollah militant group, which triggered the latest war with Israel on March 2 when it fired rockets across Lebanon’s southern border and into northern Israel. The Israel-Lebanon deal calls for Hezbollah to be disarmed before Israel will withdraw its troops from southern Lebanon. Israel agreed to withdraw initially from a couple of “pilot zones” where the Lebanese army would then deploy, but no details have been shared about how that will work in practice. Hezbollah officials have warned that attempts to implement the plan could lead to civil war. ___ Boak reported from Washington. Associated Press writers Nasser Karimi and Amir Vahdat in Tehran, Iran; Bassem Mroue and Sally Abou AlJoud in Beirut; Sylvie Corbet in Paris and Russ Bynum in Savannah, Georgia, contributed to this report.
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"13c49ebd9df8040f08f62dca7a00901c\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Islamic Republic of Mauritania: Requests for an Extended Arrangement Under the Extended Fund Facility and Arrangement Under the Extended Credit Facility, Cancellation of the Current Arrangements Under the Extended Fund Facility and the Extended Credit Facility, and Fifth Review Under the Resilience and Sustainability Facility Arrangement-Press Release; Staff Report; and Statement by the Executive Director for the Islamic Republic of Mauritania
+Summary Economic growth slowed to 4.0 percent in 2025 (compared to 6.3 percent in 2024), due to a contraction in the extractive sector and a slowdown in the non-extractive sector. Inflation has been on an upward trend since July 2025, with upward pressures partly explained by the disruptions along the Mali border, which affected key trade corridors. After widening in 2024, the current account (CA) narrowed in 2025, mainly reflecting lower imports related to the GTA project, and higher gold receipts alongside the start of LNG exports. The war in the Middle East has impacted Mauritania through an increased oil import bill and fiscal costs from the temporary subsidies under the newly introduced automatic fuel price mechanism, subsidies on butane gas cylinders, and targeted social protection measures. The social registry enables the government to expand targeted cash transfers in response to further adverse price developments, including increasing food prices. Structurally, persistent challenges, such as inadequate infrastructure, governance weaknesses, high vulnerability to external shocks, and limited economic diversification, continue to constrain Mauritania’s long-term economic development. Additionally, frequent and severe climate-related disasters create large adaptation needs.
+
+codex
+I’ve narrowed this to a handful of documents with explicit market content. I’m checking the remaining borderline items now so I don’t miss any corporate or country-level facts that are actually stated in the text.
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"14d71e9394749ef73bf000126a3a2f99\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"15371f3bccb46ba04ffca8710b6693ee\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Meta Unveils New Tech That Uses AI to Translate Brain Activity Into Text—Without Surgery - Decrypt
+In brief - Meta introduced Brain2Qwerty v2, a non-invasive AI system that decodes brain activity into text. - The model achieved 61% average word accuracy, compared with about 8% for previous non-invasive methods. - Meta released the training code for Brain2Qwerty v1 and v2, while its research partner is releasing the v1 dataset. Meta on Monday introduced Brain2Qwerty v2, an AI system that translates brain activity into text using non-invasive brain recordings. The company said the research is intended to help people who have lost the ability to communicate because of brain lesions. The system records brain activity using a helmet-like magnetoencephalography (MEG) scanner, a non-invasive brain imaging device commonly used in neuroscience research. It then feeds those raw neural signals into an end-to-end AI model that reconstructs the sentences a person is trying to type. Meta said it further improves accuracy by fine-tuning large language models on neural data, allowing the system to use semantic context when interpreting noisy brain recordings. “We trained Brain2Qwerty v2 on approximately 22,000 sentences from nine volunteer participants, each recorded for 10 hours wearing a magnetoencephalography (MEG) device while actively typing,” Meta wrote. “Instead of relying on hand-crafted pipelines to detect neural events, we use end-to-end deep learning to decode directly from raw brain signals.” Meta said Brain2Qwerty achieved a 61% average word accuracy, compared with roughly 8% for previous non-invasive methods. The company is releasing the system's code and dataset as part of its Digital Brain Project, which also includes a $5 million fund to support open neuroscience datasets. Meta also said decoding accuracy improved as the amount of training data increased, suggesting additional data could further improve performance. The company said AI agents explored possible optimizations for the decoding pipeline before engineers selected the final training configuration. In an accompanying paper published in Nature Neuroscience, Meta researchers argued that while AI has significantly improved brain-to-text decoding, most high-performing brain-computer interfaces still depend on surgically implanted electrodes, making them difficult to scale because of the risks tied to brain surgery and the challenges of maintaining implants over time. Meta said Brain2Qwerty v2 approaches levels of accuracy previously achieved only with techniques requiring brain surgery. The company said its non-invasive approach could help bridge the gap between invasive neuroprosthetics and communication systems that do not require surgery. “Our hope is that this work, done in the open, advances neuroscience to identify, diagnose, and treat neurological disorders faster than in siloes,” Meta wrote. The announcement comes as brain-computer interface research accelerates, including by Elon Musk’s Neuralink and Merge Labs, backed by OpenAI CEO Sam Altman, developing technology to help restore communication for people with neurological disorders. While companies such as Neuralink and Synchron are pursuing implanted interfaces that require surgery, a growing number of researchers and startups are using AI to improve the performance of non-invasive systems. In September 2024, startup Neurable introduced AI-powered EEG headphones designed to monitor focus and cognitive fatigue. A year later, MIT spinout AlterEgo unveiled a wearable that converts silent neuromuscular signals from the face and throat into text and commands, positioning it as a practical alternative to implanted brain-computer interfaces. Meta did not immediately respond to a request for comment by Decrypt.
+
+ succeeded in 0ms:
+Pinnacle Silver and Gold names Auramet as lead financier for El Potrero gold-silver project
+Pinnacle Silver & Gold Corp (TSX-V:PINN, OTCQB:PSGCF, FRA:P9J) announced that it has appointed Auramet Capital Partners as lead project financier to arrange or potentially provide up to $5 million in non-equity financing for the development of its El Potrero gold-silver project in Durango, Mexico. The companies have entered into an agreement under which they will work toward a mutually acceptable financing package during a seven-month exclusivity period. Any financing remains subject to due diligence, operational and financial progress, and other customary conditions. Under the agreement, Auramet has the right of last offer to provide the financing but is not obligated to do so. The deal also includes a non-solicitation provision covering competing financing proposals and a $400,000 break fee if Pinnacle accepts an alternative offer during the exclusivity period. President and CEO Robert Archer said the company aims to secure non-dilutive financing to advance El Potrero toward production while reducing reliance on equity markets. "Having a well-known metal trader and financier such as Auramet to partner with, not only brings a lot of credibility but will give us financial flexibility without being captive to the volatility of capital markets as we move through the various stages of development," Archer said in a statement. "Having enjoyed a long-standing relationship with the Auramet team, I am confident that they will be a reliable partner going forward. By participating in our last financing, they have already demonstrated strong support for our management team, business model and the Potrero Project itself." Pinnacle said work at El Potrero continues to advance, with underground delineation drilling underway. The company also reported metallurgical testing indicating average head grades of about 7.7 grams per tonne gold and 116 grams per tonne silver, with potential recoveries exceeding 97% for gold and about 70% for silver. The company added that a feasibility study for a 3.3-kilometre powerline extension has been completed, while baseline studies for a water licence and other permits, along with community agreements, are progressing.
+
+exec
+/bin/zsh -lc "jq -r 'select(.doc_id==\"1309b035fe9474758a67ad74bad7f098\") | .title, .body_text' all_batch_007.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+2026 IMF MENA Research Conference
+Rethinking MENA Integration in a Fast-Changing Global Environment Mohammed VI Polytechnic University, Rabat, Morocco June 29, 2026 Amid a challenging regional and global context marked by war, economic uncertainty, and rapid structural shifts, the IMF will hold its second annual MENA Economic Research Conference in Rabat, Morocco, on June 29–30, 2026, in partnership with Mohammed VI Polytechnic University. Under the theme “Rethinking MENA Integration in a Fast-Changing Global Environment,” the conference will examine the implications for the region of evolving global trade patterns, geoeconomic fragmentation, and technological transformation, including artificial intelligence. It will also explore the role of monetary, fiscal, and labor market policies in maintaining macroeconomic stability and supporting resilient and inclusive growth. Last year, the IMF held the first annual economic research conference co-organized by the IMF and the Onsi Sawiris School of Business at The American University in Cairo, Egypt. This conference series is in partnership with leading universities in the region and aims to establish a forum for dialogue and knowledge exchange among academics, researchers, and policymakers on significant regional and global economic issues. It also seeks to strengthen economic research capacities in ministries of finance and central banks in the region. Agenda Monday, June 29 9:00–9:30 AM Welcome and Opening Remarks Karim El Aynaoui, Executive Vice-President and Dean (Mohammed VI Polytechnic University) Jihad Azour, Director of the Middle East and Central Asia Department (IMF) 9:30–11:00 AM Session 1 – Geoeconomic Fragmentation and Economic Integration Chair: Karim El Aynaoui (Mohammed VI Polytechnic University) The Remains of the Trade: The U.S.–China Trade War and its Aftermath Authors: Pol Antràs (Harvard University) and Andrea Presbitero (IMF) Connector economies in a fragmenting world Authors: Chuan-Han Cheng (University of Cambridge), Oleg Konovalov (EBRD), and Alexander Plekhanov (EBRD) Connectedness Without Complexity? Geoeconomic Fragmentation and Structural Transformation in the MENA Region Authors: Zein Alamah (Concordia University) and Ali Fakih (Lebanese American University) Discussant:Francesco Grigoli (Georgetown University in Qatar) 11:30 AM–1:00 PM Session 2 – Artificial Intelligence Chair: Ferid Belhaj (Policy Center for the New South and Mohammed VI Polytechnic University) Technological Change, Occupations, and Labor Markets in MENA Authors: Gustavo Leyva (Center for Latin American Monetary Studies) and Carlos Urrutia (Instituto Tecnológico Autónomo de México, ITAM, Mexico City) AI in a Fragmenting World Authors: Barry Eichengreen (University of California, Berkeley), George Cui (IMF), Asmaa ElGanainy (IMF), Yevgeniya Korniyenko (IMF), Elyad Shojaei (IMF), Li Zeng (IMF), and Frank Zhang (IMF) AI and Productivity in the MENA Region and Beyond: Opportunities and Challenges Authors: Filiz Unsal (OECD), Francesco Filippucci (OECD), Peter Gal (OECD), and Matthias Schief (OECD) Discussant:Antonio Spilimbergo (Deputy Director, Research Department, IMF) 2:30–4:00 PM Session 3 – Trade Policies Chair: Dorothée Boccanfuso (Mohammed VI Polytechnic University) What Do Market-Access Subsidies Do? Experimental Evidence from Tunisia Authors: Nadia Ali (Columbia University), Giacomo De Giorgi (University of Geneva), Aminur Rahman (Asian Development Bank), and Eric Verhoogen (Columbia University) Conditional Trade Policy: Economic Effects of Qualifying Industrial Zones in the Middle East Author: Ayman Tibi (University of Mannheim) The Impact of Global Trade Policies on MCD Countries and Regional Integration Prospects Authors: Koralai Kirabeva (IMF), Lorenzo Rotunno (IMF), and Michele Ruta (IMF) Discussant:Mehdi Bartal (Mohammed VI Polytechnic University) 4:30–5:30 PM Session 4 – Labor Market Policies Chair: Taline Koranchelian (Deputy Director, Middle East and Central Asia Department, IMF) Job Amenities, Adverse Selection, and Women's Labor Supply in Jordan Author: Bailey Palmer (University of California, Berkeley) Do Employment Subsidies Affect Skill Intensity and Capital Formation? Evidence from Turkish Manufacturing Firms Authors: Güneş Aşık (Middle East Technical University, Ankara) and Çağlar Yüncüler (TOBB University of Economics and Technology, Ankara) Discussant:Nisreen Salti (American University of Beirut) 5:30–6:30 PM Keynote Lecture – "Economic Principles for the 21st Century" Keynote Speaker:Andrés Velasco (Dean of the School of Public Policy, London School of Economics) Tuesday, June 30 9:00–9:15 AM Best Graduate Student Paper Award and Acknowledgment of Graduate Students Laudatio: Jihad Azour (Director of the Middle East and Central Asia Department, IMF) Winner: Bailey Palmer (University of California, Berkeley) Special Mentions: Nadia Ali (Columbia University) and Ayman Tibi (University of Mannheim) 9:15–10:15 AM Policy Panel Moderator: Jihad Azour (Director of the Middle East and Central Asia Department, IMF) Panelists: Nadia Fettah Alaoui (Minister of Finance, Morocco) Rania Al-Mashat (Under-Secretary-General and Executive Secretary of UNESCWA) Hasan Alhasan (Senior Fellow for Middle East Policy at the International Institute for Strategic Studies) Andrés Velasco (Dean of the School of Public Policy, London School of Economics) 10:45 AM–12:15 PM Session 5 – Monetary and Fiscal Policies Chair: Mohamed Taamouti (Bank Al-Maghrib) Transmission of Global Monetary Shocks in MENA and CCA Economies Authors: Giancarlo Corsetti (European University Institute, Florence), Michele Castegini (European University Institute, Florence), Zeina Hasna (IMF), Simon Lloyd (Bank of England), and Nadine Yamout (American University of Beirut) Does Inflation Targeting Matter in Achieving Long-term Price Stability? Evidence from Egypt and Georgia Authors: Nasser Badra (American University of Beirut), Salim Chahine (Central Bank of Lebanon), and Ugo Panizza (Geneva Graduate Institute) Fiscal Rules at Risk: Debt Structure and Fiscal Adjustment in Times of Geopolitical and Economic Uncertainty Authors: Sami Ben Naceur (IMF), Abdelhamid Moustabchir (Hasan II University, Casablanca), and Sara Loukili (Bank Al-Maghrib) Discussant:Roberta Gatti (Chief Economist for the MENAP region, World Bank) 12:15–12:45 PM Closing Remarks Nadia Fettah Alaoui (Minister of Finance, Morocco) Jihad Azour (Director of the Middle East and Central Asia Department, IMF) The times listed in this agenda are shown in local time (Rabat, Morocco). Program Committee Giovanni Melina, IMF Antonio Spilimbergo, IMF Touhami Abdelkhalek, Mohammed VI Polytechnic University Francesco Grigoli, Georgetown University in Qatar Kamiar Mohaddes, University of Cambridge Nisreen Salti, American University of Beirut Organizing Committee Roberto Cardarelli, IMF Asmaa El-Ganainy, IMF Sascha Buetzer, IMF Zeina Hasna, IMF Angham Al Shami, IMF Conference Coordinators Joanna Zaffaroni, IMF Sofia Cerna Rubinstein, IMF Hana Benslimane, Mohammed VI Polytechnic University
+
+codex
+I have the fact set. I’m writing the output JSONL now with empty fact arrays for non-market documents, then I’ll validate line count and report the document and fact totals.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from pathlib import Path
+
+infile = Path('all_batch_007.jsonl')
+outfile = Path('all_facts_007.jsonl')
+
+def fact(claim, subject, predicate, object_, direction, magnitude, time, cause, entities, confidence):
+    return {
+        'claim': claim,
+        'subject': subject,
+        'predicate': predicate,
+        'object': object_,
+        'direction': direction,
+        'magnitude': magnitude,
+        'time': time,
+        'cause': cause,
+        'entities': entities,
+        'confidence': confidence,
+    }
+
+facts_by_doc = {
+    '0da60b29b7422ac32b1ccfd4d20fc294': [],
+    '1036dcd012991de77d60a6c816f57c12': [],
+    '10757b2dfc75a378fc9d6947d9a23199': [
+        fact(
+            'McDonald\\'s stock has tumbled on fears that gas prices have affected sales.',
+            'McDonald\\'s Corp.', 'price_move', None, 'down', None, '2026-06-29',
+            'Fears about how gas prices have affected sales.',
+            ['McDonald\\'s Corp.'], 0.92,
+        ),
+        fact(
+            'McDonald\\'s stock closed at "'$269.76 on Friday, June 26, up from $264.54 on June 25.'"',
+            'McDonald\\'s Corp.', 'price_move', None, 'up', '"'$269.76 from $264.54'"', 'Friday, June 26',
+            None, ['McDonald\\'s Corp.'], 0.99,
+        ),
+        fact(
+            'The article says McDonald\\'s stock could still be worth almost "'$300 per share, or 11% higher.'"',
+            'McDonald\\'s Corp.', 'forecast', None, 'up', '11% higher', '2026-06-29',
+            'The article\\'s analysis cites McDonald\\'s strong free cash flow.',
+            ['McDonald\\'s Corp.'], 0.9,
+        ),
+        fact(
+            'Analysts project McDonald\\'s revenue at "'$28.5 billion this year and $30.17 billion next year.'"',
+            'McDonald\\'s Corp.', 'forecast', None, 'up', '"'$28.5 billion to $30.17 billion'"', 'this year and next year',
+            None, ['McDonald\\'s Corp.'], 0.97,
+        ),
+        fact(
+            'The article says McDonald\\'s could generate "'$7.63 billion in free cash flow over the next 12 months.'"',
+            'McDonald\\'s Corp.', 'forecast', None, 'na', '"'$7.63 billion'"', 'over the next 12 months',
+            'The estimate uses a 26% free cash flow margin on projected revenue.',
+            ['McDonald\\'s Corp.'], 0.92,
+        ),
+    ],
+    '1144a8225757a80770fe8abf5e839d15': [
+        fact(
+            'The U.S. Supreme Court ruled on Monday that President Donald Trump\\'s firing of Federal Reserve Board member Lisa Cook was improper.',
+            'U.S. Supreme Court', 'policy_action', 'Lisa Cook', 'na', None, 'Monday',
+            None, ['U.S. Supreme Court', 'Donald Trump', 'Federal Reserve', 'Lisa Cook'], 0.98,
+        ),
+        fact(
+            'The Supreme Court rejected the Trump administration\\'s request to let Lisa Cook\\'s firing go through.',
+            'U.S. Supreme Court', 'policy_action', 'Trump administration', 'na', None, '2026-06-29',
+            'The court said the administration had overreached in firing her without due process and that the Federal Reserve is different from other federal agencies.',
+            ['U.S. Supreme Court', 'Trump administration', 'Federal Reserve', 'Lisa Cook'], 0.97,
+        ),
+        fact(
+            'Justice Brett Kavanaugh said that even temporary uncertainty about the Federal Reserve\\'s status could cause turmoil in the U.S. and world economies.',
+            'Brett Kavanaugh', 'statement', 'Federal Reserve', 'na', None, '2026-06-29',
+            None, ['Brett Kavanaugh', 'Federal Reserve', 'United States'], 0.95,
+        ),
+    ],
+    '119d88ae9a26e8e052bf88188001054e': [
+        fact(
+            'At its June policy meeting, the Bank of Japan raised interest rates by 25 basis points to 1%, the highest level in 31 years.',
+            'Bank of Japan', 'policy_action', None, 'up', '25 basis points to 1%', 'June policy meeting',
+            None, ['Bank of Japan', 'Japan'], 0.99,
+        ),
+        fact(
+            'Bank of Japan board member Toichiro Asada voted against the June rate hike, citing risks to output and jobs from the Middle East conflict.',
+            'Toichiro Asada', 'statement', 'Bank of Japan', 'na', None, 'June policy meeting',
+            'Risks to output and jobs from the Middle East conflict.',
+            ['Toichiro Asada', 'Bank of Japan', 'Japan'], 0.96,
+        ),
+        fact(
+            'Analysts at JP Morgan said the dovish dissent by Toichiro Asada and the Bank of Japan\\'s decision to halt bond tapering next fiscal year may reflect political pressure.',
+            'JP Morgan', 'statement', 'Bank of Japan', 'na', None, '2026-06-29',
+            None, ['JP Morgan', 'Bank of Japan', 'Toichiro Asada', 'Japan'], 0.9,
+        ),
+        fact(
+            'Prime Minister Sanae Takaichi said Japan\\'s government will break excessive fiscal austerity and increase spending on artificial intelligence, chips and shipbuilding.',
+            'Japan', 'policy_action', None, 'up', None, 'last year',
+            None, ['Japan', 'Sanae Takaichi'], 0.94,
+        ),
+        fact(
+            'The Japanese yen was close to 162.00 against the U.S. dollar, its lowest level in more than 40 years.',
+            'Japanese yen', 'price_move', 'U.S. dollar', 'down', 'close to 162.00 per U.S. dollar', '2026-06-29',
+            None, ['Japanese yen', 'U.S. dollar', 'Japan'], 0.97,
+        ),
+        fact(
+            'Analysts at Mitsubishi UFJ Morgan Stanley Securities said the Bank of Japan may try to reduce monetary accommodation as much as possible by next summer.',
+            'Mitsubishi UFJ Morgan Stanley Securities', 'forecast', 'Bank of Japan', 'na', None, 'by next summer',
+            'The article says Prime Minister Sanae Takaichi is set to appoint more Bank of Japan board members.',
+            ['Mitsubishi UFJ Morgan Stanley Securities', 'Bank of Japan', 'Sanae Takaichi', 'Japan'], 0.91,
+        ),
+    ],
+    '11ec69296d9658a98878677f839151e5': [],
+    '12797ba4f67f480ecaad464612bd7b32': [
+        fact(
+            'The United States and Iran separately announced on Monday that they will send delegations to Qatar this week.',
+            'United States and Iran', 'event', 'Qatar', 'na', None, 'this week',
+            None, ['United States', 'Iran', 'Qatar'], 0.97,
+        ),
+        fact(
+            'An interim deal agreed earlier this month calls for Iran to dilute its stockpile of enriched uranium.',
+            'Iran', 'policy_action', None, 'down', None, 'earlier this month',
+            'The requirement is part of the interim deal with the United States.',
+            ['Iran', 'United States'], 0.97,
+        ),
+        fact(
+            'The interim deal waives U.S.-backed oil sanctions on Iran.',
+            'United States', 'sanction', 'Iran', 'down', None, 'earlier this month',
+            'The waiver is part of the interim deal with Iran.',
+            ['United States', 'Iran'], 0.98,
+        ),
+        fact(
+            'Iran\\'s attacks and threats stopped cargo ships and tankers from moving through the Strait of Hormuz during the war, creating a global energy crisis.',
+            'Iran', 'supply_change', 'Strait of Hormuz shipping', 'down', None, 'during the war that began Feb. 28',
+            'Iran\\'s attacks and threats in the strait.',
+            ['Iran', 'Strait of Hormuz'], 0.96,
+        ),
+        fact(
+            'A U.S. official said the Trump administration was operating on the understanding that vessels can move freely through the Strait of Hormuz after the recent stand-down.',
+            'Trump administration', 'statement', 'Strait of Hormuz shipping', 'up', None, 'Monday',
+            'The United States and Iran were understood to be standing down after recent strikes.',
+            ['Trump administration', 'United States', 'Iran', 'Strait of Hormuz'], 0.9,
+        ),
+        fact(
+            'Qatar planned to release "'$6 billion in frozen Iranian assets to be used to purchase U.S. food products for the Iranian people.'"',
+            'Qatar', 'policy_action', 'Iran', 'up', '"'$6 billion'"', 'Monday',
+            None, ['Qatar', 'Iran', 'United States'], 0.96,
+        ),
+        fact(
+            'Oman and Iran are considering charging service-related fees for commercial ships transiting the Strait of Hormuz.',
+            'Oman and Iran', 'policy_action', 'Commercial ships in the Strait of Hormuz', 'up', None, 'Monday',
+            None, ['Oman', 'Iran', 'Strait of Hormuz'], 0.95,
+        ),
+    ],
+    '1309b035fe9474758a67ad74bad7f098': [],
+    '136c62982957f2508e2bce6a7092d93b': [
+        fact(
+            'MiCA restrictions are set to be enforced starting on July 1 for crypto companies serving EU users.',
+            'European Union', 'policy_action', 'Crypto companies', 'na', None, 'July 1',
+            None, ['European Union', 'Markets in Crypto-Assets'], 0.98,
+        ),
+        fact(
+            'Binance said it would restrict services for EU-based users after withdrawing its MiCA application last week.',
+            'Binance', 'corporate_action', 'EU-based users', 'down', None, 'last week',
+            'Binance withdrew its MiCA application.',
+            ['Binance', 'European Union', 'Markets in Crypto-Assets'], 0.97,
+        ),
+        fact(
+            'Bybit Global said access to services for users in the European Economic Area will be progressively limited starting on July 1.',
+            'Bybit Global', 'corporate_action', 'European Economic Area users', 'down', None, 'starting on July 1',
+            None, ['Bybit Global', 'European Economic Area'], 0.98,
+        ),
+        fact(
+            'As of Monday, regulators in EU member states had approved 244 licenses for crypto companies under MiCA.',
+            'EU member state regulators', 'policy_action', 'Crypto companies', 'up', '244 licenses', 'Monday',
+            None, ['European Union', 'Markets in Crypto-Assets'], 0.99,
+        ),
+        fact(
+            'Germany\\'s BaFin had approved 57 MiCA licenses as of Monday.',
+            'BaFin', 'policy_action', 'Crypto companies', 'up', '57 licenses', 'Monday',
+            None, ['BaFin', 'Germany', 'Markets in Crypto-Assets'], 0.99,
+        ),
+        fact(
+            'OKX Europe said it would offer 8% on new deposits to attract users from Binance and Bybit.',
+            'OKX Europe', 'corporate_action', 'Binance and Bybit users', 'up', '8%', 'Monday',
+            None, ['OKX Europe', 'Binance', 'Bybit Global'], 0.97,
+        ),
+        fact(
+            'Coinbase said it would offer a 5% transfer bonus for users before July 13.',
+            'Coinbase', 'corporate_action', 'Users', 'up', '5%', 'Friday before July 13',
+            None, ['Coinbase'], 0.98,
+        ),
+        fact(
+            'Kraken offered a "'$1.1 million prize draw for euro deposits.'"',
+            'Kraken', 'corporate_action', 'Euro depositors', 'up', '"'$1.1 million'"', '2026-06-29',
+            None, ['Kraken'], 0.97,
+        ),
+        fact(
+            'Bybit said it is stepping up business in the Middle East and North Africa while limiting services in the European Economic Area.',
+            'Bybit', 'corporate_action', 'Middle East and North Africa', 'up', None, '2026-06-29',
+            'The company is limiting services in the European Economic Area under MiCA restrictions.',
+            ['Bybit', 'Middle East and North Africa', 'European Economic Area', 'Markets in Crypto-Assets'], 0.93,
+        ),
+    ],
+    '13c49ebd9df8040f08f62dca7a00901c': [
+        fact(
+            'Mauritania\\'s economic growth slowed to 4.0% in 2025 from 6.3% in 2024.',
+            'Mauritania', 'other', None, 'down', '4.0% from 6.3%', '2025',
+            'A contraction in the extractive sector and a slowdown in the non-extractive sector.',
+            ['Mauritania'], 0.99,
+        ),
+        fact(
+            'Inflation in Mauritania has been on an upward trend since July 2025.',
+            'Mauritania', 'other', None, 'up', None, 'since July 2025',
+            'Disruptions along the Mali border affected key trade corridors.',
+            ['Mauritania', 'Mali'], 0.96,
+        ),
+        fact(
+            'Mauritania\\'s current account narrowed in 2025.',
+            'Mauritania', 'other', None, 'down', None, '2025',
+            'Lower imports related to the GTA project, higher gold receipts, and the start of LNG exports.',
+            ['Mauritania', 'GTA project', 'LNG', 'Gold'], 0.95,
+        ),
+        fact(
+            'The war in the Middle East increased Mauritania\\'s oil import bill and fiscal costs.',
+            'Mauritania', 'other', None, 'up', None, '2026-06-29',
+            'Temporary fuel subsidies, butane gas subsidies, and targeted social protection measures linked to the war in the Middle East.',
+            ['Mauritania', 'Middle East'], 0.96,
+        ),
+    ],
+    '14d71e9394749ef73bf000126a3a2f99': [
+        fact(
+            'Pinnacle Silver & Gold appointed Auramet Capital Partners as lead project financier for the El Potrero gold-silver project in Durango, Mexico.',
+            'Pinnacle Silver & Gold Corp.', 'deal_or_contract', 'Auramet Capital Partners', 'na', None, '2026-06-29',
+            'The financing is intended for the development of the El Potrero project.',
+            ['Pinnacle Silver & Gold Corp.', 'Auramet Capital Partners', 'El Potrero project', 'Mexico'], 0.99,
+        ),
+        fact(
+            'Auramet may arrange or provide up to "'$5 million in non-equity financing for Pinnacle Silver & Gold'"\\'s El Potrero project.',
+            'Auramet Capital Partners', 'deal_or_contract', 'Pinnacle Silver & Gold Corp.', 'up', 'up to "'$5 million'"', '2026-06-29',
+            None, ['Auramet Capital Partners', 'Pinnacle Silver & Gold Corp.', 'El Potrero project'], 0.98,
+        ),
+        fact(
+            'Pinnacle Silver & Gold and Auramet entered a seven-month exclusivity agreement to work toward a financing package.',
+            'Pinnacle Silver & Gold Corp.', 'deal_or_contract', 'Auramet Capital Partners', 'na', 'seven-month exclusivity period', '2026-06-29',
+            None, ['Pinnacle Silver & Gold Corp.', 'Auramet Capital Partners'], 0.98,
+        ),
+        fact(
+            'The agreement includes a "'$400,000 break fee if Pinnacle Silver & Gold accepts an alternative financing offer during the exclusivity period.'"',
+            'Pinnacle Silver & Gold Corp.', 'deal_or_contract', 'Alternative financing offers', 'na', '"'$400,000 break fee'"', 'during the exclusivity period',
+            None, ['Pinnacle Silver & Gold Corp.', 'Auramet Capital Partners'], 0.97,
+        ),
+        fact(
+            'Metallurgical testing at El Potrero indicated average head grades of about 7.7 grams per tonne gold and 116 grams per tonne silver.',
+            'El Potrero project', 'production_change', None, 'na', '7.7 grams per tonne gold and 116 grams per tonne silver', '2026-06-29',
+            None, ['El Potrero project', 'Gold', 'Silver'], 0.96,
+        ),
+    ],
+    '15371f3bccb46ba04ffca8710b6693ee': [
+        fact(
+            'Meta introduced Brain2Qwerty v2, a non-invasive AI system that translates brain activity into text.',
+            'Meta', 'corporate_action', 'Brain2Qwerty v2', 'na', None, 'Monday',
+            None, ['Meta', 'Brain2Qwerty v2'], 0.98,
+        ),
+        fact(
+            'Meta said Brain2Qwerty v2 achieved 61% average word accuracy, compared with about 8% for previous non-invasive methods.',
+            'Brain2Qwerty v2', 'other', None, 'up', '61% versus about 8%', 'Monday',
+            None, ['Meta', 'Brain2Qwerty v2'], 0.98,
+        ),
+        fact(
+            'Meta released the training code for Brain2Qwerty v1 and v2, and its research partner is releasing the v1 dataset.',
+            'Meta', 'corporate_action', 'Brain2Qwerty v1 and v2', 'na', None, 'Monday',
+            None, ['Meta', 'Brain2Qwerty v1', 'Brain2Qwerty v2'], 0.97,
+        ),
+        fact(
+            'Meta said its Digital Brain Project includes a "'$5 million fund to support open neuroscience datasets.'"',
+            'Meta', 'corporate_action', 'Digital Brain Project', 'up', '"'$5 million'"', 'Monday',
+            None, ['Meta', 'Digital Brain Project'], 0.96,
+        ),
+    ],
+}
+
+rows = []
+with infile.open() as f:
+    for line in f:
+        doc = json.loads(line)
+        rows.append({
+            'doc_id': doc['doc_id'],
+            'title': doc['title'],
+            'facts': facts_by_doc[doc['doc_id']],
+        })
+
+with outfile.open('w') as f:
+    for row in rows:
+        f.write(json.dumps(row, ensure_ascii=True) + '\\n')
+
+print(f\"docs processed: {len(rows)}, total facts: {sum(len(r['facts']) for r in rows)}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 43
+
+codex
+The output file is written. I’m doing a quick structural check on `all_facts_007.jsonl` before I stop.
+exec
+/bin/zsh -lc 'wc -l all_facts_007.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_facts_007.jsonl
+
+exec
+/bin/zsh -lc 'jq -c . all_facts_007.jsonl >/dev/null && echo ok' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+ok
+
+codex
+docs processed: 12, total facts: 43
+tokens used
+47,681
+docs processed: 12, total facts: 43

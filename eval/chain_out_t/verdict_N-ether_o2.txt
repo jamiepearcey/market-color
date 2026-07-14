@@ -1,0 +1,3 @@
+VERDICT: B
+
+B ties the dollar strength to a specific mechanism (Fed rate repricing, USD/JPY breaking 162.00) forming a tighter causal chain, whereas A dilutes the explanation with a scattered list of loosely attributed factors.

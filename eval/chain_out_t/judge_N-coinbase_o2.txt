@@ -1,0 +1,12 @@
+You are judging two answers to a market question, each written from retrieved context. Judge which answer better explains the CAUSAL CHAIN — the specific root events and mechanism, not vague gestures at "the conflict" or "market conditions". Groundedness matters: prefer specific, attributed causes. Ignore style and length.
+
+QUESTION: Why did Coinbase stock fall almost 5 percent?
+
+ANSWER A:
+The context does not report a Coinbase decline of "almost 5 percent," so the specific move you're asking about cannot be directly sourced here. What the context does show is broad-based weakness in crypto equities: a wider selloff in technology stocks has weighed especially heavily on crypto-focused companies, driven by concerns that AI advances could disrupt existing business models, alongside general bear-market conditions [1]. Contributing fundamentals include Coinbase's first-quarter revenue falling 21% quarter-over-quarter and a loss of $1.49 per share against an expected $0.27 profit [1], plus falling crypto prices such as Bitcoin dropping below $60,000 (down more than 54% from its October peak) [6]. Over the past month COIN fell 16.9% and is down 69% from its all-time high [2][5]. Missing: no item cites a specific ~5% single-day drop or its dedicated cause, and note that item [3] actually shows Coinbase rising 1.74% to close at $151.65 on the referenced Monday [3].
+
+ANSWER B:
+The context does not report a nearly 5% fall in Coinbase specifically, so this premise cannot be directly confirmed or explained from the items provided. What the context does show is that Coinbase has been caught in a broader crypto-equity slump driven by bear market conditions and a technology selloff tied to concerns that AI could disrupt sector business models [1]. Over the past month COIN fell 16.9%, coinciding with Bitcoin sliding to a near two-year low around $58,190 and fading confidence in favorable crypto legislation [2], and shares are down 69% from their all-time high [5]. Notably, on the most recent day reported Coinbase actually *rose* 1.74% to close at $151.65 [3], so the context contains no single-day ~5% decline. What's missing is any item citing a specific ~5% drop in Coinbase or its stated cause.
+
+Reply with exactly one line: VERDICT: A or VERDICT: B or VERDICT: TIE
+Then one sentence of justification.

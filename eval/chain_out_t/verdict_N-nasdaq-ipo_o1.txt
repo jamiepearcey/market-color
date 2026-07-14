@@ -1,0 +1,3 @@
+VERDICT: B
+
+Answer B gives the specific, grounded causal mechanism — the SpaceX IPO's $87.5bn scale and its Nasdaq-listed ticker (SPCX.O) tying the proceeds concentration directly to Nasdaq — whereas Answer A cites the same event but omits the size and the exchange-listing link that actually explain the lead.

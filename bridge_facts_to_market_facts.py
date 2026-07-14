@@ -73,6 +73,7 @@ def main() -> int:
             pd = str(r.get("published_date") or "")
             ents = list(r.get("entities") or [])
             desk = r.get("desk") or "other"
+            desks = list(r.get("desks") or []) or [desk]
             pts.append(models.PointStruct(
                 id=str(uuid.uuid5(uuid.NAMESPACE_URL, str(r.get("fact_id")))),
                 vector=v,
@@ -80,7 +81,7 @@ def main() -> int:
                     # --- UI/market_facts schema ---
                     "fact_id": r.get("fact_id"), "doc_id": r.get("doc_id"),
                     "claim": r.get("claim"), "entities": ents,
-                    "desk": desk, "desks": [desk],
+                    "desk": desk, "desks": desks,
                     "direction": r.get("direction"), "metric": r.get("magnitude"),
                     "source_name": r.get("source_name"), "source_domain": None,
                     "source_access": None, "url": r.get("url"), "title": r.get("doc_title"),
@@ -91,6 +92,8 @@ def main() -> int:
                     # --- graph fields (the "inc the graph" part) ---
                     "subject": r.get("subject"), "predicate": r.get("predicate"),
                     "object": r.get("object"), "cause": r.get("cause"),
+                    "cause_entities": list(r.get("cause_entities") or []),
+                    "time": r.get("time"), "magnitude": r.get("magnitude"),
                     "confidence": float(r.get("confidence") or 0.0),
                 }))
         client.upsert(collection_name=COLLECTION, points=pts, wait=True)

@@ -1,0 +1,809 @@
+OpenAI Codex v0.133.0
+--------
+workdir: /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+model: gpt-5.4
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: medium
+reasoning summaries: none
+session id: 019f1fb4-277f-7623-a520-7ecb9b2fb668
+--------
+user
+You are a financial-news fact extractor. Work ONLY from the file `all_batch_020.jsonl` in the current directory. Do NOT use the network.
+
+Each line of `all_batch_020.jsonl` is a JSON object: {doc_id, source_name, published_date, url, title, body_text}.
+
+For EACH document, extract the atomic, market-relevant FACTS explicitly supported by its title+body_text. An atomic fact is a single checkable claim about an asset, commodity, company, country, central bank, or market — with direction/magnitude/time where stated, and a causal link where the text states one. Do NOT invent or infer beyond the text. If a document has no market-relevant facts (e.g. a job posting), return an empty facts list.
+
+Each fact uses this shape:
+{"claim":"<one self-contained sentence>","subject":"<primary entity>","predicate":"<one of: price_move, supply_change, demand_change, production_change, policy_action, deal_or_contract, corporate_action, forecast, sanction, statement, event, other>","object":"<counterparty/target or null>","direction":"<up|down|flat|na>","magnitude":"<value/percent as written or null>","time":"<date/period as written, else the doc published_date>","cause":"<stated driver or null>","entities":["<canonical entity names>"],"confidence":<0.0-1.0>}
+
+Write `all_facts_020.jsonl` in the current directory: ONE JSON object per input doc, in order:
+{"doc_id":"<id>","title":"<title>","facts":[ <fact>, ... ]}
+
+Then print one line: docs processed and total facts. Write no other files.
+
+2026-07-01T22:02:12.298840Z ERROR rmcp::transport::async_rw: Error reading from stream: serde error expected value at line 1 column 1
+codex
+I’m reading `all_batch_020.jsonl` first to confirm the schema and the document mix, then I’ll generate `all_facts_020.jsonl` directly from that file only.
+exec
+/bin/zsh -lc "sed -n '1,3p' all_batch_020.jsonl" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+{"doc_id": "78258d094e15c35b8ce3e5e618f9f4f2", "source_name": "AP Top News", "published_date": "2026-06-29", "url": "https://apnews.com/article/titanosaur-dinosaur-fossil-antarctica-a822751dc177f9056cf030a6fb63cdf6", "title": "A rare dinosaur fossil from Antarctica is found tucked away in a drawer", "body_text": "A rare dinosaur fossil from Antarctica is found tucked away in a drawer A rare dinosaur fossil from Antarctica is found tucked away in a drawer NEW YORK (AP) — Scientists have stumbled on a rare dinosaur fossil from Antarctica, tucked away for decades in a drawer. The bone comes from the tail of a long-necked, plant-eating dinosaur called a titanosaur. Scientists haven’t yet identified the species it belongs to. It was discovered in 1985 during an expedition to Antarctica’s James Ross Island and collected by geologist Mike Thomson. Working with the British Antarctic Survey, Thomson was mapping the area’s rock layers and collected marine reptile fossils to help with future dating efforts. He recorded the find as a large reptile. Decades later, paleontologist Mark Evans spotted the bone in the British Antarctic Survey’s collections and wondered whether it might be a dinosaur. He and other researchers analyzed the shape of the bone and compared it to other more complete dinosaur remains, confirming their discovery. The findings were published on Monday in the journal Acta Palaeontologica Polonica. Dinosaur fossils are rare to find in Antarctica because of the unforgiving ice caps. But millions of years ago, when this dinosaur lived, the region was populated by lush forests — a “rather different and much more hospitable place than we think of today,” said study co-author Paul Barrett with the Natural History Museum in London. At about 23 feet (7 meters) long, the dinosaur was small for its group and may have been young when it died. Scientists don’t know how the creature met its end, but they think its body floated away from the coast and sank to the sea floor, becoming fossilized in marine rock. Technology has come a long way since the dinosaur tail bone was first found, allowing researchers to peer inside bones and gain even more detailed information about ancient creatures. Thomson died in 2020 before the fossil was identified as belonging to a dinosaur. “If he were still with us, he would be delighted to know what this was,” Evans, a study co-author, said. ___ An earlier version of this story incorrectly identified paleontologist Mark Evans as Mike Evans in one reference. ___ AP video producer Havovi Todd in London contributed to this report. ___ The Associated Press Health and Science Department receives support from the Howard Hughes Medical Institute’s Department of Science Education and the Robert Wood Johnson Foundation. The AP is solely responsible for all content."}
+{"doc_id": "7835c356da0e5f4fa8eed66da9276cab", "source_name": "Yahoo Finance", "published_date": "2026-06-29", "url": "https://finance.yahoo.com/markets/article/magnificent-7-stocks-are-having-a-dreadful-year-134333813.html", "title": "'Magnificent 7' stocks are having a dreadful year", "body_text": "The once high-flying \"Magnificent Seven\" are looking more like the Dreadful Seven. Quick insight: Longtime Magnificent Seven fans are being reminded of a golden rule when it comes to investing: No stock is indestructible. Since peaking in mid-May, Magnificent Seven stocks are down more than 13%, 22V Research strategist Jeff Jacobson pointed out. Both the Invesco QQQ Trust (QQQ) and the S&P 500 (^GSPC) are down only about 2% over that time. The performance is even worse when looking at the Magnificent Seven names versus their 52-week highs: - Amazon (AMZN): -11% - Apple (AAPL): -11.7% - Meta (META): -14.4% - Nvidia (NVDA): -18.5% - Tesla (TSLA): -32.6% - Microsoft (MSFT): -32.9% The why: Wall Street is growing increasingly impatient with Big Tech's astronomical capital expenditures on artificial intelligence, projected to balloon 70% to exceed $700 billion this year. This aggressive, unyielding infrastructure spending on data centers and high-end GPUs has heavily cannibalized corporate cash generation. The Magnificent Seven's collective 12-month forward free cash flow is expected to drop sharply from its 2024 peak. Sprinkle in concerns about a Fed rate hike later this year — which would increase the cost of financing for AI projects — and it makes good sense that this group is sucking wind on the stock charts. \"We are going through another 'gut check' few weeks ahead for the tech trade as tech investors await a very important 2Q earnings season in July to further validate the AI Revolution buildout,\" Wedbush tech analyst Dan Ives said in a note. \"In the meantime jitters will continue as worries around the costs of this once in a generation tech buildout hit its next gear of growth.\" Bottom line: The Magnificent Seven names are now \"show me\" stories for investors — as in, show me when you will make money from massive infrastructure investments related to AI. However, it's unlikely this proof point will happen in second quarter earnings season. Brian Sozzi is Yahoo Finance's Executive Editor and a member of Yahoo Finance's editorial leadership team. Follow Sozzi on X @BrianSozzi, Instagram, and LinkedIn. Tips on stories? Email brian.sozzi@yahoofinance.com."}
+{"doc_id": "7847ace9f33d7149688927b48dacd849", "source_name": "ForexLive", "published_date": "2026-06-29", "url": "https://investinglive.com/commodities/oil-prices-hover-around-pre-war-levels-as-focus-turns-to-the-us-data-and-the-fed-20260629/", "title": "Oil prices hover around pre-war levels as focus turns to the US data and the Fed | investingLive", "body_text": "FUNDAMENTAL OVERVIEW Oil prices have finally reached the pre-war levels last week as the reopening of the Strait of Hormuz and the end of the US-Iran war triggered a quick unwinding of the bullish oil bets. We got some minor strikes between US and Iran over the weekend but that’s just noise. The two sides are still committed to the ceasefire and to keep the Strait operational. The bearish bias remains intact as traders continue to price in the increase in supply in the next months. Another bearish driver is the Fed’s tightening risk as that’s going to weigh on the demand side. The upside risks in the short-term are mostly two. The first is that things between the US and Iran break down again and the Strait of Hormuz gets shut. The second is that the US activity data remains strong, but we see an easing in inflationary pressures which could translate into a more dovish view on the Fed and keep the downside in oil prices more limited on resilient demand. CRUDE OIL TECHNICAL ANALYSIS – DAILY TIMEFRAME On the daily chart, we can see that crude oil eventually reached the pre-war levels filling the 68.00-69.00 gap. This is going to act as support. We can expect the buyers to step in with a defined risk below the support to position for a rally into the 78.00 resistance. The sellers, on the other hand, will want to see the price breaking lower to increase the bearish bets into the 55.00 handle next. CRUDE OIL TECHNICAL ANALYSIS – 4 HOUR TIMEFRAME On the 4 hour chart, there’s not much we can add here as the buyers will likely continue to step in around the support, while the sellers will either wait for a pullback into the 78.00 resistance or a break below the 68.00 support. CRUDE OIL TECHNICAL ANALYSIS – 1 HOUR TIMEFRAME On the 1 hour chart, we have a minor resistance zone around the 73.00 handle where the price got rejected from several times in the past days. If we get a pullback, we can expect the sellers to step in around the resistance with a defined risk above it to keep pushing into new lows. The buyers, on the other hand, will look for a break to extend the pullback into the 78.00 resistance next. The red lines define the average daily range for today. UPCOMING CATALYSTS Tomorrow, we get the US Job Openings data and the US Consumer Confidence report. On Wednesday, we have the US ADP report and the US ISM Manufacturing PMI. On Thursday, we conclude with the US NFP report, and the US Jobless Claims figures."}
+
+exec
+/bin/zsh -lc 'wc -l all_batch_020.jsonl' in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+      12 all_batch_020.jsonl
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from collections import Counter
+c=Counter()
+with open('all_batch_020.jsonl') as f:
+    for i,line in enumerate(f):
+        try:
+            o=json.loads(line)
+            c['ok']+=1
+            for k in ['doc_id','source_name','published_date','url','title','body_text']:
+                if k not in o: c[f'missing_{k}']+=1
+        except Exception:
+            c['bad']+=1
+            if c['bad']>3: break
+print(c)
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+Counter({'ok': 12})
+
+codex
+The file has 12 valid documents. I’m enumerating all titles now so I can extract only explicit market facts and skip non-market items cleanly.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_020.jsonl') as f:
+    for i,line in enumerate(f,1):
+        o=json.loads(line)
+        print(f\"{i}. {o['doc_id']} | {o['source_name']} | {o['published_date']} | {o['title']}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+1. 78258d094e15c35b8ce3e5e618f9f4f2 | AP Top News | 2026-06-29 | A rare dinosaur fossil from Antarctica is found tucked away in a drawer
+2. 7835c356da0e5f4fa8eed66da9276cab | Yahoo Finance | 2026-06-29 | 'Magnificent 7' stocks are having a dreadful year
+3. 7847ace9f33d7149688927b48dacd849 | ForexLive | 2026-06-29 | Oil prices hover around pre-war levels as focus turns to the US data and the Fed | investingLive
+4. 78588f339aca44608e3ef8477ab362a3 | BBC Business | 2026-06-29 | South Korea unveils $880bn chip and AI investment plan
+5. 78ec2f5738bc30100197c37f72c736e0 | IMF News | 2026-06-29 | IMF Executive Board Concludes 2026 Article IV Consultation with Ireland
+6. 792e2c65464e5c477aaecbc6a4508d37 | Yahoo Finance | 2026-06-29 | The U.S. scored 61.1 out of 100 on a global retirement ranking — 3 countries show what Americans are missing
+7. 7af0e50441d5c06b0633f790990fbee2 | Yahoo Finance | 2026-06-29 | Here is why GE Aerospace (GE) Is Among the Best Stocks in Chris Hohn’s Portfolio
+8. 7b3a173855c017714d74260c5357df42 | Decrypt | 2026-06-29 | Ornith Is the Open-Source Coding Model Built for Agents, Not Humans - Decrypt
+9. 7b6af858be3180b5fb556449058d3c3b | The Economist - Finance & Economics | 2026-06-29 | America’s Supreme Court turns “We the People” on its head
+10. 7b9941a387b8ee7f3fe684948c9a6b22 | Cointelegraph | 2026-06-29 | Ether Treasury Sharplink Buys $62.4M of ETH in 3 Days
+11. 7bcdb52c4f207d546cb90ce0744f2b31 | Al Jazeera | 2026-06-29 | New Israeli assault in southern Syria forces families to flee their homes
+12. 7c0952662460774a935524a2554dc031 | AP Top News | 2026-06-29 | Luigi Mangione gets stuck in an elevator as judge delays his federal trial until January
+
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+with open('all_batch_020.jsonl') as f:
+    for i,line in enumerate(f,1):
+        o=json.loads(line)
+        print(f\"\\n--- DOC {i}: {o['doc_id']} ---\")
+        txt=(o['title']+'\\n'+o['body_text']).replace('\\n',' ')
+        print(txt[:1800])
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+--- DOC 1: 78258d094e15c35b8ce3e5e618f9f4f2 ---
+A rare dinosaur fossil from Antarctica is found tucked away in a drawer A rare dinosaur fossil from Antarctica is found tucked away in a drawer A rare dinosaur fossil from Antarctica is found tucked away in a drawer NEW YORK (AP) — Scientists have stumbled on a rare dinosaur fossil from Antarctica, tucked away for decades in a drawer. The bone comes from the tail of a long-necked, plant-eating dinosaur called a titanosaur. Scientists haven’t yet identified the species it belongs to. It was discovered in 1985 during an expedition to Antarctica’s James Ross Island and collected by geologist Mike Thomson. Working with the British Antarctic Survey, Thomson was mapping the area’s rock layers and collected marine reptile fossils to help with future dating efforts. He recorded the find as a large reptile. Decades later, paleontologist Mark Evans spotted the bone in the British Antarctic Survey’s collections and wondered whether it might be a dinosaur. He and other researchers analyzed the shape of the bone and compared it to other more complete dinosaur remains, confirming their discovery. The findings were published on Monday in the journal Acta Palaeontologica Polonica. Dinosaur fossils are rare to find in Antarctica because of the unforgiving ice caps. But millions of years ago, when this dinosaur lived, the region was populated by lush forests — a “rather different and much more hospitable place than we think of today,” said study co-author Paul Barrett with the Natural History Museum in London. At about 23 feet (7 meters) long, the dinosaur was small for its group and may have been young when it died. Scientists don’t know how the creature met its end, but they think its body floated away from the coast and sank to the sea floor, becoming fossilized in marine rock. Techno
+
+--- DOC 2: 7835c356da0e5f4fa8eed66da9276cab ---
+'Magnificent 7' stocks are having a dreadful year The once high-flying "Magnificent Seven" are looking more like the Dreadful Seven. Quick insight: Longtime Magnificent Seven fans are being reminded of a golden rule when it comes to investing: No stock is indestructible. Since peaking in mid-May, Magnificent Seven stocks are down more than 13%, 22V Research strategist Jeff Jacobson pointed out. Both the Invesco QQQ Trust (QQQ) and the S&P 500 (^GSPC) are down only about 2% over that time. The performance is even worse when looking at the Magnificent Seven names versus their 52-week highs: - Amazon (AMZN): -11% - Apple (AAPL): -11.7% - Meta (META): -14.4% - Nvidia (NVDA): -18.5% - Tesla (TSLA): -32.6% - Microsoft (MSFT): -32.9% The why: Wall Street is growing increasingly impatient with Big Tech's astronomical capital expenditures on artificial intelligence, projected to balloon 70% to exceed $700 billion this year. This aggressive, unyielding infrastructure spending on data centers and high-end GPUs has heavily cannibalized corporate cash generation. The Magnificent Seven's collective 12-month forward free cash flow is expected to drop sharply from its 2024 peak. Sprinkle in concerns about a Fed rate hike later this year — which would increase the cost of financing for AI projects — and it makes good sense that this group is sucking wind on the stock charts. "We are going through another 'gut check' few weeks ahead for the tech trade as tech investors await a very important 2Q earnings season in July to further validate the AI Revolution buildout," Wedbush tech analyst Dan Ives said in a note. "In the meantime jitters will continue as worries around the costs of this once in a generation tech buildout hit its next gear of growth." Bottom line: The Magnificent Seven name
+
+--- DOC 3: 7847ace9f33d7149688927b48dacd849 ---
+Oil prices hover around pre-war levels as focus turns to the US data and the Fed | investingLive FUNDAMENTAL OVERVIEW Oil prices have finally reached the pre-war levels last week as the reopening of the Strait of Hormuz and the end of the US-Iran war triggered a quick unwinding of the bullish oil bets. We got some minor strikes between US and Iran over the weekend but that’s just noise. The two sides are still committed to the ceasefire and to keep the Strait operational. The bearish bias remains intact as traders continue to price in the increase in supply in the next months. Another bearish driver is the Fed’s tightening risk as that’s going to weigh on the demand side. The upside risks in the short-term are mostly two. The first is that things between the US and Iran break down again and the Strait of Hormuz gets shut. The second is that the US activity data remains strong, but we see an easing in inflationary pressures which could translate into a more dovish view on the Fed and keep the downside in oil prices more limited on resilient demand. CRUDE OIL TECHNICAL ANALYSIS – DAILY TIMEFRAME On the daily chart, we can see that crude oil eventually reached the pre-war levels filling the 68.00-69.00 gap. This is going to act as support. We can expect the buyers to step in with a defined risk below the support to position for a rally into the 78.00 resistance. The sellers, on the other hand, will want to see the price breaking lower to increase the bearish bets into the 55.00 handle next. CRUDE OIL TECHNICAL ANALYSIS – 4 HOUR TIMEFRAME On the 4 hour chart, there’s not much we can add here as the buyers will likely continue to step in around the support, while the sellers will either wait for a pullback into the 78.00 resistance or a break below the 68.00 support. CRUDE O
+
+--- DOC 4: 78588f339aca44608e3ef8477ab362a3 ---
+South Korea unveils $880bn chip and AI investment plan - Published South Korea has unveiled plans for at least $880bn (£666bn) of investments to build out the country's chip manufacturing and artificial intelligence (AI) capabilities in the coming years. It is part of the country's so-called Three Mega Projects to develop new chip production hubs, data centres and robotics technology. The plan is aimed at rejuvenating the economies of areas outside the capital Seoul, President Lee Jae Myung said on Monday. It comes as regional rivals like Taiwan, China and Japan are investing heavily in chip factories and other technologies as the AI boom pushes up demand for semiconductors. "We must secure the core elements of AI faster than any other country," Lee said. "Semiconductors, physical AI, and AI data centres are the triple axis for a great leap forward." Lee announced the plans in a televised event alongside the leaders of Samsung and SK Hynix, the country's two largest chipmakers. Lee also announced plans to build other AI infrastructure hubs outside of Seoul, where most of the country's advanced factories are currently concentrated. Earlier, Lee said in a statement that the project was a matter of "survival" for the country to address the decline in rural areas due to the concentration of industries in Seoul. "Now, we must break this long-standing cycle of discrimination and marginalisation - not only for the sake of justice and equity, but also to ensure sustainable and inclusive growth," he wrote. Samsung and SK Group, which count the likes of AI chip giant Nvidia among their customers, have been some of the biggest beneficiaries of the surge in spending on AI infrastructure. US tech giants - including Google, Amazon and Meta - said they will spend $650bn into the techn
+
+--- DOC 5: 78ec2f5738bc30100197c37f72c736e0 ---
+IMF Executive Board Concludes 2026 Article IV Consultation with Ireland IMF Executive Board Concludes 2026 Article IV Consultation with Ireland June 29, 2026 The Irish economy has remained resilient in the face of consecutive external shocks. Growth is projected to slow but remain healthy amid trade and geopolitical tensions and elevated global uncertainty. Risks to the growth outlook are on the downside and to inflation on the upside. While the war in the Middle East demands near-term policy attention, the current strong economic position provides a window to future-proof the economy. Washington, DC: The Executive Board of the International Monetary Fund (IMF) completed the Article IV Consultation[1] with Ireland, considered and endorsed the staff appraisal without a meeting on a lapse-of-time basis. The Irish economy has remained resilient in the face of consecutive external shocks. The domestic economy, as measured by the Modified Gross National Income, is estimated to have grown by about 4 percent in 2025. Robust consumption and investment, together with strong exports dominated by foreign multinational enterprises (MNEs), contributed to solid growth. Headline inflation remained close to 2 percent in 2025 but has accelerated recently due to higher energy prices. The labor market has become less tight as employment growth slowed. The general government balance remained in a sizeable surplus in 2025, supported by continued strong corporate income tax receipts from MNEs. The economy is projected to grow at a slower but still robust pace. Private consumption is expected to slow down due to weaker employment and real income growth. Modified investment is projected to normalize from the high 2025 level and would be supported by continued construction activity. Export grow
+
+--- DOC 6: 792e2c65464e5c477aaecbc6a4508d37 ---
+The U.S. scored 61.1 out of 100 on a global retirement ranking — 3 countries show what Americans are missing The U.S. scored 61.1 out of 100 on a global retirement ranking — 3 countries show what Americans are missing The U.S. has the largest — and perhaps most influential (1) — financial market in the world. Yet, in the 2025 Mercer CFA Institute Global Pension Index, the U.S. retirement income system — a ranking of 52 national systems that cover two-thirds of the world's population — comes in far down the list at No. 30 with a score of just 61.1 (2). That works out to a grade of C+. Not exactly a stellar ranking for a country with such a sophisticated financial market. So what's the disconnect? The Index scores national retirement income systems across three pillars: adequacy (how much do you get?), sustainability (can the system keep delivering?) and integrity (can the system be trusted?). In 2025, Netherlands topped the list with a score of 85.4, followed by Iceland (84) and Denmark (82.3). How the U.S. retirement system is different Of course, no single pension model fits all. "Systems vary widely due to cultural, economic and political contexts, and what works in one country may not be easily replicated in another," according to the report (2). Still, Mercer and the CFA Institute found that "common features, such as inclusive access, robust governance and a minimum safety net pension, are consistently associated with stronger outcomes." The U.S. retirement system includes Social Security — with benefits based on lifetime earnings, adjusted to a current-dollar basis — along with voluntary workplace savings plans. These days, few private-sector companies offer a traditional pension. Social Security, which provides retirement benefits for 63 million Americans (3), is 
+
+--- DOC 7: 7af0e50441d5c06b0633f790990fbee2 ---
+Here is why GE Aerospace (GE) Is Among the Best Stocks in Chris Hohn’s Portfolio GE Aerospace (NYSE:GE) is one of the 9 Best Stocks to Buy in Chris Hohn's TCI Fund Portfolio. On June 25, 2026, GE Aerospace (NYSE:GE) announced that the company is celebrating America's 250th anniversary by showcasing its GE9X – the world's largest and most powerful commercial jet engine – at the Great American State Fair on the National Mall. Visitors can view the advanced engine, alongside an interactive flight experience. GE9X will power the Boeing 777X, which is projected to enter service and begin first airline deliveries in early to mid-2027. Chris Hohn has invested approximately $13.5 billion in the stock, marking it the top bet in the TCI Fund Portfolio. In a separate event, on June 8, 2026, GE Aerospace (NYSE:GE) and Wolfspeed Inc. (WOLF) signed a Memorandum of Understanding (MOU) to accelerate the adoption of high-voltage silicon carbide across the industrial, aerospace, and defense sectors. The partnership includes the supply of Wolfspeed's 10 kV MOSFET die and the joint development of standard power module formats. Aligning with the U.S. Government's state priorities, the MOU aims at reducing system complexities and fast-tracking critical technologies for strategic markets like AI. Founded in 1917, GE Aerospace (NYSE:GE) is an American aircraft engine manufacturer and supplier. Headquartered in Ohio, the company stands as the world's premier provider of jet engines, components, and integrated systems for commercial and military aircraft. While we acknowledge the potential of GE as an investment, we believe certain AI stocks offer greater upside potential and carry less downside risk. If you're looking for an extremely undervalued AI stock that also stands to benefit significant
+
+--- DOC 8: 7b3a173855c017714d74260c5357df42 ---
+Ornith Is the Open-Source Coding Model Built for Agents, Not Humans - Decrypt In brief - DeepReinforce released Ornith-1.0 on June 25 under MIT license, purpose-built for AI coding agents working in real terminal and repository environments. - The 9B variant scores 69.4 on SWE-bench Verified, outperforming Google's Gemma 4-31B (52.0). - Ornith's own model card warns the models may underperform on non-coding tasks—they are wired for developer pipelines, not general-purpose AI conversations. DeepReinforce, an AI research lab previously known for CUDA-L1 and the IterX code-agent optimization loop, released Ornith-1.0 late last week—a family of open-source coding models available on Hugging Face in four sizes based on the number of parameters: 9 billion, 31 billion, 35 billion mixture of experts, and a 397 billion mixture-of-experts flagship, all under MIT license with no regional restrictions. Parameters are basically the number of dials and configurations a model can handle on its training. The more parameters, the more capable a model is. A 9-billion-parameter model is considered small, good enough to run on a good smartphone, but not capable of doing any heavy reasoning task reliably. A 397 billion model is much more capable, but requires some heavy computing, the kind that is not available on consumer hardware. The lab describes it as "a self-improving family of open-source models specially for agentic coding tasks." That word—agentic—is doing a lot of work. Aloha! 🌺 Meet Ornith-1.0, a family of open-source LLMs specialized for agentic coding. Ornith-1.0 spans the full parameter sizes including 9B Dense, 31B Dense, 35B MoE, and 397B MoE. It achieves state-of-the-art performance among open-source models of comparable size on… pic.twitter.com/7g1rmacLps — Ornith (@ornith
+
+--- DOC 9: 7b6af858be3180b5fb556449058d3c3b ---
+America’s Supreme Court turns “We the People” on its head America’s Supreme Court turns “We the People” on its head The court has over-extended presidential power, writes Victoria Nourse JUST BEFORE America’s 250th birthday, the Supreme Court handed Donald Trump a power no other president has possessed in almost a century: the ability to fire every independent commissioner in the executive branch at will. The decision in Trump v Slaughter may not have been as revolutionary as American independence from Britain, but it ushers in momentous changes in the powers of the presidency, and with it, the potential for abuse of presidential power. This is no mere personnel dispute. Federal commissioners perform dozens of other functions that Congress deliberately shielded from partisan control: regulating securities markets, overseeing nuclear safety, policing commodities trading. In all, over two dozen agencies could be affected by the ruling.
+
+--- DOC 10: 7b9941a387b8ee7f3fe684948c9a6b22 ---
+Ether Treasury Sharplink Buys $62.4M of ETH in 3 Days Ether treasury Sharplink bought $62.4M ETH last week Sharplink bought nearly 40,000 ETH last week after an eight-month pause, adding to signs the company has resumed its Ether accumulation strategy. Crypto treasury company Sharplink, which resumed buying Ether last week after an eight-month pause, has bought a total of $62.4 million worth of Ether since Thursday. Onchain data from Arkham shows that after Sharplink bought 5,000 ETH on Thursday, it bought another 5,000 ETH (worth $7.9 million) on Friday, followed by 29,196 ETH (worth $46.7 million) across three over-the-counter transactions on Saturday. Source: Lookonchain The three-day buying spree adds to evidence that Sharplink has revived its active Ether accumulation strategy. The crypto treasury company was once a close competitor to Bitmine as the world’s largest ETH treasury company. Sharplink declined to comment on the reason and timing of the Ether purchase when first contacted on Thursday. Sharplink backs Ethlabs However, the purchases came the same week that both Bitmine and Sharplink backed a new research and development nonprofit that aims to make Ethereum ready for institutional use. Sharplink said on Monday that the organization, Ethlabs, was formed to “ready Ethereum for the next phase of institutional adoption,” with the company joining Bitmine, Ethereum co-founder and Sharplink chairman Joe Lubin and other Ethereum contributors in backing the initiative. Related: Sharplink, Forward Industries among crypto firms considered for Russell indexes “As stablecoins, tokenized real-world assets, funds and autonomous AI commerce move on-chain, they are converging on Ethereum as the neutral, credibly permissionless settlement layer for the global economy,” Shar
+
+--- DOC 11: 7bcdb52c4f207d546cb90ce0744f2b31 ---
+New Israeli assault in southern Syria forces families to flee their homes The Syria, government has condemned overnight Israeli attacks in southern Syria, as residents near the occupied Golan Heights were forced to flee their homes. The Syrian Ministry of Foreign Affairs on Monday firmly condemned “the Israeli aggressions”, calling them “a flagrant violation of Syria’s sovereignty and territorial integrity”. Recommended Stories list of 3 items- list 1 of 3Forever wars: Israel’s cycle of conflict shows no finish line - list 2 of 3Iran slams the GCC and the US for ‘interventionist’ statement: What we know - list 3 of 3Why the Arab League could not stop Israel’s genocide The latest attack took place on Sunday in Abdin, a village in western Deraa province, where residents attempted to block the advance of an Israeli army unit. Israeli forces then fired shells close to civilian homes, with families fleeing to neighbouring villages during the night. “Shells [then] fell near the houses,” Mahmoud Mouaffak, a village notable, told AFP. Israeli forces withdrew, allowing “a return to calm and the return of residents on Monday morning”, he added. An AFP photographer saw one resident inspecting an unexploded shell close to his home. Growing Israeli attacks Israel has intensified its attacks and incursions into southern Syria since the fall of Bashar al-Assad’s government in late 2024. It has moved troops into the United Nations-monitored buffer zone separating Israeli and Syrian forces on the Golan Heights, occupied by Israel since 1967, and deeper inside Syrian territory. Israel has intensified military operations in Deraa and Quneitra in recent weeks. The Syrian Sijil Center, which monitors Israeli activity in Syria, recorded nearly 300 operations or violations by Israel in Deraa 
+
+--- DOC 12: 7c0952662460774a935524a2554dc031 ---
+Luigi Mangione gets stuck in an elevator as judge delays his federal trial until January Luigi Mangione gets stuck in an elevator as judge delays his federal trial until January Luigi Mangione gets stuck in an elevator as judge delays his federal trial until January NEW YORK (AP) — Luigi Mangione’s federal trial in the killing of UnitedHealthcare CEO Brian Thompson will now begin in January instead of the fall, a judge said Monday at a hearing that started late because Mangione got stuck in a courthouse elevator. U.S. District Judge Margaret Garnett said she was postponing the federal trial so Mangione’s lawyers can focus on his state murder trial, which is scheduled to begin on Sept. 8. Jury selection in the federal case will begin on Jan. 5, instead of Oct. 13, followed by opening statements and testimony on Jan. 25, instead of Nov. 4, Garnett said at a hearing in Manhattan. Garnett said she will not release the questionnaire that prospective jurors will be required to fill out until after the panel is chosen. Having it circulating online for months before jury selection “would only make what promises to be a difficult task more difficult,” she said. Wearing a beige jail suit, Mangione looked bemused as a pair of deputy U.S. Marshals led him into the courtroom about 20 minutes after the hearing was supposed to start. He briefly gazed at the courtroom gallery, where about two dozen of his supporters were sitting. “Mangione was late due to elevator problems,” the court said in a statement. It was the second mishap involving Mangione’s arrival to a court hearing in recent weeks. A June 16 hearing in the state case was delayed a day after prosecutors failed to inform his jail that he was needed in court. Garnett said she had hoped “with perhaps undue optimism” to hold the
+
+codex
+I’ve isolated the market-relevant candidates. Next I’m pulling the full text for the few policy and company items where the exact wording matters for atomic claims.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+want={'78588f339aca44608e3ef8477ab362a3','78ec2f5738bc30100197c37f72c736e0','7b6af858be3180b5fb556449058d3c3b','7b9941a387b8ee7f3fe684948c9a6b22','7af0e50441d5c06b0633f790990fbee2'}
+with open('all_batch_020.jsonl') as f:
+    for line in f:
+        o=json.loads(line)
+        if o['doc_id'] in want:
+            print(f\"\\n=== {o['doc_id']} | {o['title']} ===\\n{o['body_text']}\\n\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+
+=== 78588f339aca44608e3ef8477ab362a3 | South Korea unveils $880bn chip and AI investment plan ===
+- Published South Korea has unveiled plans for at least $880bn (£666bn) of investments to build out the country's chip manufacturing and artificial intelligence (AI) capabilities in the coming years. It is part of the country's so-called Three Mega Projects to develop new chip production hubs, data centres and robotics technology. The plan is aimed at rejuvenating the economies of areas outside the capital Seoul, President Lee Jae Myung said on Monday. It comes as regional rivals like Taiwan, China and Japan are investing heavily in chip factories and other technologies as the AI boom pushes up demand for semiconductors. "We must secure the core elements of AI faster than any other country," Lee said. "Semiconductors, physical AI, and AI data centres are the triple axis for a great leap forward." Lee announced the plans in a televised event alongside the leaders of Samsung and SK Hynix, the country's two largest chipmakers. Lee also announced plans to build other AI infrastructure hubs outside of Seoul, where most of the country's advanced factories are currently concentrated. Earlier, Lee said in a statement that the project was a matter of "survival" for the country to address the decline in rural areas due to the concentration of industries in Seoul. "Now, we must break this long-standing cycle of discrimination and marginalisation - not only for the sake of justice and equity, but also to ensure sustainable and inclusive growth," he wrote. Samsung and SK Group, which count the likes of AI chip giant Nvidia among their customers, have been some of the biggest beneficiaries of the surge in spending on AI infrastructure. US tech giants - including Google, Amazon and Meta - said they will spend $650bn into the technology this year. SK Hynix's stock market valuation topped $1tn in May, driven by the boom in AI data centres. The surge in demand for chips to power AI has led to a global shortage of semiconductors, sending prices higher. Last week, Apple and Microsoft raised the prices of some of their devices, due to higher costs of components. But some investors have raised concerns about the huge amounts of money being poured into AI, which has triggered some shares to slide in recent days.
+
+
+=== 78ec2f5738bc30100197c37f72c736e0 | IMF Executive Board Concludes 2026 Article IV Consultation with Ireland ===
+IMF Executive Board Concludes 2026 Article IV Consultation with Ireland June 29, 2026 The Irish economy has remained resilient in the face of consecutive external shocks. Growth is projected to slow but remain healthy amid trade and geopolitical tensions and elevated global uncertainty. Risks to the growth outlook are on the downside and to inflation on the upside. While the war in the Middle East demands near-term policy attention, the current strong economic position provides a window to future-proof the economy. Washington, DC: The Executive Board of the International Monetary Fund (IMF) completed the Article IV Consultation[1] with Ireland, considered and endorsed the staff appraisal without a meeting on a lapse-of-time basis. The Irish economy has remained resilient in the face of consecutive external shocks. The domestic economy, as measured by the Modified Gross National Income, is estimated to have grown by about 4 percent in 2025. Robust consumption and investment, together with strong exports dominated by foreign multinational enterprises (MNEs), contributed to solid growth. Headline inflation remained close to 2 percent in 2025 but has accelerated recently due to higher energy prices. The labor market has become less tight as employment growth slowed. The general government balance remained in a sizeable surplus in 2025, supported by continued strong corporate income tax receipts from MNEs. The economy is projected to grow at a slower but still robust pace. Private consumption is expected to slow down due to weaker employment and real income growth. Modified investment is projected to normalize from the high 2025 level and would be supported by continued construction activity. Export growth is expected to slow significantly in 2026 and the current account surplus to moderate over the medium term. Risks to the growth outlook are on the downside and to inflation on the upside. Substantial external risks stem from the war in the Middle East, contingent on the war’s intensity and duration. Ireland’s reliance on MNEs continues to be a key source of vulnerability. Rising geoeconomic fragmentation and elevated policy uncertainty could lead to further reorganization of supply chains and shifts in trade and capital flows that would be detrimental to Ireland’s globally integrated economy. The rapidly evolving landscape of AI poses novel risks, including threat to cyber security. Domestically, persistent supply-side constraints could weigh on productivity. The Irish economy has remained resilient and is projected to grow at a slower but still robust pace amid higher energy prices and global uncertainty. Modified domestic demand growth is projected to moderate from almost 5 percent in 2025 to about 2½ percent in 2026–27, largely reflecting a softening of private consumption due to weaker employment and real income growth, as well as normalization of modified investment. Headline inflation is projected to rise to about 3½ percent in 2026 and return to 2 percent around 2028. The outlook is subject to elevated uncertainty, with downside risks to growth and upside risks to inflation. Ireland’s external position is preliminarily assessed to be moderately stronger than the level implied by medium-term fundamentals and desirable policies. Ireland’s current strong economic position provides an opportunity to future-proof its economy. Reliance on MNEs continues to be a source of vulnerability; housing and infrastructure gaps remain to be fully addressed; long-term spending pressures from aging and the green transition are looming; and the rapid development of AI presents both risks and opportunities. Given these vulnerabilities and risks in a more shock-prone and fragmented world, Ireland cannot take its resilience for granted and should use the current window to address vulnerabilities, improve productivity, and secure lasting prosperity. Fiscal policy should achieve a broadly neutral stance while scaling up public investment efficiently. With the economy operating at full capacity and upside inflation risks, fiscal policy should avoid injecting unnecessary demand stimulus. Furthermore, a broadly neutral stance would help build buffers for future shocks and spending needs stemming from aging and the green transition. In case of downside risks materializing, automatic stabilizers should be allowed to operate fully. Any discretionary fiscal support should be temporary, targeted, and preserve price signals, to be accommodated within a broadly neutral fiscal stance, except in a severe downside scenario. Staff welcomes the authorities’ commitment to accelerating public investment and effective implementation will be key. Current expenditure needs to be closely managed, including through stronger controls to minimize overruns. Broadening the tax base and strengthening the national fiscal framework would reduce vulnerability to the highly concentrated CIT and help prepare Ireland for long-term challenges. Increasing revenues from PIT, VAT, and local property taxes would provide more sustainable revenue sources for permanent spending commitments and allow for channeling more excess CIT revenues into the two savings funds. A stronger national fiscal framework would help Ireland balance competing priorities, enhance budget credibility, and safeguard sustainability. Given the lack of a fiscal anchor at present, the MTFSP should guide annual budgets and act as a binding mechanism on spending ceilings over the medium term. Systemic risks have risen, warranting ongoing vigilance to safeguard financial stability. The financial system has proven resilient in the face of external shocks. But vulnerabilities in segments of Ireland’s large and complex non-bank sector related to leverage and liquidity mismatches could amplify and transmit adverse shocks. Asset quality should remain a key supervisory focus for banks. Macroprudential settings are appropriate, and the CBI should continue to review and adjust them as macro-financial conditions develop. Evolving risks from digitalization and cybersecurity require continued focus on operational resilience. Strengthening regulation and supervision of non-banks requires continued efforts and cooperation with the international community. The CBI should maintain its leadership role in developing a macroprudential framework for non-banks and continue to monitor the implementation of the macroprudential measures for Irish property funds and GBP-denominated liability-driven investment funds. The CBI’s ongoing efforts, in collaboration with ESMA and other regulators, to improve data availability and quality, enhance risk assessment, and develop system-wide stress tests are welcome. Structural reforms should focus on addressing housing shortages, enhancing energy security, and preparing for the AI transformation. Achieving the new housing targets will require further efforts to streamline the complex planning and judicial review process, increase urban density, boost construction productivity, and crowd in private capital. Upgrading the electricity grid, strengthening integration with the EU energy market, and harnessing Ireland's potential in renewables are key to bolstering energy security and delivering a cost-effective green transition. Realizing AI-related productivity gains while ensuring adjustment does not undermine inclusive growth will require policies to help workers adapt and acquire new skills, enhance labor mobility, and foster innovation to leverage Ireland’s abundant talent. The Irish economy would benefit significantly from deepening the EU Single Market. The SIU can facilitate the redirection of savings into productive investments, and Ireland’s financial sector, a global leader in asset management, is uniquely positioned to lead the transition. The proposed 28th corporate regime, if designed and implemented well, would enable Irish firms to operate more efficiently in the Single Market and bring economies of scale. Advancing new EU trade agreements would allow Irish firms to diversify supply chains and capture efficiency gains from trade. Sources: CSO, DoF, Eurostat, and IMF staff estimates and projections. 1/ Real GDP growth is reported in non-seasonally adjusted terms. 2/ Nominal GNI* is deflated using GDP deflator as proxy, since an official GNI* deflator is not available. GNI* for 2025 is IMF staff estimate. 3/ Excludes estimated excess CIT receipts. In 2024 also excludes CIT receipts of 2.5 percent of GDP following judgment by the Court of Justice of the EU. 4/ IFSC indicates international financial services. 5/ Modified Domestic Demand (MDD) measures Ireland's domestic economic activity by excluding certain capital investment items such as aeroplanes purchased by leasing companies in Ireland and Intellectual Property purchases of foreign-owned corporations from final domestic demand. [1] Under Article IV of the IMF's Articles of Agreement, the IMF holds bilateral discussions with members, usually every year. A staff team visits the country, collects economic and financial information, and discusses with officials the country's economic developments and policies. On return to headquarters, the staff prepares a report, which forms the basis for discussion by the Executive Board. [2] The Executive Board takes decisions under the lapse-of-time procedure when the Board agrees that a proposal can be considered without convening formal discussions.
+
+
+=== 7af0e50441d5c06b0633f790990fbee2 | Here is why GE Aerospace (GE) Is Among the Best Stocks in Chris Hohn’s Portfolio ===
+GE Aerospace (NYSE:GE) is one of the 9 Best Stocks to Buy in Chris Hohn's TCI Fund Portfolio. On June 25, 2026, GE Aerospace (NYSE:GE) announced that the company is celebrating America's 250th anniversary by showcasing its GE9X – the world's largest and most powerful commercial jet engine – at the Great American State Fair on the National Mall. Visitors can view the advanced engine, alongside an interactive flight experience. GE9X will power the Boeing 777X, which is projected to enter service and begin first airline deliveries in early to mid-2027. Chris Hohn has invested approximately $13.5 billion in the stock, marking it the top bet in the TCI Fund Portfolio. In a separate event, on June 8, 2026, GE Aerospace (NYSE:GE) and Wolfspeed Inc. (WOLF) signed a Memorandum of Understanding (MOU) to accelerate the adoption of high-voltage silicon carbide across the industrial, aerospace, and defense sectors. The partnership includes the supply of Wolfspeed's 10 kV MOSFET die and the joint development of standard power module formats. Aligning with the U.S. Government's state priorities, the MOU aims at reducing system complexities and fast-tracking critical technologies for strategic markets like AI. Founded in 1917, GE Aerospace (NYSE:GE) is an American aircraft engine manufacturer and supplier. Headquartered in Ohio, the company stands as the world's premier provider of jet engines, components, and integrated systems for commercial and military aircraft. While we acknowledge the potential of GE as an investment, we believe certain AI stocks offer greater upside potential and carry less downside risk. If you're looking for an extremely undervalued AI stock that also stands to benefit significantly from Trump-era tariffs and the onshoring trend, see our free report on the best short-term AI stock. READ NEXT: 10 Cheap Jim Cramer Stocks to Invest In Right Now and Chase Coleman's Tiger Global Portfolio: 10 Best Stocks to Buy Disclosure: None. Follow Insider Monkey on Google News.
+
+
+=== 7b6af858be3180b5fb556449058d3c3b | America’s Supreme Court turns “We the People” on its head ===
+America’s Supreme Court turns “We the People” on its head The court has over-extended presidential power, writes Victoria Nourse JUST BEFORE America’s 250th birthday, the Supreme Court handed Donald Trump a power no other president has possessed in almost a century: the ability to fire every independent commissioner in the executive branch at will. The decision in Trump v Slaughter may not have been as revolutionary as American independence from Britain, but it ushers in momentous changes in the powers of the presidency, and with it, the potential for abuse of presidential power. This is no mere personnel dispute. Federal commissioners perform dozens of other functions that Congress deliberately shielded from partisan control: regulating securities markets, overseeing nuclear safety, policing commodities trading. In all, over two dozen agencies could be affected by the ruling.
+
+
+=== 7b9941a387b8ee7f3fe684948c9a6b22 | Ether Treasury Sharplink Buys $62.4M of ETH in 3 Days ===
+Ether treasury Sharplink bought $62.4M ETH last week Sharplink bought nearly 40,000 ETH last week after an eight-month pause, adding to signs the company has resumed its Ether accumulation strategy. Crypto treasury company Sharplink, which resumed buying Ether last week after an eight-month pause, has bought a total of $62.4 million worth of Ether since Thursday. Onchain data from Arkham shows that after Sharplink bought 5,000 ETH on Thursday, it bought another 5,000 ETH (worth $7.9 million) on Friday, followed by 29,196 ETH (worth $46.7 million) across three over-the-counter transactions on Saturday. Source: Lookonchain The three-day buying spree adds to evidence that Sharplink has revived its active Ether accumulation strategy. The crypto treasury company was once a close competitor to Bitmine as the world’s largest ETH treasury company. Sharplink declined to comment on the reason and timing of the Ether purchase when first contacted on Thursday. Sharplink backs Ethlabs However, the purchases came the same week that both Bitmine and Sharplink backed a new research and development nonprofit that aims to make Ethereum ready for institutional use. Sharplink said on Monday that the organization, Ethlabs, was formed to “ready Ethereum for the next phase of institutional adoption,” with the company joining Bitmine, Ethereum co-founder and Sharplink chairman Joe Lubin and other Ethereum contributors in backing the initiative. Related: Sharplink, Forward Industries among crypto firms considered for Russell indexes “As stablecoins, tokenized real-world assets, funds and autonomous AI commerce move on-chain, they are converging on Ethereum as the neutral, credibly permissionless settlement layer for the global economy,” Sharplink said. “Ethlabs exists to ensure the network is ready to absorb that demand at scale.” Ether slump The purchases also come as the cryptocurrency is down 22.8% month-on-month, and nearly 50% compared to the start of the year, allowing Tether stablecoin USDt (USDT) to briefly surpass Ether in market capitalization last week. Meanwhile, US spot Ether ETFs recorded their seventh week of outflows last week, recording $12.9 million in net outflows, driven mainly by withdrawals from BlackRock’s iShares Ethereum Trust (ETHA). Magazine: Bitcoin slides to $58K, XRP hits $1 but onchain data promising: Market Moves More on the subject
+
+
+codex
+I have the fact set defined. I’m writing the output file now as ordered JSONL, with empty `facts` arrays for the non-market documents.
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import json
+from collections import OrderedDict
+
+facts_by_doc = {
+    \"78258d094e15c35b8ce3e5e618f9f4f2\": [],
+    \"7835c356da0e5f4fa8eed66da9276cab\": [
+        {
+            \"claim\": \"Since peaking in mid-May, Magnificent Seven stocks are down more than 13%.\",
+            \"subject\": \"Magnificent Seven stocks\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"more than 13%\",
+            \"time\": \"since peaking in mid-May\",
+            \"cause\": \"Wall Street is growing increasingly impatient with Big Tech's AI capital expenditures and is concerned about a possible Fed rate hike later this year.\",
+            \"entities\": [\"Magnificent Seven\", \"Federal Reserve\"],
+            \"confidence\": 0.96,
+        },
+        {
+            \"claim\": \"Over the same period, the Invesco QQQ Trust was down about 2%.\",
+            \"subject\": \"Invesco QQQ Trust\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"about 2%\",
+            \"time\": \"since peaking in mid-May\",
+            \"cause\": None,
+            \"entities\": [\"Invesco QQQ Trust\"],
+            \"confidence\": 0.95,
+        },
+        {
+            \"claim\": \"Over the same period, the S&P 500 was down about 2%.\",
+            \"subject\": \"S&P 500\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"about 2%\",
+            \"time\": \"since peaking in mid-May\",
+            \"cause\": None,
+            \"entities\": [\"S&P 500\"],
+            \"confidence\": 0.95,
+        },
+        {
+            \"claim\": \"Amazon was down 11% versus its 52-week high.\",
+            \"subject\": \"Amazon\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"11%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"Amazon\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Apple was down 11.7% versus its 52-week high.\",
+            \"subject\": \"Apple\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"11.7%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"Apple\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Meta was down 14.4% versus its 52-week high.\",
+            \"subject\": \"Meta\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"14.4%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"Meta Platforms\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Nvidia was down 18.5% versus its 52-week high.\",
+            \"subject\": \"Nvidia\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"18.5%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"NVIDIA\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Tesla was down 32.6% versus its 52-week high.\",
+            \"subject\": \"Tesla\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"32.6%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"Tesla\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Microsoft was down 32.9% versus its 52-week high.\",
+            \"subject\": \"Microsoft\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"32.9%\",
+            \"time\": \"versus its 52-week high\",
+            \"cause\": None,
+            \"entities\": [\"Microsoft\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Big Tech's capital expenditures on artificial intelligence are projected to balloon 70% to exceed "'$700 billion this year.",
+            "subject": "Big Tech",
+            "predicate": "forecast",
+            "object": "artificial intelligence capital expenditures",
+            "direction": "up",
+            "magnitude": "70% to exceed $700 billion",
+            "time": "this year",
+            "cause": None,
+            "entities": ["Big Tech"],
+            "confidence": 0.93,
+        },
+        {
+            "claim": "The Magnificent Seven'"'s collective 12-month forward free cash flow is expected to drop sharply from its 2024 peak.\",
+            \"subject\": \"Magnificent Seven\",
+            \"predicate\": \"forecast\",
+            \"object\": \"12-month forward free cash flow\",
+            \"direction\": \"down\",
+            \"magnitude\": None,
+            \"time\": \"12-month forward\",
+            \"cause\": \"Aggressive spending on data centers and high-end GPUs has heavily cannibalized corporate cash generation.\",
+            \"entities\": [\"Magnificent Seven\"],
+            \"confidence\": 0.9,
+        },
+    ],
+    \"7847ace9f33d7149688927b48dacd849\": [
+        {
+            \"claim\": \"Oil prices reached pre-war levels last week.\",
+            \"subject\": \"Oil prices\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": None,
+            \"time\": \"last week\",
+            \"cause\": \"The reopening of the Strait of Hormuz and the end of the US-Iran war triggered a quick unwinding of bullish oil bets.\",
+            \"entities\": [\"Oil\", \"Strait of Hormuz\", \"United States\", \"Iran\"],
+            \"confidence\": 0.94,
+        },
+        {
+            \"claim\": \"Traders continue to price in an increase in oil supply in the next months.\",
+            \"subject\": \"Oil supply\",
+            \"predicate\": \"supply_change\",
+            \"object\": None,
+            \"direction\": \"up\",
+            \"magnitude\": None,
+            \"time\": \"the next months\",
+            \"cause\": None,
+            \"entities\": [\"Oil\"],
+            \"confidence\": 0.9,
+        },
+        {
+            \"claim\": \"Fed tightening risk is expected to weigh on oil demand.\",
+            \"subject\": \"Oil demand\",
+            \"predicate\": \"demand_change\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": None,
+            \"time\": \"2026-06-29\",
+            \"cause\": \"Fed tightening risk\",
+            \"entities\": [\"Oil\", \"Federal Reserve\"],
+            \"confidence\": 0.88,
+        },
+        {
+            \"claim\": \"Crude oil filled the 68.00-69.00 gap and reached pre-war levels.\",
+            \"subject\": \"Crude oil\",
+            \"predicate\": \"price_move\",
+            \"object\": None,
+            \"direction\": \"down\",
+            \"magnitude\": \"68.00-69.00\",
+            \"time\": \"2026-06-29\",
+            \"cause\": None,
+            \"entities\": [\"Crude oil\"],
+            \"confidence\": 0.86,
+        },
+    ],
+    \"78588f339aca44608e3ef8477ab362a3\": [
+        {
+            \"claim\": \"South Korea unveiled plans for at least "'$880bn of investments to build out the country'"'s chip manufacturing and AI capabilities in the coming years.\",
+            \"subject\": \"South Korea\",
+            \"predicate\": \"policy_action\",
+            \"object\": \"chip manufacturing and AI capabilities\",
+            \"direction\": \"up\",
+            \"magnitude\": \"at least "'$880bn",
+            "time": "the coming years",
+            "cause": None,
+            "entities": ["South Korea"],
+            "confidence": 0.98,
+        },
+        {
+            "claim": "South Korea'"'s plan includes new chip production hubs, data centres, and robotics technology under the Three Mega Projects.\",
+            \"subject\": \"South Korea\",
+            \"predicate\": \"policy_action\",
+            \"object\": \"Three Mega Projects\",
+            \"direction\": \"na\",
+            \"magnitude\": None,
+            \"time\": \"2026-06-29\",
+            \"cause\": None,
+            \"entities\": [\"South Korea\"],
+            \"confidence\": 0.94,
+        },
+        {
+            \"claim\": \"Google, Amazon, and Meta said they will spend "'$650bn on AI technology this year.",
+            "subject": "Google, Amazon, and Meta",
+            "predicate": "forecast",
+            "object": "AI technology spending",
+            "direction": "up",
+            "magnitude": "$650bn",
+            "time": "this year",
+            "cause": None,
+            "entities": ["Google", "Amazon", "Meta Platforms"],
+            "confidence": 0.91,
+        },
+        {
+            "claim": "SK Hynix'"'s stock market valuation topped "'$1tn in May.",
+            "subject": "SK Hynix",
+            "predicate": "price_move",
+            "object": "stock market valuation",
+            "direction": "up",
+            "magnitude": "$1tn",
+            "time": "May",
+            "cause": "the boom in AI data centres",
+            "entities": ["SK Hynix"],
+            "confidence": 0.95,
+        },
+        {
+            "claim": "The surge in demand for chips to power AI has led to a global semiconductor shortage.",
+            "subject": "Semiconductors",
+            "predicate": "supply_change",
+            "object": None,
+            "direction": "down",
+            "magnitude": None,
+            "time": "2026-06-29",
+            "cause": "The surge in demand for chips to power AI",
+            "entities": ["Semiconductors", "Artificial intelligence"],
+            "confidence": 0.9,
+        },
+        {
+            "claim": "The global semiconductor shortage has sent semiconductor prices higher.",
+            "subject": "Semiconductor prices",
+            "predicate": "price_move",
+            "object": None,
+            "direction": "up",
+            "magnitude": None,
+            "time": "2026-06-29",
+            "cause": "The global semiconductor shortage",
+            "entities": ["Semiconductors"],
+            "confidence": 0.9,
+        },
+        {
+            "claim": "Apple and Microsoft raised the prices of some of their devices last week.",
+            "subject": "Apple and Microsoft devices",
+            "predicate": "price_move",
+            "object": None,
+            "direction": "up",
+            "magnitude": None,
+            "time": "last week",
+            "cause": "higher costs of components",
+            "entities": ["Apple", "Microsoft"],
+            "confidence": 0.9,
+        },
+        {
+            "claim": "Some shares slid in recent days as investors raised concerns about the huge amounts of money being poured into AI.",
+            "subject": "Some shares",
+            "predicate": "price_move",
+            "object": None,
+            "direction": "down",
+            "magnitude": None,
+            "time": "recent days",
+            "cause": "investor concerns about the huge amounts of money being poured into AI",
+            "entities": ["Artificial intelligence"],
+            "confidence": 0.79,
+        },
+    ],
+    "78ec2f5738bc30100197c37f72c736e0": [
+        {
+            "claim": "Ireland'"'s domestic economy, as measured by Modified Gross National Income, is estimated to have grown by about 4 percent in 2025.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"other\",
+            \"object\": \"Modified Gross National Income\",
+            \"direction\": \"up\",
+            \"magnitude\": \"about 4 percent\",
+            \"time\": \"2025\",
+            \"cause\": \"Robust consumption and investment, together with strong exports dominated by foreign multinational enterprises, contributed to solid growth.\",
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Ireland's headline inflation remained close to 2 percent in 2025.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"other\",
+            \"object\": \"headline inflation\",
+            \"direction\": \"flat\",
+            \"magnitude\": \"close to 2 percent\",
+            \"time\": \"2025\",
+            \"cause\": None,
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.95,
+        },
+        {
+            \"claim\": \"Ireland's headline inflation has accelerated recently due to higher energy prices.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"price_move\",
+            \"object\": \"headline inflation\",
+            \"direction\": \"up\",
+            \"magnitude\": None,
+            \"time\": \"recently\",
+            \"cause\": \"higher energy prices\",
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.94,
+        },
+        {
+            \"claim\": \"Ireland's general government balance remained in a sizeable surplus in 2025.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"other\",
+            \"object\": \"general government balance\",
+            \"direction\": \"flat\",
+            \"magnitude\": None,
+            \"time\": \"2025\",
+            \"cause\": \"continued strong corporate income tax receipts from multinational enterprises\",
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.93,
+        },
+        {
+            \"claim\": \"Ireland's modified domestic demand growth is projected to moderate from almost 5 percent in 2025 to about 2.5 percent in 2026-27.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"forecast\",
+            \"object\": \"modified domestic demand growth\",
+            \"direction\": \"down\",
+            \"magnitude\": \"from almost 5 percent to about 2.5 percent\",
+            \"time\": \"2026-27\",
+            \"cause\": \"a softening of private consumption due to weaker employment and real income growth, as well as normalization of modified investment\",
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.96,
+        },
+        {
+            \"claim\": \"Ireland's headline inflation is projected to rise to about 3.5 percent in 2026.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"forecast\",
+            \"object\": \"headline inflation\",
+            \"direction\": \"up\",
+            \"magnitude\": \"about 3.5 percent\",
+            \"time\": \"2026\",
+            \"cause\": None,
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.96,
+        },
+        {
+            \"claim\": \"Ireland's headline inflation is projected to return to 2 percent around 2028.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"forecast\",
+            \"object\": \"headline inflation\",
+            \"direction\": \"down\",
+            \"magnitude\": \"2 percent\",
+            \"time\": \"around 2028\",
+            \"cause\": None,
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.95,
+        },
+        {
+            \"claim\": \"Ireland's export growth is expected to slow significantly in 2026.\",
+            \"subject\": \"Ireland\",
+            \"predicate\": \"forecast\",
+            \"object\": \"export growth\",
+            \"direction\": \"down\",
+            \"magnitude\": None,
+            \"time\": \"2026\",
+            \"cause\": None,
+            \"entities\": [\"Ireland\"],
+            \"confidence\": 0.92,
+        },
+    ],
+    \"792e2c65464e5c477aaecbc6a4508d37\": [
+        {
+            \"claim\": \"The U.S. retirement income system ranked No. 30 with a score of 61.1 in the 2025 Mercer CFA Institute Global Pension Index.\",
+            \"subject\": \"United States\",
+            \"predicate\": \"other\",
+            \"object\": \"2025 Mercer CFA Institute Global Pension Index\",
+            \"direction\": \"na\",
+            \"magnitude\": \"61.1\",
+            \"time\": \"2025\",
+            \"cause\": None,
+            \"entities\": [\"United States\", \"Mercer CFA Institute Global Pension Index\"],
+            \"confidence\": 0.98,
+        },
+        {
+            \"claim\": \"The Netherlands topped the 2025 Mercer CFA Institute Global Pension Index with a score of 85.4.\",
+            \"subject\": \"Netherlands\",
+            \"predicate\": \"other\",
+            \"object\": \"2025 Mercer CFA Institute Global Pension Index\",
+            \"direction\": \"na\",
+            \"magnitude\": \"85.4\",
+            \"time\": \"2025\",
+            \"cause\": None,
+            \"entities\": [\"Netherlands\", \"Mercer CFA Institute Global Pension Index\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Iceland ranked second in the 2025 Mercer CFA Institute Global Pension Index with a score of 84.\",
+            \"subject\": \"Iceland\",
+            \"predicate\": \"other\",
+            \"object\": \"2025 Mercer CFA Institute Global Pension Index\",
+            \"direction\": \"na\",
+            \"magnitude\": \"84\",
+            \"time\": \"2025\",
+            \"cause\": None,
+            \"entities\": [\"Iceland\", \"Mercer CFA Institute Global Pension Index\"],
+            \"confidence\": 0.97,
+        },
+        {
+            \"claim\": \"Denmark ranked third in the 2025 Mercer CFA Institute Global Pension Index with a score of 82.3.\",
+            \"subject\": \"Denmark\",
+            \"predicate\": \"other\",
+            \"object\": \"2025 Mercer CFA Institute Global Pension Index\",
+            \"direction\": \"na\",
+            \"magnitude\": \"82.3\",
+            \"time\": \"2025\",
+            \"cause\": None,
+            \"entities\": [\"Denmark\", \"Mercer CFA Institute Global Pension Index\"],
+            \"confidence\": 0.97,
+        },
+    ],
+    \"7af0e50441d5c06b0633f790990fbee2\": [
+        {
+            \"claim\": \"GE Aerospace said the Boeing 777X, powered by the GE9X engine, is projected to enter service and begin first airline deliveries in early to mid-2027.\",
+            \"subject\": \"Boeing 777X\",
+            \"predicate\": \"forecast\",
+            \"object\": \"first airline deliveries\",
+            \"direction\": \"na\",
+            \"magnitude\": None,
+            \"time\": \"early to mid-2027\",
+            \"cause\": None,
+            \"entities\": [\"GE Aerospace\", \"Boeing 777X\", \"GE9X\"],
+            \"confidence\": 0.9,
+        },
+        {
+            \"claim\": \"Chris Hohn has invested approximately "'$13.5 billion in GE Aerospace stock.",
+            "subject": "Chris Hohn",
+            "predicate": "corporate_action",
+            "object": "GE Aerospace",
+            "direction": "up",
+            "magnitude": "approximately $13.5 billion",
+            "time": "2026-06-29",
+            "cause": None,
+            "entities": ["Chris Hohn", "GE Aerospace"],
+            "confidence": 0.88,
+        },
+        {
+            "claim": "GE Aerospace and Wolfspeed signed a Memorandum of Understanding on June 8, 2026 to accelerate the adoption of high-voltage silicon carbide across the industrial, aerospace, and defense sectors.",
+            "subject": "GE Aerospace",
+            "predicate": "deal_or_contract",
+            "object": "Wolfspeed",
+            "direction": "na",
+            "magnitude": None,
+            "time": "June 8, 2026",
+            "cause": None,
+            "entities": ["GE Aerospace", "Wolfspeed"],
+            "confidence": 0.96,
+        },
+        {
+            "claim": "The GE Aerospace-Wolfspeed partnership includes the supply of Wolfspeed'"'s 10 kV MOSFET die and joint development of standard power module formats.\",
+            \"subject\": \"GE Aerospace\",
+            \"predicate\": \"deal_or_contract\",
+            \"object\": \"Wolfspeed\",
+            \"direction\": \"na\",
+            \"magnitude\": None,
+            \"time\": \"June 8, 2026\",
+            \"cause\": None,
+            \"entities\": [\"GE Aerospace\", \"Wolfspeed\"],
+            \"confidence\": 0.94,
+        },
+    ],
+    \"7b3a173855c017714d74260c5357df42\": [],
+    \"7b6af858be3180b5fb556449058d3c3b\": [
+        {
+            \"claim\": \"The U.S. Supreme Court's decision in Trump v Slaughter gave the president the ability to fire every independent commissioner in the executive branch at will.\",
+            \"subject\": \"United States Supreme Court\",
+            \"predicate\": \"policy_action\",
+            \"object\": \"independent commissioners in the executive branch\",
+            \"direction\": \"na\",
+            \"magnitude\": None,
+            \"time\": \"2026-06-29\",
+            \"cause\": None,
+            \"entities\": [\"United States Supreme Court\", \"Donald Trump\"],
+            \"confidence\": 0.95,
+        },
+        {
+            \"claim\": \"More than two dozen federal agencies could be affected by the Trump v Slaughter ruling.\",
+            \"subject\": \"Trump v Slaughter ruling\",
+            \"predicate\": \"policy_action\",
+            \"object\": \"more than two dozen federal agencies\",
+            \"direction\": \"na\",
+            \"magnitude\": \"over two dozen\",
+            \"time\": \"2026-06-29\",
+            \"cause\": None,
+            \"entities\": [\"United States Supreme Court\", \"Trump v Slaughter\"],
+            \"confidence\": 0.9,
+        },
+    ],
+    \"7b9941a387b8ee7f3fe684948c9a6b22\": [
+        {
+            \"claim\": \"Sharplink bought a total of "'$62.4 million worth of Ether since Thursday.",
+            "subject": "Sharplink",
+            "predicate": "corporate_action",
+            "object": "Ether",
+            "direction": "up",
+            "magnitude": "$62.4 million",
+            "time": "since Thursday",
+            "cause": None,
+            "entities": ["Sharplink", "Ether"],
+            "confidence": 0.98,
+        },
+        {
+            "claim": "Sharplink bought 5,000 ETH on Thursday.",
+            "subject": "Sharplink",
+            "predicate": "corporate_action",
+            "object": "Ether",
+            "direction": "up",
+            "magnitude": "5,000 ETH",
+            "time": "Thursday",
+            "cause": None,
+            "entities": ["Sharplink", "Ether"],
+            "confidence": 0.97,
+        },
+        {
+            "claim": "Sharplink bought 5,000 ETH worth $7.9 million on Friday.",
+            "subject": "Sharplink",
+            "predicate": "corporate_action",
+            "object": "Ether",
+            "direction": "up",
+            "magnitude": "5,000 ETH worth $7.9 million",
+            "time": "Friday",
+            "cause": None,
+            "entities": ["Sharplink", "Ether"],
+            "confidence": 0.97,
+        },
+        {
+            "claim": "Sharplink bought 29,196 ETH worth $46.7 million across three over-the-counter transactions on Saturday.",
+            "subject": "Sharplink",
+            "predicate": "corporate_action",
+            "object": "Ether",
+            "direction": "up",
+            "magnitude": "29,196 ETH worth $46.7 million",
+            "time": "Saturday",
+            "cause": None,
+            "entities": ["Sharplink", "Ether"],
+            "confidence": 0.97,
+        },
+        {
+            "claim": "Sharplink and Bitmine backed Ethlabs, a new research and development nonprofit formed to ready Ethereum for institutional adoption.",
+            "subject": "Sharplink",
+            "predicate": "corporate_action",
+            "object": "Ethlabs",
+            "direction": "na",
+            "magnitude": None,
+            "time": "2026-06-29",
+            "cause": None,
+            "entities": ["Sharplink", "Bitmine", "Ethlabs", "Ethereum"],
+            "confidence": 0.92,
+        },
+        {
+            "claim": "Ether was down 22.8% month-on-month.",
+            "subject": "Ether",
+            "predicate": "price_move",
+            "object": None,
+            "direction": "down",
+            "magnitude": "22.8%",
+            "time": "month-on-month",
+            "cause": None,
+            "entities": ["Ether"],
+            "confidence": 0.95,
+        },
+        {
+            "claim": "Ether was down nearly 50% compared to the start of the year.",
+            "subject": "Ether",
+            "predicate": "price_move",
+            "object": None,
+            "direction": "down",
+            "magnitude": "nearly 50%",
+            "time": "compared to the start of the year",
+            "cause": None,
+            "entities": ["Ether"],
+            "confidence": 0.95,
+        },
+        {
+            "claim": "U.S. spot Ether ETFs recorded $12.9 million in net outflows last week.",
+            "subject": "U.S. spot Ether ETFs",
+            "predicate": "demand_change",
+            "object": None,
+            "direction": "down",
+            "magnitude": "$12.9 million",
+            "time": "last week",
+            "cause": "withdrawals from BlackRock'"'s iShares Ethereum Trust\",
+            \"entities\": [\"U.S. spot Ether ETFs\", \"BlackRock\", \"iShares Ethereum Trust\"],
+            \"confidence\": 0.95,
+        },
+    ],
+    \"7bcdb52c4f207d546cb90ce0744f2b31\": [],
+    \"7c0952662460774a935524a2554dc031\": [],
+}
+
+count_docs = 0
+count_facts = 0
+with open('all_batch_020.jsonl') as src, open('all_facts_020.jsonl', 'w') as out:
+    for line in src:
+        o = json.loads(line)
+        facts = facts_by_doc[o['doc_id']]
+        rec = {
+            'doc_id': o['doc_id'],
+            'title': o['title'],
+            'facts': facts,
+        }
+        out.write(json.dumps(rec, ensure_ascii=True) + '\\n')
+        count_docs += 1
+        count_facts += len(facts)
+print(f\"docs processed: {count_docs}, total facts: {count_facts}\")
+PY" in /Users/jamiepearcey/projects/research/market-color/facts_work/batches
+ succeeded in 0ms:
+docs processed: 12, total facts: 49
+
+codex
+docs processed: 12, total facts: 49
+tokens used
+44,642
+docs processed: 12, total facts: 49
