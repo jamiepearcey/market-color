@@ -89,8 +89,32 @@ not a retriever. Reproduced the nonlinear direction head (HistGB on
 4. **Measure with content review** (novel load-bearing drivers vs baseline), not pooled
    snippet-relevance.
 
+## Open question / correction in progress (2026-07-15)
+Three caveats on the conclusions above, being tested by a dedicated eval:
+1. **The graph was only ever tested as a RETRIEVER, not a hypothesis conditioner.**
+   "No multi-hop graph" killed the PPR chain feeding docs into a ranked list (judged on
+   nDCG). It never tested the `cause_entities` graph as the *source of diverse, grounded
+   upstream hypotheses* — which is a different use, and the one that can name drivers
+   whose vocabulary doesn't overlap the effect (`causal_hypotheses.py`, `hyp_sources.py`).
+2. **Hypotheses are currently seeded only from cosine top-5** (`gen_hyde_input.py`) — the
+   very baseline neighbourhood they must beat, biasing generation back to the topical prior.
+   "Invest in hypothesis decomposition" is under-specified without fixing where they come from.
+3. **The content-verified re-eval was n=1** (q19), and the operator/chain were reverted on
+   the *same* blind-relevance metric this doc calls novelty-blind. Can't discredit the
+   metric for the positive case and trust it for the negative.
+
+**Corrected experiment:** head-to-head on the hypothesis SOURCE (A prior / B cosine5 =
+current / C graph / D hybrid), scored on **novel load-bearing drivers vs baseline**
+(content-read set difference), ≥15 queries, cos+ndir reranker layered *fused* (not as a
+standalone retriever). Decisive test: does C or D beat B (CI excluding 0)? Protocol +
+harness: **EVAL_DISCOVERY_PROTOCOL.md**, run via `scripts/run_discovery_eval.sh`.
+
 ## Reusable harness
 `scripts/`: stack_experiment.py, stack_multi.py, reach_experiment.py, reach_multistep.py,
 emit_uncovered.py, gen_candidates.py, build_judge_packets.py, score_relevance.py,
 score_reach.py, score_ms.py. Judged label pool (828 query,doc driver-relevance grades)
 under `data/eval/` (local, gitignored).
+
+**Driver-discovery harness (the correction above):** hyp_sources.py, gen_hypotheses.py,
+gen_hyp_candidates.py, direction_head.py, build_novelty_packets.py, score_discovery.py,
+run_discovery_eval.sh — see EVAL_DISCOVERY_PROTOCOL.md.
