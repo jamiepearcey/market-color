@@ -21,6 +21,8 @@ data/tmp/
 # large generated artifacts (regenerate via the pipeline scripts)
 # ~240MB embeddings/transport matrices (.npy/.npz)
 receptors/data/
+# ~314MB BGE-base embeddings/transport matrices (.npy/.npz)
+receptors/data_bge_base/
 # archive backup of data/news_corpus/
 data/news_corpus.zip
 # generated eval run outputs

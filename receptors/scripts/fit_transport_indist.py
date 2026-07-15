@@ -18,8 +18,9 @@ Outputs:
 """
 import json, numpy as np
 from collections import Counter
+import os
 
-D = "data"
+D = os.environ.get("RECEPTORS_DATA_DIR", "data")
 docs = [json.loads(l) for l in open(f"{D}/docs.jsonl")]
 epoch_d = {d["doc_id"]: d["published_epoch"] for d in docs}
 ents = {d["doc_id"]: set(d.get("entities") or []) for d in docs}
@@ -74,7 +75,8 @@ Y = np.array(Ys, dtype=np.float32)
 print(f"queries with gold: {n_q}  in-dist pairs (cause_chunk -> effect_claim): {len(Xs)}")
 
 lam = 1.0
-W = np.linalg.solve(X.T @ X + lam * np.eye(384, dtype=np.float32), X.T @ Y)
+dim = X.shape[1]
+W = np.linalg.solve(X.T @ X + lam * np.eye(dim, dtype=np.float32), X.T @ Y)
 np.save(f"{D}/transport_w_indist.npy", W.astype(np.float32))
 
 T = ch @ W

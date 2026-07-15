@@ -21,11 +21,17 @@ supervision for W; these tools only do BLAS.
 CLI:  uv run scripts/receptors_tools.py find "effect phenomenon" [-k 8] [--before D] [--json]
       uv run scripts/receptors_tools.py direction "text a" "text b"
 """
-import json, sys
+import json, sys, os
 from pathlib import Path
 import numpy as np
 
-D = Path(__file__).resolve().parents[1] / "data"
+# Substrate-configurable: point at an alternative embedding build (e.g. data_bge_base)
+# with a matching embedding model + query prefix, so the SAME tools can run on a
+# different embedding space for A/B substrate comparison. Defaults = MiniLM baseline.
+_ROOT = Path(__file__).resolve().parents[1]
+D = _ROOT / os.environ.get("RECEPTORS_DATA_DIR", "data")
+_EMBED_MODEL = os.environ.get("RECEPTORS_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+_QUERY_PREFIX = os.environ.get("RECEPTORS_QUERY_PREFIX", "")
 _model = None
 
 
@@ -33,7 +39,9 @@ def _embed(texts):
     global _model
     if _model is None:
         from fastembed import TextEmbedding
-        _model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        _model = TextEmbedding(model_name=_EMBED_MODEL)
+    if _QUERY_PREFIX:
+        texts = [_QUERY_PREFIX + t for t in texts]
     V = np.array(list(_model.embed(texts)), dtype=np.float32)
     V /= (np.linalg.norm(V, axis=1, keepdims=True) + 1e-9)
     return V
@@ -122,17 +130,22 @@ def _rrf_rank(rankings, take=100):
     return [ni for ni, _ in sorted(score.items(), key=lambda kv: -kv[1])]
 
 
-def causal_chain(query, k=8, before=None, exclude=None, alpha=0.9, iters=20):
-    """MULTI-HOP cause finder over the precomputed SEMANTIC GRAPH (abductive fusion —
-    the crowned method in the Rust scoreboard). Pipeline, all BLAS, graph precomputed:
-      1-hop:   seed = relu(doc_w . q)                    (direct causes)
+def causal_chain(query, k=8, before=None, exclude=None, alpha=0.9, iters=20,
+                 seed_top=0, mode="abductive"):
+    """MULTI-HOP cause finder over the precomputed SEMANTIC GRAPH. Pipeline, all
+    BLAS, graph precomputed:
+      1-hop:   seed = relu(doc_w . q), CONCENTRATED to the top-`seed_top` direct
+               causes (a focused hypothesis walks the real chain instead of
+               spraying PPR mass onto generic hubs)
       chain:   PPR back through the graph                (causes-of-causes, 2-hop)
-      support: cosine of a hypothesis centroid (top chain docs) over doc_emb
-      cosine:  effect-anchored topical
-    then 4-way RRF. On held-out 2-hop chain gold this beats 1-hop W R@10 0.044 vs
-    0.034 (+29%) / R@30 0.099 vs 0.083, hub-rate 0.33 (raw PPR alone = 0.85, unusable).
-    Zero inference-time graph construction: the graph is built once, offline.
-    Returns CANDIDATE causes -> feed the gate; the algebra proposes, it does not prove."""
+    mode="union" (default, OPTIMISED): 2-way RRF [1-hop ⊕ chain]. On held-out
+      TEMPORAL cross-vocab chain gold (the docs cosine can't reach = 85% of chain
+      gold) this reaches R@100 0.131 vs cosine 0.021 (~6.2×) and vs the old
+      abductive 0.078 (+64%), at a CLEANER top-10 (hub-rate 0.078 vs 0.15).
+    mode="abductive" (legacy): 4-way RRF [cos ⊕ 1-hop ⊕ chain ⊕ hyp-support];
+      stronger on direct/topical questions, weaker on cross-vocab reach.
+    See data/CHAIN_OPTIM.md. Graph built once, offline; zero inference-time graph
+    construction. Returns CANDIDATES -> feed the gate; the algebra proposes."""
     g = _load_graph()
     edges_idx, edges_wt = g["edges_idx"], g["edges_wt"]
     doc_w = g["doc_w"].astype(np.float32)
@@ -153,6 +166,14 @@ def causal_chain(query, k=8, before=None, exclude=None, alpha=0.9, iters=20):
 
     seed = np.maximum(doc_w @ q, 0.0).astype(np.float32)
     seed = np.where(live, seed, 0.0)
+    # CONCENTRATE the seed onto the top-`seed_top` direct causes: a focused
+    # hypothesis makes the PPR walk targeted, collapsing hub contamination
+    # (top-10 hub-rate 0.84 -> 0.08) with negligible reach loss.
+    if seed_top and seed_top > 0:
+        keep = np.argsort(-seed)[:seed_top]
+        mask = np.zeros_like(seed, dtype=bool)
+        mask[keep] = True
+        seed = np.where(mask, seed, 0.0)
     ssum = float(seed.sum())
     if ssum > 0:
         seed = seed / ssum
@@ -164,13 +185,23 @@ def causal_chain(query, k=8, before=None, exclude=None, alpha=0.9, iters=20):
 
     r_cos = _rank(doc_emb @ q)
 
-    # abductive support: centroid of top-15 chain docs -> cosine RAG for corroboration
-    top = np.argsort(-hyp)[:15]
-    qhyp = (doc_emb[top] * hyp[top, None]).sum(axis=0)
-    nn = float(np.linalg.norm(qhyp))
-    r_support = _rank(doc_emb @ (qhyp / nn)) if nn > 0 else r_cos
-
-    fused = _rrf_rank([r_cos, r_1hop, r_chain, r_support], take=100)
+    if mode == "chain":
+        # PURE multi-step: PPR chain only (causes-of-causes), no 1-hop, no cosine.
+        # Isolates the 2-hop method's own contribution.
+        fused = r_chain
+    elif mode == "onehop":
+        fused = r_1hop            # pure 1-hop operator only (for isolation)
+    elif mode == "abductive":
+        # legacy: add topical anchor + hypothesis-centroid support (4-way RRF)
+        top = np.argsort(-hyp)[:15]
+        qhyp = (doc_emb[top] * hyp[top, None]).sum(axis=0)
+        nn = float(np.linalg.norm(qhyp))
+        r_support = _rank(doc_emb @ (qhyp / nn)) if nn > 0 else r_cos
+        fused = _rrf_rank([r_cos, r_1hop, r_chain, r_support], take=100)
+    else:
+        # OPTIMISED union: 2-way RRF of direct causes + chain (no cosine dead-
+        # weight, which is ~0 on cross-vocab gold and only dilutes reach).
+        fused = _rrf_rank([r_1hop, r_chain], take=100)
 
     # snippet = the doc's best chunk by cosine to the query (doc-level result)
     ch = np.load(D / "chunks.npy").astype(np.float32)

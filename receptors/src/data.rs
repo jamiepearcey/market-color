@@ -16,6 +16,24 @@ pub struct Doc {
     pub entities: Vec<String>,
     #[serde(default)]
     pub cause_entities: Vec<String>,
+    // Doc-level free labels (added by the richer export; default-filled so old
+    // docs.jsonl files still parse). `direction` is a signed mean in [-1, 1].
+    #[serde(default = "unknown")]
+    pub predicate: String,
+    #[serde(default)]
+    pub direction: f32,
+    #[serde(default)]
+    pub confidence: f32,
+    #[serde(default)]
+    pub source_name: String,
+    #[serde(default = "unknown")]
+    pub desk: String,
+    #[serde(default)]
+    pub desks: Vec<String>,
+}
+
+fn unknown() -> String {
+    "other".into()
 }
 
 pub struct Dataset {

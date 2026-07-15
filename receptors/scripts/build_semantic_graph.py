@@ -29,9 +29,14 @@ Outputs data/semantic_graph.npz:
 import json, numpy as np
 from pathlib import Path
 
-D = Path(__file__).resolve().parents[1] / "data"
-K = 10
-GAMMA = 1.0
+import os
+D = Path(__file__).resolve().parents[1] / os.environ.get("RECEPTORS_DATA_DIR", "data")
+# K=25/γ=0 maximised held-out cross-vocab chain RECALL (data/CHAIN_OPTIM.md) but a
+# blind relevance panel judged that config WORSE on top-10 quality than the
+# original K=10/γ=1 (nDCG 0.676 vs 0.788) — the extra reach came with junk hubs.
+# So defaults stay at the quality-validated K=10/γ=1; env-override to experiment.
+K = int(os.environ.get("GRAPH_K", "10"))
+GAMMA = float(os.environ.get("GRAPH_GAMMA", "1.0"))
 
 docs = [json.loads(l) for l in (D / "docs.jsonl").read_text().splitlines() if l.strip()]
 doc_ids = [d["doc_id"] for d in docs]

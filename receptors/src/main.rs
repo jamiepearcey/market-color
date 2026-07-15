@@ -10,15 +10,30 @@
 
 extern crate blas_src; // links Accelerate BLAS for ndarray's `.dot()`
 
+mod arc;
+mod atlas;
+mod confound;
+mod consensus;
 mod data;
 mod eval;
+mod facts;
+mod generalize;
+mod impact;
+mod latency;
 mod linalg;
+mod mechanism;
+mod metric;
 mod modality;
 mod novelty;
 mod pairs;
 mod polarity;
 mod price;
+mod regime;
+mod report;
 mod rerank;
+mod source;
+mod spectrum;
+mod spillover;
 
 use anyhow::Result;
 use ndarray::Array2;
@@ -52,6 +67,11 @@ fn main() -> Result<()> {
         return rerank::ask(&cfg.dir, cfg.lambda, cfg.specific_frac);
     }
 
+    // Subcommand: generalization spot-checks (temporal / specificity / null).
+    if std::env::args().nth(1).as_deref() == Some("generalize") {
+        return generalize::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac);
+    }
+
     // Subcommand: price-grounded receptor.
     if std::env::args().nth(1).as_deref() == Some("price") {
         return price::run(&cfg.dir, cfg.lambda);
@@ -67,6 +87,23 @@ fn main() -> Result<()> {
     }
     if std::env::args().nth(1).as_deref() == Some("novelq") {
         return novelty::run_query(&cfg.dir);
+    }
+
+    // ---- second-generation receptors ----
+    match std::env::args().nth(1).as_deref() {
+        Some("mechanism") => return mechanism::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac),
+        Some("spectrum") => return spectrum::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac),
+        Some("atlas") => return atlas::run(&cfg.dir, cfg.lambda),
+        Some("impact") => return impact::run(&cfg.dir, cfg.lambda),
+        Some("latency") => return latency::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac),
+        Some("spillover") => return spillover::run(&cfg.dir, cfg.lambda),
+        Some("confound") => return confound::run(&cfg.dir, cfg.lambda, cfg.specific_frac),
+        Some("source") => return source::run(&cfg.dir, cfg.lambda),
+        Some("metric") => return metric::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac),
+        Some("consensus") => return consensus::run(&cfg.dir),
+        Some("regime") => return regime::run(&cfg.dir),
+        Some("arc") => return arc::run(&cfg.dir, cfg.lambda, cfg.specific_frac, cfg.test_frac),
+        _ => {}
     }
 
     // Subcommand: RAG reranking experiment.

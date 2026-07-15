@@ -6,7 +6,7 @@
 //! ndarray doesn't provide — a symmetric eigendecomposition and a matrix
 //! inverse, both only 384x384 — use nalgebra.
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use nalgebra::{DMatrix, SymmetricEigen};
 use ndarray::{Array1, Array2, Axis};
 
@@ -151,6 +151,53 @@ pub fn cos(a: &Array1<f32>, b: &Array1<f32>) -> f32 {
     a.dot(b)
 }
 
+/// Invert a small dense (D x D) matrix via nalgebra.
+pub fn invert(a: &Array2<f32>) -> Result<Array2<f32>> {
+    let inv = to_na(a).try_inverse().context("matrix not invertible")?;
+    Ok(from_na(&inv))
+}
+
+/// Ridge linear probe for a scalar target: w = (XᵀX + λI)⁻¹ Xᵀy.
+/// `x` is (n, D), `y` is (n,). Returns the (D,) weight vector.
+pub fn ridge_probe(x: &Array2<f32>, y: &Array1<f32>, lambda: f32) -> Result<Array1<f32>> {
+    let d = x.ncols();
+    let mut g = x.t().dot(x);
+    for i in 0..d {
+        g[[i, i]] += lambda;
+    }
+    let rhs = x.t().dot(y); // (D,)
+    let ginv = invert(&g)?;
+    Ok(ginv.dot(&rhs))
+}
+
+/// Top-`k` singular channels of a (possibly asymmetric) D x D operator `W`,
+/// returned as (sigma, v_in, u_out) with unit v_in / u_out. A cause loading on
+/// input direction `v_in` is transported toward effect direction `u_out`.
+/// Computed from the symmetric eigenproblem of WᵀW (right singular vectors),
+/// then u = W v / sigma.
+pub fn top_singular(w: &Array2<f32>, k: usize) -> Vec<(f32, Array1<f32>, Array1<f32>)> {
+    let d = w.ncols();
+    let wtw = w.t().dot(w); // (D, D) symmetric PSD
+    let se = SymmetricEigen::new(to_na(&wtw));
+    let mut idx: Vec<usize> = (0..se.eigenvalues.len()).collect();
+    idx.sort_by(|&i, &j| se.eigenvalues[j].partial_cmp(&se.eigenvalues[i]).unwrap());
+    let mut out = Vec::new();
+    for &e in idx.iter().take(k.min(d)) {
+        let sigma = se.eigenvalues[e].max(0.0).sqrt();
+        let mut v = Array1::<f32>::zeros(d);
+        for r in 0..d {
+            v[r] = se.eigenvectors[(r, e)];
+        }
+        let mut u = w.dot(&v);
+        let un = u.dot(&u).sqrt();
+        if un > 1e-9 {
+            u.mapv_inplace(|x| x / un);
+        }
+        out.push((sigma, v, u));
+    }
+    out
+}
+
 /// Fit the operator on cause rows `a` and effect rows `b`. Ridge by default;
 /// set RECEPTORS_FIT=margin to refine with the contrastive objective.
 pub fn fit_operator(a: &Array2<f32>, b: &Array2<f32>, lambda: f32) -> anyhow::Result<Array2<f32>> {
@@ -166,5 +213,101 @@ pub fn fit_operator(a: &Array2<f32>, b: &Array2<f32>, lambda: f32) -> anyhow::Re
         ))
     } else {
         Ok(w)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ndarray::array;
+
+    // Deterministic pseudo-random matrix in [-1,1] (no rand dep).
+    fn rand_mat(n: usize, d: usize, seed: u64) -> Array2<f32> {
+        let mut s = seed | 1;
+        Array2::from_shape_fn((n, d), |_| {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            ((s % 20000) as f32 / 10000.0) - 1.0
+        })
+    }
+
+    #[test]
+    fn ridge_recovers_known_linear_map() {
+        // B = A W_true (noise-free) => ridge with tiny lambda recovers W_true.
+        let a = rand_mat(400, 12, 7);
+        let w_true = rand_mat(12, 12, 99);
+        let b = a.dot(&w_true);
+        let w = fit_transport(&a, &b, 1e-4).unwrap();
+        let err = (&w - &w_true).mapv(|x| x * x).sum().sqrt() / w_true.mapv(|x| x * x).sum().sqrt();
+        assert!(err < 1e-2, "relative reconstruction error too high: {err}");
+    }
+
+    #[test]
+    fn transport_operator_is_asymmetric() {
+        // If effects are a rotation of causes, score(a->b) must beat score(b->a).
+        let a = rand_mat(300, 8, 3);
+        // shift/rotate columns to make a directional map
+        let mut w_true = Array2::<f32>::zeros((8, 8));
+        for i in 0..8 {
+            w_true[[i, (i + 1) % 8]] = 1.0;
+        }
+        let b = a.dot(&w_true);
+        let w = fit_transport(&a, &b, 1e-3).unwrap();
+        let ahat = transport(&a, &w);
+        let mut a_norm = a.clone();
+        normalize_rows(&mut a_norm);
+        let (mut fwd_wins, n) = (0usize, 100usize);
+        for i in 0..n {
+            let j = (i + 1) % n;
+            let fwd = ahat.row(i).dot(&a_norm.row(j)); // predicted-effect(i) vs raw j
+            let rev = ahat.row(j).dot(&a_norm.row(i));
+            if fwd >= rev {
+                fwd_wins += 1;
+            }
+        }
+        // not a strict claim on synthetic data, but asymmetry must show up often
+        assert!(fwd_wins > 40, "operator shows no directional asymmetry: {fwd_wins}/100");
+    }
+
+    #[test]
+    fn ridge_probe_recovers_plane() {
+        // y = X w_true (+ tiny) => probe recovers w_true direction.
+        let x = rand_mat(500, 10, 21);
+        let w_true = Array1::from_shape_fn(10, |i| (i as f32) - 5.0);
+        let y = x.dot(&w_true);
+        let w = ridge_probe(&x, &y, 1e-4).unwrap();
+        let cos = w.dot(&w_true) / (w.dot(&w).sqrt() * w_true.dot(&w_true).sqrt());
+        assert!(cos > 0.999, "probe direction off: cos={cos}");
+    }
+
+    #[test]
+    fn top_singular_reconstructs_rank_two() {
+        // Build a rank-2 operator; its two singular values must dominate.
+        let u1 = array![1.0f32, 0.0, 0.0, 0.0];
+        let u2 = array![0.0f32, 1.0, 0.0, 0.0];
+        let v1 = array![0.0f32, 0.0, 1.0, 0.0];
+        let v2 = array![0.0f32, 0.0, 0.0, 1.0];
+        // W = 3 u1 v1^T + 1 u2 v2^T  (so acting on the right: x -> W x)
+        let mut w = Array2::<f32>::zeros((4, 4));
+        for i in 0..4 {
+            for j in 0..4 {
+                w[[i, j]] = 3.0 * u1[i] * v1[j] + 1.0 * u2[i] * v2[j];
+            }
+        }
+        let ch = top_singular(&w, 4);
+        assert!((ch[0].0 - 3.0).abs() < 1e-3, "sigma1 wrong: {}", ch[0].0);
+        assert!((ch[1].0 - 1.0).abs() < 1e-3, "sigma2 wrong: {}", ch[1].0);
+        assert!(ch[2].0 < 1e-3, "spurious third singular value: {}", ch[2].0);
+    }
+
+    #[test]
+    fn normalize_rows_unit_length() {
+        let mut m = rand_mat(50, 16, 5);
+        normalize_rows(&mut m);
+        for row in m.rows() {
+            let n = row.dot(&row).sqrt();
+            assert!((n - 1.0).abs() < 1e-4 || n < 1e-6);
+        }
     }
 }

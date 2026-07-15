@@ -56,30 +56,49 @@ def to_epoch(ts: str) -> int:
 
 con = duckdb.connect()
 
-# Aggregate facts per doc: union of entities and cause_entities.
+# Aggregate facts per doc: union of entities and cause_entities, plus the
+# doc-level free-label signals the typed/atlas receptors need. `predicate` and
+# `desk` collapse to the doc's dominant (mode); `direction` becomes a signed mean
+# (up=+1, down=-1, else 0); `confidence` the mean. These already sit in
+# facts.parquet — no new extraction. Old readers ignore the extra keys (serde
+# defaults on the Rust side), so this stays backward-compatible.
 print("aggregating facts per doc ...")
 rows = con.execute(f"""
     SELECT doc_id,
            any_value(published_utc)  AS published_utc,
            any_value(published_date) AS published_date,
            flatten(list(entities))        AS ents,
-           flatten(list(cause_entities))  AS causes
+           flatten(list(cause_entities))  AS causes,
+           mode(predicate)                AS predicate,
+           avg(CASE WHEN direction='up' THEN 1.0
+                    WHEN direction='down' THEN -1.0 ELSE 0.0 END) AS dir_signed,
+           avg(confidence)                AS confidence,
+           any_value(source_name)         AS source_name,
+           mode(desk)                     AS desk,
+           flatten(list(desks))           AS desks
     FROM '{FACTS.as_posix()}'
     GROUP BY doc_id
 """).fetchall()
 
 docs = []
-for doc_id, put, pdate, ents, causes in rows:
+for doc_id, put, pdate, ents, causes, predicate, dir_signed, conf, src, desk, desks in rows:
     ents = sorted({norm(e) for e in (ents or []) if e and e.strip()})
     causes = sorted({norm(e) for e in (causes or []) if e and e.strip()})
     if not ents:          # need something to bind on
         continue
+    desks = sorted({d for d in (desks or []) if d and d.strip()})
     docs.append({
         "doc_id": doc_id,
         "published_epoch": to_epoch(put or (pdate + "T00:00:00+00:00" if pdate else "")),
         "date": (pdate or (put or "")[:10]),
         "entities": ents,
         "cause_entities": causes,
+        "predicate": (predicate or "other"),
+        "direction": float(dir_signed or 0.0),
+        "confidence": float(conf or 0.0),
+        "source_name": (src or ""),
+        "desk": (desk or "other"),
+        "desks": desks,
     })
 
 docs.sort(key=lambda d: (d["published_epoch"], d["doc_id"]))

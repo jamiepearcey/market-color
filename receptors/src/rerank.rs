@@ -499,11 +499,16 @@ fn multihop_eval(
 ) -> Result<()> {
     let n = ds.n();
     let d = ds.d();
-    const K: usize = 10;
-    let gamma: f32 = std::env::var("RECEPTORS_HUBSUP")
-        .ok()
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(1.0);
+    let getf = |k: &str, dv: f32| std::env::var(k).ok().and_then(|v| v.parse().ok()).unwrap_or(dv);
+    let k_edges: usize = getf("RECEPTORS_K", 10.0) as usize;
+    let gamma: f32 = getf("RECEPTORS_HUBSUP", 1.0);
+    let alpha: f32 = getf("RECEPTORS_ALPHA", 0.9);
+    let iters: usize = getf("RECEPTORS_ITERS", 20.0) as usize;
+    let xv_thresh: f32 = getf("RECEPTORS_XV", 0.35); // gold below this cosine = cross-vocab
+    let cw_cos: f32 = getf("RECEPTORS_WCOS", 1.0); // RRF weight on cosine in weighted fuse
+    let cw_chain: f32 = getf("RECEPTORS_WCHAIN", 2.0); // RRF weight on chain in weighted fuse
+    let seed_top: usize = getf("RECEPTORS_SEEDTOP", 0.0) as usize; // 0 = dense seed; M = keep top-M direct causes
+    let K = k_edges;
     // raw graph (for in-degree/hub set) and content-suppressed causal graph
     let (doc_emb, doc_w, valid, _col_raw, deg) =
         build_causal_graph(ds, chunks, chunk_doc, w, K, 0.0, false);
@@ -523,12 +528,17 @@ fn multihop_eval(
         "PPR hub-content",
         "union RRF",
         "abductive H->R",
+        "abductive -hubs",   // NEW: best method, post-filter in-degree hubs
+        "weighted fuse",     // NEW: RRF, chain up-weighted vs cosine (cross-vocab tilt)
     ];
     let nm = methods.len();
     let mut chain_r: Vec<Vec<f32>> = vec![vec![0.0; ks.len()]; nm]; // chain (1+2 hop) recall
     let mut direct_r: Vec<Vec<f32>> = vec![vec![0.0; ks.len()]; nm]; // direct (1-hop) recall
+    let mut xv_r: Vec<Vec<f32>> = vec![vec![0.0; ks.len()]; nm]; // CROSS-VOCAB chain recall (the right attribute)
     let mut hubrate: Vec<f32> = vec![0.0; nm]; // hub-rate@10 (lower = cleaner)
     let mut chain_extra = 0.0f32;
+    let mut xv_frac = 0.0f32; // avg share of chain gold that is cross-vocab
+    let mut n_xv_q = 0usize; // queries with a non-empty cross-vocab gold set
     let mut n_eval = 0usize;
 
     for (qi, q) in queries.iter().enumerate() {
@@ -556,6 +566,15 @@ fn multihop_eval(
                 seed[i] = seed_full[i].max(0.0);
             }
         }
+        // Optional: concentrate the seed on the top-M direct causes so the chain
+        // walk starts from a focused hypothesis instead of spraying mass on hubs.
+        if seed_top > 0 {
+            let mut idx: Vec<usize> = (0..n).collect();
+            idx.sort_by(|&i, &j| seed[j].partial_cmp(&seed[i]).unwrap());
+            for &i in idx.iter().skip(seed_top) {
+                seed[i] = 0.0;
+            }
+        }
         let ssum: f32 = seed.sum();
         if ssum > 0.0 {
             seed.mapv_inplace(|x| x / ssum);
@@ -580,7 +599,7 @@ fn multihop_eval(
 
         let r_cos = rank_by(&cos_full);
         let r_1hop = rank_by(&seed);
-        let hyp = ppr(&seed, &col_content, 0.9, 20); // hypothesis chain (multi-hop)
+        let hyp = ppr(&seed, &col_content, alpha, iters); // hypothesis chain (multi-hop)
         let r_pcontent = rank_by(&mask_future(hyp.clone()));
         let r_union = rrf(&r_1hop, &r_pcontent, 100);
 
@@ -615,13 +634,48 @@ fn multihop_eval(
             v.into_iter().map(|(d, _)| d).collect::<Vec<usize>>()
         };
 
-        let rankings = [&r_cos, &r_1hop, &r_pcontent, &r_union, &r_abd];
+        // NEW variant A: abductive with in-degree hubs stripped out post-hoc.
+        let r_abd_nohub: Vec<usize> = r_abd.iter().copied().filter(|&i| !is_hub[i]).collect();
+        // NEW variant B: weighted RRF — up-weight the chain signal (1-hop ⊕ PPR)
+        // relative to cosine, tilting the fusion toward cross-vocabulary reach.
+        let r_weighted = {
+            let mut sc: HashMap<usize, f32> = HashMap::new();
+            for (r, &dd) in r_cos.iter().take(100).enumerate() {
+                *sc.entry(dd).or_insert(0.0) += cw_cos / (60.0 + r as f32);
+            }
+            for lst in [&r_1hop, &r_pcontent] {
+                for (r, &dd) in lst.iter().take(100).enumerate() {
+                    *sc.entry(dd).or_insert(0.0) += cw_chain / (60.0 + r as f32);
+                }
+            }
+            let mut v: Vec<(usize, f32)> = sc.into_iter().collect();
+            v.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+            v.into_iter().map(|(dd, _)| dd).collect::<Vec<usize>>()
+        };
+
+        // cross-vocab gold = chain gold the query embedding ranks low topically
+        // (cos < threshold) — the docs cosine structurally cannot surface.
+        let gold_xv: HashSet<usize> = gold_chain
+            .iter()
+            .copied()
+            .filter(|&i| cos_full[i] < xv_thresh)
+            .collect();
+        if !gold_xv.is_empty() {
+            xv_frac += gold_xv.len() as f32 / gold_chain.len() as f32;
+            n_xv_q += 1;
+        }
+
+        let rankings = [&r_cos, &r_1hop, &r_pcontent, &r_union, &r_abd, &r_abd_nohub, &r_weighted];
         for (mi, ranked) in rankings.iter().enumerate() {
             for (ki, &k) in ks.iter().enumerate() {
                 let hc = ranked.iter().take(k).filter(|i| gold_chain.contains(i)).count();
                 chain_r[mi][ki] += hc as f32 / gold_chain.len() as f32;
                 let hd = ranked.iter().take(k).filter(|i| gold.contains(i)).count();
                 direct_r[mi][ki] += hd as f32 / gold.len() as f32;
+                if !gold_xv.is_empty() {
+                    let hx = ranked.iter().take(k).filter(|i| gold_xv.contains(i)).count();
+                    xv_r[mi][ki] += hx as f32 / gold_xv.len() as f32;
+                }
             }
             let hubs = ranked.iter().take(10).filter(|&&i| is_hub[i]).count();
             hubrate[mi] += hubs as f32 / 10.0;
@@ -635,8 +689,13 @@ fn multihop_eval(
         "  curated sample: {n_eval} effect queries (≥2 direct causes, real 2-hop chain);",
     );
     println!(
-        "  chain gold adds {:.1} extra 2-hop docs on avg; hub-suppression γ={gamma}\n",
-        chain_extra / nf
+        "  chain gold adds {:.1} extra 2-hop docs on avg; cross-vocab (cos<{xv_thresh}) = {:.0}% of chain gold ({} qs)",
+        chain_extra / nf,
+        100.0 * xv_frac / n_xv_q.max(1) as f32,
+        n_xv_q
+    );
+    println!(
+        "  config: K={K} α={alpha} iters={iters} γ={gamma} wcos={cw_cos} wchain={cw_chain}\n"
     );
     println!("  --- recall vs DIRECT gold (1-hop causes) ---");
     println!("  {:<18} {:>7} {:>7} {:>7}", "method", "R@10", "R@30", "R@100");
@@ -659,6 +718,16 @@ fn multihop_eval(
             chain_r[mi][1] / nf,
             chain_r[mi][2] / nf,
             hubrate[mi] / nf
+        );
+    }
+    // THE RIGHT ATTRIBUTE: recall on cross-vocab chain gold (docs cosine misses).
+    let xf = n_xv_q.max(1) as f32;
+    println!("\n  --- recall vs CROSS-VOCAB chain gold (cos<{xv_thresh}; the docs cosine can't reach) ---");
+    println!("  {:<18} {:>7} {:>7} {:>7}", "method", "R@10", "R@30", "R@100");
+    for (mi, name) in methods.iter().enumerate() {
+        println!(
+            "  {:<18} {:>7.3} {:>7.3} {:>7.3}",
+            name, xv_r[mi][0] / xf, xv_r[mi][1] / xf, xv_r[mi][2] / xf
         );
     }
     Ok(())
