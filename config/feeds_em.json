@@ -1,6 +1,6 @@
 {
- "version": "em-v1",
- "note": "EM regional feed pack (Postscript 8 recommendations). region key = source_region for localized routing + local-vs-global dissent; join analyses on source_name.",
+ "version": "em-v2",
+ "note": "EM regional feed pack. em-v2 closes coverage gaps: LatAm ex-Brazil (MX/AR/CL/CO), Africa ex-NG/SA (KE/EG), South Asia ex-India (PK/BD/LK), SE Asia ex-SG (TH/VN/PH/MY), Turkey/EM-Europe (TR/PL), + local-language sources (es/zh/ar/tr) — the first-mover, thin-coverage signal DM wires drop. region key = source_region for localized routing; join analyses on source_name.",
  "feeds": [
   {
    "name": "bne IntelliNews",
@@ -210,6 +210,285 @@
    "scope": "focused",
    "tier": 2,
    "access": "open"
+  },
+  {
+   "name": "El Economista MX",
+   "url": "https://news.google.com/rss/search?q=site:eleconomista.com.mx+when:3d&hl=es-419&gl=MX&ceid=MX:es",
+   "method": "google_news_rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "El Financiero MX",
+   "url": "https://www.elfinanciero.com.mx/arc/outboundfeeds/rss/category/mercados/?outputType=xml",
+   "method": "rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "Ambito AR",
+   "url": "https://www.ambito.com/rss/economia.xml",
+   "method": "rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "Diario Financiero CL",
+   "url": "https://www.df.cl/noticias/site/list/port/rss.xml",
+   "method": "rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "equities",
+    "metals"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "La Republica CO",
+   "url": "https://www.larepublica.co/rss/economia",
+   "method": "rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "Business Daily Africa",
+   "url": "https://news.google.com/rss/search?q=site:businessdailyafrica.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "africa",
+   "desks": [
+    "macro",
+    "equities",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Ahram Online Business",
+   "url": "https://news.google.com/rss/search?q=site:english.ahram.org.eg+economy+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "africa",
+   "desks": [
+    "macro",
+    "geopolitics"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Dawn Business PK",
+   "url": "https://www.dawn.com/feeds/business",
+   "method": "rss",
+   "region": "south_asia",
+   "desks": [
+    "macro",
+    "fx",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Business Recorder PK",
+   "url": "https://www.brecorder.com/feeds/latest-news",
+   "method": "rss",
+   "region": "south_asia",
+   "desks": [
+    "macro",
+    "fx",
+    "energy"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Daily Star BD Business",
+   "url": "https://www.thedailystar.net/business/rss.xml",
+   "method": "rss",
+   "region": "south_asia",
+   "desks": [
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Daily FT Sri Lanka",
+   "url": "https://news.google.com/rss/search?q=site:ft.lk+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "south_asia",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Bangkok Post Business",
+   "url": "https://www.bangkokpost.com/rss/data/business.xml",
+   "method": "rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "VnExpress Intl Business",
+   "url": "https://e.vnexpress.net/rss/business.rss",
+   "method": "rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Inquirer Business PH",
+   "url": "https://business.inquirer.net/feed",
+   "method": "rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "The Edge Malaysia",
+   "url": "https://news.google.com/rss/search?q=site:theedgemalaysia.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "asia",
+    "equities",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Daily Sabah Business TR",
+   "url": "https://www.dailysabah.com/rss/business",
+   "method": "rss",
+   "region": "emea_em",
+   "desks": [
+    "macro",
+    "fx",
+    "geopolitics"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Hurriyet Ekonomi TR",
+   "url": "https://www.hurriyet.com.tr/rss/ekonomi",
+   "method": "rss",
+   "region": "emea_em",
+   "desks": [
+    "macro",
+    "fx"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "tr"
+  },
+  {
+   "name": "Notes from Poland",
+   "url": "https://news.google.com/rss/search?q=site:notesfrompoland.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "emea_em",
+   "desks": [
+    "macro",
+    "geopolitics"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "China Business zh",
+   "url": "https://news.google.com/rss/search?q=%E7%BB%8F%E6%B5%8E+OR+%E5%B8%82%E5%9C%BA+when:2d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+   "method": "google_news_rss",
+   "region": "china",
+   "desks": [
+    "asia",
+    "macro",
+    "equities"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "zh"
+  },
+  {
+   "name": "MENA Arabic Econ",
+   "url": "https://news.google.com/rss/search?q=%D8%A7%D9%82%D8%AA%D8%B5%D8%A7%D8%AF+when:2d&hl=ar&gl=AE&ceid=AE:ar",
+   "method": "google_news_rss",
+   "region": "mena",
+   "desks": [
+    "macro",
+    "energy"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "ar"
   }
  ]
 }
