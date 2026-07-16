@@ -503,6 +503,106 @@
    "scope": "focused",
    "tier": 2,
    "access": "open"
+  },
+  {
+   "name": "PBoC China",
+   "url": "https://news.google.com/rss/search?q=%22People%27s+Bank+of+China%22+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "china",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Banxico Mexico",
+   "url": "https://news.google.com/rss/search?q=Banxico+OR+%22Bank+of+Mexico%22+when:5d&hl=es-419&gl=MX&ceid=MX:es",
+   "method": "google_news_rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "es"
+  },
+  {
+   "name": "BCB Brazil",
+   "url": "https://news.google.com/rss/search?q=%22Banco+Central%22+Brasil+juros+OR+Selic+when:5d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+   "method": "google_news_rss",
+   "region": "latam",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "lang": "pt"
+  },
+  {
+   "name": "CBRT Turkey",
+   "url": "https://news.google.com/rss/search?q=%22Central+Bank%22+Turkey+OR+TCMB+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "emea_em",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "SARB South Africa",
+   "url": "https://news.google.com/rss/search?q=%22Reserve+Bank%22+South+Africa+OR+SARB+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "africa",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "BSP Philippines",
+   "url": "https://news.google.com/rss/search?q=%22Bangko+Sentral%22+OR+BSP+Philippines+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Bank Indonesia",
+   "url": "https://news.google.com/rss/search?q=%22Bank+Indonesia%22+rate+OR+rupiah+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
   }
  ]
 }

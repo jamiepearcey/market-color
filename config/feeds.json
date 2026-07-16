@@ -1110,6 +1110,105 @@
     "macro",
     "equities"
    ]
+  },
+  {
+   "name": "Atlanta Fed macroblog",
+   "url": "https://www.atlantafed.org/rss/macroblog",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates"
+   ]
+  },
+  {
+   "name": "SF Fed Research",
+   "url": "https://www.frbsf.org/feed/",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates"
+   ]
+  },
+  {
+   "name": "Dallas Fed (energy)",
+   "url": "https://news.google.com/rss/search?q=site:dallasfed.org+when:14d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "energy"
+   ]
+  },
+  {
+   "name": "Cleveland Fed (inflation)",
+   "url": "https://news.google.com/rss/search?q=site:clevelandfed.org+when:14d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "rates"
+   ]
+  },
+  {
+   "name": "St Louis Fed",
+   "url": "https://news.google.com/rss/search?q=site:stlouisfed.org+(economy+OR+inflation)+when:10d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "rates"
+   ]
+  },
+  {
+   "name": "Bank of Japan",
+   "url": "https://www.boj.or.jp/en/rss/whatsnew.xml",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates",
+    "fx"
+   ]
+  },
+  {
+   "name": "Bank of Canada",
+   "url": "https://www.bankofcanada.ca/feed/",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates",
+    "fx"
+   ]
+  },
+  {
+   "name": "Reserve Bank of Australia",
+   "url": "https://www.rba.gov.au/rss/rss-cb-media-releases.xml",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates",
+    "fx"
+   ]
   }
  ]
 }
