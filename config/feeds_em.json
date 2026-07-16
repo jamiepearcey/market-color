@@ -489,6 +489,20 @@
    "tier": 2,
    "access": "open",
    "lang": "ar"
+  },
+  {
+   "name": "RBI India Press",
+   "url": "https://www.rbi.org.in/pressreleases_rss.xml",
+   "method": "rss",
+   "region": "india",
+   "desks": [
+    "macro",
+    "fx",
+    "rates"
+   ],
+   "scope": "focused",
+   "tier": 2,
+   "access": "open"
   }
  ]
 }

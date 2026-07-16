@@ -1,5 +1,5 @@
 {
- "version": "v4",
+ "version": "v4+fin-macro",
  "note": "Curated best-of-breed feed list for the v4 market-color corpus. Marquee wires are included regardless of paywall: Bloomberg/WSJ/FT/Economist publish headline RSS (body is paywalled), and Reuters/AP/AFP -- which offer no usable public RSS -- are routed via Google News RSS (site:<domain> when:2d) to capture recent headlines + URLs. Per-feed `access` = open (full text in feed) | headline (RSS headline+snippet, body paywalled) | paywall (body behind login) | licensed (needs a paid/contract feed). `method` = rss | google_news_rss | scrape. Run `scrape_news_feeds.py --validate` to confirm which resolve live and prune the dead ones from the report. Truly licensed-only majors (Bloomberg Terminal firehose, Reuters Connect, Dow Jones Newswires) are NOT scraped here; the headline/Google-News paths are the open substitute until a licensed feed is wired in.",
  "desks_legend": {
   "macro": "cross-asset / central-bank / data",
@@ -968,6 +968,148 @@
    "scope": "focused",
    "tier": 2,
    "access": "open"
+  },
+  {
+   "name": "BIS Central-Bank Speeches",
+   "url": "https://www.bis.org/doclist/cbspeeches.rss",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates",
+    "fx"
+   ]
+  },
+  {
+   "name": "IMF",
+   "url": "https://news.google.com/rss/search?q=site:imf.org+(economy+OR+forecast+OR+article+IV)+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "fx"
+   ]
+  },
+  {
+   "name": "World Bank",
+   "url": "https://news.google.com/rss/search?q=site:worldbank.org+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro"
+   ]
+  },
+  {
+   "name": "NY Fed Liberty Street Economics",
+   "url": "https://libertystreeteconomics.newyorkfed.org/feed/",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "rates"
+   ]
+  },
+  {
+   "name": "VoxEU CEPR",
+   "url": "https://news.google.com/rss/search?q=site:cepr.org/voxeu+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 2,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro"
+   ]
+  },
+  {
+   "name": "Project Syndicate",
+   "url": "https://www.project-syndicate.org/rss",
+   "scope": "global",
+   "tier": 2,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro",
+    "geopolitics"
+   ]
+  },
+  {
+   "name": "gCaptain",
+   "url": "https://gcaptain.com/feed/",
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "energy",
+    "macro",
+    "geopolitics"
+   ]
+  },
+  {
+   "name": "Splash247",
+   "url": "https://splash247.com/feed/",
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "energy",
+    "macro"
+   ]
+  },
+  {
+   "name": "The Loadstar",
+   "url": "https://theloadstar.com/feed/",
+   "scope": "focused",
+   "tier": 2,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro"
+   ]
+  },
+  {
+   "name": "BEA US Economic Data",
+   "url": "https://apps.bea.gov/rss/rss.xml",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "rss",
+   "desks": [
+    "macro"
+   ]
+  },
+  {
+   "name": "US Treasury Press",
+   "url": "https://news.google.com/rss/search?q=site:home.treasury.gov+press+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 1,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "geopolitics"
+   ]
+  },
+  {
+   "name": "Reuters Breakingviews",
+   "url": "https://news.google.com/rss/search?q=%22breakingviews%22+reuters+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "scope": "global",
+   "tier": 2,
+   "access": "open",
+   "method": "google_news_rss",
+   "desks": [
+    "macro",
+    "equities"
+   ]
   }
  ]
 }
