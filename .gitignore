@@ -36,3 +36,7 @@ eval/blind_*/
 # secrets
 .env
 .env.*
+
+# eventgraph regenerable extraction artifacts (regenerate via extract.py; never commit corpora)
+eventgraph/out/
+eventgraph/data/

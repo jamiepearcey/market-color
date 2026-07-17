@@ -1,0 +1,2 @@
+# runtime resolve-cache + durable slow-lane state (never commit)
+.state/
