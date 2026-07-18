@@ -75,6 +75,14 @@ def price_at(h, t0, age):
     return best["p"] if best else None
 
 
+def first_price_within(h, t0, days):
+    """earliest traded price within `days` of open — the first crowd belief on a thin market."""
+    cand = [pt for pt in h if pt["t"] <= t0 + days * 86400]
+    if not cand:
+        return None
+    return min(cand, key=lambda pt: pt["t"])["p"]
+
+
 def cluster_edge(sub):
     byev = collections.defaultdict(list)
     for ev, b in sub:
@@ -94,6 +102,11 @@ def main():
     ap.add_argument("--min-volume", type=float, default=500.0)
     ap.add_argument("--per-event", type=int, default=6, help="cap legs per event (keep events independent)")
     ap.add_argument("--max-fetch", type=int, default=6000)
+    ap.add_argument("--ascending", action="store_true", help="pull SMALLEST events first (the genuinely "
+                    "un-arbitraged standalone tail, not low-vol legs of popular events)")
+    ap.add_argument("--max-volume", type=float, default=1e12, help="skip markets above this volume")
+    ap.add_argument("--first-price", type=int, default=0, metavar="DAYS", help="use the FIRST traded price "
+                    "within N days of open (thin markets rarely have a fixed-age price)")
     a = ap.parse_args()
     gd = Path(a.graph_dir); cache = gd / "pm_hist"; cache.mkdir(exist_ok=True)
     sess = httpx.Client(headers={"User-Agent": "Mozilla/5.0"})
@@ -104,7 +117,7 @@ def main():
     while len(events) < a.max_events:
         try:
             page = sess.get(f"{GAMMA}/events", params={"closed": "true", "limit": 100, "offset": off,
-                            "order": "volume", "ascending": "false"}, timeout=30).json()
+                            "order": "volume", "ascending": "true" if a.ascending else "false"}, timeout=30).json()
         except Exception:
             break
         if not isinstance(page, list) or not page:
@@ -127,7 +140,7 @@ def main():
                 clobs = json.loads(m.get("clobTokenIds") or "[]")
             except Exception:
                 clobs = []
-            if y is None or vol < a.min_volume or not clobs or not m.get("startDate"):
+            if y is None or vol < a.min_volume or vol > a.max_volume or not clobs or not m.get("startDate"):
                 continue
             try:
                 sd = dt.datetime.fromisoformat(m["startDate"].replace("Z", "+00:00"))
@@ -136,7 +149,8 @@ def main():
             h = daily_hist(clobs[0], cache, sess); fetched += 1
             if not h:
                 continue
-            p = price_at(h, int(sd.timestamp()), a.age)
+            t0 = int(sd.timestamp())
+            p = first_price_within(h, t0, a.first_price) if a.first_price else price_at(h, t0, a.age)
             if p is None or p <= 0.02 or p >= 0.98:
                 continue
             obs.append({"ev": e.get("title") or e.get("id"), "bias": p - y, "vol": vol, "p": p, "y": y})
