@@ -78,6 +78,8 @@ def main():
     legs = []                       # per-leg records across all usable multi-outcome events
     nev = 0
     for e in events:
+        if not isinstance(e, dict):      # a malformed/error page entry can slip in at deep offsets
+            continue
         ms = e.get("markets") or []
         if not (a.min_legs <= len(ms) <= a.max_legs):
             continue
@@ -127,8 +129,12 @@ def main():
         nev += 1
         for rank, k in enumerate(ranks):
             m = next(mm for mm in ms if id(mm) == k)
+            vshare = vols[k] / vtot
             legs.append({"p": norm[k], "raw": raw[k], "won": outc[k], "rank": rank,
-                         "is_fav": rank == 0, "volshare": vols[k] / vtot, "conc": conc,
+                         "is_fav": rank == 0, "volshare": vshare, "conc": conc,
+                         # money lopsidedness: share of MONEY minus share of PROBABILITY.
+                         # >0 = crowd piled more $ on this entity than the odds justify (over-attention).
+                         "att_exc": vshare - norm[k], "nlegs": len(ms),
                          "event": e.get("title") or e.get("id")})
     print(f"usable multi-outcome events: {nev}  |  legs: {len(legs)}\n")
     if len(legs) < 40:
@@ -157,11 +163,38 @@ def main():
         edge([l for l in favs if l["volshare"] >= vs_med], "favorite w/ HIGH volume-share")
         edge([l for l in favs if l["volshare"] < vs_med], "favorite w/ low volume-share")
     print()
-    # lopsidedness: favorites in the most vs least concentrated (Herfindahl) distributions
+    # MONEY LOPSIDEDNESS: favorite bias conditioned on attention-excess (vol-share minus
+    # prob-share) — the real 'non-uniform distribution of bias' measure. Quintiles + gradient.
+    if len(favs) >= 40:
+        print("favorite bias by ATTENTION-EXCESS (vol-share − prob-share), low→high:")
+        ae = np.array([l["att_exc"] for l in favs]); edges = np.unique(np.quantile(ae, np.linspace(0, 1, 6)))
+        bidx = np.clip(np.digitize(ae, edges[1:-1]), 0, len(edges) - 2)
+        bias_by_b = []
+        for b in range(len(edges) - 1):
+            sub = [l for l, bi in zip(favs, bidx) if bi == b]
+            if len(sub) < 12:
+                bias_by_b.append(np.nan); continue
+            byev = collections.defaultdict(list)
+            for l in sub:
+                byev[l["event"]].append(l["p"] - l["won"])
+            cl = np.array([np.mean(x) for x in byev.values()])
+            m = cl.mean(); se = cl.std(ddof=1) / math.sqrt(len(cl)) if len(cl) > 1 else float("nan")
+            bias_by_b.append(m)
+            excl = "  <-- SIG" if abs(m) > 2 * se else ""
+            print(f"    q{b}: n={len(sub):3} att_exc∈[{edges[b]:+.2f},{edges[b+1]:+.2f}]  bias {m:+.4f} ±{2*se:.4f}{excl}")
+        valid = [(i, v) for i, v in enumerate(bias_by_b) if not math.isnan(v)]
+        if len(valid) >= 3:
+            gi, gv = zip(*valid)
+            rg, rv = np.argsort(np.argsort(gi)).astype(float), np.argsort(np.argsort(gv)).astype(float)
+            mono = np.corrcoef(rg, rv)[0, 1]
+            print(f"    → MONOTONICITY (att-excess vs favorite bias): {mono:+.2f}  "
+                  f"[{'gradient — lopsidedness DRIVES it' if abs(mono) >= 0.8 else 'no gradient'}]")
+
+    # field size: is the favorite more over-priced when the FIELD is bigger/more diffuse?
     if favs:
-        c_med = np.median([l["conc"] for l in favs])
-        edge([l for l in favs if l["conc"] >= c_med], "favorite in LOPSIDED distribution")
-        edge([l for l in favs if l["conc"] < c_med], "favorite in even distribution")
+        n_med = np.median([l["nlegs"] for l in favs])
+        edge([l for l in favs if l["nlegs"] >= n_med], "favorite in LARGE field (>= median legs)")
+        edge([l for l in favs if l["nlegs"] < n_med], "favorite in small field")
     print("\n  fade the high-attention FAVORITE, hold the FIELD — the distribution-level")
     print("  fan bias that pairwise (A-vs-B) markets cancel out.")
 
