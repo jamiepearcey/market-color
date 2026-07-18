@@ -29,7 +29,8 @@ from pathlib import Path
 import httpx, numpy as np
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
-CATS = ["Companies", "Financials", "Economics"]
+CATS = ["Companies", "Financials", "Economics", "Politics", "Science and Technology", "Health",
+        "World", "Mentions", "Entertainment", "Commodities", "Transportation", "Climate and Weather"]
 INSIDER = re.compile(r"\b(kpi|earning|report|revenue|nominat|appoint|acqui|merger|buyout|takeover|"
                      r"fda|approv|ipo|go public|resign|fired|guilty|verdict|settle|launch|deliver)\b", re.I)
 INSIDER_FREE = re.compile(r"\b(cpi|inflation|gdp|payroll|unemployment|jobless|index|s&p|nasdaq|russell|"
