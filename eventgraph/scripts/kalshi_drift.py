@@ -72,6 +72,17 @@ def cprice(c):
     return None
 
 
+def cspread(c):
+    yb = (c.get("yes_bid") or {}).get("close_dollars"); ya = (c.get("yes_ask") or {}).get("close_dollars")
+    try:
+        b, a = float(yb), float(ya)
+        if 0 < b < a < 1:
+            return a - b
+    except (TypeError, ValueError):
+        pass
+    return None
+
+
 def candles(sess, series, ticker, t0, t1, cache):
     f = cache / f"{ticker}.json"
     if f.exists():
@@ -85,10 +96,18 @@ def candles(sess, series, ticker, t0, t1, cache):
     for c in cs:
         p = cprice(c); t = c.get("end_period_ts") or c.get("ts")
         if p is not None and t and 0 < p < 1:
-            out.append({"t": int(t), "p": p})
+            out.append({"t": int(t), "p": p, "sp": cspread(c)})
     time.sleep(0.12)
     f.write_text(json.dumps(out))
     return out
+
+
+def spread_at(cs, tgt):
+    best = None
+    for c in cs:
+        if c["t"] <= tgt + 43200 and (best is None or c["t"] > best["t"]):
+            best = c
+    return best.get("sp") if best else None
 
 
 def price_at(cs, tgt):
@@ -134,6 +153,7 @@ def main():
     ap.add_argument("--min-dur", type=int, default=7, help="min market duration (days)")
     ap.add_argument("--early", type=int, default=3)
     ap.add_argument("--max-markets", type=int, default=8000)
+    ap.add_argument("--insider-only", action="store_true", help="skip control markets before fetch (faster)")
     a = ap.parse_args()
     gd = Path(a.graph_dir); cache = gd / "kalshi_candles"; cache.mkdir(parents=True, exist_ok=True)
     sess = httpx.Client(headers={"User-Agent": "Mozilla/5.0"})
@@ -156,6 +176,8 @@ def main():
             for m in mk:
                 q = " ".join(x for x in [title, m.get("title"), m.get("subtitle")] if x)
                 t = "insider" if INSIDER.search(q) else ("insider_free" if INSIDER_FREE.search(q) else "other")
+                if a.insider_only and t != "insider":
+                    continue
                 res = (m.get("result") or "").lower()
                 if res not in ("yes", "no") or not m.get("open_time") or not m.get("close_time"):
                     continue
@@ -166,12 +188,14 @@ def main():
                 cs = candles(sess, ser, m["ticker"], t0, t1, cache); n += 1
                 if len(cs) < 3:
                     continue
+                mid_ts = t0 + int(hold / 2) * 86400
                 p_e = price_at(cs, t0 + a.early * 86400)
-                p_m = price_at(cs, t0 + int(hold / 2) * 86400)
+                p_m = price_at(cs, mid_ts)
                 if p_e is None or p_m is None or not (0.02 < p_e < 0.98) or not (0.02 < p_m < 0.98):
                     continue
                 y = 1 if res == "yes" else 0
-                recs[t].append({"m1": p_m - p_e, "fwd": y - p_m, "bias": p_e - y, "ser": ser, "y": y})
+                recs[t].append({"m1": p_m - p_e, "fwd": y - p_m, "bias": p_e - y, "ser": ser, "y": y,
+                                "pm": p_m, "sp": spread_at(cs, mid_ts)})
                 got += 1
             cursor = j.get("cursor") if isinstance(j, dict) else None
             if not cursor or not mk:
@@ -199,6 +223,23 @@ def main():
             print(f"  {t:13} (too few)"); continue
         cl = np.array([np.mean(v) for v in byu.values()]); se = cl.std(ddof=1) / math.sqrt(len(cl))
         print(f"  {t:13} edge {cl.mean():+.4f} ±{2*se:.4f}  ({len(cl)} series)  {'SIG' if abs(cl.mean())>2*se else 'n.s.'}")
+
+    # COSTED follow trade: cross HALF the bid-ask to enter + Kalshi fee 0.07*p*(1-p),
+    # hold to settlement (no exit fee). Net = sign(m1)*fwd - half_spread - fee.
+    print("\nCOSTED follow-the-move (cross half-spread + Kalshi fee, hold to settle), cluster-robust:")
+    for t in ["insider", "insider_free"]:
+        sub = [r for r in recs.get(t, []) if abs(r["m1"]) >= 0.02 and r.get("sp") is not None]
+        byu = collections.defaultdict(list)
+        for r in sub:
+            fee = 0.07 * r["pm"] * (1 - r["pm"])
+            net = math.copysign(1, r["m1"]) * r["fwd"] - r["sp"] / 2 - fee
+            byu[r["ser"]].append(net)
+        if len(byu) < 5:
+            print(f"  {t:13} (too few)"); continue
+        cl = np.array([np.mean(v) for v in byu.values()]); se = cl.std(ddof=1) / math.sqrt(len(cl))
+        sps = [r["sp"] for r in sub]
+        print(f"  {t:13} NET edge {cl.mean():+.4f} ±{2*se:.4f}  ({len(cl)} series)  "
+              f"{'SIG' if abs(cl.mean())>2*se else 'n.s.'}   [median spread {np.median(sps):.3f}]")
 
     print("\nEARLY-BIAS fade = price@3d − outcome (>0 = yes overpriced), cluster-robust by series:")
     for t in ["insider", "insider_free"]:
