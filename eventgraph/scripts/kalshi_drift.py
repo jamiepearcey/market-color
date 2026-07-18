@@ -238,8 +238,24 @@ def main():
             print(f"  {t:13} (too few)"); continue
         cl = np.array([np.mean(v) for v in byu.values()]); se = cl.std(ddof=1) / math.sqrt(len(cl))
         sps = [r["sp"] for r in sub]
-        print(f"  {t:13} NET edge {cl.mean():+.4f} ±{2*se:.4f}  ({len(cl)} series)  "
+        print(f"  {t:13} TAKER net {cl.mean():+.4f} ±{2*se:.4f}  ({len(cl)} series)  "
               f"{'SIG' if abs(cl.mean())>2*se else 'n.s.'}   [median spread {np.median(sps):.3f}]")
+        # MAKER: post a limit at mid, pay only the fee (no half-spread) — IF you get filled
+        bm = collections.defaultdict(list)
+        for r in sub:
+            bm[r["ser"]].append(math.copysign(1, r["m1"]) * r["fwd"] - 0.07 * r["pm"] * (1 - r["pm"]))
+        cm = np.array([np.mean(v) for v in bm.values()]); sem = cm.std(ddof=1) / math.sqrt(len(cm))
+        print(f"  {t:13} MAKER net {cm.mean():+.4f} ±{2*sem:.4f}  ({len(cm)} series)  "
+              f"{'SIG' if abs(cm.mean())>2*sem else 'n.s.'}   (limit@mid, fee only)")
+        # TIGHT-SPREAD subset: taker net where spread <= 3c (drift may still clear a tight book)
+        tight = [r for r in sub if r["sp"] <= 0.03]
+        bt = collections.defaultdict(list)
+        for r in tight:
+            bt[r["ser"]].append(math.copysign(1, r["m1"]) * r["fwd"] - r["sp"] / 2 - 0.07 * r["pm"] * (1 - r["pm"]))
+        if len(bt) >= 5:
+            ct = np.array([np.mean(v) for v in bt.values()]); set_ = ct.std(ddof=1) / math.sqrt(len(ct))
+            print(f"  {t:13} TIGHT net {ct.mean():+.4f} ±{2*set_:.4f}  ({len(ct)} series, {len(tight)} mkts, spread<=3c)  "
+                  f"{'SIG' if abs(ct.mean())>2*set_ else 'n.s.'}")
 
     print("\nEARLY-BIAS fade = price@3d − outcome (>0 = yes overpriced), cluster-robust by series:")
     for t in ["insider", "insider_free"]:
