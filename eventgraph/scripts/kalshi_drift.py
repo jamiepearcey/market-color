@@ -165,14 +165,32 @@ def main():
                 series[s["ticker"]] = s.get("title") or ""
     print(f"{len(series)} finance/company/econ series")
 
+    mkcache = gd / "kalshi_markets"; mkcache.mkdir(parents=True, exist_ok=True)
+
+    def settled_markets(ser):
+        f = mkcache / f"{ser}.json"
+        if f.exists():
+            try:
+                return json.loads(f.read_text())
+            except Exception:
+                return []
+        allm, cursor = [], None
+        while len(allm) < a.per_series:
+            j = kget(sess, "/markets", series_ticker=ser, status="settled", limit=100, cursor=cursor)
+            mk = j.get("markets", []) if isinstance(j, dict) else []
+            allm.extend(mk)
+            cursor = j.get("cursor") if isinstance(j, dict) else None
+            if not cursor or not mk:
+                break
+        f.write_text(json.dumps(allm[:a.per_series]))
+        return allm[:a.per_series]
+
     recs = collections.defaultdict(list); n = 0
     for si, (ser, title) in enumerate(series.items()):
         if n >= a.max_markets:
             break
-        cursor = None; got = 0
-        while got < a.per_series and n < a.max_markets:
-            j = kget(sess, "/markets", series_ticker=ser, status="settled", limit=100, cursor=cursor)
-            mk = j.get("markets", []) if isinstance(j, dict) else []
+        if True:
+            mk = settled_markets(ser)
             for m in mk:
                 q = " ".join(x for x in [title, m.get("title"), m.get("subtitle")] if x)
                 t = "insider" if INSIDER.search(q) else ("insider_free" if INSIDER_FREE.search(q) else "other")
@@ -195,11 +213,7 @@ def main():
                     continue
                 y = 1 if res == "yes" else 0
                 recs[t].append({"m1": p_m - p_e, "fwd": y - p_m, "bias": p_e - y, "ser": ser, "y": y,
-                                "pm": p_m, "sp": spread_at(cs, mid_ts)})
-                got += 1
-            cursor = j.get("cursor") if isinstance(j, dict) else None
-            if not cursor or not mk:
-                break
+                                "pm": p_m, "sp": spread_at(cs, mid_ts), "hold": hold})
         if (si + 1) % 60 == 0:
             print(f"  {si+1}/{len(series)} series, {n} markets fetched")
     print(f"usable: " + ", ".join(f"{k}={len(v)}" for k, v in recs.items()) + f"  ({n} fetched)\n")
@@ -256,6 +270,30 @@ def main():
             ct = np.array([np.mean(v) for v in bt.values()]); set_ = ct.std(ddof=1) / math.sqrt(len(ct))
             print(f"  {t:13} TIGHT net {ct.mean():+.4f} ±{2*set_:.4f}  ({len(ct)} series, {len(tight)} mkts, spread<=3c)  "
                   f"{'SIG' if abs(ct.mean())>2*set_ else 'n.s.'}")
+
+    # SHARPE of the maker follow strategy (hold mid->resolution, ~hold/2 days)
+    sub = [r for r in recs.get("insider", []) if abs(r["m1"]) >= 0.02 and r.get("sp") is not None]
+    if len(sub) >= 25:
+        net = np.array([math.copysign(1, r["m1"]) * r["fwd"] - 0.07 * r["pm"] * (1 - r["pm"]) for r in sub])
+        hd = np.array([max(r["hold"] / 2, 1) for r in sub])
+        pts = net.mean() / net.std()
+        avgh = hd.mean()
+        print(f"\nSHARPE (maker follow, insider): per-trade mean {net.mean():+.4f} std {net.std():.3f} "
+              f"-> per-trade Sharpe {pts:+.3f} (n={len(net)}, avg hold {avgh:.0f}d)")
+        print(f"  NAIVE annualised {pts*math.sqrt(365/avgh):+.2f}  (assumes INDEPENDENT trades — optimistic)")
+        # cluster-robust: resample whole SERIES, annualise each resample -> honest CI
+        byser = collections.defaultdict(list)
+        for r, x in zip(sub, net):
+            byser[r["ser"]].append((x, max(r["hold"] / 2, 1)))
+        sers = list(byser.values()); rng = np.random.default_rng(3); boot = []
+        for _ in range(2000):
+            idx = rng.integers(0, len(sers), len(sers))
+            xs = np.array([v for i in idx for (v, h) in sers[i]])
+            hs = np.array([h for i in idx for (v, h) in sers[i]])
+            if xs.std() > 0:
+                boot.append(xs.mean() / xs.std() * math.sqrt(365 / hs.mean()))
+        print(f"  CLUSTER-ROBUST annualised Sharpe 90%CI [{np.percentile(boot,5):+.2f}, {np.percentile(boot,95):+.2f}] "
+              f"(resample by series; {len(sers)} series) {'-> excludes 0' if np.percentile(boot,5)>0 else '-> includes 0'}")
 
     print("\nEARLY-BIAS fade = price@3d − outcome (>0 = yes overpriced), cluster-robust by series:")
     for t in ["insider", "insider_free"]:
