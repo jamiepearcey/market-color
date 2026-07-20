@@ -99,8 +99,11 @@ def main():
 
     sym = {}
     for l in open(gd / "entity_symbol.jsonl"):
-        j = json.loads(l); us = j.get("source", "").endswith(("us", "exact", "fuzzy"))
-        if ((j["kind"] == "security" and us) or j["kind"] == "etf_proxy") and not j["symbol"].startswith("^"):
+        # US listing/ADR ONLY (XOM, VWAGY, PBR — no suffix); foreign LOCAL lines
+        # (.SA/.VI/.MX/.NS ...) are ~0/negative IC = noise (doctrine), regardless of
+        # which resolver source produced them. Symbol shape is the reliable test.
+        j = json.loads(l); sym_us = "." not in j["symbol"]
+        if ((j["kind"] == "security" and sym_us) or j["kind"] == "etf_proxy") and not j["symbol"].startswith("^"):
             sym[j["entity_id"]] = j["symbol"]
     docdate = {json.loads(l)["doc_id"]: json.loads(l).get("published_at") for l in open(lake / "document.jsonl")}
 

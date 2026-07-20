@@ -45,8 +45,13 @@ pub fn run(
                 }
                 if let Ok(v) = serde_json::from_str::<serde_json::Value>(&line) {
                     if let (Some(id), Some(ex)) = (v.get("doc_id").and_then(|x| x.as_str()), v.get("ex")) {
-                        if let Ok(ex) = serde_json::from_value::<DocExtraction>(ex.clone()) {
-                            cached.insert(id.to_string(), ex);
+                        // Parse leniently (element-by-element) so a checkpointed
+                        // extraction with one malformed array item keeps its good
+                        // facts instead of failing the whole doc to a mock. Only an
+                        // object ex is a real extraction (a null = failed doc).
+                        if ex.is_object() {
+                            let parsed = crate::extract::lenient_extraction(ex.clone());
+                            cached.insert(id.to_string(), parsed);
                         }
                     }
                 }
@@ -105,8 +110,15 @@ pub fn run(
     });
     let mut new_map: HashMap<usize, Result<DocExtraction, String>> = new_results.into_iter().collect();
 
+    // Resolve ONE canonical entity type per name across the whole run (over every
+    // extraction, cached + newly-extracted) so a name the 8B typed inconsistently
+    // collapses to a single node instead of splitting a hub by type.
+    let canonical_types = crate::normalize::canonical_entity_types(
+        cached.values().chain(new_map.values().filter_map(|r| r.as_ref().ok())),
+    );
+
     // Normalize (sequential -> deterministic entity resolution) from cached + new.
-    let mut resolver = EntityResolver::default();
+    let mut resolver = EntityResolver::with_canonical_types(canonical_types);
     let mut gates = GateStats::default();
     let mut batch = GraphBatch::default();
     let (mut ok, mut err) = (0usize, 0usize);

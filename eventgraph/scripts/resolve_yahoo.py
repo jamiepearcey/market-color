@@ -22,6 +22,8 @@ import httpx
 
 DIRSET = {"up", "down", "widen", "tighten"}
 TRADEABLE_TYPES = {"company", "bank", "security"}
+# US listings / ADRs preferred (clean US-session bars aligned with the news timing).
+US_EXCH = {"NMS", "NYQ", "NGM", "NCM", "NSM", "ASE", "PCX", "PNK", "OQB", "OQX", "NAS", "NYS"}
 
 
 def ysearch(q, sess):
@@ -49,6 +51,9 @@ def has_prices(sym, sess):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--graph-dir", default="/tmp/eg_live")
     ap.add_argument("--limit", type=int, default=300); ap.add_argument("--min-freq", type=int, default=1)
+    # anti-hallucination gate: reject a Yahoo hit whose issuer name is too dissimilar
+    # from the entity name (kills e.g. hmv -> HMVL.NS/"Hindustan Media", 0.22).
+    ap.add_argument("--min-sim", type=float, default=0.6)
     a = ap.parse_args(); gd = Path(a.graph_dir); lake = gd / "lake"
     esym = gd / "entity_symbol.jsonl"
 
@@ -78,7 +83,7 @@ def main():
         print(f"  loaded {len(cache)} cached searches")
 
     sess = httpx.Client(headers={"User-Agent": "Mozilla/5.0"})
-    out = []; hit = 0
+    out = []; hit = 0; dropped = 0
     cf = open(cache_path, "a")
     for e, fr in targets:
         q = names[e]
@@ -90,14 +95,38 @@ def main():
         eq = [x for x in quotes if x.get("quoteType") == "EQUITY" and x.get("symbol")]
         if not eq:
             continue
-        # PREFER a US listing / ADR (clean US-session bars aligned with the news timing);
-        # foreign local listings (.KS/.NS/.T/...) diluted the signal to noise in testing.
-        US_EXCH = {"NMS", "NYQ", "NGM", "NCM", "NSM", "ASE", "PCX", "PNK", "OQB", "OQX", "NAS", "NYS"}
-        eq.sort(key=lambda x: 0 if (x.get("exchange") in US_EXCH or "." not in x.get("symbol", "")) else 1)
-        top = eq[0]; sym = top["symbol"]; nm = top.get("shortname", top.get("longname", ""))
-        if not has_prices(sym, sess):
+        # Score EVERY equity candidate by issuer-name similarity and KEEP ONLY those
+        # above the threshold — so a wrong high-ranked hit (hmv -> Hindustan Media,
+        # 0.22) can neither be chosen nor block a genuine lower-ranked match.
+        scored = []
+        for x in eq:
+            nm = x.get("shortname", x.get("longname", "")) or ""
+            sim = difflib.SequenceMatcher(None, q.lower(), nm.lower()).ratio()
+            scored.append((sim, x, nm))
+        qualifying = [t for t in scored if t[0] >= a.min_sim]
+        if not qualifying:
+            dropped += 1
+            best = max(scored, key=lambda t: t[0], default=(0, None, ""))
+            print(f"  {fr:3}  {q:34} -> DROPPED (best sim {best[0]:.2f} < {a.min_sim})")
             continue
-        sim = difflib.SequenceMatcher(None, q.lower(), nm.lower()).ratio()
+        # DOCTRINE: US listings/ADRs ONLY for signal -- foreign LOCAL lines (.SA/.VI/
+        # .MX/.NS/.T ...) are ~0/negative IC = noise. A US listing/ADR carries no
+        # '.XX' suffix (XOM, VWAGY, PBR, DB); require it and DROP foreign-only matches
+        # rather than falling back to a noisy local line.
+        def is_us(x):
+            return "." not in x.get("symbol", ".") or x.get("exchange") in US_EXCH
+        us_qual = sorted((t for t in qualifying if is_us(t[1])), key=lambda t: -t[0])
+        if not us_qual:
+            dropped += 1
+            best = max(qualifying, key=lambda t: t[0])
+            print(f"  {fr:3}  {q:34} -> DROPPED-FOREIGN ({best[1].get('symbol')} sim {best[0]:.2f}; no US listing)")
+            continue
+        # take the highest-similarity US candidate WITH a usable history (try in order,
+        # don't drop the entity just because the first US line lacks bars).
+        chosen = next(((sim, top, nm) for sim, top, nm in us_qual if has_prices(top["symbol"], sess)), None)
+        if not chosen:
+            continue
+        sim, top, nm = chosen; sym = top["symbol"]
         out.append({"entity_id": e, "canonical_name": q, "type": e.split("__")[-1],
                     "symbol": sym, "source": "yahoo_exact", "kind": "security", "edge_freq": fr,
                     "match_name": nm, "name_sim": round(sim, 2)})
@@ -109,7 +138,8 @@ def main():
     new = [o for o in out if o["entity_id"] not in have]
     with open(esym, "a") as f:
         for o in new: f.write(json.dumps(o) + "\n")
-    print(f"\nresolved {hit}/{len(targets)} via Yahoo search; appended {len(new)} new securities to {esym}")
+    print(f"\nresolved {hit}/{len(targets)} via Yahoo search (dropped {dropped} below sim {a.min_sim}); "
+          f"appended {len(new)} new securities to {esym}")
 
 
 if __name__ == "__main__":

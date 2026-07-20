@@ -25,13 +25,17 @@ pub fn upsert_sql(batch: &GraphBatch, meta: &RunMeta) -> String {
 
     for e in &batch.entities {
         s.push_str(&format!(
-            "INSERT INTO entity (entity_id,canonical_name,type,identifier,sector,country) \
-             VALUES ({},{},{},{},{},{}) ON CONFLICT (entity_id) DO UPDATE SET \
+            "INSERT INTO entity (entity_id,canonical_name,type,identifier,suggested_ticker,resolution_status,resolution_source,sector,country) \
+             VALUES ({},{},{},{},{},{},{},{},{}) ON CONFLICT (entity_id) DO UPDATE SET \
              identifier=COALESCE(entity.identifier,EXCLUDED.identifier), \
+             suggested_ticker=COALESCE(entity.suggested_ticker,EXCLUDED.suggested_ticker), \
+             resolution_status=CASE WHEN entity.identifier IS NOT NULL THEN entity.resolution_status ELSE EXCLUDED.resolution_status END, \
+             resolution_source=COALESCE(entity.resolution_source,EXCLUDED.resolution_source), \
              sector=COALESCE(entity.sector,EXCLUDED.sector), \
              country=COALESCE(entity.country,EXCLUDED.country);\n",
             lit(&e.entity_id), lit(&e.canonical_name), lit(&e.r#type),
-            opt(&e.identifier), opt(&e.sector), opt(&e.country)
+            opt(&e.identifier), opt(&e.suggested_ticker), lit(&e.resolution_status),
+            opt(&e.resolution_source), opt(&e.sector), opt(&e.country)
         ));
     }
     for a in &batch.aliases {

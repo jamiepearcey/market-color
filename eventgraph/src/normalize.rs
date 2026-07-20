@@ -66,15 +66,62 @@ pub struct EntityResolver {
     seen_alias: HashSet<(String, String)>,
     pub new_entities: Vec<EntityRow>,
     pub new_aliases: Vec<AliasRow>,
+    /// One canonical entity type per normalized name, resolved run-wide (see
+    /// [`canonical_entity_types`]). Keys the entity_id so a name the 8B typed
+    /// inconsistently (`china` as `sovereign` in one doc, `other` in another)
+    /// collapses to ONE node instead of `china__sovereign` + `china__other`.
+    canonical_type: HashMap<String, String>,
+}
+
+/// Resolve one canonical entity type per name across a whole run: the
+/// most-frequent NON-`other` type a name is given; `other` only when a name is
+/// never assigned a real type. Run this over ALL extractions before normalize so
+/// entity nodes and edge endpoints agree on type (and thus on entity_id).
+pub fn canonical_entity_types<'a>(exs: impl Iterator<Item = &'a DocExtraction>) -> HashMap<String, String> {
+    let mut votes: HashMap<String, HashMap<String, usize>> = HashMap::new();
+    for ex in exs {
+        for e in &ex.entities {
+            let name = norm_name(&e.name);
+            if name.is_empty() {
+                continue;
+            }
+            *votes.entry(name).or_default().entry(snap_type(&e.etype)).or_insert(0) += 1;
+        }
+    }
+    votes
+        .into_iter()
+        .map(|(name, v)| {
+            let best = v
+                .iter()
+                .filter(|(t, _)| t.as_str() != "other")
+                .max_by_key(|(_, c)| **c)
+                .map(|(t, _)| t.clone())
+                .unwrap_or_else(|| "other".to_string());
+            (name, best)
+        })
+        .collect()
 }
 
 impl EntityResolver {
+    /// A resolver seeded with a run-wide canonical name→type map.
+    pub fn with_canonical_types(canonical_type: HashMap<String, String>) -> Self {
+        Self { canonical_type, ..Default::default() }
+    }
+
+    /// The canonical type for a name (run-wide vote), or the given fallback.
+    fn typed(&self, name: &str, fallback: impl FnOnce() -> String) -> String {
+        self.canonical_type.get(name).cloned().unwrap_or_else(fallback)
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn intern(
         &mut self,
         canonical: String,
         etype: String,
         identifier: Option<String>,
+        suggested_ticker: Option<String>,
+        resolution_status: String,
+        resolution_source: Option<String>,
         sector: Option<String>,
         country: Option<String>,
         surface: &str,
@@ -86,6 +133,9 @@ impl EntityResolver {
                 canonical_name: canonical,
                 r#type: etype,
                 identifier,
+                suggested_ticker,
+                resolution_status,
+                resolution_source,
                 sector,
                 country,
             });
@@ -96,15 +146,32 @@ impl EntityResolver {
         }
         id
     }
-    /// Resolve a fully-typed entity. `seen` = its name appears in the source; if
-    /// not, its LLM-guessed ticker is rejected (gate 2).
+    /// Resolve a fully-typed entity. v2 identity doctrine: the LLM's ticker guess is
+    /// NEVER written to `identifier` (the verified slot) here -- it is kept as
+    /// `suggested_ticker` for the downstream resolve_yahoo/resolve_llm gates to
+    /// verify. `seen` (name appears in source, gate 2) only sets a weak resolution
+    /// tier; a real symbol arrives later. This keeps a hallucinated ticker out of
+    /// the merge/realised-join path entirely.
     fn resolve_entity(&mut self, e: &ExEntity, seen: bool, g: &mut GateStats) -> String {
-        let id = e.identifier.clone().filter(|s| plausible_ticker(s));
-        let identifier = if seen { id } else { None };
-        if e.identifier.is_some() {
-            if identifier.is_some() { g.tickers_kept += 1 } else { g.tickers_rejected += 1 }
-        }
-        self.intern(norm_name(&e.name), snap_type(&e.etype), identifier, e.sector.clone(), e.country.clone(), &e.name)
+        let guess = e.suggested_ticker.clone().filter(|s| plausible_ticker(s));
+        let status = match (&guess, seen) {
+            (Some(_), true) => { g.tickers_kept += 1; "seen_in_source" }
+            (Some(_), false) => { g.tickers_rejected += 1; "unresolved" }
+            (None, _) => "unresolved",
+        };
+        let name = norm_name(&e.name);
+        let etype = self.typed(&name, || snap_type(&e.etype));
+        self.intern(
+            name,
+            etype,         // run-wide canonical type (no per-mention splitting)
+            None,          // identifier (verified) -- filled by resolvers, never here
+            guess,         // suggested_ticker -- the audited 8B guess
+            status.into(),
+            None,
+            e.sector.clone(),
+            e.country.clone(),
+            &e.name,
+        )
     }
     /// A reference by bare name (edge cause/effect etc.): reuse the per-doc map,
     /// else mint an 'other'-typed node with no ticker.
@@ -116,11 +183,40 @@ impl EntityResolver {
         if let Some(id) = map.get(&n) {
             return Some(id.clone());
         }
-        Some(self.intern(n, "other".into(), None, None, None, name))
+        // Edge endpoint minted as a bare node: use the run-wide canonical type so
+        // it lands on the SAME id as the typed entity (china -> china__sovereign,
+        // not china__other).
+        let etype = self.typed(&n, || "other".to_string());
+        Some(self.intern(n, etype, None, None, "unresolved".into(), None, None, None, name))
     }
     pub fn drain(&mut self, b: &mut GraphBatch) {
         b.entities.append(&mut self.new_entities);
         b.aliases.append(&mut self.new_aliases);
+    }
+}
+
+/// Cheap lexicon direction-audit: does the verbatim effect phrase agree with the
+/// tagged `effect_direction`? Returns "ok" | "conflict" | "unchecked". Catches
+/// PayPal-class mis-tags (a bid target trades UP, tagged 'down') for downstream review.
+fn audit_direction(effect_dir: &Option<String>, verbatim: &Option<String>) -> String {
+    let (Some(dir), Some(v)) = (effect_dir.as_deref(), verbatim.as_deref()) else {
+        return "unchecked".into();
+    };
+    let v = v.to_lowercase();
+    let up = ["jump", "surg", "soar", "rall", "rose", "rise", "gain", "climb", "advanc", "up ", "higher", "spike", "boost"];
+    let down = ["fell", "fall", "slid", "slip", "tumbl", "plung", "drop", "sank", "sink", "decline", "lower", "down ", "loss", "lost", "retreat"];
+    let widen = ["widen", "blowout", "blew out"];
+    let tighten = ["tighten", "narrow"];
+    let hit = |kws: &[&str]| kws.iter().any(|k| v.contains(k));
+    let phrase_dir = if hit(&up) { Some("up") }
+        else if hit(&down) { Some("down") }
+        else if hit(&widen) { Some("widen") }
+        else if hit(&tighten) { Some("tighten") }
+        else { None };
+    match phrase_dir {
+        None => "unchecked".into(),
+        Some(pd) if pd == dir => "ok".into(),
+        Some(_) => "conflict".into(),
     }
 }
 
@@ -260,6 +356,10 @@ pub fn build_batch(
             region: ev.region.clone(),
             scheduled: ev.scheduled.unwrap_or(true),
             event_time,
+            event_time_text: ev.event_time_text.clone(),
+            event_time_kind: ev.event_time_kind.clone(),
+            period_text: ev.period_text.clone(),
+            period_hint: ev.period_hint.clone(),
             expected: ev.expected,
             actual: ev.actual,
             prior: ev.prior,
@@ -287,14 +387,21 @@ pub fn build_batch(
             edge_key: fnv1a(&format!("{}|{}|{}|{}", doc.doc_id, ce.cause, ce.effect, ce.quote.clone().unwrap_or_default())),
             cause_entity: cause,
             effect_entity: effect,
+            cause_kind: ce.cause_kind.clone(),
+            effect_kind: ce.effect_kind.clone(),
             mechanism: ce.mechanism.clone(),
             effect_dir: ce.effect_direction.clone(),
+            effect_verbatim: ce.effect_verbatim.clone(),
             magnitude_value: ce.magnitude_value,
             magnitude_unit: ce.magnitude_unit.clone(),
+            magnitude_text: ce.magnitude_text.clone(),
+            timing_text: ce.timing_text.clone(),
+            timing_kind: ce.timing_kind.clone(),
             modality: ce.modality.clone().unwrap_or_else(|| "happened".into()),
             attribution: ce.attribution_source.clone(),
             lag: ce.lag.clone(),
             confidence: ce.confidence.clone(),
+            direction_audit: audit_direction(&ce.effect_direction, &ce.effect_verbatim),
             event_id: None,
             doc_id: doc.doc_id.clone(),
             chunk_id: Some(chunk_id),
@@ -313,12 +420,14 @@ pub fn build_batch(
         b.sensitivities.push(SensitivityRow {
             sens_key: fnv1a(&format!("{}|sens|{}|{}", doc.doc_id, s.asset, s.factor)),
             asset_entity: asset,
+            asset_class: s.asset_class.clone(),
             factor_id: Some(slug(&s.factor)),
             factor_entity: None,
             sign: s.sign,
             magnitude_qual: s.magnitude_qual.clone(),
             magnitude_value: s.magnitude_value,
             magnitude_unit: s.magnitude_unit.clone(),
+            magnitude_text: s.magnitude_text.clone(),
             basis: s.basis.clone(),
             doc_id: doc.doc_id.clone(),
             chunk_id: Some(chunk_id),
@@ -378,7 +487,35 @@ pub fn build_batch(
             kind: f.kind.clone(),
             value: f.value,
             unit: f.unit.clone(),
+            currency: f.currency.clone(),
+            as_of_text: f.as_of_text.clone(),
             quote: f.quote.clone(),
+        });
+    }
+
+    // v2 entity<->entity relations. Grounded like edges: an ungrounded relation
+    // (quote does not locate in the source) is dropped. source/target resolve via
+    // the per-doc entity map (or mint an 'other' node).
+    for r in &ex.relations {
+        let source = res.resolve_ref(&r.source, &map);
+        let target = res.resolve_ref(&r.target, &map);
+        if source.is_none() && target.is_none() {
+            continue;
+        }
+        let Some(chunk_id) = grounded_chunk(&doc.doc_id, &r.quote, &canon) else {
+            continue;
+        };
+        b.relations.push(RelationRow {
+            rel_key: fnv1a(&format!("{}|rel|{}|{}|{:?}", doc.doc_id, r.source, r.target, r.relation)),
+            source_entity: source,
+            target_entity: target,
+            relation: r.relation.clone(),
+            deal_value: r.deal_value,
+            deal_currency: r.deal_currency.clone(),
+            status_hint: r.status_hint.clone(),
+            doc_id: doc.doc_id.clone(),
+            chunk_id: Some(chunk_id),
+            quote: r.quote.clone(),
         });
     }
 

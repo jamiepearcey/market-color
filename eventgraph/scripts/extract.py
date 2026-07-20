@@ -122,14 +122,14 @@ class TokenBucket:
 # rich JSON for a typical article fits; truncation is recovered by the balancer).
 MAX_TOKENS = 1200
 PROMPT_CHUNKS = 4          # feed the first 4 chunks (~480 words) -- lead carries the causal content
-async def extract_one(client, sem, bucket, model, key, doc):
+async def extract_one(client, sem, bucket, model, key, doc, max_tokens=MAX_TOKENS):
     chunks = chunk_text(doc["headline"], doc.get("article", ""))[:PROMPT_CHUNKS]
     user = prompt(doc["headline"], chunks)
-    body = {"model": model, "temperature": 0, "max_tokens": MAX_TOKENS,
+    body = {"model": model, "temperature": 0, "max_tokens": max_tokens,
             "response_format": {"type": "json_object"},
             "messages": [{"role": "system", "content": SYSTEM},
                          {"role": "user", "content": user}]}
-    est = (len(SYSTEM) + len(user)) // 4 + MAX_TOKENS   # TPM debit = input + RESERVED max_tokens
+    est = (len(SYSTEM) + len(user)) // 4 + max_tokens   # TPM debit = input + RESERVED max_tokens
     await bucket.acquire(est)                            # pace to match real accounting
     async with sem:
         for attempt in range(6):
@@ -156,6 +156,8 @@ async def main():
     ap.add_argument("--model", default="llama-3.1-8b-instant")
     ap.add_argument("--concurrency", type=int, default=8)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
+                    help="1200 fits 8b lean output; reasoning models (gpt-oss-120b) need ~3000+")
     a = ap.parse_args()
     key = os.environ.get("GROQ_API_KEY")
     if not key: raise SystemExit("set GROQ_API_KEY (source data/tmp/groq.env)")
@@ -179,7 +181,7 @@ async def main():
     t0, ok, fail, wrote = time.time(), 0, 0, 0
     async with httpx.AsyncClient(timeout=180, limits=limits) as client:
         with open(ckpt, "a") as f:
-            tasks = [extract_one(client, sem, bucket, a.model, key, d) for d in todo]
+            tasks = [extract_one(client, sem, bucket, a.model, key, d, a.max_tokens) for d in todo]
             for i, fut in enumerate(asyncio.as_completed(tasks), 1):
                 did, ex = await fut
                 if ex is not None:
