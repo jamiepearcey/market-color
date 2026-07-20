@@ -1,0 +1,226 @@
+# Eventgraph Findings Report — July 2026 research arc
+
+Reference copy of everything discovered in the 2026-07-18..20 investigation: the
+hypotheses, the evidence, what survived, what died, and where every artifact lives.
+
+**One-sentence thesis the whole arc supports:**
+> The causal structure of news, gated by market confirmation, identifies which asset
+> correlations are structural rather than statistical — a modest, real, non-tautological
+> signal whose economic value is bounded only by news coverage.
+
+---
+
+## 1. Data & infrastructure
+
+| Asset | Location | Notes |
+|---|---|---|
+| Historical graph (57k docs) | `data/eg_runs/eg100k_graph/` + GCS `/eg_runs` | Bloomberg 2006-13 (dense 2010-12), gpt-oss-120b, 149k entities / 134k causal edges, 81% grounding; merged Groq batch checkpoint (partially irreproducible — source batches expired) |
+| Live graph (2026) | `data/eg_runs/eg_live2/` | 3,095 docs 06-27..07-19 (99% extraction after max-tokens fix), 94% grounding |
+| Bloomberg corpus (446k articles) | GCS `/bbg/bloomberg_financial_data.parquet.gzip` | was only in ~/Downloads |
+| Daily capture | `data/news_corpus/` + GCS `/news_corpus` | 269 sources, scraper runs daily |
+| Formal plane | `lake/0005..0011.sql` + `data/eg_runs/formal/` | ALFRED first-prints (2,301, DST-correct), EDGAR acceptance timestamps, agency ICS, options layers, Kalshi/Polymarket implied-prob feeds, lineage + unified provenance |
+| GCS bucket | `gs://nimble-sylph-96609-market-color-data` (europe-west2) | 2.73GB, rsync-incremental |
+| Results logs | `data/eg_runs/logs/` | raw outputs of every run below |
+
+Panel methodology used throughout: monthly pairwise correlations of **abnormal returns**
+(9-macro-factor EWMA-WLS residuals; live window uses ACWI/TLT/UUP/GLD/EEM proxy residuals),
+US listings only (foreign local lines excluded — validated doctrine), dyadic
+cluster-robust SEs (Aronow-Samii-Assenova) on all headline regressions.
+
+---
+
+## 2. Validated findings
+
+### F1. The core result: news-linked correlations persist; unlinked mean-revert
+Among pairs with elevated trailing correlation (>0.3), P(persist) by evidence tier
+(2010-12, 160 names, 342k pair-months):
+
+| Tier | P(persist) | next corr (from) |
+|---|---|---|
+| unlinked | **20%** | 0.24 (0.43) — collapses |
+| shared news cause, dormant | 41% | 0.48 (0.53) |
+| + one leg market-confirmed | 63% | 0.58 (0.53) |
+| + both legs confirmed | **69%** | **0.65 (0.60) — rises** |
+
+Regression: dormant +0.133 (dyadic t 5.4), act1 +0.193 (4.9), act2 +0.294 (**t 8.6**,
+highest of the project). Confirmation = volume z≥2 or abnormal-move z≥2 on edge day.
+Risk statement: *"correlated for a named, market-confirmed reason — don't assume the
+diversification benefit returns."* Log: `activation.log`.
+
+### F2. Structure x activation is the organizing principle (pre-registered, confirmed)
+Direction hit-rate on news days: vol-confirmed 68% (dir·z +1.29, t 5.8) vs unconfirmed
+54% (+0.10) — ~12x effect-size concentration; volume is direction-blind (non-circular).
+Retroactively explains the results table: every unconditioned-structure test died;
+every market-gated test survived. Activation *concentrates* (dormant 41% ≠ noise).
+
+### F3. News leads the correlation matrix (non-tautological second-moment result)
+Shared-cause pairs at month m: next-2-month corr rise +0.024 vs +0.005 unlinked
+(excess +0.020, t 3.0; controlling trailing level +0.065, t 9.7 pre-dyadic).
+Survives + **grows monotonically within trailing-corr bins** (relatedness control):
++0.030*/+0.043**/+0.055**/+0.078**/+0.157** — high-corr unlinked pairs mean-revert
+hard (−0.18) while linked hold. News-link density peaked 2011-08 (263 shared-cause
+pairs) = the contagion month. Structural-vs-transient correlation discrimination is
+information a trailing-covariance model cannot contain. Log: `leads` runs in /tmp
+(re-runnable: `news_leads_correlation.py`).
+
+### F4. Causal structure complements co-mention (novelty test vs Schwenkler-Zheng)
+Link sets Jaccard 0.42 (distinct). Persistence: neither 20% / co-mention-only 43% /
+shared-cause-only 39% / both **50%**. Incremental regression: co_mention +0.121
+(t 20.5 OLS), shared_cause **+0.080 (t 7.9)** beyond it; interaction null (additive).
+Honest bound: co-mention is the stronger single signal; causal is the junior,
+*across-article* complement (graph-transitive links co-mention cannot see).
+
+### F5. Latent cause-profile embedding (beyond co-mention, beyond sector)
+tf-idf vector of which drivers move each asset; cosine similarity predicts co-movement:
+- strongest news feature in full regression (+0.141, dyadic t 3.7)
+- **pure-latent** (never co-mentioned, no shared event): +0.194, dyadic t 4.6
+- survives SEC SIC-2 sector control: +0.223 (t 4.0), 3x the same_sector effect (+0.072)
+- **cross-sector pairs only** (192,820; sector cannot explain): +0.168, dyadic **t 2.8**
+  — the linchpin, real but marginal.
+NMF factorization (295 assets x 358 causes, k=14): legible event factors — Deepwater
+Horizon (BP+KBR+banks+GM), Galleon insider (GS/MS/LEH), Japan/yen (SONY/MUFG/Toyota),
+Euro-debt banks, defense-aero-tech (BA/LMT/MSFT/LUV); **9/14 span ≥4 SIC sectors**.
+Logs: `dyadic.log`; script `news_latent.py`, `news_embedding.py`.
+
+### F6. Contemporaneous name-level signal (mirror, replicated at 10x scale)
+Cross-sectional IC of graph direction vs same-day abnormal return: +0.099 raw (t 7.4) /
++0.107 weighted (**t 8.0**), 744 names, 5,452 obs — vs 6k-corpus baseline +0.128 (t 4.5).
+Lag+1 **null** (replicated) — news explains, does not predict, at daily horizon.
+Magnitude recovered from +0.084 after fixing foreign-listing leakage (two real bugs:
+resolve_yahoo fell back to foreign lines; IC filter was source-name not symbol-shape).
+Logs: `ic_full.log`, `ic_v2.log`.
+
+### F7. Coverage decomposition (the honest product profile)
+Of 40,977 big idiosyncratic movers (|z|>2, 1,189-name full panel, 2010-12):
+- 2.2% had **any** story in the 57k corpus that day (story existence = dominant bottleneck; sampling limit, we hold 57k of 446k)
+- of those, 50% got a directional edge (extraction completeness gap)
+- of those, **72% direction correct** (best precision measured)
+- end-to-end: **36%** correct call given a big move had a story.
+Raw coverage 1.1% — *unchanged* at 10x corpus because the resolved universe scaled too:
+coverage is per-name-per-day density-bound, not total-corpus-bound. Log: `coverage2.log`.
+
+### F8. News factor set: two kinds
+Weekly long-short theme factors (abnormal): demand_supply +221bp/wk (t 4.2), earnings
++179 (3.6), monetary +130 (2.7), regulation +53 (2.0); credit/contagion **null on
+direction**. Inter-factor corr |off-diag| 0.13 (distinct). Co-exposure co-movement
+excess vs matched random pairs: **credit +0.075** (the direction-null theme is the
+strongest covariance factor), macro_data +0.187 (small n); earnings/demand ~0.
+=> idiosyncratic themes price directionally; systemic themes appear as covariance.
+Contagion case study: absorption ratio of 39 news-selected global financials
+0.27 baseline -> **0.64 in 2011-09**; H2-2011 0.45 vs 0.27 other. Honest: earnings
+control also spiked (0.36) — most of the crisis spike is market-wide; news-specific
+excess ≈ +0.09. Logs: `comovement.log`, contagion runs.
+
+### F9. Link-source expansion (10x coverage)
+Beyond shared-cause: relation-month +0.074 (t 5.8), relation-static +0.050 (6.9),
+sensitivity +0.041 (2.3*, survives pre-registered sector kill-condition — only 11%
+same-sector). Linked coverage 1,175 -> **12,061 pair-months (0.34% -> 3.5%)**.
+Caveats (review): relation-static inseparable from unobserved structural pairing;
+link-timing endogeneity (links form inside trailing window); month clustering owed.
+Log: `linkexp.log` (/tmp), script `link_expansion.py`.
+
+### F10. Live pipeline + monitors (shipped)
+scrape -> extract (resumable; **--max-tokens 3000 for reasoning models** — hardcoded
+1200 silently truncated ~49% of gpt-oss-120b output) -> Rust ingest with grounding
+gates -> SEC/Yahoo US resolution -> `persistence_signal.py` (tiers + provenance) +
+`exante_flags.py` (E1 live agency-ICS calendar + FOMC from Kalshi closes; E3 live
+option chains via cookie+crumb, cross-sectional implied/realized rank, mandatory
+earnings screen; E2 driver-state as context metadata; ordinal labels only, calibration
+footnoted as cross-horizon) + `emerging_pairs.py` (cross-sector risers, sign-aware
+links: shared-factor co-movement only when exposure signs agree; mixed-sign = "graph
+predicted hedge" disagreement class). Live demo: SOBO~oil-majors correlation surge
+(+0.25..0.34 to 0.63-0.67) named by an oil-supply news cluster — then correctly
+reclassified MIXED-SIGN once sign-awareness landed (SOBO's edge was a spill story).
+Provenance drill-down works cross-lingually (Arabic article -> INTC/TXN pair flag).
+
+---
+
+## 3. Refuted / null results (do not resurrect)
+
+1. **News as forecaster**: lag+1 IC null at daily horizon, both corpora, both models.
+   Forecast-modality news: t = −0.67 (null). The mirror critique stands.
+2. **Stress-timing / early-warning framing**: cross-sector cause_sim does NOT scale
+   with VIX (interaction t −0.5); tercile gradient runs the WRONG way (calm +0.255
+   t 3.0 / stress +0.105 t 1.4). The chronological "crisis half" significance was
+   actually the calm 2012 months. A calm-market phenomenon, not a risk timer.
+3. **Attention/uncertainty factors**: news flow vs |z| corr +0.06; narrative
+   dispersion vs |z| 0.00.
+4. **Direction agreement** (B1): same-sign vs opposite-sign shared-cause pairs adds
+   nothing to signed next-corr (t 1.1, underpowered/collinear).
+5. **Hedge integrity** (B2): uninterpretable — linked effect flips sign at trailing
+   ≈ −0.34 (review caught an algebra error before mis-claiming); opposite-sign pairs
+   n=2; sign-preservation null. No claim.
+6. **Covariance-forecast product at current density**: +0.4% OOS MSE improvement,
+   tracking the 0.4% pair coverage ~1:1. Scalpel, not blanket.
+
+## 4. Statistical honesty ledger
+
+- Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
+  except cross-sector cause_sim (t 2.8) — marginal, regime-dependent (calm-half only).
+- Not yet done: month-level clustering on top of dyadic (2010-12 common shocks);
+  strict link-timing (links precede trailing window); tf-idf idf computed full-sample
+  (mild look-ahead); resolution uses 2026 knowledge for 2010 names.
+- Survivorship: differential resolution ~4pp for distress-heavy entities (6% of active
+  names); unresolved mass dominated by collectives/foreign/sports, but genuinely dead
+  issuers dropped (MF Global, 57 edges). Universe itself selected via current-day
+  resolvability. Results conditional on the resolved US universe.
+- One regime (2010-12 euro-crisis window); one outlet (Bloomberg editorial conventions
+  shape both co-mention and extraction).
+
+## 5. Methodological lessons
+
+1. **The tautology test first**: "news explains finance" is near-circular; only
+   second-moment (correlation) and divergence constructions escape it.
+2. **Structure x activation**: the market's filter tells you which narratives matter;
+   the graph tells you what network they bind. Neither alone.
+3. **The density wall**: signal quality was never the problem; per-name-per-day
+   coverage always was. Economic value scales ~1:1 with coverage.
+4. **Sign-awareness**: the extractor captures exposure signs ("shielded from oil",
+   sign=−1); ignoring them manufactures false co-movement links.
+5. **Adversarial review loop pays**: external design/results review caught a wrong
+   algebraic claim (B2), mandated the sector kill-condition, demoted a confounded
+   evidence leg (E2), banned rate-numbers on live flags.
+6. **Reasoning models need output headroom**: max_tokens tuned for lean models
+   silently truncates reasoning-model JSON (49% failure -> 1% at 3000).
+
+## 6. Open threads (priority order)
+
+1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
+   entity graph, driver sets disjoint) predict co-movement the embedding cannot see
+   (cosine=0)? Hub exclusion mandatory (macro hubs connect everything). Designed,
+   not yet run.
+2. **Month-clustered SEs + strict link timing**: rigor items owed on F1/F3/F9.
+3. **Divergence program** (the one construction with predictive potential): narrative
+   vs market-implied expectation. Machinery built (`v_prob_divergence`, Kalshi/
+   Polymarket feeds); needs live accumulation, or an Intrade 2010-12 archive (overlaps
+   the dense corpus window — likely nobody has done LLM-narrative vs Intrade).
+4. **Accumulation**: every week of daily capture widens the live monitors; net-signs
+   replace n=1 sign estimates. Cron + GCS rsync recommended.
+5. **Deferred**: intraday horizon (timestamp infra built, data unpurchased); unused
+   fact layers (sentiments 44k, figures 144k); delisted-inclusive price data (CRSP/
+   FirstRateData) for survivorship-clean replication.
+
+## 7. Reproduction quick reference
+
+```
+# historical panel tests (graph dir = data/eg_runs/eg100k_graph)
+uv run scripts/cross_sectional_ic.py --graph-dir <g> --years 2010,2011,2012
+uv run scripts/coverage_panel.py --graph-dir <g>
+uv run scripts/news_leads_correlation.py --graph-dir <g>     # + stratified control
+uv run scripts/news_covariance.py --graph-dir <g>            # persistence + OOS forecast
+uv run scripts/comention_vs_cause.py --graph-dir <g>
+uv run scripts/news_latent.py --graph-dir <g>                # embedding + sector + dyadic + VIX
+uv run scripts/news_embedding.py --graph-dir <g>             # NMF exhibit
+uv run scripts/activation_split.py --graph-dir <g>
+uv run scripts/link_expansion.py --graph-dir <g>
+# live pipeline (graph dir = data/eg_runs/eg_live2)
+uv run scripts/extract.py --feed <feed> --out <g> --model openai/gpt-oss-120b --max-tokens 3000
+<eventgraph-bin> ingest --mock --feed <extracted-subset-feed> --out <g>
+uv run scripts/resolve_tickers.py --graph-dir <g> && uv run scripts/resolve_yahoo.py --graph-dir <g>
+uv run scripts/exante_flags.py --graph-dir <g>
+uv run scripts/emerging_pairs.py --graph-dir <g>
+# formal plane
+uv run scripts/formal_calendar.py alfred|ics|edgar ...
+uv run scripts/implied_prob.py kalshi|polymarket ...
+uv run scripts/load_formal.py --graph-dir <g> --db <duckdb>
+```
