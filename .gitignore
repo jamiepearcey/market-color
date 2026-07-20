@@ -40,3 +40,10 @@ eval/blind_*/
 # eventgraph regenerable extraction artifacts (regenerate via extract.py; never commit corpora)
 eventgraph/out/
 eventgraph/data/
+
+# eventgraph experiment data (2.1GB+: graphs, checkpoints, price caches, DuckLake) —
+# synced to GCS (gs://nimble-sylph-96609-market-color-data), see data/eg_runs/README.md
+data/eg_runs/
+# stray DuckLake artifacts from running loaders at repo root (regenerable)
+eventgraph_catalog.ducklake
+eg_data/

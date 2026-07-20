@@ -35,6 +35,7 @@ pub fn write_lake(dir: &Path, b: &GraphBatch) -> Result<Vec<(&'static str, Strin
     emit!("sensitivity_edge", &b.sensitivities);
     emit!("sentiment_annotation", &b.sentiments);
     emit!("probability_annotation", &b.probabilities);
+    emit!("relation_edge", &b.relations);
     Ok(out)
 }
 
@@ -48,8 +49,13 @@ pub fn load_script(
     let mut s = String::new();
     s.push_str("INSTALL ducklake; LOAD ducklake;\n");
     s.push_str(&format!("ATTACH '{catalog}' AS eg (DATA_PATH '{data_path}');\nUSE eg;\n"));
-    // ensure the fact + realised + analytics DDL exists (idempotent)
-    for f in ["0002_facts.sql", "0003_realised.sql", "0004_analytics.sql"] {
+    // ensure the fact + realised + analytics + formal-plane DDL exists (idempotent,
+    // numeric order = dependency order: views ref tables created in earlier files)
+    for f in [
+        "0002_facts.sql", "0003_realised.sql", "0004_analytics.sql", "0005_v2.sql",
+        "0006_options.sql", "0007_lineage.sql", "0008_provenance.sql",
+        "0009_surprise.sql", "0010_series_alias.sql", "0011_market_quote.sql",
+    ] {
         s.push_str(&format!(".read {}\n", ddl_dir.join(f).to_string_lossy()));
     }
     for (tbl, file, _) in tables {
