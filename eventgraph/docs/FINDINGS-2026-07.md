@@ -183,6 +183,39 @@ Provenance drill-down works cross-lingually (Arabic article -> INTC/TXN pair fla
 6. **Reasoning models need output headroom**: max_tokens tuned for lean models
    silently truncates reasoning-model JSON (49% failure -> 1% at 3000).
 
+### F11. Activation-first inversion (the forward direction) — 2026-07-20
+The recurring lesson made operational: *the graph knows lots of narratives; the market
+tells you which matter.* Inverted pipeline (`activation_first.py`): observe an
+activation (|abnormal z|>=2.5 or volume z>=3 across the resolved US universe) ->
+focused retrieval of every fact touching the name -> local causal graph (recurring
+causes, multi-firm mechanisms, explicit disagreements) -> deterministic
+dominant-narrative template with spillover candidates + verbatim provenance.
+First live run (7 trading days, 300 names): 60 activations; top-8 triage: **2/8
+explained (~11x the 2.2% broad story-coverage)** — e.g. ITV −6.5σ correctly
+attributed to Netflix/YouTube audience erosion (demand_change) with the Guardian
+quote; ManpowerGroup +7.7σ -> guidance/earnings events. Unexplained cases (IBM −8σ,
+PYPL +7.3σ) are corpus-sampling gaps, not graph failures — the trigger names exactly
+what to fetch, so the production design retrieves on demand at activation time
+(~60 names/week instead of 16k docs/day). This reframes the density wall: coverage
+becomes a retrieval-latency problem, not a pre-extraction-volume problem.
+
+### Rigor updates (2026-07-20, post-report)
+- **Month-clustered SEs**: core linked coefficient +0.110 — dyadic t 5.2 remains the
+  binding dimension (month t 15.4); common time shocks do not explain the result.
+- **Strict link timing**: links formed entirely BEFORE the correlation-measurement
+  window still show 34% vs 17% persistence (n=1,174) — the co-mention-because-
+  already-comoving endogeneity cannot account for the effect.
+- **Graph transitivity** (multi-hop): directionally consistent but underpowered —
+  directed common-cause parent2 +0.052 (dyadic t 1.8, pre-registered magnitude
+  ordering respected), collider placebo cleanly ~0, bridge2 null; prevalence after
+  hub-exclusion + doc-leakage safeguards only 59/333k. Density-bound, not refuted.
+- **Sign-aware links** (live monitor): shared-factor co-movement only when exposure
+  signs agree; mixed-sign pairs surfaced as "graph predicted hedge" disagreements
+  (caught the 'shielded from oil' false flag; reclassified the SOBO cluster).
+- **Intrade archive**: post-shutdown archive with all contracts to 2003 (daily prices
+  + trades) exists on GitHub (via P. Ipeirotis) — makes the historical divergence
+  test (LLM narrative expectations vs Intrade odds, 2010-12) feasible with data in hand.
+
 ## 6. Open threads (priority order)
 
 1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
