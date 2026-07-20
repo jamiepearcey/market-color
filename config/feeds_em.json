@@ -1,6 +1,6 @@
 {
- "version": "em-v2",
- "note": "EM regional feed pack. em-v2 closes coverage gaps: LatAm ex-Brazil (MX/AR/CL/CO), Africa ex-NG/SA (KE/EG), South Asia ex-India (PK/BD/LK), SE Asia ex-SG (TH/VN/PH/MY), Turkey/EM-Europe (TR/PL), + local-language sources (es/zh/ar/tr) — the first-mover, thin-coverage signal DM wires drop. region key = source_region for localized routing; join analyses on source_name.",
+ "version": "em-v3",
+ "note": "EM regional feed pack. em-v2 closes coverage gaps: LatAm ex-Brazil (MX/AR/CL/CO), Africa ex-NG/SA (KE/EG), South Asia ex-India (PK/BD/LK), SE Asia ex-SG (TH/VN/PH/MY), Turkey/EM-Europe (TR/PL), + local-language sources (es/zh/ar/tr) — the first-mover, thin-coverage signal DM wires drop. region key = source_region for localized routing; join analyses on source_name. | em-v3 (2026-07-20): +17 SINGLE-NAME EQUITY feeds (native EM markets press: moneycontrol/ET/caixin/yicai/valor/moneyweb/KED/BIST/BMV/IDX/Bursa) closing the F12 gap — corpus covered EM as sovereign macro, not linkable single names.",
  "feeds": [
   {
    "name": "bne IntelliNews",
@@ -601,6 +601,198 @@
     "rates"
    ],
    "scope": "focused",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Moneycontrol (IN equities)",
+   "url": "https://news.google.com/rss/search?q=site:moneycontrol.com+when:3d&hl=en-IN&gl=IN&ceid=IN:en",
+   "method": "google_news_rss",
+   "region": "india",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Economic Times Markets (IN)",
+   "url": "https://news.google.com/rss/search?q=site:m.economictimes.com+when:3d&hl=en-IN&gl=IN&ceid=IN:en",
+   "method": "google_news_rss",
+   "region": "india",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Business Standard (IN)",
+   "url": "https://news.google.com/rss/search?q=site:business-standard.com+when:3d&hl=en-IN&gl=IN&ceid=IN:en",
+   "method": "google_news_rss",
+   "region": "india",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Caixin Global (CN equities)",
+   "url": "https://news.google.com/rss/search?q=site:caixinglobal.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "china",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Korea Economic Daily",
+   "url": "https://news.google.com/rss/search?q=site:kedglobal.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "korea",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Moscow Times business",
+   "url": "https://news.google.com/rss/search?q=site:themoscowtimes.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "cis",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Focus Taiwan business",
+   "url": "https://news.google.com/rss/search?q=site:focustaiwan.tw+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "taiwan",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Nikkei Asia markets",
+   "url": "https://news.google.com/rss/search?q=site:asia.nikkei.com+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "asia_em",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Valor Economico (BR)",
+   "url": "https://news.google.com/rss/search?q=site:valor.globo.com+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "latam_br",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Brazil equities (Bovespa)",
+   "url": "https://news.google.com/rss/search?q=(Bovespa+OR+Petrobras+OR+Vale+OR+Itau)+shares+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "latam_br",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Moneyweb (ZA equities)",
+   "url": "https://news.google.com/rss/search?q=site:moneyweb.co.za+when:7d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "africa_za",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "South Africa equities (JSE)",
+   "url": "https://news.google.com/rss/search?q=JSE+(shares+OR+stocks)+when:3d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "africa_za",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Turkey equities (BIST)",
+   "url": "https://news.google.com/rss/search?q=(Borsa+Istanbul+OR+BIST)+shares+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "emea_em",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Mexico equities (BMV)",
+   "url": "https://news.google.com/rss/search?q=(Bolsa+Mexicana+OR+Bimbo+OR+Cemex+OR+America+Movil)+shares+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "latam_mx",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Indonesia equities (IDX)",
+   "url": "https://news.google.com/rss/search?q=(Jakarta+stocks+OR+IDX)+shares+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
+   "tier": 2,
+   "access": "open"
+  },
+  {
+   "name": "Malaysia equities (Bursa)",
+   "url": "https://news.google.com/rss/search?q=(Bursa+Malaysia+OR+KLCI)+shares+when:5d&hl=en-US&gl=US&ceid=US:en",
+   "method": "google_news_rss",
+   "region": "sea",
+   "desks": [
+    "equities"
+   ],
+   "scope": "single_name",
    "tier": 2,
    "access": "open"
   }
