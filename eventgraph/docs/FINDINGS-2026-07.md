@@ -216,6 +216,25 @@ becomes a retrieval-latency problem, not a pre-extraction-volume problem.
   + trades) exists on GitHub (via P. Ipeirotis) — makes the historical divergence
   test (LLM narrative expectations vs Intrade odds, 2010-12) feasible with data in hand.
 
+### F12. Emerging markets: 18% of the graph as drivers, untestable as assets (2026-07-20)
+EM is NOT a data-scarcity problem: 24,613/134,366 causal edges (18%) touch an EM entity,
+concentrated in 2010-12; top EM nodes China (4,183 driver edges) and Greece (1,336) are
+among the biggest causal hubs in the whole graph. BUT this is EM-as-SOVEREIGN (countries
+as macro drivers), not EM-as-tradeable-single-name. The tradeable EM company cross-section
+is thin: 200 EM-country company effect-entities (>=3 edges) -> only 59 priceable (Vale,
+Petrobras, Norilsk, Sberbank, Gold Fields, Standard Bank, Baidu, Hyundai, POSCO, OTP,
+America Movil, Sasol). EM PERSISTENCE TEST (EEM/ACWI/UUP/GLD-neutralized, mirror of the
+core test): EM unlinked 21% (n=3,408, matches DM 20% = validity check) vs EM news-linked
+23% (n=43) = +2pp, UNDETECTABLE, vs DM's +28pp (20% -> 48%). NOT a refutation of the EM
+edge thesis and NOT a confirmation — the thesis is UNTESTABLE on this corpus: the mechanism
+needs dense per-name-per-month linking, but the English Bloomberg desk covers EM as macro
+backdrop, not as linkable single names (only 43 elevated linked EM pairs in 3 years). The
+signal STARVES in EM for lack of single-name coverage, not lack of inefficiency. CONCLUSION
+(data-acquisition, not signal): testing the EM thesis needs a NATIVE-LANGUAGE EM-single-name
+-dense corpus (Valor/Caixin/Economic Times/Russian press). The edge, if real, is exactly
+where Western data can't see it — consistent with why the inefficiency persists. Scripts:
+em_resolve.py, em_persistence.py.
+
 ## 6. Open threads (priority order)
 
 1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
