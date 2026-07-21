@@ -251,6 +251,23 @@ neutralization (equal-weight market mean, not a factor model), no activation tie
 news 0.6 edges/doc = list/price-report style, less causal). Inconclusive; needs the full
 38k (billing) + more years + proper India factors. Script india_persistence.py.
 
+
+### F12c. India with a PROPER factor model — the EM edge appears (2026-07-20)
+The user's methodological catch (India needs its own factor model) was decisive. The weak
+F12b result used a crude equal-weight market mean, leaving Bank Nifty + Nifty IT co-movement
+in the residuals (inflated unlinked baseline). Two proper neutralizations:
+- PCA-3 (market+banks+IT, statistical): LINKED 47% vs unlinked 21% = **+26pp** (>0.3),
+  +28pp (>0.2) — matches DM's +28pp. But K-sensitive (PCA-5 only +5pp) = researcher df.
+- SPECIFIED named factors (Nifty/BankNifty/NiftyIT/INR/Brent, no K-arbitrariness), nested:
+  market-only +12pp/+2pp; +sectors +10pp/+9pp; +macro +35pp(n19)/+16pp (>0.3/>0.2).
+  **Positive in EVERY specification** (+2..+35pp, never null) = robust in SIGN.
+Honest bound: robustly positive, best-powered estimate ~+10-16pp (>0.2, sectors+),
+plausibly DM-comparable; magnitude UNDERPOWERED (n=19-69 linked, 34% of one year). The
+crude-neutralization null was the artifact — with correct India factors the news-graph
+edge appears. => EM thesis alive: Bloomberg-EM null = coverage; first India null =
+factor-model; both fixed -> India ~ DM. Needs full 38k + more years to pin magnitude.
+Scripts india_factor_test.py (PCA), india_specified_factors.py (named).
+
 ## 6. Open threads (priority order)
 
 1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
