@@ -295,6 +295,17 @@ Product statement: "A and B correlate primarily through same-sign driver X (+0.2
 quarter-to-quarter); driver Y partially offsets. If X de-activates, diversification returns."
 Descriptive not predictive (consistent with F1-F6). Strongest single result: significant
 (t=7.5) AND out-of-sample stable (0.75) AND sign-aware (links cannot do this).
+- **SECTOR-NEUTRALITY (the decisive confound test, `sector_neutral_attribution.py`):** re-run
+  the same-sign attribution on returns residualized against 9 GICS sector SPDRs (XLF/XLK/…)
+  ON TOP of the 9 macro factors. Baseline mean Δcorr +0.222 (t26.7) → sector-neutral +0.156
+  (t23.0) = **70% survives**. The sector confound is real (~30% of the level) but the majority
+  is genuine news-specific covariance beyond macro AND sector. This is what upgrades the daily/
+  pair monitor from "interesting" to trustworthy at ~70% of the shown magnitude.
+- **Daily/pair monitor (productization, `attribution_daily.py` + `pair_attribution.py` + viz):**
+  rolling 63d attribution replayed one trading day at a time -> interactive HTML. Moody's
+  downgrade channel spikes +0.44 in 2011Q4 (euro sovereign/bank downgrade wave); GS-MS raw
+  corr 0.70, Moody's channel +0.13 (19%), counterfactual corr collapses to ~0.25 at the peak.
+  Attribution BUILDS ahead of the peak and DECAYS after. Levels ~70% news-specific per above.
 
 ## 6. Open threads (priority order)
 

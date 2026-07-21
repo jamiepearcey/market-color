@@ -62,8 +62,10 @@ that specific channel, day by day. BBG corpus, 2010&ndash;2012.</p>
 <p class="note">Read: for GS&ndash;MS a persistent ~0.13 slice of a ~0.70 correlation runs through the
 Moody's channel &mdash; it widens through the 2011 downgrade wave and narrows after. This is
 <b>descriptive</b> (it decomposes existing correlation), trusted for its out-of-sample stability
-(r&nbsp;=&nbsp;+0.75), not as a return forecast. The <i>level</i> is the news channel's share of a
-correlation that also carries a sector component; the <i>timing</i> is driven by the news flow.</p>
+(r&nbsp;=&nbsp;+0.75), not as a return forecast. The level carries a sector component &mdash; but
+<b>~70% of it survives</b> residualizing against a 9 GICS-sector factor model (t&nbsp;=&nbsp;23),
+so most of this gap is genuine news-specific covariance beyond macro and sector. The <i>timing</i>
+is driven by the news flow.</p>
 </div>
 <script>
 const DATA=__DATA__, DATES=__DATES__, DRIVER="__DRIVER__";
