@@ -268,9 +268,46 @@ edge appears. => EM thesis alive: Bloomberg-EM null = coverage; first India null
 factor-model; both fixed -> India ~ DM. Needs full 38k + more years to pin magnitude.
 Scripts india_factor_test.py (PCA), india_specified_factors.py (named).
 
+### F13. Counterfactual driver attribution — the signed synthesis (2026-07-20)
+The user's reframe ("find negative synthetic values by discounting a factor's residual to
+see what things look like without it") turned the F5 embedding + directional edges into an
+*attribution* engine: for a correlated pair, build the shared-driver return factor, residualize
+both legs against it, and read Δcorr = how much of the co-movement that driver explained.
+- **Link-based** (shared-cause driver, `driver_attribution.py`): named-driver removal drops
+  corr **+0.266** vs random-shared **+0.121** → excess **+0.145, t=14.4**. The specific driver
+  the graph names carries most of the correlation — not any shared driver.
+- **Embedding-weighted, unsigned** (`embedding_attribution.py`): ranking shared drivers by
+  tf-idf profile overlap → top vs random-shared excess only **+0.039, t=1.6 (null)**. Unsigned
+  embedding weight does *not* isolate the load-bearing driver — shared drivers are redundant.
+- **SIGNED** (`signed_attribution.py`, the fix the user predicted): build the driver factor
+  direction-weighted (`sign(effect_dir)·AR`). Same-sign (co-movement) driver removal Δcorr
+  **+0.219** (n492) vs opposite-sign (divergence) **+0.098** (n98) → **difference +0.121,
+  t=7.5**. Sign is what the unsigned embedding threw away.
+- **Product-readiness** (`signed_calibration.py`): distribution median Δcorr +0.22 (5% neg);
+  **out-of-sample stability corr +0.75, magnitude 108% persists** — *better* than the link
+  version's +0.64, the strongest stability in the project. Calibration via embedding tf-idf
+  weight FAILS (non-monotone: mid +0.30 > high +0.23 > low +0.18) — the embedding weight does
+  not predict per-pair confidence.
+Synthesis / honest architecture: **embedding = candidate generator** (which drivers to test),
+**realized signed Δcorr = the measured attribution**, **OOS-stability 0.75 = the confidence**.
+Trust the measured Δcorr (self-calibrating via 0.75 persistence), not the embedding weight.
+Product statement: "A and B correlate primarily through same-sign driver X (+0.22, holds
+quarter-to-quarter); driver Y partially offsets. If X de-activates, diversification returns."
+Descriptive not predictive (consistent with F1-F6). Strongest single result: significant
+(t=7.5) AND out-of-sample stable (0.75) AND sign-aware (links cannot do this).
+
 ## 6. Open threads (priority order)
 
-1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
+0. **India signed attribution at power** (data-gated, running): 6× 5k 8b sub-batches on
+   Groq extract the remaining ~25.4k of the unbiased complete-year India-2021 feed
+   (13,040 already recovered from the spend-cap survivor batch). On completion: ingest
+   full 38k, re-resolve Nifty50, re-run F13 signed attribution + F1 persistence
+   cross-market at power — the real generalization test for the EM edge (F12c).
+1. **Clean sign-flip regime** (analysis-gated): mirror of F13 — for a *negatively*-correlated
+   pair joined by an *opposite-sign* driver, removing it should *raise* corr toward zero.
+   If it holds, signed attribution decomposes co-movement and divergence symmetrically.
+   Thin (few negative-corr pairs at n≥20 co-days); check power before claiming.
+2. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
    entity graph, driver sets disjoint) predict co-movement the embedding cannot see
    (cosine=0)? Hub exclusion mandatory (macro hubs connect everything). Designed,
    not yet run.
@@ -304,6 +341,10 @@ uv run scripts/extract.py --feed <feed> --out <g> --model openai/gpt-oss-120b --
 uv run scripts/resolve_tickers.py --graph-dir <g> && uv run scripts/resolve_yahoo.py --graph-dir <g>
 uv run scripts/exante_flags.py --graph-dir <g>
 uv run scripts/emerging_pairs.py --graph-dir <g>
+# signed driver attribution (F13)
+uv run scripts/driver_attribution.py        # link-based counterfactual
+uv run scripts/signed_attribution.py        # signed (co-move vs divergence)
+uv run scripts/signed_calibration.py        # distribution + OOS stability + calibration
 # formal plane
 uv run scripts/formal_calendar.py alfred|ics|edgar ...
 uv run scripts/implied_prob.py kalshi|polymarket ...
