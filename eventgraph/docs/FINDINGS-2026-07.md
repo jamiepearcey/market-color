@@ -235,6 +235,22 @@ signal STARVES in EM for lack of single-name coverage, not lack of inefficiency.
 where Western data can't see it — consistent with why the inefficiency persists. Scripts:
 em_resolve.py, em_persistence.py.
 
+
+### F12b. India partial test — corpus testable (F12 diagnosis validated), signal weak/inconclusive (2026-07-20)
+Recovered 13,036 India 2021 extractions (survivor of a spend-cap-failed 38k batch; Groq
+account hit a spend-alert block, 100% of the fresh batch rejected — resubmit staged).
+Graph: 13k docs, 7,611 causal edges (94% grounded), 26k entities. Resolved 46 of 50
+Nifty50 names as effects (India names matched to nifty50_ticker.csv); **479 shared-cause
+linked pair-months, 141 distinct linked pairs** — economically real bank clusters
+(AXISBANK~SBIN~ICICIBANK). This VALIDATES the F12 diagnosis: a single-name-dense native
+corpus IS testable where Bloomberg EM was not (43 pairs). PERSISTENCE (market-mean-
+neutralized, 45 priced): trailing>0.3 unlinked 32% vs linked 29% (n=52, null); trailing>0.2
+unlinked 23% vs linked 30% (n=81, +7pp). Weak, threshold-sensitive, underpowered — NOT the
+DM +28pp, better than Bloomberg-EM's +2pp. CAVEATS: 34% of one year (13k/38k), crude
+neutralization (equal-weight market mean, not a factor model), no activation tiering (India
+news 0.6 edges/doc = list/price-report style, less causal). Inconclusive; needs the full
+38k (billing) + more years + proper India factors. Script india_persistence.py.
+
 ## 6. Open threads (priority order)
 
 1. **Graph transitivity / multi-hop**: does 2-hop connection (drivers linked in the
