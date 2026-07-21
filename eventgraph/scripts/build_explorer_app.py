@@ -58,6 +58,13 @@ body{background:var(--surface);color:var(--ink);font:13.5px/1.5 -apple-system,Bl
 .narr b{color:var(--ink)} .narr .hi{color:var(--accent);font-weight:600}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
 .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:4px;font-weight:600}
+.cardhdr{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tgl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--ink2);user-select:none}
+.tgl input{display:none}
+.tgl .slider{width:34px;height:19px;border-radius:20px;background:var(--line);position:relative;transition:.15s;flex:none}
+.tgl .slider::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--surface);transition:.15s}
+.tgl input:checked+.slider{background:var(--accent)}
+.tgl input:checked+.slider::after{transform:translateX(15px)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin:6px 0 4px}
 .legend .lg{display:flex;gap:7px;align-items:center}
 .sw{width:16px;height:0;border-top:2px solid;flex:none}.sw.dash{border-top-style:dashed}.sw.fill{height:11px;border:none;border-radius:3px;opacity:.9}
@@ -105,7 +112,22 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 <script>
 const DATA=__DATA__;
 const INSTR=DATA.instruments, DATES=DATA.dates, CORR=DATA.corr, ATTR=DATA.attr, WIN=DATA.window;
+const META=DATA.drivers_meta||{};
 const IM={};INSTR.forEach(x=>IM[x.sym]=x);
+// the news-level analog of the 9 macro factors: index/macro/commodity/rate/fx aggregates.
+// These are "common" drivers, redundant with the factor neutralization -> filtered by default.
+const MACRO_TYPES=new Set(["equity_index","sovereign","central_bank","commodity","currency",
+  "rate_or_bond","economic_indicator","sector","market","exchange"]);
+// generic collective nouns that live under specific types (bank/regulator) but are aggregates
+const GENERIC_NAMES=new Set(["banks","european_banks","wall_street_banks","wall_street","regulators",
+  "lenders","investors","markets","traders","analysts","economists","hedge_funds","fund_managers",
+  "bond_investors","creditors","policymakers","central_banks","governments","companies","the_market"]);
+const dtype=id=>id.split("__").pop();
+const isBroad=id=>MACRO_TYPES.has(dtype(id))||GENERIC_NAMES.has(id.split("__")[0]);
+let specificOnly=true;                    // default: hide the common macro/market channels
+// filter a pair's driver map by the specific-only toggle
+function drvEntries(a,b){const at=getAttr(a,b);if(!at)return[];
+  let e=Object.entries(at);if(specificOnly)e=e.filter(([id])=>!isBroad(id));return e}
 const SECPAL=["#3987e5","#008300","#d55181","#c98500","#199e70","#d95926","#9085e9","#e66767"];
 const SECS=[...new Set(INSTR.map(x=>x.sector))].sort();
 const secColor=s=>{const i=SECS.indexOf(s);return i<0?"#888":SECPAL[i%SECPAL.length]};
@@ -161,16 +183,16 @@ function renderList(){
 function narrative(){
   const c=getCorr(A.sym,B.sym);const mc=mean(c),pc=peak(c);
   let pi=0;c.forEach((v,i)=>{if(v!=null&&v===pc)pi=i});
-  const at=getAttr(A.sym,B.sym);
+  const ent=drvEntries(A.sym,B.sym);
   let s=`<b>${A.name}</b> and <b>${B.name}</b> co-move at an average correlation of <span class="hi">${fmt(mc)}</span>`;
   s+=`, peaking <span class="hi">${fmt(pc)}</span> around <b>${DATES[pi].slice(0,7)}</b>.`;
-  if(at){const ds=Object.values(at);const top=ds[0];
+  if(ent.length){const ds=ent.map(e=>e[1]);const top=ds[0];
     let ai=0;top.series.forEach((v,i)=>{if(v!=null&&v===Math.max(...top.series.filter(x=>x!=null)))ai=i});
     s+=` The dominant news channel is <span class="hi">${top.label}</span> `;
     s+=top.sign>=0?`(a shared <b>co-movement</b> driver)`:`(a <b>divergence</b> driver)`;
     s+=`, explaining on average <span class="hi">${fmt(top.mean)}</span> of the correlation — strongest around <b>${DATES[ai].slice(0,7)}</b>.`;
     if(ds.length>1)s+=` ${ds.length-1} other channel${ds.length>2?'s':''} also contribute${ds.length===2?'s':''}.`;
-  } else { s+=` No shared news driver in the corpus explains this pair — the co-movement is sector/market, not a specific news channel.`; }
+  } else { s+=` No <b>specific</b> news channel explains this pair${specificOnly&&getAttr(A.sym,B.sym)?` (only broad market-like drivers, hidden by the filter)`:''} — the co-movement is sector/market.`; }
   return s;
 }
 
@@ -225,12 +247,17 @@ function renderMain(){
       <div class="empty">Pick a name from the ranked list on the left to see their correlation and its news drivers over time.</div>`;
     el("theme").onclick=toggleTheme;return}
   const at=getAttr(A.sym,B.sym);
-  const drvHtml=at?Object.entries(at).map(([id,d])=>`<div class="drv ${DRV===id?'on':''}" data-drv="${id}">
+  const ent=drvEntries(A.sym,B.sym);
+  const nHidden=at?Object.keys(at).length-ent.length:0;
+  const drvHtml=ent.length?ent.map(([id,d])=>`<div class="drv ${DRV===id?'on':''}" data-drv="${id}">
       <span class="dot" style="background:${d.sign>=0?'var(--raw)':'var(--cf)'}"></span>
       <span class="dl">${d.label}</span>
       <span class="tag ${d.sign>=0?'co':'dv'}">${d.sign>=0?'co-move':'divergence'}</span>
       <span class="mn">${fmt(d.mean)}</span></div>`).join(""):
-      `<div class="hint">No shared news driver explains this pair — its co-movement is sector/market, not a specific news channel.</div>`;
+      `<div class="hint">${at?`Only broad market-like channels touch this pair — hidden by the filter.`:`No shared news channel explains this pair — its co-movement is sector/market.`}</div>`;
+  const toggle=`<label class="tgl" title="Hides index/macro/commodity/rate/FX drivers — the news-level analog of the 9 macro factors already removed from returns">
+      <input type="checkbox" id="specTgl" ${specificOnly?'checked':''}><span class="slider"></span>
+      <span class="tl">specific channels only${nHidden>0?` · ${nHidden} common hidden`:''}</span></label>`;
   m.innerHTML=`<div class="top">
       <div class="title">${secDot(A.sector)}${A.name} <span class="x">↔</span> ${secDot(B.sector)}${B.name}</div>
       <div class="tools"><button id="swap">⇄ swap</button><button id="theme">◐ theme</button></div></div>
@@ -239,11 +266,12 @@ function renderMain(){
       <div class="legend"><span class="lg"><span class="sw" style="border-color:var(--raw)"></span>correlation</span>
         ${DRV?`<span class="lg"><span class="sw dash" style="border-color:var(--cf)"></span>driver removed</span><span class="lg"><span class="sw fill" style="background:var(--raw)"></span>attribution</span>`:'<span class="hint">click a driver below to overlay its counterfactual</span>'}</div>
       <div id="chartholder"></div></div>
-    <div class="card"><h3>News channels explaining this co-movement — ranked by attribution</h3>
+    <div class="card"><div class="cardhdr"><h3>News channels explaining this co-movement — ranked by attribution</h3>${toggle}</div>
       <div style="margin-top:6px">${drvHtml}</div></div>`;
   el("chartholder").appendChild(chart());
   el("theme").onclick=toggleTheme;
   const sw=el("swap");if(sw)sw.onclick=()=>{const t=A;A=B;B=t;DRV=null;renderAll()};
+  const tg=el("specTgl");if(tg)tg.onchange=()=>{specificOnly=tg.checked;if(DRV&&specificOnly&&isBroad(DRV))DRV=null;renderMain()};
   m.querySelectorAll(".drv").forEach(r=>r.onclick=()=>{DRV=DRV===r.dataset.drv?null:r.dataset.drv;renderMain()});
 }
 function renderAll(){renderList();renderMain()}

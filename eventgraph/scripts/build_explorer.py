@@ -77,10 +77,18 @@ inst_drv=collections.defaultdict(dict)  # sym -> {driverId: (label,sign,cnt)}
 for c,nm in drv_net.items():
     for s,v in nm.items():
         if s in U and v!=0: inst_drv[s][c]=(c.split("__")[0].replace("_"," ").title(), int(np.sign(v)), drv_cnt[c][s])
+sym_sec={}
 for s in uni:
+    sec=sector_of(s); sym_sec[s]=sec
     ds=sorted(inst_drv[s].items(), key=lambda kv:-kv[1][2])[:12]
-    insts.append({"sym":s,"name":name.get(s,s),"sector":sector_of(s),"freq":freq[s],
+    insts.append({"sym":s,"name":name.get(s,s),"sector":sec,"freq":freq[s],
                   "drivers":[{"id":c,"label":v[0],"sign":v[1],"n":v[2]} for c,v in ds]})
+# driver breadth (uncapped, over the universe): a driver spanning many SECTORS is market-like/common
+dmap=collections.defaultdict(set)
+for s in uni:
+    for c in inst_drv[s]: dmap[c].add(s)
+drivers_meta={c:{"label":inst_drv[next(iter(ss))][c][0],"nnames":len(ss),
+                 "nsec":len({sym_sec[s] for s in ss})} for c,ss in dmap.items()}
 print("computing weekly correlations ...", flush=True)
 corr={}
 for x in range(len(uni)):
@@ -113,7 +121,7 @@ for key,cser in corr.items():
         if va: pa[c]={"label":inst_drv[A][c][0],"sign":int(inst_drv[A][c][1]*inst_drv[B][c][1]),
                       "mean":round(float(np.mean(va)),3),"series":aser}
     if pa: attr[key]=dict(sorted(pa.items(), key=lambda kv:-kv[1]["mean"])[:5]); npair+=1
-out={"window":W,"dates":wdates,"instruments":insts,"corr":corr,"attr":attr}
+out={"window":W,"dates":wdates,"instruments":insts,"corr":corr,"attr":attr,"drivers_meta":drivers_meta}
 Path("../data/eg_runs/eg100k_graph/explorer.json").write_text(json.dumps(out))
 sz=len(json.dumps(out))/1e6
 print(f"\n-> explorer.json  {len(insts)} instruments, {len(corr)} corr pairs, {npair} pairs w/ drivers, {len(wdates)} weeks, {sz:.1f}MB")
