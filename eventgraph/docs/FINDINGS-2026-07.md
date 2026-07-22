@@ -370,6 +370,18 @@ beta) with idiosyncratic ones (not). The classifier lets us route: factor_signed
 STOP residualizing the macro factors that carry the sign); idiosyncratic -> no direction claim. This is the concrete
 path to fixing direction for the subset where it's knowable. `event_classifier.py`, `event_routing.json`.
 
+### F28. Routed direction — factor-event direction is the FACTOR MODEL, not news (2026-07-22)
+Tested F27's hope that direction is recoverable for factor_signed events (`direction_routed.py`): does the
+event shock D_E propagate to NON-mentioned firms, market-relative (drift removed), split by routing tag?
+RESULT (reversed): factor_signed **48.9%** (n1129, AT chance), idiosyncratic **53.3%** (n2418, weakly>chance);
+by layer factor 48.7% vs mechanism 53.2%. INTERPRETATION: for factor/macro events the direction lives in the
+MARKET MOVE itself — remove the factor (market-relative) and nothing news-specific remains -> chance. So the
+'recoverable direction' for factor events is just the FACTOR MODEL (firm beta x shock), well-known, NOT news.
+Idiosyncratic events keep a tiny sub-industry directional residual (53%, the F21 structure). CONCLUSION: direction
+is not a news-actionable signal in ANY bucket (F24 chance / F25 sentiment contemporaneous-only / F28 factor=factor-
+model). The routing insight was architecturally right and PROVED where direction comes from (factor model, not news).
+Routing's real payoff is EXPOSURE (F26/F27), not direction. `direction_routed.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
