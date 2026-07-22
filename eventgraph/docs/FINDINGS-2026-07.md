@@ -395,6 +395,20 @@ to harvest. 5th independent null on the predictive side (F6/F14/F24/F25/F29). Cl
 real contemporaneous EXPOSURE map (explanation/risk), not alpha — the market is efficient wrt the structure it
 recovers. `information_gap.py`.
 
+### F30. RIGOR RECHECK (Fable review) — text adds little over a price-history baseline (2026-07-23)
+Fable review flagged the +0.101 exposure headline as partly mechanical (in-window betas, no price baseline,
+inflated pooled t). Decisive recheck (`rigor_recheck.py`, event-level inference, T2-broadened non-mention):
+add the MISSING baseline = pre-event trailing correlation with the event basket. CONTEMPORANEOUS: trailing
++0.134 (t11) >> embedding +0.032 (t3.3); text INCREMENT over trailing +0.018 (t1.9, 95%CI [-0.000,+0.036] —
+marginal). FORWARD: trailing +0.127; embedding +0.034; text increment +0.021 (t2.5, CI [+0.005,+0.037]).
+CORRECTIONS: (1) the ~+0.10 exposure IC was MOSTLY price history (trailing corr), not text; (2) embedding's
+UNIQUE contribution is ~+0.02, contemporaneously marginal; (3) naive pooled t=13 was inflated ~4-6x (event-
+level t=1.9-3.8). SILVER LINING: text adds a small SIGNIFICANT FORWARD increment (+0.021) = predictive-covariance
+(R3, consistent with F3) beyond price history — the first survivor pointing at a predictive (risk) signal. CAVEAT:
+forward increment may still be profile-leakage (company profiles include cross-month quotes) -> F31/T3 pending.
+Retro-deflates F22-F24 headline magnitudes; the exposure STRUCTURE is real but its text-specific size was overstated.
+`rigor_recheck.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
