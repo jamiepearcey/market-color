@@ -170,6 +170,21 @@ warning" framing. Value = interpretable text-discovered factor model (descriptiv
 alpha. Caveats: daily/weekly granularity (an intraday lead is untested & unseen here); market control
 is aggressive. But symmetric lead-lag argues against a rescue. `lead_lag.py`.
 
+### F15. In-sample vs out-of-sample attribution — real structure, not a relabeled fit (2026-07-22)
+Concern (correct): the attribution fits the factor AND measures the correlation drop on the SAME
+window -> in-sample, near-mechanical, and the news basket ~ sector. Strict test (`oos_attribution.py`):
+fit each leg's beta to the driver factor on W1, apply the FIXED W1 betas to the non-overlapping
+FORWARD W2, measure the drop there; compare named-in-sample / named-OOS / random-driver-OOS.
+- named in-sample +0.250 (t24.6); named **OOS +0.247 (t23.0) = 99% retained** -> NOT overfit, the
+  factor structure is stable across windows.
+- **random-driver OOS +0.062** -> named beats random **4:1 OOS** -> the news GROUPING is informative,
+  not arbitrary relabeling. named-OOS − random-OOS = **+0.184**.
+CONCLUSION: the decomposition is real, out-of-sample-stable, and non-arbitrary — the "GS-MS co-move
+through the Moody's channel" statement is genuine structure, not an in-sample artifact. Splits the
+"relabeled regression" worry: it IS a beta regression to a text-defined factor (conceded), but it is
+NOT circular/in-sample/arbitrary. Boundary that HOLDS: still DESCRIPTIVE not predictive (F14: news
+doesn't lead). Sector share handled separately (F13 sector-neutralization: 70% survives). `oos_attribution.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
