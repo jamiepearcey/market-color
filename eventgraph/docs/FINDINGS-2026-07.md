@@ -346,6 +346,18 @@ CONCLUSION: sentiment enriches DESCRIPTIVE direction (best contemporaneous polar
 predictive direction — same wall as F6/F14/F24. Fourth independent directional signal (mention-dir, mechanism-
 dir, sentiment) all landing on: the news layer DESCRIBES, does not PREDICT. `sentiment_direction.py`.
 
+### F26. Exposure accuracy varies by EVENT TYPE — route by channel, not one embedding (2026-07-22)
+User's insight: different event types propagate through different channels; one universal embedding conflates
+them. Tested (`category_exposure.py`): LLM-classify 116 events into 6 types, per-event exposure-vs-realized IC.
+RESULT — accuracy swings hugely: **regulatory +0.183** (embedding's home turf: named-set+peers, e.g. LIBOR),
+company-specific +0.095, macro-surprise +0.089, policy +0.050, **supply-chain -0.027** (embedding is the WRONG
+channel — semantics can't capture supplier->customer linkage; needs the NETWORK). Breadth ~constant so it's the
+CHANNEL not diffuseness. CONCLUSION: the universal embedding is one channel forced onto 6 physics — right for
+regulatory, wrong for supply-chain/policy. Route by type: regulatory/company->embedding, supply-chain->relation
+network (relation_edge.jsonl), macro/policy->return beta, geopolitical->country/commodity. NB reconciles F23:
+recombining latent EMBEDDING factors = rotation (no gain), but routing to independent CHANNELS by type IS
+justified (+0.18 to -0.03 spread). The demo's best cases (LIBOR) are regulatory = the model's best type. `category_exposure.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
