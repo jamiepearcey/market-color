@@ -267,6 +267,20 @@ names) are SPARSE+BURSTY — 507 in 3yrs = ~1.1/day mean but MEDIAN 0 (clustered
 full-corpus rate is low single digits/day, NOT ~8. So the unique news signal is small (~+0.06) AND sparse
 (~1/day, median 0, bursty) — an occasional event-linkage detector, valuable on event days, quiet otherwise.
 
+### F21. "Most events look sector-driven" — true for membership, FALSE for the co-movement (2026-07-22)
+User observation: the event clusters (F20 viz) are mostly same-sector. Confirmed at MEMBERSHIP level:
+61% of strong events single-sector, Financials-dominated (51/67); apparent "cross-sector" ones are
+mostly sector-tagging noise (Freddie/Fannie both mortgage GSEs, Honda/Toyota both autos, AAL/UAL both
+airlines). BUT decisive control (`residual_subsector.py`): add 12 SUB-INDUSTRY ETFs (KBE/KRE/KIE/IAI/
+XHB/OIH/SMH/IYT/IBB/ITB/XRT/IYR) to the broad-9 sector block and re-measure the news-linked residual
+excess: +0.063 (t6.6) -> +0.056 (t6.0) — barely moves. The co-movement SURVIVES a fine sub-industry
+taxonomy. INTERPRETATION: membership is sectoral (banks with banks) but the co-movement is NOT sector-
+explained — a bank ETF captures "banks co-move on average"; the news links the SPECIFIC banks bound by a
+SPECIFIC event (the ones downgraded, the UK banks under Vickers) that move together MORE than the sub-
+industry factor. The news graph's irreducible contribution = the DYNAMIC, catalyst-specific selection of
+which same-industry names are bound right now — not a new sector, but time-varying within-industry
+clustering no static taxonomy (however fine) provides. Small (+0.056) and descriptive, but real. `residual_subsector.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
