@@ -358,6 +358,18 @@ network (relation_edge.jsonl), macro/policy->return beta, geopolitical->country/
 recombining latent EMBEDDING factors = rotation (no gain), but routing to independent CHANNELS by type IS
 justified (+0.18 to -0.03 spread). The demo's best cases (LIBOR) are regulatory = the model's best type. `category_exposure.py`.
 
+### F27. Event classifier (top of the hierarchy) — routing + per-event direction-determinacy (2026-07-22)
+User's hierarchy: News event -> decomposition {mechanism|factor|regime} -> exposure -> response, classify BEFORE
+ranking. Built (`event_classifier.py` -> event_routing.json): tags each event with mech + domain + dominant LAYER
++ **dir (factor_signed | idiosyncratic)**. Correct on samples: LIBOR/Almunia & Dodd-Frank & BMW = mechanism/
+idiosyncratic; Growth-Forecasts & Earthquake & Project-Merlin = factor/factor_signed. ROUTING VALIDATED (embedding
+IC by mech): regulatory +0.13, legal +0.12, macro +0.11, policy +0.09, company +0.07 vs supply_shock +0.01,
+credit_rating -0.06, geopolitical -0.06 (embedding is the WRONG channel for the last three). DIRECTION DIAGNOSIS
+(the key): F24's chance-direction was from AVERAGING factor_signed events (sign recoverable via firm's signed factor
+beta) with idiosyncratic ones (not). The classifier lets us route: factor_signed -> signed factor-beta channel (and
+STOP residualizing the macro factors that carry the sign); idiosyncratic -> no direction claim. This is the concrete
+path to fixing direction for the subset where it's knowable. `event_classifier.py`, `event_routing.json`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
