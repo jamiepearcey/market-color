@@ -423,6 +423,19 @@ inference (pre-event-only), not retrieval. The corrected thesis: not a descripti
 defensible AND more valuable (forward risk > contemporaneous explanation). Next (Fable): sharpen into a proper
 realized-covariance / hedge-failure forecast; run per-type routing at event-level inference. `rigor_recheck_t3.py`.
 
+### F32. Hedge-failure overlay — text predicts correlation PERSISTENCE, not rising (2026-07-23)
+Upgraded the F31 survivor into a forward-risk tool (`hedge_overlay.py`). Text-exposure does NOT forecast
+correlation RISING: IC(exposure, Δcorr=forward-trailing) = -0.008 (t-0.8, null) — no new-link formation.
+But the forward-LEVEL signal survives (+0.028, t2.7): text nudges the mean-reversion-adjusted forecast (β<1),
+not the raw change. ECONOMIC payoff = a DIVERSIFICATION TRAP: among ELEVATED pairs (trailing>0.3, n395), high-
+text-exposure ones retain correlation (trailing 0.40 -> forward 0.21) while low-exposure revert (0.36 -> 0.08);
+forward gap +0.13 is ~3x the trailing gap +0.04 -> text flags which already-correlated pairs PERSIST vs decouple.
+CORRECTED FINAL THESIS: not rising correlation, not returns, not a big contemporaneous exposure map — a modest,
+leakage-free, forward PERSISTENCE signal on covariance (which elevated correlations won't mean-revert = which
+hedges fail). Consistent with F1 (linked persist, unlinked revert), now leakage-free + incremental to price
+history. The one result that survived the full Fable rigor review. Bounds: modest (+0.03 IC), elevated-subset,
+persistence-not-discovery. `hedge_overlay.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
