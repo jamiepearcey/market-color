@@ -308,6 +308,21 @@ firms go from [Vale,Mastercard,BAE noise] -> [GS,JPM,HSBC,BAC] — the actual un
 Residual noise (Google/airline) remains -> the last upgrade is mention-independent profiles (10-Ks). The
 event-exposure landscape is now trustworthy enough to ship as a full-universe exposure map per event.
 
+### F23. Mechanism-factor exposure (step 4) — return-anchoring beats embedding cosine (2026-07-22)
+User's progression (named -> tf-idf -> embedding -> latent factors). Tested (`mechanism_factors.py`):
+K=24 KMeans clusters over EVENT embeddings give INTERPRETABLE economic-mechanism factors (US financial
+legislation/Dodd-Frank, UK banking reform/Vickers-Merlin-ICB, antitrust-LIBOR/Almunia, industrial metals,
+German autos/BMW, natural disasters, credit downgrades/Moody's). Bonus: embedding clustering semantically
+merges the Vickers/Merlin/ICB catalyst fragments the LEXICAL canonicalizer (F21) could not.
+EXPOSURE vs realized co-movement (non-mentioned, n15651): raw embedding cosine +0.057 (baseline);
+factor-mediated SEMANTIC +0.058 (NO gain — factorizing the embedding is a rotation of the same info);
+**RETURN-ANCHORED mechanism factors +0.076, t10 (+33%)** — company loads on each mechanism via its RETURN
+BETA to the factor's mimicking portfolio (magnitude from prices, not text). CONFIRMS: latent decomposition
+per se adds nothing over cosine; the gain comes from grounding exposures in RETURNS (the direction/magnitude
+the embedding lacks). Breaks past the ~0.057 ceiling that held across mention/tfidf/embedding -> ceiling was
+model structure, not purely data. Still small (residual-scale). CAVEATS: mimicking-portfolio self-inclusion
+(tighten), and DIRECTION (signed effect) not yet added. `mechanism_factors.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
