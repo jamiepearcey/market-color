@@ -294,6 +294,13 @@ anchor UNDERCOUNTS exposure; the event-anchored/descriptive frame adds real (sma
 and a full-universe exposure landscape (not just named firms). Caveats: small magnitude (~residual scale);
 company profile still news-derived (not fully mention-free — 10-Ks/business-desc would be cleaner); first-cut
 tf-idf + coarse quartile split. EXTENDS not overturns. Next: event-as-factor betas + real embeddings. `descriptive_exposure.py`.
+LANDSCAPE (`exposure_landscape.py`): full-universe exposure map per event + validation that exposure
+predicts realized co-movement for NON-mentioned firms: pooled corr +0.047, t6 (n15651) — CONCEPT holds in
+aggregate. BUT per-event ranking is NOISY with tf-idf: LIBOR/Almunia landscape surfaces REAL unnamed banks
+(JPM realized +0.20, GS, MFG) mixed with vocabulary-coincidence NOISE (Vale mining, Mastercard). tf-idf on
+own-news too coarse for a trustworthy per-event exposure list. CLEAN product needs (a) real semantic
+embeddings (not tf-idf) + (b) mention-independent company profile (10-K business descriptions, not own news).
+Validated concept, not-yet-shippable ranking. `exposure_landscape.py`.
 
 ## 4. Statistical honesty ledger
 
