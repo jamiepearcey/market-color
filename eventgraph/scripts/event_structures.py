@@ -31,13 +31,19 @@ docm={}; docmeta={}
 for l in open(G/"lake/document.jsonl"):
     j=json.loads(l); docm[j["doc_id"]]=(j.get("published_at") or "")[:7]
     docmeta[j["doc_id"]]={"h":j.get("headline"),"s":j.get("source"),"u":j.get("url"),"d":(j.get("published_at") or "")[:10]}
+# canonical catalyst map (normalized cause entities): entity_id -> {key,name,type}
+CANON=json.load(open(G/"catalyst_map.json")) if (G/"catalyst_map.json").exists() else {}
+def canon(c):
+    ci=CANON.get(c)
+    return (ci["key"],ci["name"],ci["type"]) if ci else (c, c.split("__")[0].replace("_"," ").title(), c.split("__")[-1])
 freq=collections.Counter(); cause_m=collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int))); dlabel={}
-prov=collections.defaultdict(lambda: collections.defaultdict(list))   # (month,cause)->firm->[(sign,quote,mech,doc_id)]
+prov=collections.defaultdict(lambda: collections.defaultdict(list))   # (month,canonKey)->firm->[(sign,quote,mech,doc_id)]
 for l in open(G/"lake/causal_event_edge.jsonl"):
     j=json.loads(l); m=docm.get(j.get("doc_id")); e=j.get("effect_entity"); c=j.get("cause_entity"); d=j.get("effect_dir")
     if not m or m[:4] not in {"2010","2011","2012"} or e not in sym or not c or d not in DIRV: continue
-    freq[sym[e]]+=1; cause_m[m][c][sym[e]]+=DIRV[d]; dlabel[c]=(c.split("__")[0].replace("_"," ").title(),c.split("__")[-1])
-    pl=prov[(m,c)][sym[e]]
+    ck,cname,ctype=canon(c)
+    freq[sym[e]]+=1; cause_m[m][ck][sym[e]]+=DIRV[d]; dlabel[ck]=(cname,ctype)
+    pl=prov[(m,ck)][sym[e]]
     if len(pl)<3: pl.append((DIRV[d], j.get("quote"), j.get("mechanism"), j.get("doc_id")))
 years={"2010","2011","2012"}
 def ret(t): return logret(yahoo(t,cache,p1,p2))
@@ -85,7 +91,7 @@ events=[]
 for m in mo:
     i=idx[m]; win=[d for d in alld if d[:7] in mo[max(0,i-1):i+2]]
     for c,sgn in cause_m[m].items():
-        if dlabel[c][1] in MACRO_T: continue
+        if dlabel[c][1] in {"macro","monetary","fiscal","equity_index","sovereign","central_bank","commodity","currency","rate_or_bond","economic_indicator","sector","market","exchange"}: continue
         ns=sorted(s for s in sgn if s in R2 and sgn[s]!=0)
         if len(ns)<2: continue
         pairs=[]; vals=[]; vsub=[]
