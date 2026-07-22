@@ -223,6 +223,19 @@ macro+sector wearing news labels; the news-specific INCREMENTAL factor is small.
 STRUCTURE (F16) is real but sector-adjacent, not a large independent factor. CAVEAT: order-dependent (news-
 last = conservative); a Shapley decomposition (avg over orderings) is the order-independent version. `factor_decomp.py`.
 
+### F18. Shapley (order-independent) decomposition — news ≈ sector, unique add ~1-3% (2026-07-22)
+Order-independent version of F17 (`factor_shapley.py`): Shapley value of each block (MACRO/SECTOR/NEWS)
+= avg marginal covariance-explained over all orderings; the 7 subset values v(S) = cov of A,B projected
+onto that subset's factor span (order-free). GS-MS: MACRO 15% / SECTOR 39% / NEWS 34% / idio 12%.
+BUT the block bounds expose the truth: NEWS-FIRST (block alone) 81%, Shapley 34%, NEWS-LAST (incremental)
+~1%. The 80pp spread = NEWS and SECTOR are nearly the SAME SUBSPACE (driver baskets ARE same-sector stocks).
+Shapley's 34% is the FAIR SPLIT of variance news SHARES with sector, NOT independent importance; news's
+UNIQUE orthogonal contribution (news-last) is ~1-3% (BP-GM 1%, AAPL-GS ~0%). CONCLUSION: the news graph is
+largely a text-derived sector/sub-sector classifier — it reconstructs groupings a sector model already has;
+you cannot cleanly separate news from sector because they are the same factor; forced to a unique-contribution
+answer, news is a couple of percent. This is the quantified end of the "half a trend relabeled" skepticism:
+the cross-market-replicated structure (F16) is real but ≈ sector; the independent news factor is small. `factor_shapley.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
