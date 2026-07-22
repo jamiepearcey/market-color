@@ -208,6 +208,21 @@ india_specified_factors.py.
   reversion (C_past -0.57) + market ΔC. US was -0.0044 (t-3.9). India leans mildly positive but
   below significance; not a leading/tradeable signal in either market. Descriptive-not-predictive holds cross-market.
 
+### F17. Factor decomposition — the news channel is a ~0-2% incremental sliver (2026-07-22)
+Full orthogonalized covariance decomposition of a pair's correlation (`factor_decomp.py`): split
+cov(A,B) EXACTLY into blocks in economic order macro(9)->sector(9 GICS SPDRs)->named news drivers->
+idiosyncratic (Gram-Schmidt makes it additive, checks to 100%).
+- GS-MS (corr +0.815): MACRO 46% + SECTOR 41% + news drivers ~2% + idiosyncratic 12%.
+- BP-GM (+0.528): macro 77% + sector 20% + news 1% + idio 3%. AAPL-GS: macro 78% + sector 26% + news ~0%.
+CONCLUSION: once macro AND sector are separated FIRST, the named news channels make up only ~0-2% of
+pair co-movement. Reconciles the earlier "Moody's +0.13 (19%)" / "70% survives sector": those removed
+the driver BASKET (which IS mostly sector) from sector-containing returns, CREDITING sector-overlapping
+variance to the driver; giving sector priority collapses the unique news share to ~1-2% (finer sub-sector
+clustering the 9 broad ETFs miss). Confirms the standing skepticism: most "news explains co-movement" is
+macro+sector wearing news labels; the news-specific INCREMENTAL factor is small. The cross-market-replicated
+STRUCTURE (F16) is real but sector-adjacent, not a large independent factor. CAVEAT: order-dependent (news-
+last = conservative); a Shapley decomposition (avg over orderings) is the order-independent version. `factor_decomp.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
