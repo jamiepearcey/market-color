@@ -281,6 +281,20 @@ industry factor. The news graph's irreducible contribution = the DYNAMIC, cataly
 which same-industry names are bound right now — not a new sector, but time-varying within-industry
 clustering no static taxonomy (however fine) provides. Small (+0.056) and descriptive, but real. `residual_subsector.py`.
 
+### F22. Event-anchored (out-of-mention) exposure — description beats the ticker-mention (2026-07-22)
+Reframe (user): everything prior is MENTION-ANCHORED (article names X -> resolve to ticker -> measure
+co-movement among named tickers), conflating 'mentioned' with 'exposed' and conditioning all results on
+the journalist's list. Test the event-anchored alternative (`descriptive_exposure.py`): represent each
+event by its verbatim quotes+catalyst+mechanism (tf-idf), each company by its OWN news text (independent
+of the event); exposure=cosine. Among firms the article NEVER named, do high-descriptive-exposure ones
+co-move with the event's mentioned basket more than low-exposure ones, after macro+sector removal?
+RESULT: non-mentioned HIGH-exposure +0.029 vs LOW +0.007 -> **excess +0.023, t9.4**. YES — rich event
+description surfaces genuinely exposed firms the mention missed, co-moving beyond sector. So the mention
+anchor UNDERCOUNTS exposure; the event-anchored/descriptive frame adds real (small) sector-orthogonal signal
+and a full-universe exposure landscape (not just named firms). Caveats: small magnitude (~residual scale);
+company profile still news-derived (not fully mention-free — 10-Ks/business-desc would be cleaner); first-cut
+tf-idf + coarse quartile split. EXTENDS not overturns. Next: event-as-factor betas + real embeddings. `descriptive_exposure.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
