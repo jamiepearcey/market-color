@@ -323,6 +323,18 @@ the embedding lacks). Breaks past the ~0.057 ceiling that held across mention/tf
 model structure, not purely data. Still small (residual-scale). CAVEATS: mimicking-portfolio self-inclusion
 (tighten), and DIRECTION (signed effect) not yet added. `mechanism_factors.py`.
 
+### F24. Mechanism model + DIRECTION — magnitude works, direction is chance (2026-07-22)
+Completed the step-4 framework (`mechanism_direction.py`): signed event shock D_E (net effect_dir of named
+firms) x signed company mechanism betas (leakage-clean: firm excluded from its own mimicking portfolio).
+(A) MAGNITUDE/co-movement: |mechanism-factor exposure| vs realized co-move = **+0.101, t13** (leakage-clean),
+up from cosine +0.057 and self-included +0.076 — nearly 2x the baseline; best exposure model built. WHO is
+exposed is now well-predicted. (B) DIRECTION: corr(D_E*exposure, realized SIGNED abnormal return) = +0.039
+(t5 only from n=15651); **directional hit-rate 51.4%** (chance=50%). Predicting UP vs DOWN is essentially a
+coin flip. CONCLUSION on the user's 3 ingredients: pathway (mechanisms) ✓ interpretable; magnitude (return
+betas) ✓ +0.101; DIRECTION ✗ near-chance. Direction is exactly where the signal runs out — reaffirming the
+whole project's through-line: a DESCRIPTIVE exposure lens (who/how-strongly), NOT predictive (which-way/when).
+`mechanism_direction.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
