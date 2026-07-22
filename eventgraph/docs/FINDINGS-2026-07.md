@@ -261,6 +261,11 @@ shared catalyst (regulation, litigation, strike, national policy, crisis complex
 national clusters that broad sector betas cannot encode. The news graph's genuine informational value = it
 NAMES the catalyst. Small magnitude (~+0.06 aggregate) but real and interpretable; it is an event-driven
 sub-sector linkage detector, not a sector relabel and not a factor. `residual_content.py`.
+RATE (residual_content count): named event-cluster structures (specific driver linking >=2 priceable
+names) are SPARSE+BURSTY — 507 in 3yrs = ~1.1/day mean but MEDIAN 0 (clustered on event days, max 16);
+>=3 names 194 total, 0.4/day. On 57k/446k sample; F7 (coverage density-bound, not total-bound) implies
+full-corpus rate is low single digits/day, NOT ~8. So the unique news signal is small (~+0.06) AND sparse
+(~1/day, median 0, bursty) — an occasional event-linkage detector, valuable on event days, quiet otherwise.
 
 ## 4. Statistical honesty ledger
 
