@@ -42,6 +42,13 @@ body{background:var(--surface);color:var(--ink);font:13.5px/1.5 -apple-system,Bl
 .bar .fill{height:100%;border-radius:4px;opacity:.85}
 .rl{font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
 .rl b{font-weight:700}
+.evi{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 15px;margin:12px 0 4px;max-width:900px}
+.evi .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);margin-bottom:8px}
+.fact{border-left:3px solid var(--line);padding:3px 0 3px 11px;margin-bottom:7px}
+.fact .fq q{font-style:italic;color:var(--ink);font-size:13px}
+.fact .fmech{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--panel2);color:var(--ink3);text-transform:uppercase;margin-left:6px}
+.fact .fsrc{display:block;font-size:11.5px;color:var(--ink3);text-decoration:none;margin-top:2px}
+.fact .fsrc:hover{color:var(--pos);text-decoration:underline}.fact .fsrc .src{text-transform:uppercase;font-size:10px}
 .note{color:var(--ink3);font-size:12px;margin-top:20px;max-width:820px}
 ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
 </style></head>
@@ -71,10 +78,16 @@ function render(){
   const e=sel; const rows=e.rows.filter(r=>r.exp>0);
   const mx=Math.max(...rows.map(r=>r.exp),0.1);
   const surfaced=rows.filter(r=>!r.m).slice(0,6).map(r=>r.t);
+  const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const evi=(e.facts&&e.facts.length)?`<div class="evi"><div class="lbl">what this event is — the article text behind it</div>`+
+    e.facts.map(f=>`<div class="fact"><div class="fq"><q>${esc(f.q)}</q>${f.mech?`<span class="fmech">${esc(f.mech)}</span>`:''}</div>`+
+      (f.u?`<a class="fsrc" href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.h)||'(article)'} · <span class="src">${esc(f.s)}</span> · ${f.d||''} ↗</a>`:`<div class="fsrc">${esc(f.h)||''} · <span class="src">${esc(f.s)||''}</span> · ${f.d||''}</div>`)+
+    `</div>`).join("")+`</div>`:"";
   el("main").innerHTML=`<div class="hd">${e.label} <span class="badge">${e.type}</span> <span style="color:var(--ink3);font-size:14px">${e.month}</span></div>
     <p class="sub">The article <b>named ${e.n_named}</b> firm${e.n_named>1?'s':''}. The exposure map below ranks the <b>whole universe</b> by
     semantic similarity to the event — surfacing the unnamed firms most exposed (top: <b>${surfaced.join(', ')}</b>). <b>Realized</b> = each firm's
     actual co-movement with the event during its window, after macro+sector — the check that a surfaced exposure is real.</p>
+    ${evi}
     <div class="leg"><span><span class="dot tagn"></span>named by the article</span><span><span class="dot tags"></span>surfaced (unnamed)</span><span style="color:var(--ink3)">bar = exposure · right = realized co-move</span></div>
     <div class="rows">`+rows.slice(0,28).map((r,i)=>{
       const rl=r.real==null?'—':(r.real>=0?'+':'')+r.real.toFixed(2);
