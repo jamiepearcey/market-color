@@ -51,6 +51,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .cohort{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .chip2{font-size:11.5px;padding:3px 9px;border-radius:8px;font-weight:600}
 .chip2.bound{color:#fff}.chip2.peer{background:transparent;border:1px dashed var(--line);color:var(--ink3);font-weight:500}
+.facts{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.fact{border-left:3px solid var(--line);padding:4px 0 4px 11px}
+.fq{font-size:13px}.fq .fd{font-weight:700;font-variant-numeric:tabular-nums}.fq q{font-style:italic;color:var(--ink)}
+.fmech{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--panel2);color:var(--ink3);text-transform:uppercase;letter-spacing:.03em;margin-left:6px}
+.fsrc{display:block;font-size:11.5px;color:var(--ink3);margin-top:2px;text-decoration:none}
+.fsrc:hover{color:var(--pos);text-decoration:underline}.fsrc .src{text-transform:uppercase;font-size:10px;letter-spacing:.04em}
 .arcwrap{margin-top:8px}
 .note{color:var(--ink3);font-size:12px;margin-top:16px;max-width:820px}
 </style></head>
@@ -126,12 +132,18 @@ function detail(e){
   const bound=e.names.map(n=>`<span class="chip2 bound" style="background:${secColor(n.sec)}">${n.t}</span>`).join("");
   const peers=(e.cohort||[]).map(n=>`<span class="chip2 peer">${n.t}</span>`).join("");
   const cohort=(e.cohort&&e.cohort.length)?`<div class="cohort-lbl">the ${e.dom} cohort — <span style="color:var(--pos)">named by this catalyst</span> vs <span style="color:var(--ink3)">skipped</span>:</div><div class="cohort">${bound}${peers}</div>`:"";
+  const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const facts=(e.facts&&e.facts.length)?`<div class="cohort-lbl">evidence — the facts &amp; source articles behind these links:</div><div class="facts">`+
+    e.facts.map(f=>`<div class="fact"><div class="fq"><span class="fd" style="color:${f.dir>=0?'var(--pos)':'var(--neg)'}">${f.dir>=0?'▲':'▼'} ${f.t}</span> — <q>${esc(f.quote)}</q>${f.mech?`<span class="fmech">${esc(f.mech)}</span>`:''}</div>`+
+      (f.u?`<a class="fsrc" href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.h)||'(article)'} · <span class="src">${esc(f.s)}</span> · ${f.d||''} ↗</a>`:`<div class="fsrc">${esc(f.h)||''} · <span class="src">${esc(f.s)||''}</span> · ${f.d||''}</div>`)+
+    `</div>`).join("")+`</div>`:"";
   el("detail").innerHTML=`<div class="dh"><span class="t">${e.label}</span><span class="badge">${e.type}</span><span class="mo">${e.month}</span></div>
     <div class="dstat">binds <b>${e.size}</b> firms · residual co-movement <b>${e.res>=0?'+':''}${e.res.toFixed(2)}</b> (peak <b>${e.resmax>=0?'+':''}${e.resmax.toFixed(2)}</b>) after macro &amp; broad sector</div>
     ${specificity}
     <div class="arcwrap"><svg viewBox="0 0 ${arcW} ${arcH}" style="max-width:${arcW}px">${arcs}${nodes}</svg></div>
     <div class="firms">${firms}</div>
-    ${cohort}`;
+    ${cohort}
+    ${facts}`;
 }
 const leg=el("legend");
 TYPES.forEach(t=>{const d=document.createElement("div");d.className="lg";d.innerHTML=`<span class="sw" style="background:${tColor(t)}"></span>${t}`;

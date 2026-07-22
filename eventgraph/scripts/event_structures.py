@@ -27,12 +27,18 @@ for l in open(G/"entity_symbol.jsonl"):
     j=json.loads(l)
     if j["kind"]=="security" and "." not in j["symbol"] and not j["symbol"].startswith("^") and j["symbol"] not in SKIP:
         sym[j["entity_id"]]=j["symbol"]; name.setdefault(j["symbol"], j["entity_id"].split("__")[0].replace("_"," ").title())
-docm={json.loads(l)["doc_id"]:(json.loads(l).get("published_at") or "")[:7] for l in open(G/"lake/document.jsonl")}
+docm={}; docmeta={}
+for l in open(G/"lake/document.jsonl"):
+    j=json.loads(l); docm[j["doc_id"]]=(j.get("published_at") or "")[:7]
+    docmeta[j["doc_id"]]={"h":j.get("headline"),"s":j.get("source"),"u":j.get("url"),"d":(j.get("published_at") or "")[:10]}
 freq=collections.Counter(); cause_m=collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int))); dlabel={}
+prov=collections.defaultdict(lambda: collections.defaultdict(list))   # (month,cause)->firm->[(sign,quote,mech,doc_id)]
 for l in open(G/"lake/causal_event_edge.jsonl"):
     j=json.loads(l); m=docm.get(j.get("doc_id")); e=j.get("effect_entity"); c=j.get("cause_entity"); d=j.get("effect_dir")
     if not m or m[:4] not in {"2010","2011","2012"} or e not in sym or not c or d not in DIRV: continue
     freq[sym[e]]+=1; cause_m[m][c][sym[e]]+=DIRV[d]; dlabel[c]=(c.split("__")[0].replace("_"," ").title(),c.split("__")[-1])
+    pl=prov[(m,c)][sym[e]]
+    if len(pl)<3: pl.append((DIRV[d], j.get("quote"), j.get("mechanism"), j.get("doc_id")))
 years={"2010","2011","2012"}
 def ret(t): return logret(yahoo(t,cache,p1,p2))
 etf={e:ret(e) for e in BROAD+SUBIND}; etf={e:v for e,v in etf.items() if len([d for d in v if d[:4] in years])>300}
@@ -89,6 +95,17 @@ for m in mo:
                 if rc is not None: pairs.append([x,y,round(rc,3)]); vals.append(rc)
                 if rs is not None: vsub.append(rs)
         if not vals: continue
+        # evidence: the actual facts (verbatim quote + mechanism + source article) behind the links
+        facts=[]; seen=set()
+        for firm in ns:
+            for fsgn,quote,mech,did in prov[(m,c)].get(firm,[]):
+                k=(firm,quote)
+                if k in seen or not quote: continue
+                seen.add(k); dm=docmeta.get(did,{})
+                facts.append({"t":firm,"dir":int(fsgn),"quote":quote,"mech":mech,
+                              "h":dm.get("h"),"s":dm.get("s"),"u":dm.get("u"),"d":dm.get("d")})
+                if len(facts)>=10: break
+            if len(facts)>=10: break
         dom=collections.Counter(SEC[s] for s in ns).most_common(1)[0][0]
         # sector cohort: same-dominant-sector universe peers NOT in the event
         cohort=[s for s in by_sec[dom] if s not in ns][:14]
@@ -99,7 +116,7 @@ for m in mo:
             "dom":dom,"cohort_base":round(float(np.mean(base)),3) if base else None,
             "names":[{"t":s,"n":name.get(s,s),"sec":SEC[s],"dir":int(np.sign(sgn[s]))} for s in ns],
             "cohort":[{"t":s,"n":name.get(s,s),"sec":SEC[s]} for s in cohort],
-            "pairs":pairs})
+            "facts":facts,"pairs":pairs})
 events.sort(key=lambda e:(e["month"],-e["res"]))
 Path("../data/eg_runs/eg100k_graph/events.json").write_text(json.dumps({"events":events,"sectors":list(SN.values())}))
 print(f"-> events.json  {len(events)} events (with res_sub + sector cohort)")
