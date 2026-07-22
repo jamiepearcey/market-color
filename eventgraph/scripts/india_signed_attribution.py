@@ -19,12 +19,14 @@ p1=int(dt.datetime(2020,1,1,tzinfo=dt.UTC).timestamp()); p2=int(dt.datetime(2022
 FAC={"mkt":"^NSEI","bank":"^NSEBANK","it":"^CNXIT","inr":"INR=X","brent":"BZ=F"}
 facr={k:logret(yahoo(t,cache,p1,p2)) for k,t in FAC.items()}
 px={s:logret(yahoo(s,cache,p1,p2)) for s in sorted(set(resolved.values()))}; px={s:v for s,v in px.items() if len(v)>200}
-common=sorted(set.intersection(*[set(px[s]) for s in px], *[set(facr[k]) for k in facr]))
-AR={}
+facdays=sorted(set.intersection(*[set(facr[k]) for k in facr]))   # master calendar (factor days)
+AR={}                                                            # residualize each stock on ITS OWN days
 for s,r in px.items():
-    y=np.array([r[d] for d in common]); X=np.column_stack([np.ones(len(common))]+[[facr[k][d] for d in common] for k in facr])
-    b,*_=np.linalg.lstsq(X,y,rcond=None); AR[s]=dict(zip(common,y-X@b))
-U=set(AR)
+    days=sorted(set(r)&set(facdays))
+    if len(days)<200: continue
+    y=np.array([r[d] for d in days]); X=np.column_stack([np.ones(len(days))]+[[facr[k][d] for d in days] for k in facr])
+    b,*_=np.linalg.lstsq(X,y,rcond=None); AR[s]=dict(zip(days,y-X@b))
+U=set(AR); common=facdays
 docm={json.loads(l)["doc_id"]:(json.loads(l).get("published_at") or "")[:7] for l in open(G/"lake/document.jsonl")}
 cs=collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(int)))
 for l in open(G/"lake/causal_event_edge.jsonl"):

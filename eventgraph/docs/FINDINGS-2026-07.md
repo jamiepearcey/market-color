@@ -185,19 +185,24 @@ through the Moody's channel" statement is genuine structure, not an in-sample ar
 NOT circular/in-sample/arbitrary. Boundary that HOLDS: still DESCRIPTIVE not predictive (F14: news
 doesn't lead). Sector share handled separately (F13 sector-neutralization: 70% survives). `oos_attribution.py`.
 
-### F16. India at power — persistence generalizes, signed attribution underpowered (2026-07-22)
-Full India-2021 corpus extracted (38,405 docs, 99.7% parsed) and re-ingested: lake rebuilt to
-**45,428 causal edges** (6x the 13k-doc version's 7,611), 38,469 docs, 85% grounded.
-- **Persistence (F1) GENERALIZES to EM**: linked−unlinked +8pp/+12pp/+24pp (>0.3) across market/
-  sectors/macro India-factor specs, positive in EVERY spec, n now 57-120 (was 19-69). Robust.
-- **Signed attribution (F13) UNDERPOWERED / null**: same-sign removal mean +0.001 (t0.3, **n=20**),
-  opposite-sign n=2; difference -0.024 (t-1.0). vs US +0.121 t7.5 n492/98. OOS n=14, magnitude ~0.
-  NOT confirmed, NOT refuted — a power wall: only **46 resolved Nifty tickers x 1 year (2021)** means
-  almost no (driver,month) cell has ≥4 priceable connected names + a correlated pair + ≥2 leave-two-out
-  others. The coarse persistence test survives low power; the fine signed decomposition does not.
-CONCLUSION: the CORE finding (news-linked correlations persist) broadens to an emerging market; the
-signed-attribution decomposition is not confirmable at India's power — needs broader resolution
-(Nifty500 vs 46 names) and/or multi-year. Scripts india_signed_attribution.py, india_specified_factors.py.
+### F16. India at power — the signed attribution GENERALIZES to an emerging market (2026-07-22)
+Full India-2021 corpus re-ingested (45,428 causal edges, 6x the 13k version). First pass was
+UNDERPOWERED (signed n=20) — diagnosed NOT as a real null but as an unfinished resolution: only
+46 of 3,580 company entities mapped (Nifty50-only, 6% edge coverage). Expanded resolution via
+LLM+Yahoo-verified gate (`india_resolve_expand.py`): 46 -> **140 NSE tickers** (107 new, each gated
+on real 2020-22 price history + issuer name-match). Re-run at power (fixed a global common-day
+intersection bug that newly-listed 2021 IPOs exposed — residualize each stock on its own days):
+- **Signed attribution (F13) GENERALIZES**: same-sign (co-move) removal +0.113 (t6.9, n68) vs
+  opposite-sign (divergence) +0.021 (t2.4, n13); **DIFFERENCE +0.091, t4.9** — same pattern,
+  significance, and comparable magnitude to US (+0.121, t7.5). 
+- **OOS (F15) holds**: same-sign OOS (W1 betas -> W2) retains **80%** of in-sample (t3.7) vs US 99%.
+- **Persistence (F1)**: +19/+19/+25pp (>0.3) across market/sectors/macro specs, n=192-420. Robust, powered.
+CONCLUSION: every component of the US result (persistence, signed co-move-vs-divergence attribution,
+out-of-sample stability) reproduces in a structurally different emerging market once the universe is
+properly resolved. The earlier India "null" was a 15%-complete resolution, NOT a failure to generalize.
+This is the finding's broadening — it is not a US-only artifact. Caveat: single year (2021), so temporal
+(not cross-sectional) power is still limited. Scripts india_resolve_expand.py, india_signed_attribution.py,
+india_specified_factors.py.
 
 ## 4. Statistical honesty ledger
 

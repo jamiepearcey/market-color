@@ -23,13 +23,15 @@ for l in open(G/"lake/causal_event_edge.jsonl"):
     if m and c and e in resolved and resolved[e] in px: cause_m[m][c].add(resolved[e])
 
 def neutralize(fset):
-    fk=[k for k in fset]
-    common=sorted(set.intersection(*[set(px[s]) for s in px], *[set(facr[k]) for k in fk]))
+    fk=list(fset)
+    facdays=sorted(set.intersection(*[set(facr[k]) for k in fk]))    # master calendar
     ar={}
-    for s,r in px.items():
-        y=np.array([r[d] for d in common]); X=np.column_stack([np.ones(len(common))]+[[facr[k][d] for d in common] for k in fk])
-        b,*_=np.linalg.lstsq(X,y,rcond=None); ar[s]=dict(zip(common,y-X@b))
-    return ar, common
+    for s,r in px.items():                                          # residualize each stock on ITS OWN days
+        days=sorted(set(r)&set(facdays))
+        if len(days)<200: continue
+        y=np.array([r[d] for d in days]); X=np.column_stack([np.ones(len(days))]+[[facr[k][d] for d in days] for k in fk])
+        b,*_=np.linalg.lstsq(X,y,rcond=None); ar[s]=dict(zip(days,y-X@b))
+    return ar, facdays
 
 def links_in(ms):
     out=set()
