@@ -248,6 +248,20 @@ decomp F17) vs 0.38 (per-name macro+sector OLS here); one method mishandles coll
 reconciliation OWED before trusting absolute pair-level residuals. Aggregate B/C use one consistent method,
 so the linked-vs-unlinked +0.062 is robust. `residual_view.py`.
 
+### F20. What the residual CONTAINS — event-driven sub-sector linkages (2026-07-22)
+`residual_content.py` characterizes the sector-orthogonal news signal (F19's +0.062). (A) it lives more
+in SAME-sector pairs (linked +0.103 vs unlinked +0.014, excess +0.090) than cross-sector (+0.035) = the
+broad 9 GICS factors miss FINE SUB-SECTOR clusters the news identifies. (B) the top drivers of residual
+co-movement are SPECIFIC EVENTS, not factors: UK/EU bank regulation (Project Merlin, Vickers/Independent
+Commission on Banking, EU Competition -> Lloyds-NatWest-Barclays-DB-UBS), SA gold-miner strikes (National
+Union of Mineworkers -> AngloGold-Gold Fields), the mortgage-agency complex (Maiden Lane III/Sherry Hunt/
+SEC -> Freddie-Fannie), German autos (BMW -> Mercedes-VW), US derivatives reg (CFTC -> GS-MS).
+CONCLUSION: the residual contains EVENT-DRIVEN, sector-orthogonal co-movement — firms bound by a specific
+shared catalyst (regulation, litigation, strike, national policy, crisis complex) forming fine sub-sector/
+national clusters that broad sector betas cannot encode. The news graph's genuine informational value = it
+NAMES the catalyst. Small magnitude (~+0.06 aggregate) but real and interpretable; it is an event-driven
+sub-sector linkage detector, not a sector relabel and not a factor. `residual_content.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
