@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 G = Path("../data/eg_runs/eg100k_graph")
 D = json.loads((G / "exposure_landscape_emb.json").read_text())
+ROUTE = json.loads((G / "event_routing.json").read_text()) if (G / "event_routing.json").exists() else {}
+for e in D["events"]:
+    e["route"] = ROUTE.get(f"{e['month']}|{e['label']}", {})
 MECH = [
  ("US financial legislation", "Dodd-Frank, Barney Frank, Carl Levin — regulatory reform of banks"),
  ("UK banking reform", "Vickers / Independent Commission on Banking / Project Merlin — ring-fencing"),
@@ -69,6 +72,11 @@ a{color:inherit}
 .tag{font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700;text-transform:uppercase}.tag.n{background:var(--pos);color:#fff}.tag.s{border:1px dashed var(--ink3);color:var(--ink3)}
 .bar{height:14px;border-radius:4px;background:var(--panel2)}.bar .fill{height:100%;border-radius:4px;opacity:.85}
 .rl{font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums}
+.route{display:flex;gap:10px;flex-wrap:wrap}
+.rt{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 12px;min-width:150px}
+.rt .k{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
+.rt .v{font-size:13.5px;font-weight:600;margin-top:2px}
+.fit-ok{color:var(--gd)}.fit-warn{color:#c98500}.fit-bad{color:var(--neg)}
 .note{color:var(--ink3);font-size:12px;margin-top:8px}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 30px}
 .mcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
@@ -124,8 +132,10 @@ function renderList(){
   const q=el("search").value.toLowerCase();
   const items=EV.filter(e=>!q||e.label.toLowerCase().includes(q)||e.type.includes(q));
   const byT={}; items.forEach(e=>(byT[e.type]=byT[e.type]||[]).push(e));
-  el("list").innerHTML=Object.keys(byT).sort().map(t=>`<div class="grp">${t}</div>`+byT[t].map(e=>
-    `<div class="ev ${e===sel?'sel':''}" data-i="${e._i}"><div class="t">${e.label}</div><div class="s">${e.month} · named ${e.n_named}</div></div>`).join("")).join("");
+  const FITC={regulatory:'var(--gd)',legal:'var(--gd)',company_specific:'var(--gd)',macro_surprise:'#c98500',policy:'#c98500',supply_shock:'var(--neg)',credit_rating:'var(--neg)',geopolitical:'var(--neg)'};
+  el("list").innerHTML=Object.keys(byT).sort().map(t=>`<div class="grp">${t}</div>`+byT[t].map(e=>{
+    const fc=FITC[(e.route||{}).mech]||'var(--ink3)';
+    return `<div class="ev ${e===sel?'sel':''}" data-i="${e._i}"><div class="t"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${fc};margin-right:6px" title="channel fit"></span>${e.label}</div><div class="s">${e.month} · ${((e.route||{}).mech||'').replace(/_/g,' ')||'named '+e.n_named}</div></div>`}).join("")).join("");
 }
 function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 function render(){
@@ -133,7 +143,26 @@ function render(){
   const surf=rows.filter(r=>!r.m).slice(0,5).map(r=>r.t);
   const evi=(e.facts&&e.facts.length)?e.facts.slice(0,2).map(f=>`<div style="margin-bottom:8px"><div class="fq"><q>${esc(f.q)}</q>${f.mech?`<span class="fmech">${esc(f.mech)}</span>`:''}</div>`+
     (f.u?`<a class="fsrc" href="${esc(f.u)}" target="_blank">${esc(f.h)||'(article)'} · <span class="src">${esc(f.s)}</span> · ${f.d||''} ↗</a>`:'')+`</div>`).join(""):'<span class="note">no source quote captured</span>';
+  const CH={regulatory:["embedding","fit-ok","✓ well-suited — named set + close peers"],
+    legal:["embedding","fit-ok","✓ well-suited"],
+    company_specific:["embedding","fit-ok","✓ suited — firm + direct relations"],
+    macro_surprise:["factor beta","fit-warn","⚠ embedding is a broad proxy — true channel is factor exposure"],
+    policy:["sector / factor beta","fit-warn","⚠ embedding weak — policy-sensitive sectors via beta"],
+    supply_shock:["relation network","fit-bad","✗ wrong channel here — needs supplier/customer graph"],
+    credit_rating:["credit / CDS graph","fit-bad","✗ wrong channel — needs credit linkage"],
+    geopolitical:["country / commodity","fit-bad","✗ wrong channel — needs country/commodity exposure"]};
+  const DIRN={factor_signed:["factor-model only","β × shock — a factor model handles the sign; not a news signal"],
+    idiosyncratic:["not recoverable","idiosyncratic — no common factor sets the sign"]};
+  const rt=e.route||{}, ch=CH[rt.mech]||["embedding","fit-warn","— unclassified"], dn=DIRN[rt.dir]||["—","—"];
+  const routeCard=rt.mech?`<div class="card"><h3>0 · how this event should be handled — routing</h3><div class="route">
+      <div class="rt"><div class="k">event type</div><div class="v">${rt.mech.replace(/_/g,' ')}</div></div>
+      <div class="rt"><div class="k">domain</div><div class="v">${(rt.domain||'—').replace(/_/g,' ')}</div></div>
+      <div class="rt"><div class="k">dominant layer</div><div class="v">${rt.layer||'—'}</div></div>
+      <div class="rt"><div class="k">exposure channel</div><div class="v ${ch[1]}">${ch[0]}</div></div>
+      <div class="rt"><div class="k">direction</div><div class="v ${rt.dir=='factor_signed'?'fit-warn':'fit-bad'}">${dn[0]}</div></div>
+    </div><p class="note">${ch[2]} · <b>Direction:</b> ${dn[1]}. <span style="color:var(--ink3)">This demo's channel is the embedding — best on regulatory/legal/company events; for the others the ranking below is a proxy.</span></p></div>`:"";
   el("main").innerHTML=`<div class="hd">${e.label} <span class="badge">${e.type}</span> <span style="color:var(--ink3);font-size:14px">${e.month}</span></div>
+    ${routeCard}
     <div class="card"><h3>1 · what the event is — the source article</h3>${evi}</div>
     <div class="card"><h3>2 · who the article named</h3><div class="named">${e.named.map(t=>`<span class="pill">${t}</span>`).join("")}</div></div>
     <div class="card"><h3>3 · who is actually exposed — the whole market, ranked</h3>
