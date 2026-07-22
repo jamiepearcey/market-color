@@ -153,6 +153,23 @@ Provenance drill-down works cross-lingually (Arabic article -> INTC/TXN pair fla
 6. **Covariance-forecast product at current density**: +0.4% OOS MSE improvement,
    tracking the 0.4% pair coverage ~1:1. Scalpel, not blanket.
 
+### F14. Lead-lag test — news does NOT lead correlation (decisive negative, 2026-07-22)
+The sharpest question: is the news channel a LEADING, non-price observable (the one thing a
+price-defined beta regression cannot be), or just an interpretable re-description of one? Test
+(`lead_lag.py`): for each (driver, week) does a 1-SD surge in the driver's news over the trailing
+window predict its connected names co-moving MORE over the FORWARD 15 trading days, controlling
+for mean-reversion (C_past) and market-wide co-movement change (crisis confound)?
+- NEWS coef = **-0.0044, t=-3.9** (negative, not positive). C_past -0.33; dC_market **+0.96** (the
+  driver names' co-movement change is ~1:1 the market's -> the confound does the work).
+- Intuitive lead-lag peak cross-correlation: **median lag 0 wk**, 47% lead / 13% same / 40% lag = symmetric.
+CONCLUSION: news activation is **coincident, not leading** (news spikes during crises when co-movement
+is already high, then mean-reverts). The attribution (F13) is confirmed to be, mechanically, a BETA
+REGRESSION to a text-defined factor: novelty is factor CONSTRUCTION from news (named/signed/no-price-
+history-needed), NOT a leading signal. RETRACTS any "sits ahead of the trailing covariance / early
+warning" framing. Value = interpretable text-discovered factor model (descriptive), not prediction/
+alpha. Caveats: daily/weekly granularity (an intraday lead is untested & unseen here); market control
+is aggressive. But symmetric lead-lag argues against a rescue. `lead_lag.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
