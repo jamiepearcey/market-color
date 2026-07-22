@@ -4,9 +4,10 @@ Reference copy of everything discovered in the 2026-07-18..20 investigation: the
 hypotheses, the evidence, what survived, what died, and where every artifact lives.
 
 **One-sentence thesis the whole arc supports:**
-> The causal structure of news, gated by market confirmation, identifies which asset
-> correlations are structural rather than statistical — a modest, real, non-tautological
-> signal whose economic value is bounded only by news coverage.
+> News-event embeddings carry a small but genuine, leakage-free FORWARD signal about asset
+> co-movement, incremental to price history — a predictive *covariance/risk* signal (not returns,
+> not contemporaneous exposure, which is mostly recoverable from returns). Modest (+0.03 IC) but real.
+> [Corrected 2026-07-23 after Fable rigor review — see F30/F31; earlier F22-F24 magnitudes were price-history-inflated.]
 
 ---
 
@@ -408,6 +409,19 @@ level t=1.9-3.8). SILVER LINING: text adds a small SIGNIFICANT FORWARD increment
 forward increment may still be profile-leakage (company profiles include cross-month quotes) -> F31/T3 pending.
 Retro-deflates F22-F24 headline magnitudes; the exposure STRUCTURE is real but its text-specific size was overstated.
 `rigor_recheck.py`.
+
+### F31. Leakage-free (pre-event profiles) — a small genuine FORWARD covariance signal survives (2026-07-23)
+Fable T3/#3 decisive test: rebuild firm profiles from ONLY the firm's news published BEFORE the event month
+(`rigor_recheck_t3.py`) — kills cross-document retrieval leakage, directly answering the research question
+(latent inference vs retrieval). CONTEMPORANEOUS text increment over trailing corr: +0.016 (t1.5, 95%CI
+[-0.004,+0.036] = NOT significant — dies). FORWARD text increment: **+0.028 (t2.7, CI [+0.007,+0.048]) —
+SURVIVES, if anything stronger than the leaky +0.021.** CONCLUSION: contemporaneous 'exposure' is mostly price
+history (text adds ~0 clean); but a small, significant, LEAKAGE-FREE, FORWARD-predictive covariance signal is
+real — pre-event text predicts next-window co-movement beyond trailing correlation, and it is genuine latent
+inference (pre-event-only), not retrieval. The corrected thesis: not a descriptive exposure map, but a modest
+(+0.03 IC) PREDICTIVE covariance/RISK signal (consistent with F3 corr-forecasting + F13 OOS-stability). More
+defensible AND more valuable (forward risk > contemporaneous explanation). Next (Fable): sharpen into a proper
+realized-covariance / hedge-failure forecast; run per-type routing at event-level inference. `rigor_recheck_t3.py`.
 
 ## 4. Statistical honesty ledger
 
