@@ -382,6 +382,19 @@ is not a news-actionable signal in ANY bucket (F24 chance / F25 sentiment contem
 model). The routing insight was architecturally right and PROVED where direction comes from (factor model, not news).
 Routing's real payoff is EXPOSURE (F26/F27), not direction. `direction_routed.py`.
 
+### F29. Information-gap / timing alpha — no exploitable lag (2026-07-23)
+User's reframe: the trade isn't DIRECTION, it's TIMING — a firm with HIGH latent exposure that is NOT mentioned
+and has NOT reacted (abnormal return ~0) is the 'market hasn't caught up' gap. Tested (`information_gap.py`):
+split each event window into early (reacted?) and late (catch-up?); for non-mentioned firms measure late drift
+toward the event basket, conditioned on exposure and early reaction. RESULT: high-exposure + not-reacted late
+drift +0.010 (t2.2) — BELOW the low-exposure-unreacted control +0.012; corr(exposure, late drift | unreacted)
+= -0.010 (t-0.8, NULL). Only the already-reacted high-exposure group keeps moving (+0.037, contemporaneous
+momentum, not a gap). CONCLUSION: the exposure model does NOT lead price — if a genuinely-exposed firm hasn't
+moved early, exposure says nothing about a late move. The market prices this exposure CONTEMPORANEOUSLY; no lag
+to harvest. 5th independent null on the predictive side (F6/F14/F24/F25/F29). Closes the alpha search: this is a
+real contemporaneous EXPOSURE map (explanation/risk), not alpha — the market is efficient wrt the structure it
+recovers. `information_gap.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
