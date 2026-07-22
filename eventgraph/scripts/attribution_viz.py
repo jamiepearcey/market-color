@@ -1,142 +1,99 @@
 # /// script
 # requires-python = ">=3.10"
 # ///
-"""Render attribution_daily.json -> a self-contained interactive HTML monitor.
-Multi-line chart (driver attribution over time), validated colorblind-safe palette,
-crosshair+tooltip, legend + direct end-labels, light/dark toggle, data-table view."""
+"""Render attribution.json -> interactive PRICE-MOVE ATTRIBUTION. Pick a firm, see its biggest monthly
+moves decomposed into MARKET/macro + SECTOR + IDIOSYNCRATIC, with the named news events (verbatim quote +
+source article) that explain the idiosyncratic part. Contemporaneous, first-order, direct — no prediction."""
 import json
 from pathlib import Path
-
 G = Path("../data/eg_runs/eg100k_graph")
-data = json.loads((G / "attribution_daily.json").read_text())
-# fixed categorical slot order (dataviz validated palette): light / dark hex per slot
-PAL = [("#2a78d6", "#3987e5"), ("#008300", "#008300"), ("#e87ba4", "#d55181"),
-       ("#eda100", "#c98500"), ("#1baf7a", "#199e70"), ("#eb6834", "#d95926")]
-for i, d in enumerate(data["drivers"]):
-    d["cLight"], d["cDark"] = PAL[i % len(PAL)]
+D = json.loads((G / "attribution.json").read_text())
 
-TEMPLATE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Driver co-movement attribution — daily monitor</title>
+HTML = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Price-move attribution</title>
 <style>
-  :root{--surface:#fcfcfb;--panel:#f4f3f0;--ink:#0b0b0b;--ink2:#52514e;--grid:#e4e3df;--zero:#b9b8b3;color-scheme:light}
-  [data-theme=dark]{--surface:#1a1a19;--panel:#232321;--ink:#fff;--ink2:#c3c2b7;--grid:#333331;--zero:#4a4a47;color-scheme:dark}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--surface);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-  .wrap{max-width:1040px;margin:0 auto;padding:28px 24px 60px}
-  h1{font-size:20px;margin:0 0 4px;letter-spacing:-.01em}
-  .sub{color:var(--ink2);font-size:13px;margin:0 0 20px;max-width:760px}
-  .bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
-  button{font:inherit;color:var(--ink2);background:var(--panel);border:1px solid var(--grid);border-radius:7px;padding:5px 11px;cursor:pointer}
-  button:hover{color:var(--ink)}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:2px 0 10px}
-  .lg{display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
-  .lg.off{opacity:.32}
-  .sw{width:11px;height:11px;border-radius:3px;flex:none}
-  svg{display:block;width:100%;height:auto;overflow:visible}
-  .gridline{stroke:var(--grid);stroke-width:1}
-  .zeroline{stroke:var(--zero);stroke-width:1}
-  .axlab{fill:var(--ink2);font-size:11px}
-  .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-  .endlab{font-size:11.5px;font-weight:600}
-  .cross{stroke:var(--ink2);stroke-width:1;stroke-dasharray:3 3;opacity:0}
-  .tip{position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--grid);border-radius:8px;
-       padding:9px 11px;font-size:12px;box-shadow:0 6px 22px rgba(0,0,0,.22);opacity:0;transition:opacity .08s;z-index:9;min-width:190px}
-  .tip .dt{color:var(--ink2);margin-bottom:5px;font-variant-numeric:tabular-nums}
-  .tip .row{display:flex;justify-content:space-between;gap:14px;align-items:center}
-  .tip .row b{font-variant-numeric:tabular-nums}
-  .tip .nm{display:flex;gap:6px;align-items:center;color:var(--ink2)}
-  table{border-collapse:collapse;font-size:12px;margin-top:16px;width:100%;display:none;font-variant-numeric:tabular-nums}
-  table.show{display:table}
-  th,td{border-bottom:1px solid var(--grid);padding:4px 8px;text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  th{color:var(--ink2);font-weight:600}
-  .note{color:var(--ink2);font-size:12px;margin-top:18px;max-width:760px}
+:root{--surface:#151514;--panel:#1e1e1c;--panel2:#262624;--ink:#fff;--ink2:#c3c2b7;--ink3:#86857c;--grid:#2b2b29;--line:#323230;--mac:#6b6a63;--sec:#3987e5;--idio:#d95926;--pos:#199e70;--neg:#d95926;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--surface);color:var(--ink);font:13.5px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;height:100vh;overflow:hidden}
+.app{display:grid;grid-template-columns:300px 1fr;height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.brand{padding:15px 16px 11px;border-bottom:1px solid var(--line)}.brand h1{font-size:14.5px}.brand p{font-size:11px;color:var(--ink3);margin-top:3px}
+.search{margin:11px 12px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px;width:calc(100% - 24px)}
+.list{flex:1;overflow-y:auto;padding:2px 8px 20px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 10px;border-radius:9px;cursor:pointer}
+.row:hover{background:var(--panel2)}.row.sel{background:var(--sec);color:#fff}
+.row .nm{font-weight:600;font-size:12.5px;display:flex;gap:6px;align-items:center;min-width:0}.row .nm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .nm .tk{opacity:.6;font-weight:500}.row .sc{width:8px;height:8px;border-radius:2px;flex:none}
+.main{overflow-y:auto;padding:22px 28px 60px}
+.hd{font-size:21px;font-weight:650;display:flex;gap:10px;align-items:baseline}.hd .tk{color:var(--ink3);font-weight:500;font-size:15px}
+.sub{color:var(--ink2);font-size:13px;margin:5px 0 16px;max-width:820px}
+.moves{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.mv{padding:7px 12px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:var(--panel);font-variant-numeric:tabular-nums}
+.mv:hover{border-color:var(--ink3)}.mv.on{border-color:var(--sec);background:var(--panel2)}
+.mv .mo{font-size:11px;color:var(--ink3)}.mv .rt{font-size:15px;font-weight:700}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h3{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:12px;font-weight:600}
+.decomp{display:flex;flex-direction:column;gap:9px}
+.drow{display:grid;grid-template-columns:120px 1fr 74px;gap:12px;align-items:center}
+.dlab{font-size:13px;color:var(--ink2);display:flex;gap:7px;align-items:center}.dlab .sw{width:11px;height:11px;border-radius:3px}
+.dbarwrap{position:relative;height:20px;background:var(--panel2);border-radius:4px}
+.dbar{position:absolute;top:0;height:100%;border-radius:4px;opacity:.9}
+.dmid{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--ink3);left:50%}
+.dval{font-size:13.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.expl{color:var(--ink3);font-size:12px;margin-top:11px}
+.fact{border-left:3px solid var(--idio);padding:4px 0 6px 12px;margin-bottom:9px}
+.fq{font-size:13.5px}.fq .fd{font-weight:700}.fq q{font-style:italic;color:var(--ink)}
+.fcat{font-weight:600;color:var(--ink)}.fmech{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--panel2);color:var(--ink3);text-transform:uppercase;margin-left:6px}
+.fsrc{display:block;font-size:11.5px;color:var(--ink3);text-decoration:none;margin-top:2px}.fsrc:hover{color:var(--sec);text-decoration:underline}.fsrc .src{text-transform:uppercase;font-size:10px}
+.note{color:var(--ink3);font-size:12px;margin-top:14px;max-width:820px}
+::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
 </style></head>
-<body data-theme="dark"><div class="wrap">
-<h1>Driver co-movement attribution &mdash; daily monitor</h1>
-<p class="sub">Each line: how much a news-graph <b>driver</b> explains its connected pairs' co-movement,
-measured every trading day in a trailing 63-day window (leave-two-out signed residualization).
-High = a <b>specific</b> channel tightly bundling its names; near-zero = a broad market-wide driver
-whose effect is already in the baseline. Historical BBG corpus, 2010&ndash;2012.</p>
-<div class="bar">
-  <button id="theme">Toggle light/dark</button>
-  <button id="tbl">Show data table</button>
-</div>
-<div class="legend" id="legend"></div>
-<svg id="chart" viewBox="0 0 1000 520" role="img" aria-label="Driver attribution over time"></svg>
-<div class="tip" id="tip"></div>
-<table id="table"></table>
-<p class="note">Attribution is <b>descriptive</b> (it decomposes correlation that exists), not a return
-forecast. The measured drop is trusted for its out-of-sample stability (r&nbsp;=&nbsp;+0.75 quarter-to-quarter),
-not the driver's headline importance &mdash; a broad macro hub can be economically huge yet score low here
-because it moves everything.</p>
+<body><div class="app">
+  <aside class="side"><div class="brand"><h1>Price-move attribution</h1><p>Why did it move? Market vs sector vs news — with the article. BBG 2010–2012.</p></div>
+    <input class="search" id="search" placeholder="Search firms…"><div class="list" id="list"></div></aside>
+  <main class="main" id="main"></main>
 </div>
 <script>
-const DATA = __DATA__;
-const D = DATA.drivers, DATES = DATES_JSON;
-const NS="http://www.w3.org/2000/svg", svg=document.getElementById("chart");
-const W=1000,H=520,mL=48,mR=150,mT=14,mB=34, iw=W-mL-mR, ih=H-mT-mB;
-const off=new Set();
-let ymax=0; D.forEach(d=>d.series.forEach(p=>{if(p.attr!=null&&p.attr>ymax)ymax=p.attr}));
-ymax=Math.ceil(ymax/0.05)*0.05;
-const x=i=>mL+iw*i/(DATES.length-1), y=v=>mT+ih*(1-v/ymax);
-const cvar=d=>document.body.dataset.theme==="dark"?d.cDark:d.cLight;
-function draw(){
-  svg.innerHTML="";
-  const g=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
-  // y grid + labels
-  for(let v=0;v<=ymax+1e-9;v+=0.05){const yy=y(v);
-    g(v===0?"line":"line",{class:v===0?"zeroline":"gridline",x1:mL,x2:mL+iw,y1:yy,y2:yy});
-    const t=g("text",{class:"axlab",x:mL-8,y:yy+3,"text-anchor":"end"});t.textContent=v.toFixed(2)}
-  // x ticks: first trading day of each quarter
-  let last="";DATES.forEach((d,i)=>{const q=d.slice(0,4)+"Q"+(Math.floor((+d.slice(5,7)-1)/3)+1);
-    if(q!==last){last=q;const xx=x(i);g("line",{class:"gridline",x1:xx,x2:xx,y1:mT,y2:mT+ih});
-      const t=g("text",{class:"axlab",x:xx,y:H-12,"text-anchor":"middle"});t.textContent=q}});
-  // lines (skip null gaps)
-  const ends=[];
-  D.forEach(d=>{if(off.has(d.id))return;const col=cvar(d);let path="",pen=false;
-    d.series.forEach((p,i)=>{if(p.attr==null){pen=false;return}path+=(pen?"L":"M")+x(i).toFixed(1)+" "+y(p.attr).toFixed(1)+" ";pen=true});
-    g("path",{class:"ln",d:path,stroke:col});
-    for(let i=d.series.length-1;i>=0;i--){if(d.series[i].attr!=null){ends.push({y:y(d.series[i].attr),col,label:d.label});break}}});
-  // end labels: de-collide by pushing apart to a 14px min gap, then leader-align
-  ends.sort((a,b)=>a.y-b.y);
-  for(let i=1;i<ends.length;i++){if(ends[i].y-ends[i-1].y<14)ends[i].y=ends[i-1].y+14}
-  ends.forEach(e=>{const t=g("text",{class:"endlab",x:mL+iw+8,y:e.y+4,fill:e.col});
-    t.textContent=e.label.length>18?e.label.slice(0,17)+"…":e.label});
-  g("line",{class:"cross",id:"cross",x1:0,x2:0,y1:mT,y2:mT+ih});
+const F=__DATA__.firms, SECTORS=__DATA__.sectors;
+const PAL=["#3987e5","#008300","#d55181","#c98500","#199e70","#d95926","#9085e9","#e66767"];
+const sc=s=>PAL[Math.max(0,SECTORS.indexOf(s))%PAL.length];
+F.forEach((f,i)=>f._i=i);
+let sel=F[0], mv=sel.moves[0];
+const el=id=>document.getElementById(id);
+const pct=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';
+function renderList(){
+  const q=el("search").value.toLowerCase();
+  el("list").innerHTML=F.filter(f=>!q||f.n.toLowerCase().includes(q)||f.t.toLowerCase().includes(q)).map(f=>{
+    const big=f.moves.reduce((a,m)=>Math.abs(m.tot)>Math.abs(a.tot)?m:a,f.moves[0]);
+    return `<div class="row ${f===sel?'sel':''}" data-i="${f._i}"><div class="nm"><span class="sc" style="background:${sc(f.sec)}"></span><b>${f.n}</b> <span class="tk">${f.t}</span></div><div style="font-variant-numeric:tabular-nums;font-weight:600;color:${big.tot>=0?'var(--pos)':'var(--neg)'}">${pct(big.tot)}</div></div>`}).join("");
 }
-// legend
-const leg=document.getElementById("legend");
-D.forEach(d=>{const el=document.createElement("div");el.className="lg";el.dataset.id=d.id;
-  el.innerHTML=`<span class="sw" style="background:${cvar(d)}"></span>${d.label} <span style="opacity:.6">(${d.n_names})</span>`;
-  el.onclick=()=>{off.has(d.id)?off.delete(d.id):off.add(d.id);el.classList.toggle("off");draw()};leg.appendChild(el)});
-function paintLegend(){[...leg.children].forEach(el=>{const d=D.find(x=>x.id===el.dataset.id);el.querySelector(".sw").style.background=cvar(d)})}
-// hover
-const tip=document.getElementById("tip");
-svg.addEventListener("mousemove",e=>{const r=svg.getBoundingClientRect();const px=(e.clientX-r.left)/r.width*W;
-  let i=Math.round((px-mL)/iw*(DATES.length-1));i=Math.max(0,Math.min(DATES.length-1,i));
-  const cr=document.getElementById("cross");if(cr){cr.setAttribute("x1",x(i));cr.setAttribute("x2",x(i));cr.style.opacity=1}
-  let rows="";D.forEach(d=>{if(off.has(d.id))return;const p=d.series[i];
-    rows+=`<div class="row"><span class="nm"><span class="sw" style="background:${cvar(d)}"></span>${d.label}</span><b>${p.attr==null?"—":p.attr>=0?"+"+p.attr.toFixed(3):p.attr.toFixed(3)}</b></div>`});
-  tip.innerHTML=`<div class="dt">${DATES[i]}</div>${rows}`;tip.style.opacity=1;
-  tip.style.left=Math.min(e.clientX+16,innerWidth-tip.offsetWidth-10)+"px";tip.style.top=(e.clientY+14)+"px"});
-svg.addEventListener("mouseleave",()=>{tip.style.opacity=0;const cr=document.getElementById("cross");if(cr)cr.style.opacity=0});
-// controls
-document.getElementById("theme").onclick=()=>{document.body.dataset.theme=document.body.dataset.theme==="dark"?"light":"dark";draw();paintLegend()};
-const table=document.getElementById("table");
-document.getElementById("tbl").onclick=()=>{if(!table.classList.contains("show")){
-    let h="<tr><th>Date</th>"+D.map(d=>`<th>${d.label}</th>`).join("")+"</tr>";
-    DATES.forEach((dt,i)=>{h+=`<tr><td>${dt}</td>`+D.map(d=>{const a=d.series[i].attr;return `<td>${a==null?"":a.toFixed(3)}</td>`}).join("")+"</tr>"});
-    table.innerHTML=h}
-  table.classList.toggle("show");
-  document.getElementById("tbl").textContent=table.classList.contains("show")?"Hide data table":"Show data table"};
-draw();
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function render(){
+  const f=sel; if(!f.moves.includes(mv)) mv=f.moves[0];
+  const mvs=f.moves.map(m=>`<div class="mv ${m===mv?'on':''}" data-m="${m.m}"><div class="mo">${m.m}</div><div class="rt" style="color:${m.tot>=0?'var(--pos)':'var(--neg)'}">${pct(m.tot)}</div></div>`).join("");
+  const parts=[["Market / macro","--mac",mv.macro],["Sector ("+f.sec+")","--sec",mv.sector],["Idiosyncratic","--idio",mv.idio]];
+  const scale=Math.max(...parts.map(p=>Math.abs(p[2])),Math.abs(mv.tot),0.01);
+  const dec=parts.map(([lab,cv,v])=>{
+    const w=Math.abs(v)/scale*50, left=v>=0?50:50-w;
+    return `<div class="drow"><div class="dlab"><span class="sw" style="background:var(${cv})"></span>${lab}</div>
+      <div class="dbarwrap"><div class="dmid"></div><div class="dbar" style="left:${left}%;width:${w}%;background:var(${cv})"></div></div>
+      <div class="dval" style="color:${v>=0?'var(--pos)':'var(--neg)'}">${pct(v)}</div></div>`}).join("");
+  const facts=mv.events.map(e=>`<div class="fact"><div class="fq"><span class="fd" style="color:${e.dir>=0?'var(--pos)':'var(--neg)'}">${e.dir>=0?'▲':'▼'}</span> <span class="fcat">${esc(e.cat)}</span> — <q>${esc(e.q)}</q>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div>`+
+    (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> · ${e.d||''} ↗</a>`:`<div class="fsrc">${esc(e.h)||''} · ${e.d||''}</div>`)+`</div>`).join("");
+  el("main").innerHTML=`<div class="hd">${f.n} <span class="tk">${f.t}</span></div>
+    <p class="sub">Pick a month to attribute the move. Each is split additively into <b>market/macro</b>, <b>sector</b>, and <b>idiosyncratic</b> — and the idiosyncratic part is explained by the named news below. Contemporaneous &amp; first-order — no forecasting.</p>
+    <div class="moves">${mvs}</div>
+    <div class="card"><h3>${mv.m} · total move ${pct(mv.tot)} — attribution</h3><div class="decomp">${dec}</div>
+      <p class="expl">Of the ${pct(mv.tot)} move, <b>${pct(mv.macro)}</b> was the market/macro, <b>${pct(mv.sector)}</b> the sector, and <b style="color:var(--idio)">${pct(mv.idio)}</b> firm-specific — the part the news below explains.</p></div>
+    <div class="card"><h3>news driving the idiosyncratic move — ${mv.m}</h3>${facts||'<span class="note">no quoted event captured this month</span>'}</div>
+    <p class="note">Honest note: for most moves the market + sector dominate — the news names the <i>idiosyncratic</i> slice (often small, sometimes large for M&amp;A/litigation). This view is <b>explanation</b>, grounded in the source article — not prediction. The idiosyncratic % is the abnormal (macro+sector-removed) return; the news is the contemporaneous catalyst on record.</p>`;
+}
+function all(){renderList();render()}
+el("search").oninput=renderList;
+el("list").addEventListener("click",ev=>{const r=ev.target.closest(".row");if(!r)return;sel=F[+r.dataset.i];mv=sel.moves[0];all()});
+el("main").addEventListener("click",ev=>{const m=ev.target.closest(".mv");if(!m)return;mv=sel.moves.find(x=>x.m===m.dataset.m);render()});
+all();
 </script></body></html>"""
-
-html = (TEMPLATE
-        .replace("__DATA__", json.dumps({"drivers": data["drivers"]}))
-        .replace("DATES_JSON", json.dumps(data["dates"])))
-out = G / "attribution_daily.html"
-out.write_text(html)
-print(f"-> {out}  ({len(data['dates'])} days, {len(data['drivers'])} drivers)")
+out = G / "attribution.html"
+out.write_text(HTML.replace("__DATA__", json.dumps(D)))
+print(f"-> {out}  ({len(D['firms'])} firms)")
