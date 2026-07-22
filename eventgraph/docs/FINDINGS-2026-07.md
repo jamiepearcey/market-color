@@ -335,6 +335,17 @@ betas) ✓ +0.101; DIRECTION ✗ near-chance. Direction is exactly where the sig
 whole project's through-line: a DESCRIPTIVE exposure lens (who/how-strongly), NOT predictive (which-way/when).
 `mechanism_direction.py`.
 
+### F25. Sentiment — best contemporaneous direction, still not predictive (2026-07-22)
+Does SENTIMENT recover DIRECTION (mechanism-model failed at 51.4%)? 44k signed-polarity annotations (mostly
++-1, intensity, immediate horizon), 6.8k on priceable firms. Test polarity vs signed abnormal return
+(`sentiment_direction.py`): CONTEMPORANEOUS [D..D+5] IC **+0.125 t8** (beats causal effect_dir F6 +0.10 and
+mechanism-dir +0.039 — the strongest directional signal in the project); LEAD [D+6..D+15] IC +0.013 (NULL);
+PRE [D-5..D] IC +0.052 (positive -> sentiment partly LAGS price, reporter tone follows the move). Directional
+sign hit-rate ~48% (chance) — graded correlation real but not a clean up/down call (base-rate skew ~60% neg).
+CONCLUSION: sentiment enriches DESCRIPTIVE direction (best contemporaneous polarity signal) but adds NO
+predictive direction — same wall as F6/F14/F24. Fourth independent directional signal (mention-dir, mechanism-
+dir, sentiment) all landing on: the news layer DESCRIBES, does not PREDICT. `sentiment_direction.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
