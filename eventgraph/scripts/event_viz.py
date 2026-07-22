@@ -45,6 +45,12 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .firm{display:flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:6px 10px}
 .firm .tk{font-weight:700}.firm .nm{color:var(--ink3);font-size:11.5px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .firm .sec{font-size:10px;padding:1px 6px;border-radius:20px;color:#fff}.firm .d{font-weight:700}
+.spec{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:12px}
+.spec b{color:var(--ink);font-variant-numeric:tabular-nums}
+.cohort-lbl{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 6px}
+.cohort{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chip2{font-size:11.5px;padding:3px 9px;border-radius:8px;font-weight:600}
+.chip2.bound{color:#fff}.chip2.peer{background:transparent;border:1px dashed var(--line);color:var(--ink3);font-weight:500}
 .arcwrap{margin-top:8px}
 .note{color:var(--ink3);font-size:12px;margin-top:16px;max-width:820px}
 </style></head>
@@ -52,8 +58,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 <h1>News event-linkage timeline</h1>
 <p class="sub">Each bubble is a <b>named catalyst</b> — a regulation, ruling, strike, or corporate event — that binds
 two or more firms together <b>beyond what macro &amp; sector explain</b>. Height = the sector-orthogonal
-<b>residual co-movement</b> of the bound firms; size = how many firms; colour = catalyst type. This is the thin,
-bursty, event-driven signal the news graph uniquely sees. Click a bubble to open the cluster. BBG 2010–2012.</p>
+<b>residual co-movement</b> of the bound firms; size = how many firms; colour = catalyst type. <b>Click a bubble</b>
+to open the cluster — the panel shows the specificity: <i>which</i> names the catalyst named out of their whole
+sector, and how much more they co-move than the peers it skipped (the gap a sector model can't produce). BBG 2010–2012.</p>
 <div class="bar">
   <button id="theme">◐ theme</button>
   <div class="ctrl">min residual <input type="range" id="minres" min="0" max="0.7" step="0.05" value="0.15"><span id="minlbl">0.15</span></div>
@@ -112,10 +119,19 @@ function detail(e){
     arcs+=`<path d="M ${x1} ${base} Q ${mx} ${base-peak} ${x2} ${base}" fill="none" stroke="${rc>=0?'var(--pos)':'var(--neg)'}" stroke-width="${0.6+Math.abs(rc)*5}" stroke-opacity="${0.22+Math.abs(rc)*0.6}"/>`});
   let nodes="";e.names.forEach((n,i)=>{nodes+=`<circle cx="${px(i)}" cy="${base}" r="4.5" fill="${secColor(n.sec)}"/><text x="${px(i)}" y="${base+16}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--ink)">${n.t}</text>`});
   const firms=e.names.map(n=>`<div class="firm"><span class="d" style="color:${n.dir>=0?'var(--pos)':'var(--neg)'}">${n.dir>=0?'▲':'▼'}</span><span class="tk">${n.t}</span><span class="nm">${n.n}</span><span class="sec" style="background:${secColor(n.sec)}">${n.sec}</span></div>`).join("");
+  const total=e.size+(e.cohort?e.cohort.length:0);
+  const rsub=e.res_sub==null?null:e.res_sub, cb=e.cohort_base==null?null:e.cohort_base;
+  const specificity=(rsub!=null&&cb!=null)?
+    `<div class="spec">This catalyst named <b>${e.size}</b> of the <b>${total}</b> ${e.dom} names in view — and those <b>${e.size}</b> co-move <b>${rsub>=0?'+':''}${rsub.toFixed(2)}</b> together <i>beyond even sub-industry</i>, versus <b>${cb>=0?'+':''}${cb.toFixed(2)}</b> for the ${e.cohort.length} peers it did <b>not</b> name. <span style="color:var(--ink3)">That gap is the specificity — a sector model can't pick these ${e.size} out of the ${total}.</span></div>`:"";
+  const bound=e.names.map(n=>`<span class="chip2 bound" style="background:${secColor(n.sec)}">${n.t}</span>`).join("");
+  const peers=(e.cohort||[]).map(n=>`<span class="chip2 peer">${n.t}</span>`).join("");
+  const cohort=(e.cohort&&e.cohort.length)?`<div class="cohort-lbl">the ${e.dom} cohort — <span style="color:var(--pos)">named by this catalyst</span> vs <span style="color:var(--ink3)">skipped</span>:</div><div class="cohort">${bound}${peers}</div>`:"";
   el("detail").innerHTML=`<div class="dh"><span class="t">${e.label}</span><span class="badge">${e.type}</span><span class="mo">${e.month}</span></div>
-    <div class="dstat">binds <b>${e.size}</b> firms · mean residual co-movement <b>${e.res>=0?'+':''}${e.res.toFixed(2)}</b> (peak <b>${e.resmax>=0?'+':''}${e.resmax.toFixed(2)}</b>) — the co-movement left <i>after macro &amp; sector are removed</i></div>
+    <div class="dstat">binds <b>${e.size}</b> firms · residual co-movement <b>${e.res>=0?'+':''}${e.res.toFixed(2)}</b> (peak <b>${e.resmax>=0?'+':''}${e.resmax.toFixed(2)}</b>) after macro &amp; broad sector</div>
+    ${specificity}
     <div class="arcwrap"><svg viewBox="0 0 ${arcW} ${arcH}" style="max-width:${arcW}px">${arcs}${nodes}</svg></div>
-    <div class="firms">${firms}</div>`;
+    <div class="firms">${firms}</div>
+    ${cohort}`;
 }
 const leg=el("legend");
 TYPES.forEach(t=>{const d=document.createElement("div");d.className="lg";d.innerHTML=`<span class="sw" style="background:${tColor(t)}"></span>${t}`;
