@@ -236,6 +236,18 @@ you cannot cleanly separate news from sector because they are the same factor; f
 answer, news is a couple of percent. This is the quantified end of the "half a trend relabeled" skepticism:
 the cross-market-replicated structure (F16) is real but ≈ sector; the independent news factor is small. `factor_shapley.py`.
 
+### F19. The residual — idiosyncratic on average, but a small genuine news signal survives (2026-07-22)
+`residual_view.py` — what's left after macro+sector removed. (A) universe residual is IDIOSYNCRATIC:
+mean pairwise residual corr +0.014, absorption ratio (top-eigenvalue share) 0.45 raw -> 0.06 residual
+= no missing common factor; macro+sector captured the systematic co-movement. (B) BUT the residual is
+NEWS-shaped: news-linked pairs mean residual corr +0.073 vs unlinked +0.011 = **+0.062, t6.2** — a small
+but significant SECTOR-ORTHOGONAL news component that survives macro+sector removal. Reconciles F18: news
+is mostly sector, but has a real thin non-sector residual (+0.06) — the part that replicated in India (F16).
+HONEST FLAG: pair-level residual magnitude is method-sensitive — GS-MS residual 0.10 (Gram-Schmidt pair
+decomp F17) vs 0.38 (per-name macro+sector OLS here); one method mishandles collinear sector/news blocks,
+reconciliation OWED before trusting absolute pair-level residuals. Aggregate B/C use one consistent method,
+so the linked-vs-unlinked +0.062 is robust. `residual_view.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
