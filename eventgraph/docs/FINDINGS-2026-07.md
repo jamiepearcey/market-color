@@ -301,6 +301,12 @@ aggregate. BUT per-event ranking is NOISY with tf-idf: LIBOR/Almunia landscape s
 own-news too coarse for a trustworthy per-event exposure list. CLEAN product needs (a) real semantic
 embeddings (not tf-idf) + (b) mention-independent company profile (10-K business descriptions, not own news).
 Validated concept, not-yet-shippable ranking. `exposure_landscape.py`.
+EMBEDDING UPGRADE (`embed_exposure.py`, all-MiniLM-L6-v2 on Metal/MPS): aggregate corr(exposure,realized)
++0.047(tfidf)->+0.057(embed), t7. PER-EVENT ranking MUCH cleaner: LIBOR/Almunia top surfaced non-mentioned
+firms go from [Vale,Mastercard,BAE noise] -> [GS,JPM,HSBC,BAC] — the actual unnamed banks (HSBC realized
++0.50). Semantic embeddings fix the vocab-coincidence noise; ranking now dominated by the right firms.
+Residual noise (Google/airline) remains -> the last upgrade is mention-independent profiles (10-Ks). The
+event-exposure landscape is now trustworthy enough to ship as a full-universe exposure map per event.
 
 ## 4. Statistical honesty ledger
 
