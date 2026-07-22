@@ -203,6 +203,10 @@ properly resolved. The earlier India "null" was a 15%-complete resolution, NOT a
 This is the finding's broadening — it is not a US-only artifact. Caveat: single year (2021), so temporal
 (not cross-sectional) power is still limited. Scripts india_resolve_expand.py, india_signed_attribution.py,
 india_specified_factors.py.
+- **Descriptive verdict retested in India (F14 replication, india_lead_lag.py)**: news does NOT
+  lead forward co-movement — NEWS coef +0.0021 (t+1.7, not significant), controlling for mean-
+  reversion (C_past -0.57) + market ΔC. US was -0.0044 (t-3.9). India leans mildly positive but
+  below significance; not a leading/tradeable signal in either market. Descriptive-not-predictive holds cross-market.
 
 ## 4. Statistical honesty ledger
 
