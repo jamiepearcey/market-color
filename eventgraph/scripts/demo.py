@@ -12,6 +12,7 @@ D = json.loads((G / "exposure_landscape_emb.json").read_text())
 ROUTE = json.loads((G / "event_routing.json").read_text()) if (G / "event_routing.json").exists() else {}
 for e in D["events"]:
     e["route"] = ROUTE.get(f"{e['month']}|{e['label']}", {})
+ATTR = json.loads((G / "attribution.json").read_text()) if (G / "attribution.json").exists() else {"firms": [], "sectors": []}
 MECH = [
  ("US financial legislation", "Dodd-Frank, Barney Frank, Carl Levin — regulatory reform of banks"),
  ("UK banking reform", "Vickers / Independent Commission on Banking / Project Merlin — ring-fencing"),
@@ -77,6 +78,19 @@ a{color:inherit}
 .rt .k{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3)}
 .rt .v{font-size:13.5px;font-weight:600;margin-top:2px}
 .fit-ok{color:var(--gd)}.fit-warn{color:#c98500}.fit-bad{color:var(--neg)}
+.moves2{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.mv{padding:6px 11px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:var(--panel);font-variant-numeric:tabular-nums}
+.mv.on{border-color:#3987e5;background:var(--panel2)}.mv .mo{font-size:11px;color:var(--ink3)}.mv .rt2{font-size:15px;font-weight:700}
+.arow2{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 10px;border-radius:9px;cursor:pointer}
+.arow2:hover{background:var(--panel2)}.arow2.sel{background:#3987e5;color:#fff}
+.decomp{display:flex;flex-direction:column;gap:9px}
+.drow{display:grid;grid-template-columns:120px 1fr 74px;gap:12px;align-items:center}
+.dlab{font-size:13px;color:var(--ink2);display:flex;gap:7px;align-items:center}.dlab .sw{width:11px;height:11px;border-radius:3px}
+.dbarwrap{position:relative;height:20px;background:var(--panel2);border-radius:4px}
+.dbar{position:absolute;top:0;height:100%;border-radius:4px;opacity:.9}.dmid{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--ink3);left:50%}
+.dval{font-size:13.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.afact{border-left:3px solid var(--line);padding:4px 0 6px 12px;margin-bottom:10px}
+.fhead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}.fcontrib{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;min-width:50px}.fday{font-size:11px;color:var(--ink3)}
 .note{color:var(--ink3);font-size:12px;margin-top:8px}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 30px}
 .mcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
@@ -97,6 +111,7 @@ a{color:inherit}
 </div>
 <div class="tabs">
   <div class="tab on" data-v="events">Events &amp; exposure</div>
+  <div class="tab" data-v="attr">Price attribution</div>
   <div class="tab" data-v="mech">Economic mechanisms</div>
   <div class="tab" data-v="cando">What it can &amp; can't do</div>
 </div>
@@ -118,8 +133,13 @@ a{color:inherit}
   </table>
   <p class="note" style="margin-top:14px">Bottom line: a genuine, cross-validated, evidence-grounded <b>exposure and explanation</b> layer — <b>not</b> alpha. The value is knowing <i>who is connected to what, and why</i>, on the day it happens.</p>
 </div></div>
+<div class="view" id="v-attr"><div class="app">
+  <aside class="side"><div class="brand" style="border:none;padding:14px 16px 6px"><p style="font-size:12px;color:var(--ink2)">Pick a firm → its biggest moves → market vs sector vs news, each catalyst scored by event study.</p></div>
+    <input class="search" id="asearch" placeholder="Search firms…"><div class="list" id="alist"></div></aside>
+  <main class="main" id="amain"></main>
+</div></div>
 <script>
-const EV=__DATA__.events, SECTORS=__DATA__.sectors;
+const EV=__DATA__.events, SECTORS=__DATA__.sectors, ATTR=__ATTR__;
 const PAL=["#3987e5","#008300","#d55181","#c98500","#199e70","#d95926","#9085e9","#e66767"];
 const sc=s=>PAL[Math.max(0,SECTORS.indexOf(s))%PAL.length];
 EV.forEach((e,i)=>e._i=i); EV.sort((a,b)=>a.month<b.month?-1:1);
@@ -176,11 +196,47 @@ function all(){renderList();render()}
 el("search").oninput=renderList;
 el("list").addEventListener("click",ev=>{const r=ev.target.closest(".ev");if(!r)return;sel=EV[+r.dataset.i];all();});
 all();
+// ===== Price attribution tab =====
+(function(){
+  const AF=(ATTR.firms||[]); if(!AF.length) return;
+  AF.forEach((f,i)=>f._i=i); let As=AF[0], Am=As.moves[0];
+  const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const pct=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';
+  function aList(){
+    const q=el("asearch").value.toLowerCase();
+    el("alist").innerHTML=AF.filter(f=>!q||f.n.toLowerCase().includes(q)||f.t.toLowerCase().includes(q)).map(f=>{
+      const big=f.moves.reduce((a,m)=>Math.abs(m.tot)>Math.abs(a.tot)?m:a,f.moves[0]);
+      return `<div class="arow2 ${f===As?'sel':''}" data-i="${f._i}"><div style="display:flex;gap:6px;align-items:center;min-width:0"><span style="width:8px;height:8px;border-radius:2px;background:${sc(f.sec)};flex:none"></span><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.n}</b> <span style="opacity:.6">${f.t}</span></div><div style="font-variant-numeric:tabular-nums;font-weight:600;color:${big.tot>=0?'#199e70':'#e0533a'}">${pct(big.tot)}</div></div>`}).join("");
+  }
+  function aRender(){
+    const f=As; if(!f.moves.includes(Am)) Am=f.moves[0];
+    const mvs=f.moves.map(m=>`<div class="mv ${m===Am?'on':''}" data-m="${m.m}"><div class="mo">${m.m}</div><div class="rt2" style="color:${m.tot>=0?'#199e70':'#e0533a'}">${pct(m.tot)}</div></div>`).join("");
+    const parts=[["Market / macro","#6b6a63",Am.macro],["Sector ("+f.sec+")","#3987e5",Am.sector],["Idiosyncratic","#d95926",Am.idio]];
+    const scale=Math.max(...parts.map(p=>Math.abs(p[2])),Math.abs(Am.tot),0.01);
+    const dec=parts.map(p=>{const v=p[2],w=Math.abs(v)/scale*50,left=v>=0?50:50-w;
+      return `<div class="drow"><div class="dlab"><span class="sw" style="background:${p[1]}"></span>${p[0]}</div><div class="dbarwrap"><div class="dmid"></div><div class="dbar" style="left:${left}%;width:${w}%;background:${p[1]}"></div></div><div class="dval" style="color:${v>=0?'#199e70':'#e0533a'}">${pct(v)}</div></div>`}).join("");
+    const facts=Am.events.map(e=>{const c=e.contrib,cc=c==null?'var(--ink3)':(c>=0?'#199e70':'#e0533a');
+      return `<div class="afact" style="border-left-color:${c!=null&&Math.abs(c)>=0.01?cc:'var(--line)'}"><div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span style="font-weight:600">${esc(e.cat)} <span style="color:${e.dir>=0?'#199e70':'#e0533a'};font-weight:700">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div><div style="font-size:13px;margin-top:1px"><q style="font-style:italic;color:var(--ink)">${esc(e.q)}</q></div>`+
+      (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> ↗</a>`:`<div class="fsrc">${esc(e.h)||''}</div>`)+`</div>`}).join("");
+    const cov=Am.idio?Math.round((Am.idio_news/Am.idio)*100):0;
+    el("amain").innerHTML=`<div class="hd">${f.n} <span style="color:var(--ink3);font-weight:500;font-size:15px">${f.t}</span></div>
+      <p class="sub">Each month's move is split additively into <b>market/macro</b>, <b>sector</b>, <b>idiosyncratic</b>; each news event is scored by <b>event study</b> — the firm's abnormal return on that article's day. Explanation, first-order — no forecasting.</p>
+      <div class="moves2">${mvs}</div>
+      <div class="card"><h3>${Am.m} · total ${pct(Am.tot)} — attribution</h3><div class="decomp">${dec}</div>
+        <p class="note" style="color:var(--ink2)">Of ${pct(Am.tot)}: <b>${pct(Am.macro)}</b> market · <b>${pct(Am.sector)}</b> sector · <b style="color:#d95926">${pct(Am.idio)}</b> firm-specific. <b>${pct(Am.idio_news)}</b> (${cov}%) of the firm-specific move landed on captured-news days; the rest is unexplained.</p></div>
+      <div class="card"><h3>news driving the idiosyncratic move — ${Am.m} <span style="text-transform:none;letter-spacing:0;color:var(--ink3);font-weight:400">(number = abnormal return that day)</span></h3>${facts||'<span class="note">no quoted event this month</span>'}</div>`;
+  }
+  function aAll(){aList();aRender()}
+  el("asearch").oninput=aList;
+  el("alist").addEventListener("click",ev=>{const r=ev.target.closest(".arow2");if(!r)return;As=AF[+r.dataset.i];Am=As.moves[0];aAll()});
+  el("amain").addEventListener("click",ev=>{const m=ev.target.closest(".mv");if(!m)return;Am=As.moves.find(x=>x.m===m.dataset.m);aRender()});
+  aAll();
+})();
 </script></body></html>"""
 
 chips = "".join(f'<div class="chip"><span class="v">{v}</span><span class="k">{k}</span></div>' for v, k in STATS)
 mech = "".join(f'<div class="mcard"><div class="mt">{t}</div><div class="md">{d}</div></div>' for t, d in MECH)
-html = (HTML.replace("__DATA__", json.dumps(D)).replace("__CHIPS__", chips).replace("__MECH__", mech))
+html = (HTML.replace("__DATA__", json.dumps(D)).replace("__ATTR__", json.dumps(ATTR)).replace("__CHIPS__", chips).replace("__MECH__", mech))
 out = G / "demo.html"
 out.write_text(html)
 print(f"-> {out}  ({len(D['events'])} events)")

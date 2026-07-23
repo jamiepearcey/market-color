@@ -436,6 +436,19 @@ hedges fail). Consistent with F1 (linked persist, unlinked revert), now leakage-
 history. The one result that survived the full Fable rigor review. Bounds: modest (+0.03 IC), elevated-subset,
 persistence-not-discovery. `hedge_overlay.py`.
 
+### F33. Implied move BY NEWS TYPE — empirical prior, huge variation (2026-07-23)
+Answering 'what move does each news type imply' (`news_type_moves.py`): for every causal edge, measure the
+firm's IDIOSYNCRATIC abnormal return on the article day, aggregate by mechanism. Random-firm-day baseline
+|move| ~1.07%. RESULT (mean |move| / direction-aligned / n): restructuring 5.07%/+5.07%/53; earnings 3.56%/
++3.15%/72; rate_decision 2.18%/+1.41%; data_surprise 1.96%/+1.63%; guidance 1.82%/+1.27%/244; M&A 1.53%/+0.63%/
+1021; regulation 1.28%/+0.02%/1483; leadership 1.91%/-0.49%; competition 0.85%. KEY: (1) news types differ
+hugely — restructuring/earnings move 3-5% directionally-aligned (real catalysts), regulation/competition barely
+clear the 1.07% baseline w/ NO direction (context/noise). (2) direction-aligned column is the tell: positive =
+extracted up/down tracks the move (trustworthy); ~0/negative (regulation +0.02, leadership -0.49, factor -0.41)
+= mention/reaction not driver. (3) high-VOLUME != high-impact: the two biggest buckets (regulation 1483, M&A 1021)
+are among the weakest movers -> most edges are context. This is the empirical implied-move-by-type prior; before
+this the per-event number was realized-from-price only and the type label decorative. `news_type_moves.py`.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01
