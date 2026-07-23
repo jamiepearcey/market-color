@@ -6,7 +6,7 @@
 move additively into MACRO (9 factors) + SECTOR (9 SPDRs, orthogonal to macro) + IDIOSYNCRATIC, and attach
 the named NEWS EVENTS (causal edges where the firm is the effect that month, with verbatim quote + article)
 that explain the idiosyncratic part. No embedding, no prediction — pure explanation from the causal graph."""
-import json, collections, csv, sys, datetime as dt
+import json, collections, csv, sys, bisect, datetime as dt
 from pathlib import Path
 import numpy as np
 sys.path.insert(0,"scripts")
@@ -67,14 +67,25 @@ for s in uni:
     Xs=np.column_stack([np.ones(len(days))]+[[spdr[e][d] for d in days] for e in SPDR])
     bs,*_=np.linalg.lstsq(Xs,res1,rcond=None); secfit=Xs@bs; idio=res1-secfit
     dm={d:(macfit[i],secfit[i],idio[i],Y[i]) for i,d in enumerate(days)}
+    idio_d={d:idio[i] for i,d in enumerate(days)}
     moves=[]
     for m in mo:
         dd=[d for d in days if d[:7]==m]
         if len(dd)<10: continue
         tot=sum(dm[d][3] for d in dd); mac=sum(dm[d][0] for d in dd); sec=sum(dm[d][1] for d in dd); idi=sum(dm[d][2] for d in dd)
-        evs=ev_by.get((s,m),[])
+        evs=[dict(e) for e in ev_by.get((s,m),[])]
+        newsdays=set()
+        for e in evs:
+            Dt=e.get("d")
+            if not Dt: e["contrib"]=None; continue
+            k=bisect.bisect_left(days,Dt)
+            if k<len(days) and days[k][:7]==m:      # event-study: idio abnormal return on the article's trading day
+                e["contrib"]=round(idio_d[days[k]],4); e["day"]=days[k]; newsdays.add(days[k])
+            else: e["contrib"]=None
+        idio_news=round(sum(idio_d[d] for d in newsdays),4)
+        evs=sorted(evs,key=lambda x:-abs(x.get("contrib") or 0))[:6]
         moves.append({"m":m,"tot":round(tot,4),"macro":round(mac,4),"sector":round(sec,4),"idio":round(idi,4),
-                      "nev":len(evs),"events":sorted(evs,key=lambda x:-len(x["q"]))[:5]})
+                      "idio_news":idio_news,"nev":len(ev_by.get((s,m),[])),"events":evs})
     # keep the most notable moves (by |total|) that have news
     notable=sorted([mv for mv in moves if mv["nev"]>0 and abs(mv["tot"])<0.6],key=lambda x:-abs(x["tot"]))[:8]
     if notable: out.append({"t":s,"n":name.get(s,s),"sec":secof(s,r),"moves":notable})

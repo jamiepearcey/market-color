@@ -41,8 +41,11 @@ body{background:var(--surface);color:var(--ink);font:13.5px/1.55 -apple-system,B
 .dmid{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--ink3);left:50%}
 .dval{font-size:13.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 .expl{color:var(--ink3);font-size:12px;margin-top:11px}
-.fact{border-left:3px solid var(--idio);padding:4px 0 6px 12px;margin-bottom:9px}
-.fq{font-size:13.5px}.fq .fd{font-weight:700}.fq q{font-style:italic;color:var(--ink)}
+.fact{border-left:3px solid var(--line);padding:4px 0 6px 12px;margin-bottom:10px}
+.fhead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+.fcontrib{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;min-width:52px}
+.fday{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
+.fq{font-size:13px;margin-top:1px}.fq .fd{font-weight:700}.fq q{font-style:italic;color:var(--ink)}
 .fcat{font-weight:600;color:var(--ink)}.fmech{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--panel2);color:var(--ink3);text-transform:uppercase;margin-left:6px}
 .fsrc{display:block;font-size:11.5px;color:var(--ink3);text-decoration:none;margin-top:2px}.fsrc:hover{color:var(--sec);text-decoration:underline}.fsrc .src{text-transform:uppercase;font-size:10px}
 .note{color:var(--ink3);font-size:12px;margin-top:14px;max-width:820px}
@@ -78,15 +81,20 @@ function render(){
     return `<div class="drow"><div class="dlab"><span class="sw" style="background:var(${cv})"></span>${lab}</div>
       <div class="dbarwrap"><div class="dmid"></div><div class="dbar" style="left:${left}%;width:${w}%;background:var(${cv})"></div></div>
       <div class="dval" style="color:${v>=0?'var(--pos)':'var(--neg)'}">${pct(v)}</div></div>`}).join("");
-  const facts=mv.events.map(e=>`<div class="fact"><div class="fq"><span class="fd" style="color:${e.dir>=0?'var(--pos)':'var(--neg)'}">${e.dir>=0?'▲':'▼'}</span> <span class="fcat">${esc(e.cat)}</span> — <q>${esc(e.q)}</q>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div>`+
-    (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> · ${e.d||''} ↗</a>`:`<div class="fsrc">${esc(e.h)||''} · ${e.d||''}</div>`)+`</div>`).join("");
+  const facts=mv.events.map(e=>{
+    const c=e.contrib, cc=c==null?'var(--ink3)':(c>=0?'var(--pos)':'var(--neg)');
+    return `<div class="fact" style="border-left-color:${c==null?'var(--line)':(Math.abs(c)>=0.01?cc:'var(--line)')}">
+      <div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span class="fcat">${esc(e.cat)} <span class="fd" style="color:${e.dir>=0?'var(--pos)':'var(--neg)'}">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div>
+      <div class="fq"><q>${esc(e.q)}</q></div>`+
+      (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> ↗</a>`:`<div class="fsrc">${esc(e.h)||''}</div>`)+`</div>`}).join("");
+  const cov=mv.idio? Math.round((mv.idio_news/mv.idio)*100):0;
   el("main").innerHTML=`<div class="hd">${f.n} <span class="tk">${f.t}</span></div>
-    <p class="sub">Pick a month to attribute the move. Each is split additively into <b>market/macro</b>, <b>sector</b>, and <b>idiosyncratic</b> — and the idiosyncratic part is explained by the named news below. Contemporaneous &amp; first-order — no forecasting.</p>
+    <p class="sub">Pick a month to attribute the move. Each is split additively into <b>market/macro</b>, <b>sector</b>, and <b>idiosyncratic</b>. Each news event is scored by <b>event study</b> — the firm's abnormal return on that article's day. Contemporaneous &amp; first-order — no forecasting.</p>
     <div class="moves">${mvs}</div>
     <div class="card"><h3>${mv.m} · total move ${pct(mv.tot)} — attribution</h3><div class="decomp">${dec}</div>
-      <p class="expl">Of the ${pct(mv.tot)} move, <b>${pct(mv.macro)}</b> was the market/macro, <b>${pct(mv.sector)}</b> the sector, and <b style="color:var(--idio)">${pct(mv.idio)}</b> firm-specific — the part the news below explains.</p></div>
-    <div class="card"><h3>news driving the idiosyncratic move — ${mv.m}</h3>${facts||'<span class="note">no quoted event captured this month</span>'}</div>
-    <p class="note">Honest note: for most moves the market + sector dominate — the news names the <i>idiosyncratic</i> slice (often small, sometimes large for M&amp;A/litigation). This view is <b>explanation</b>, grounded in the source article — not prediction. The idiosyncratic % is the abnormal (macro+sector-removed) return; the news is the contemporaneous catalyst on record.</p>`;
+      <p class="expl">Of the ${pct(mv.tot)} move, <b>${pct(mv.macro)}</b> was market/macro, <b>${pct(mv.sector)}</b> sector, and <b style="color:var(--idio)">${pct(mv.idio)}</b> firm-specific. <b>${pct(mv.idio_news)}</b> of that firm-specific move (${cov}%) landed on days with captured news — quantified below; the rest is unexplained by any recorded event.</p></div>
+    <div class="card"><h3>news driving the idiosyncratic move — ${mv.m} <span style="text-transform:none;letter-spacing:0;color:var(--ink3);font-weight:400">(number = the firm's abnormal return that day)</span></h3>${facts||'<span class="note">no quoted event captured this month</span>'}</div>
+    <p class="note">Honest note: each event's number is the firm's <b>idiosyncratic (abnormal) return on the article's day</b> — an event study, so it ranks real drivers and auto-downweights noise (an irrelevant edge lands near 0). Caveats: multiple events sharing one day can't be separated (they share that day's move), and the Bloomberg date can lag the real event. This is <b>explanation</b>, not prediction; market+sector usually dominate the total, and some of the firm-specific move is left unexplained by any captured event.</p>`;
 }
 function all(){renderList();render()}
 el("search").oninput=renderList;
