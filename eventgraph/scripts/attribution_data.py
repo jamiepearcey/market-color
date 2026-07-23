@@ -25,6 +25,7 @@ for l in open(G/"entity_symbol.jsonl"):
     if j["kind"]=="security" and "." not in j["symbol"] and not j["symbol"].startswith("^") and j["symbol"] not in SKIP:
         sym[j["entity_id"]]=j["symbol"]; name.setdefault(j["symbol"], j["entity_id"].split("__")[0].replace("_"," ").title()); inv[j["symbol"]].append(j["entity_id"])
 CANON=json.load(open(G/"catalyst_map.json"))
+PRIOR=json.load(open(G/"mech_prior.json")); MECHP=PRIOR["mech"]; BASE=PRIOR["baseline"]
 docmeta={json.loads(l)["doc_id"]:{"m":(json.loads(l).get("published_at") or "")[:7],"h":json.loads(l).get("headline"),"s":json.loads(l).get("source"),"u":json.loads(l).get("url"),"d":(json.loads(l).get("published_at") or "")[:10]} for l in open(G/"lake/document.jsonl")}
 freq=collections.Counter(); ev_by=collections.defaultdict(list); _seen=collections.defaultdict(set)
 for l in open(G/"lake/causal_event_edge.jsonl"):
@@ -76,6 +77,7 @@ for s in uni:
         evs=[dict(e) for e in ev_by.get((s,m),[])]
         newsdays=set()
         for e in evs:
+            pr=MECHP.get(e.get("mech") or "?",{}); e["pmove"]=pr.get("move"); e["palign"]=pr.get("align"); e["trust"]=pr.get("trust","context")
             Dt=e.get("d")
             if not Dt: e["contrib"]=None; continue
             k=bisect.bisect_left(days,Dt)

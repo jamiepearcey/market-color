@@ -47,6 +47,9 @@ body{background:var(--surface);color:var(--ink);font:13.5px/1.55 -apple-system,B
 .fday{font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums}
 .fq{font-size:13px;margin-top:1px}.fq .fd{font-weight:700}.fq q{font-style:italic;color:var(--ink)}
 .fcat{font-weight:600;color:var(--ink)}.fmech{font-size:9.5px;padding:1px 6px;border-radius:20px;background:var(--panel2);color:var(--ink3);text-transform:uppercase;margin-left:6px}
+.ftrust{font-size:9.5px;padding:1px 7px;border-radius:20px;text-transform:uppercase;font-weight:700;letter-spacing:.03em}
+.ftrust.driver{background:rgba(25,158,112,.18);color:var(--pos)}.ftrust.weak{background:rgba(201,133,0,.18);color:#e0a52e}.ftrust.context{background:var(--panel2);color:var(--ink3)}
+.ftyp{font-size:11px;color:var(--ink3);margin-top:2px}
 .fsrc{display:block;font-size:11.5px;color:var(--ink3);text-decoration:none;margin-top:2px}.fsrc:hover{color:var(--sec);text-decoration:underline}.fsrc .src{text-transform:uppercase;font-size:10px}
 .note{color:var(--ink3);font-size:12px;margin-top:14px;max-width:820px}
 ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
@@ -84,8 +87,9 @@ function render(){
   const facts=mv.events.map(e=>{
     const c=e.contrib, cc=c==null?'var(--ink3)':(c>=0?'var(--pos)':'var(--neg)');
     return `<div class="fact" style="border-left-color:${c==null?'var(--line)':(Math.abs(c)>=0.01?cc:'var(--line)')}">
-      <div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span class="fcat">${esc(e.cat)} <span class="fd" style="color:${e.dir>=0?'var(--pos)':'var(--neg)'}">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div>
+      <div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span class="fcat">${esc(e.cat)} <span class="fd" style="color:${e.dir>=0?'var(--pos)':'var(--neg)'}">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}${e.trust?`<span class="ftrust ${e.trust}">${e.trust}</span>`:''}</div>
       <div class="fq"><q>${esc(e.q)}</q></div>`+
+      (e.pmove!=null?`<div class="ftyp">'${esc(e.mech)}' news typically moves a stock ≈${(e.pmove*100).toFixed(1)}%${e.trust=='context'?' with no directional signal — usually context, not a driver':(e.trust=='driver'?' in the stated direction — a real-catalyst type':' — weak directional signal')}</div>`:'')+
       (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> ↗</a>`:`<div class="fsrc">${esc(e.h)||''}</div>`)+`</div>`}).join("");
   const cov=mv.idio? Math.round((mv.idio_news/mv.idio)*100):0;
   el("main").innerHTML=`<div class="hd">${f.n} <span class="tk">${f.t}</span></div>

@@ -69,6 +69,10 @@ def rep(dct,title,minn=40):
 print(f"universe {len(idio)} firms; classifying article-day abnormal moves by news type")
 rep(by_mech,"MECHANISM")
 rep(by_typ,"CATALYST TYPE",minn=80)
+BASE=float(np.mean([abs(idio[s][d]) for s in list(idio)[:40] for d in idio[s]['_days'][::7]]))
+def _tr(a): return "driver" if a>=.008 else ("weak" if a>=.003 else "context")
+pri={k:{"move":round(float(np.mean([x for x,_ in v])),4),"align":round(float(np.mean([y for _,y in v])),4),"n":len(v),"trust":_tr(float(np.mean([y for _,y in v])))} for k,v in by_mech.items() if len(v)>=20}
+json.dump({"baseline":round(BASE,4),"mech":pri},open(G/"mech_prior.json","w"))
 allv=[a for v in by_mech.values() for a,_ in v]
 print(f"\n  baseline: mean |abnormal move| on a RANDOM firm-day ~ {np.mean([abs(idio[s][d]) for s in list(idio)[:40] for d in idio[s]['_days'][::7]]):.2%}")
 print("  => mean|move| >> baseline = this news type genuinely moves prices; dir-aligned>0 = extracted direction matches the move.")

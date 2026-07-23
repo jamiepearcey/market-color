@@ -91,6 +91,9 @@ a{color:inherit}
 .dval{font-size:13.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 .afact{border-left:3px solid var(--line);padding:4px 0 6px 12px;margin-bottom:10px}
 .fhead{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}.fcontrib{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;min-width:50px}.fday{font-size:11px;color:var(--ink3)}
+.ftrust{font-size:9.5px;padding:1px 7px;border-radius:20px;text-transform:uppercase;font-weight:700}
+.ftrust.driver{background:rgba(25,158,112,.18);color:var(--gd)}.ftrust.weak{background:rgba(201,133,0,.18);color:#e0a52e}.ftrust.context{background:var(--panel2);color:var(--ink3)}
+.ftyp{font-size:11px;color:var(--ink3);margin-top:2px}
 .note{color:var(--ink3);font-size:12px;margin-top:8px}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 30px}
 .mcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
@@ -216,7 +219,8 @@ all();
     const dec=parts.map(p=>{const v=p[2],w=Math.abs(v)/scale*50,left=v>=0?50:50-w;
       return `<div class="drow"><div class="dlab"><span class="sw" style="background:${p[1]}"></span>${p[0]}</div><div class="dbarwrap"><div class="dmid"></div><div class="dbar" style="left:${left}%;width:${w}%;background:${p[1]}"></div></div><div class="dval" style="color:${v>=0?'#199e70':'#e0533a'}">${pct(v)}</div></div>`}).join("");
     const facts=Am.events.map(e=>{const c=e.contrib,cc=c==null?'var(--ink3)':(c>=0?'#199e70':'#e0533a');
-      return `<div class="afact" style="border-left-color:${c!=null&&Math.abs(c)>=0.01?cc:'var(--line)'}"><div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span style="font-weight:600">${esc(e.cat)} <span style="color:${e.dir>=0?'#199e70':'#e0533a'};font-weight:700">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}</div><div style="font-size:13px;margin-top:1px"><q style="font-style:italic;color:var(--ink)">${esc(e.q)}</q></div>`+
+      return `<div class="afact" style="border-left-color:${c!=null&&Math.abs(c)>=0.01?cc:'var(--line)'}"><div class="fhead"><span class="fcontrib" style="color:${cc}">${c==null?'—':pct(c)}</span> <span style="font-weight:600">${esc(e.cat)} <span style="color:${e.dir>=0?'#199e70':'#e0533a'};font-weight:700">${e.dir>=0?'▲':'▼'}</span></span> <span class="fday">${e.day||e.d||''}</span>${e.mech?`<span class="fmech">${esc(e.mech)}</span>`:''}${e.trust?`<span class="ftrust ${e.trust}">${e.trust}</span>`:''}</div><div style="font-size:13px;margin-top:1px"><q style="font-style:italic;color:var(--ink)">${esc(e.q)}</q></div>`+
+      (e.pmove!=null?`<div class="ftyp">'${esc(e.mech)}' news typically moves ≈${(e.pmove*100).toFixed(1)}%${e.trust=='context'?' with no direction — usually context, not a driver':(e.trust=='driver'?' in the stated direction — real-catalyst type':' — weak direction')}</div>`:'')+
       (e.u?`<a class="fsrc" href="${esc(e.u)}" target="_blank">${esc(e.h)||'(article)'} · <span class="src">${esc(e.s)}</span> ↗</a>`:`<div class="fsrc">${esc(e.h)||''}</div>`)+`</div>`}).join("");
     const cov=Am.idio?Math.round((Am.idio_news/Am.idio)*100):0;
     el("amain").innerHTML=`<div class="hd">${f.n} <span style="color:var(--ink3);font-weight:500;font-size:15px">${f.t}</span></div>
