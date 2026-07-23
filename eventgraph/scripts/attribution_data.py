@@ -63,10 +63,23 @@ for s in uni:
     if len(days)<250: continue
     Y=np.array([r[d] for d in days])
     if np.max(np.abs(Y))>0.35 or np.std(Y)>0.06: continue   # drop penny/delisted/split-artifact series
-    Xm=np.column_stack([np.ones(len(days))]+[[Fmap[d][i] for d in days] for i in mcol]); Xm=np.nan_to_num(Xm)
-    bm,*_=np.linalg.lstsq(Xm,Y,rcond=None); macfit=Xm@bm; res1=Y-macfit
+    # FABLE FIX (a): leave-one-month-out betas + intercept EXCLUDED from attributed components,
+    # so a firm's secular drift stays in IDIO (not booked to macro) and the event month never fits itself.
+    Xm=np.nan_to_num(np.column_stack([np.ones(len(days))]+[[Fmap[d][i] for d in days] for i in mcol]))
     Xs=np.column_stack([np.ones(len(days))]+[[spdr[e][d] for d in days] for e in SPDR])
-    bs,*_=np.linalg.lstsq(Xs,res1,rcond=None); secfit=Xs@bs; idio=res1-secfit
+    dmon=np.array([d[:7] for d in days])
+    macfit=np.zeros(len(days))
+    for m_ in sorted(set(dmon)):
+        te=dmon==m_; tr=~te
+        if tr.sum()<150: continue
+        bm,*_=np.linalg.lstsq(Xm[tr],Y[tr],rcond=None); macfit[te]=Xm[te][:,1:]@bm[1:]
+    res1=Y-macfit
+    secfit=np.zeros(len(days))
+    for m_ in sorted(set(dmon)):
+        te=dmon==m_; tr=~te
+        if tr.sum()<150: continue
+        bs,*_=np.linalg.lstsq(Xs[tr],res1[tr],rcond=None); secfit[te]=Xs[te][:,1:]@bs[1:]
+    idio=res1-secfit
     dm={d:(macfit[i],secfit[i],idio[i],Y[i]) for i,d in enumerate(days)}
     idio_d={d:idio[i] for i,d in enumerate(days)}
     moves=[]

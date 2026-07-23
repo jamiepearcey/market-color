@@ -449,6 +449,21 @@ extracted up/down tracks the move (trustworthy); ~0/negative (regulation +0.02, 
 are among the weakest movers -> most edges are context. This is the empirical implied-move-by-type prior; before
 this the per-event number was realized-from-price only and the type label decorative. `news_type_moves.py`.
 
+### F34. Unified driver pipeline + Fable judge (fix-first -> fixed) (2026-07-23)
+Unified process (`hypothesis_engine.py`), REPLACING embedding ranking: activation -> residual DECOMPOSITION
+(macro/sector/idio) as the driver detector -> ROUTED retrieval (macro catalysts | same-sector catalysts |
+firm's event-study-scored edges w/ F33 type-trust) -> hypothesis (LLM w/ deterministic fallback; Groq key
+currently EXPIRED). FABLE JUDGE verdict: architecture sound (right replacement), FIX-FIRST on 4 defects:
+(a) intercept-in-macro bug — secular drift booked to macro, corrupting routing (VWSYF -32% "macro"); (b)
+trust-prior as hard gate — false-low on best hit (ACGBY/Huijin +14% = 13x noise marked low) and false-high
+on worst (BIDU "Google" -1.5% sub-noise high); (c) no naming floor (BB/"Dolby" +0.4% named for a -47% move);
+(d) 8-anecdote evaluation. FIXES APPLIED: (a) leave-one-month-out betas + intercept EXCLUDED from attributed
+components (drift->idio); (b) evidence-combination confidence — z-vs-1.07%-noise x coverage-of-idio x sign,
+trust MODULATES not vetoes, ABSTAIN below noise, never high on mixed. POST-FIX: BP->high (10.7x noise, 30%
+cov, right family), ACGBY->med w/ correct catalyst, BIDU no false-high, BB/NWG/EBKOF clean abstentions —
+no confidently-wrong outputs remain. PENDING (Fable #3): scaled scoring vs labeled ground truth; same-day
+multi-event disentangling; ADR/FX factors. `hypothesis_engine.py`, unified_attributions.json.
+
 ## 4. Statistical honesty ledger
 
 - Dyadic clustering deflates OLS t by 3-6x; all headline claims survive at p<0.01

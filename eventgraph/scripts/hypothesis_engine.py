@@ -16,7 +16,7 @@ import os, json, collections, sys, time
 from pathlib import Path
 import httpx
 G=Path("../data/eg_runs/eg100k_graph")
-GROQ="https://api.groq.com/openai/v1/chat/completions"; KEY=os.environ["GROQ_API_KEY"]; MODEL="openai/gpt-oss-120b"
+GROQ="https://api.groq.com/openai/v1/chat/completions"; KEY=os.environ.get("GROQ_API_KEY"); MODEL="openai/gpt-oss-120b"
 ATTR=json.load(open(G/"attribution.json")); CANON=json.load(open(G/"catalyst_map.json"))
 PRIOR=json.load(open(G/"mech_prior.json"))["mech"]
 DIRV={"up":1,"down":-1,"widen":-1,"tighten":1}
@@ -62,7 +62,8 @@ def reason(firm,mv,S,idioev,secev,macev):
      f"(dominant: {shares[0][0]}).\nFIRM-SPECIFIC news (event-study scored):\n{ev_i}\nSECTOR ({S}) news that month:\n{ev_s}\nMACRO news that month:\n{ev_m}")
     body={"model":MODEL,"temperature":0,"max_tokens":500,"response_format":{"type":"json_object"},
           "messages":[{"role":"system","content":sysmsg},{"role":"user","content":user}]}
-    for a in range(4):
+    if not KEY: return {}
+    for a in range(2):
         try:
             r=httpx.post(GROQ,json=body,headers={"Authorization":f"Bearer {KEY}"},timeout=60)
             if r.status_code!=200: time.sleep(2*(a+1)); continue
@@ -79,17 +80,22 @@ def deterministic(mv,S,idioev,secev,macev):
     dom=ordered[0][0]; channel="mixed" if ordered[1][1]/tot>0.33 else dom
     rank={"driver":2,"weak":1,"context":0}
     if dom=="idiosyncratic":
-        sgn=1 if mv["idio"]>=0 else -1     # a driver must move the SAME direction as the idio move
-        ev=sorted([e for e in idioev if e.get("contrib") is not None],
-                  key=lambda e:((1 if e["contrib"]*sgn>0 else 0),rank.get(e.get("trust"),0),abs(e["contrib"])),reverse=True)
-        if ev:
-            pd=ev[0]["cat"]; tr=ev[0].get("trust","context")
-            signok=ev[0]["contrib"]*sgn>0
-            conf="high" if signok and tr=="driver" and abs(ev[0]["contrib"])>=0.01 else ("med" if signok and tr!="context" else "low")
-            if not signok: why_sfx=" (WARNING: no captured event matches the move direction)"
-            else: why_sfx=""
-            why=f"idiosyncratic {mv['idio']:+.1%} dominates; top trust-ranked event: {pd} ({tr}, {ev[0]['contrib']:+.1%} on {ev[0].get('day','?')})"+why_sfx
-        else: pd="unexplained (no captured firm-specific event)"; conf="low"; why=f"idiosyncratic {mv['idio']:+.1%} dominates but no captured event explains it"
+        # FABLE FIX (b): evidence-combination confidence — z vs noise baseline + coverage of the idio move;
+        # trust MODULATES (case evidence can overwhelm the class prior); abstain below noise; never high on mixed.
+        BASEn=0.0107; sgn=1 if mv["idio"]>=0 else -1
+        cand=[e for e in idioev if e.get("contrib") is not None and e["contrib"]*sgn>0]
+        best=max(cand,key=lambda e:abs(e["contrib"])*(1+0.25*rank.get(e.get("trust"),0)),default=None)
+        if best is None or abs(best["contrib"])<BASEn:
+            pd="unexplained by captured news"; conf="low"
+            why=f"idiosyncratic {mv['idio']:+.1%} dominates but no sign-consistent captured event exceeds the {BASEn:.1%} noise baseline — abstaining rather than naming from noise"
+        else:
+            z=abs(best["contrib"])/BASEn; cov=abs(best["contrib"])/max(abs(mv["idio"]),1e-9); tr=best.get("trust","context")
+            pd=best["cat"]
+            if (z>=3 and cov>=0.25) or (tr=="driver" and z>=2): conf="high"
+            elif z>=1.5: conf="med"
+            else: conf="low"
+            if channel=="mixed" and conf=="high": conf="med"
+            why=f"idiosyncratic {mv['idio']:+.1%} dominates; {pd} ({tr}, {best['contrib']:+.1%} on {best.get('day','?')} = {z:.1f}x noise, covers {cov:.0%} of the idio move)"
     elif dom=="sector":
         pd=secev[0][1] if secev else f"{S} sector-wide move (no specific catalyst captured)"
         conf="med" if secev else "low"; why=f"sector {mv['sector']:+.1%} dominates; leading {S} catalyst: {pd}"
