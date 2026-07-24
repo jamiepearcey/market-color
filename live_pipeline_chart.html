@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What we're doing now — grounded live news retrieval</title>
+<style>
+  .viz-root{
+    color-scheme:light;
+    --plane:#f9f9f7;--surface:#fcfcfb;--surface-2:#f3f2ee;
+    --ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;--grid:#e1e0d9;--border:rgba(11,11,11,0.10);
+    --good:#0ca30c;--good-ink:#006300;--crit:#d03b3b;--neutral:#898781;--accent:#2a78d6;
+  }
+  :root[data-theme="dark"] .viz-root{
+    color-scheme:dark;
+    --plane:#0d0d0d;--surface:#1a1a19;--surface-2:#232320;
+    --ink:#fff;--ink-2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--border:rgba(255,255,255,0.10);
+    --good:#0ca30c;--good-ink:#0ca30c;--crit:#d03b3b;--neutral:#898781;--accent:#3987e5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .viz-root{background:var(--plane);color:var(--ink);min-height:100vh;padding:32px 22px 60px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto}
+  .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  h1{font-size:21px;font-weight:650;margin:0;letter-spacing:-0.01em}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:6px 0 22px;max-width:76ch;line-height:1.5}
+  .toggle{background:var(--surface);border:1px solid var(--border);color:var(--ink-2);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+
+  /* pipeline strip */
+  .pipe{display:flex;align-items:stretch;gap:0;margin-bottom:26px;flex-wrap:wrap}
+  .step{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 14px;min-width:120px;flex:1}
+  .step .l{font-size:11px;color:var(--muted);font-weight:500}
+  .step .v{font-size:19px;font-weight:640;margin-top:3px;letter-spacing:-0.01em}
+  .step .s{font-size:11px;color:var(--ink-2);margin-top:2px}
+  .arrow{display:flex;align-items:center;color:var(--muted);font-size:15px;padding:0 6px}
+
+  .h2{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0.02em;margin:0 0 12px}
+
+  /* headline comparison bars */
+  .cmp{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px 20px;margin-bottom:22px}
+  .cbar{margin:14px 0}
+  .cbar .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .cbar .name{font-size:14px;font-weight:560}
+  .cbar .fr{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .cbar .fr b{font-size:15px}
+  .track{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden}
+  .cell{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;min-width:22px}
+  .cell.correct{background:var(--good)}
+  .cell.offtopic{background:var(--crit)}
+  .cell.abstain{background:var(--neutral)}
+  .legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2)}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* per-activation detail */
+  .grid{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .gr{display:grid;grid-template-columns:74px 1fr 1fr;align-items:center;border-top:1px solid var(--grid)}
+  .gr:first-child{border-top:none}
+  .gh{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.02em;padding:11px 14px;background:var(--surface-2)}
+  .gc{padding:11px 14px;font-size:12.5px;min-width:0}
+  .tk{font-weight:640;font-size:13.5px}
+  .zz{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .out{display:flex;gap:8px;align-items:flex-start}
+  .pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;display:inline-flex;gap:5px;align-items:center;flex:0 0 auto}
+  .pill.correct{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good-ink)}
+  .pill.offtopic{background:color-mix(in srgb,var(--crit) 15%,transparent);color:var(--crit)}
+  .pill.abstain{background:var(--surface-2);color:var(--ink-2)}
+  .head{color:var(--ink-2);line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .head.off{color:var(--crit)}
+  .foot{color:var(--muted);font-size:12px;margin-top:22px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <div class="hh">
+    <div>
+      <h1>What we're doing now: grounded news retrieval on live activations</h1>
+    </div>
+    <button class="toggle" id="themeBtn">◐ Theme</button>
+  </div>
+  <p class="sub">The live pipeline crawls news, embeds the <b>full</b> corpus, dictionary-links each article to
+  tickers, then for each notable price move retrieves firm-scoped news — <b>answering only when the corpus
+  actually covers the firm, and abstaining otherwise.</b> The chart compares that grounded step against plain
+  embedding search on the same 7 recent moves.</p>
+
+  <div class="pipe" id="pipe"></div>
+
+  <div class="cmp">
+    <p class="h2">FALSE-EXPLANATION RATE — plain embeddings vs grounded (7 live moves)</p>
+    <div id="bars"></div>
+    <div class="legend">
+      <span class="lg"><span class="sw" style="background:var(--good)"></span>✓ correct firm explanation</span>
+      <span class="lg"><span class="sw" style="background:var(--crit)"></span>✗ off-topic (false explanation)</span>
+      <span class="lg"><span class="sw" style="background:var(--neutral)"></span>○ abstained (honest “no news”)</span>
+    </div>
+  </div>
+
+  <p class="h2">PER-MOVE — what each method actually served</p>
+  <div class="grid" id="detail"></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+</div>
+<script>
+const DATA = {
+  "pipeline": [
+    {"label":"Crawl", "v":"21,285", "sub":"articles /28 days"},
+    {"label":"Index (full corpus)", "v":"17,134", "sub":"embedded in Qdrant"},
+    {"label":"Ground", "v":"260", "sub":"tickers dict-linked"},
+    {"label":"Activations", "v":"7", "sub":"notable moves"},
+    {"label":"Grounded retrieve", "v":"4 / 3", "sub":"explained / abstained"}
+  ],
+  "activations": [
+    {"t":"IBM","z":-8.0,"plain":{"s":"correct","h":"IBM stock craters 23% after Q2 earnings warning"},"grounded":{"s":"correct","h":"IBM stock craters 23% after Q2 earnings warning"}},
+    {"t":"PYPL","z":7.3,"plain":{"s":"correct","h":"PayPal VP sold ~4,000 shares (firm)"},"grounded":{"s":"correct","h":"PayPal VP sold ~4,000 shares (firm)"}},
+    {"t":"PNR","z":-8.4,"plain":{"s":"correct","h":"Pentair shares dip 17% on dour forecast"},"grounded":{"s":"correct","h":"Pentair shares dip 17% on dour forecast"}},
+    {"t":"MAN","z":7.7,"plain":{"s":"offtopic","h":"WeWork India shares slide 5%"},"grounded":{"s":"correct","h":"Biggest moves midday: Manpower, Abbott…"}},
+    {"t":"SGRP","z":-10.7,"plain":{"s":"offtopic","h":"Stocks in news: DMart, HCL Tech, ICICI…"},"grounded":{"s":"abstain","h":"no firm-specific news in corpus"}},
+    {"t":"NVVE","z":-7.2,"plain":{"s":"offtopic","h":"Absa disrupts EV finance with BYD"},"grounded":{"s":"abstain","h":"no firm-specific news in corpus"}},
+    {"t":"AARD","z":6.5,"plain":{"s":"offtopic","h":"FDA Approves KEYTRUDA…"},"grounded":{"s":"abstain","h":"no firm-specific news in corpus"}}
+  ]
+}
+;
+const ICON = {correct:"✓", offtopic:"✗", abstain:"○"};
+const LABEL = {correct:"correct", offtopic:"off-topic", abstain:"abstain"};
+
+function pipe(){
+  const el=document.getElementById("pipe"); let h="";
+  DATA.pipeline.forEach((s,i)=>{
+    h+=`<div class="step"><div class="l">${s.label}</div><div class="v">${s.v}</div><div class="s">${s.sub}</div></div>`;
+    if(i<DATA.pipeline.length-1) h+=`<div class="arrow">→</div>`;
+  });
+  el.innerHTML=h;
+}
+function bars(){
+  const methods=[["plain","Plain embeddings"],["grounded","Grounded (+ abstain)"]];
+  const el=document.getElementById("bars");
+  el.innerHTML = methods.map(([k,name])=>{
+    const cnt={correct:0,offtopic:0,abstain:0};
+    DATA.activations.forEach(a=>cnt[a[k].s]++);
+    const n=DATA.activations.length;
+    const seg=["correct","offtopic","abstain"].filter(s=>cnt[s]>0).map(s=>
+      `<span class="cell ${s}" style="flex:${cnt[s]}" title="${cnt[s]} ${LABEL[s]}">${cnt[s]}</span>`).join("");
+    const fr=Math.round(100*cnt.offtopic/n);
+    return `<div class="cbar"><div class="top"><span class="name">${name}</span>
+       <span class="fr">false-explanation <b style="color:${cnt.offtopic?'var(--crit)':'var(--good-ink)'}">${fr}%</b> · ${cnt.offtopic}/${n}</span></div>
+       <div class="track">${seg}</div></div>`;
+  }).join("");
+}
+function detail(){
+  const el=document.getElementById("detail");
+  let h=`<div class="gr"><div class="gh">MOVE</div><div class="gh">PLAIN EMBEDDINGS</div><div class="gh">GROUNDED</div></div>`;
+  DATA.activations.forEach(a=>{
+    const cell=(o)=>`<div class="gc"><div class="out"><span class="pill ${o.s}">${ICON[o.s]} ${LABEL[o.s]}</span>
+      <span class="head ${o.s==='offtopic'?'off':''}">${o.h}</span></div></div>`;
+    h+=`<div class="gr"><div class="gc"><div class="tk">${a.t}</div><div class="zz">${a.z>=0?'+':''}${a.z}σ</div></div>
+        ${cell(a.plain)}${cell(a.grounded)}</div>`;
+  });
+  el.innerHTML=h;
+}
+document.getElementById("foot").innerHTML =
+  "Grounding is cheap dictionary entity-linking (company-name→ticker) over the full corpus — no LLM extraction. "+
+  "On easy moves with strong news (IBM, PayPal, Pentair) plain and grounded are identical; the entire difference "+
+  "is on hard/micro-cap moves, and it's <b>trust, not recall</b>: 57%→0% false explanations. N=7 recent activations.";
+document.getElementById("themeBtn").addEventListener("click",()=>{const r=document.documentElement;r.setAttribute("data-theme",r.getAttribute("data-theme")==="dark"?"light":"dark")});
+pipe();bars();detail();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution Engine — decomposition-routed news attribution</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f3f2ee;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --macro:#2a78d6; --sector:#eb6834; --idio:#1baf7a;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --good-ink:#006300;
+  }
+  :root[data-theme="dark"] .viz-root, .viz-root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232320;
+    --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+    --macro:#3987e5; --sector:#d95926; --idio:#199e70;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --good-ink:#0ca30c;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .viz-root { background:var(--plane); color:var(--ink); min-height:100vh;
+    padding:32px 20px 80px; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  header.h { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:6px; }
+  h1 { font-size:22px; font-weight:650; margin:0; letter-spacing:-0.01em; }
+  .sub { color:var(--ink-2); font-size:14px; margin:6px 0 24px; max-width:70ch; line-height:1.5; }
+  .toggle { background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:8px; padding:7px 12px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .toggle:hover { color:var(--ink); }
+
+  /* stat tiles */
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
+  .tile { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 16px 14px; }
+  .tile .k { font-size:12px; color:var(--muted); font-weight:500; }
+  .tile .v { font-size:30px; font-weight:660; letter-spacing:-0.02em; margin-top:6px; line-height:1; }
+  .tile .n { font-size:12px; color:var(--ink-2); margin-top:6px; }
+
+  /* calibration strip */
+  .calib { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:22px; }
+  .calib .lab { font-size:12px; color:var(--muted); font-weight:500; margin-bottom:10px; }
+  .cbar { display:flex; align-items:center; gap:12px; margin:7px 0; }
+  .cbar .name { width:130px; font-size:13px; color:var(--ink-2); }
+  .cbar .track { flex:1; height:10px; background:var(--surface-2); border-radius:5px; overflow:hidden; }
+  .cbar .fill { height:100%; border-radius:5px; }
+  .cbar .pct { width:96px; text-align:right; font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); }
+
+  /* filters */
+  .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .filters button { background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:20px; padding:6px 13px; font-size:13px; cursor:pointer; }
+  .filters button[aria-pressed="true"] { background:var(--ink); color:var(--plane); border-color:var(--ink); }
+
+  /* cards */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px; margin-bottom:14px; }
+  .crow { display:flex; justify-content:space-between; align-items:baseline; gap:16px; }
+  .firm { font-size:16px; font-weight:620; }
+  .firm .tk { color:var(--muted); font-weight:500; font-size:13px; margin-left:7px; }
+  .firm .mo { color:var(--muted); font-weight:500; font-size:13px; margin-left:7px; }
+  .move { font-size:22px; font-weight:680; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .up { color:var(--good-ink); } .down { color:var(--crit); }
+
+  /* decomposition bar */
+  .decomp { margin:15px 0 4px; }
+  .dbar { display:flex; gap:2px; height:22px; border-radius:5px; overflow:hidden; }
+  .seg { position:relative; min-width:2px; }
+  .seg[data-c="macro"] { background:var(--macro); } .seg[data-c="sector"] { background:var(--sector); } .seg[data-c="idio"] { background:var(--idio); }
+  .dlabels { display:flex; gap:14px; margin-top:8px; flex-wrap:wrap; }
+  .dl { font-size:12px; color:var(--ink-2); display:flex; align-items:center; gap:6px; }
+  .swatch { width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .dl b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  .dl.dom { font-weight:600; }
+
+  .route { font-size:12.5px; color:var(--ink-2); margin:13px 0 2px; }
+  .route .arrow { color:var(--muted); }
+  .route code { background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:11.5px; color:var(--ink-2); }
+
+  /* answer */
+  .answer { margin-top:14px; padding-top:14px; border-top:1px solid var(--grid); }
+  .adrv { font-size:15px; font-weight:560; line-height:1.4; }
+  .chips { display:flex; gap:8px; margin:10px 0 2px; flex-wrap:wrap; }
+  .chip { font-size:12px; font-weight:550; padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; }
+  .chip .ic { width:8px; height:8px; border-radius:50%; }
+  .chip.high { background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good-ink); }
+  .chip.med { background:color-mix(in srgb,var(--warn) 22%,transparent); color:var(--ink); }
+  .chip.low { background:var(--surface-2); color:var(--ink-2); }
+  .chip.high .ic{background:var(--good);} .chip.med .ic{background:var(--warn);} .chip.low .ic{background:var(--muted);}
+  .chip.v-correct { background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good-ink); }
+  .chip.v-weak { background:color-mix(in srgb,var(--warn) 22%,transparent); color:var(--ink); }
+  .chip.v-wrong { background:color-mix(in srgb,var(--crit) 15%,transparent); color:var(--crit); }
+  .chip.gate { background:transparent; border:1px dashed var(--border); color:var(--muted); font-weight:500; }
+  .reason { font-size:13px; color:var(--ink-2); line-height:1.5; margin-top:9px; }
+
+  /* evidence */
+  details.ev { margin-top:12px; }
+  details.ev > summary { cursor:pointer; font-size:12.5px; color:var(--macro); list-style:none; user-select:none; }
+  details.ev > summary::-webkit-details-marker { display:none; }
+  details.ev > summary::before { content:"▸ "; }
+  details.ev[open] > summary::before { content:"▾ "; }
+  .src { border-left:2px solid var(--grid); padding:8px 0 8px 13px; margin:11px 0; }
+  .src .meta { font-size:11.5px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:5px; }
+  .tag { font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:4px; letter-spacing:0.02em; }
+  .tag.firm { background:color-mix(in srgb,var(--idio) 20%,transparent); color:var(--idio); }
+  .tag.macro { background:color-mix(in srgb,var(--macro) 18%,transparent); color:var(--macro); }
+  .src .hl { font-size:12.5px; color:var(--ink); font-weight:550; margin-bottom:4px; }
+  .src .q { font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+  .src .bk { font-size:11px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+  .src .bk a { color:var(--macro); text-decoration:none; } .src .bk a:hover { text-decoration:underline; }
+  .foot { color:var(--muted); font-size:12px; margin-top:26px; line-height:1.6; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <header class="h">
+    <div>
+      <h1>Attribution Engine</h1>
+    </div>
+    <button class="toggle" id="themeBtn">◐ Theme</button>
+  </header>
+  <p class="sub">Every large stock move is first <b>decomposed</b> into macro / sector / firm-specific return, that
+  decomposition <b>routes</b> a scoped news search, and the answer is <b>synthesized from the verbatim source</b> —
+  then graded by an adversarial, channel-aware judge. Confident answers are trustworthy; when the evidence is thin it abstains.</p>
+
+  <div class="tiles" id="tiles"></div>
+  <div class="calib" id="calib"></div>
+  <div class="filters" id="filters"></div>
+  <div id="cards"></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+</div>
+<script>
+const DATA = /*__DATA__*/ {};
+const pct = x => (x>=0?"+":"")+(x*100).toFixed(1)+"%";
+const CH = [["macro","Macro","var(--macro)"],["sector","Sector","var(--sector)"],["idio","Firm-specific","var(--idio)"]];
+const ROUTE_TXT = {idio:"the firm's own news", sector:"beta-correlated peers", macro:"macro catalysts", mixed:"firm-own OR macro"};
+
+function tiles(s){
+  const committedN = s.conf.high.n + s.conf.med.n, committedC = s.conf.high.correct + s.conf.med.correct;
+  const hi = s.conf.high;
+  const t = [
+    ["Activations", s.n, "biggest moves, 2010–2012"],
+    ["Correct when it commits", Math.round(100*committedC/committedN)+"%", committedC+"/"+committedN+" high+med calls"],
+    ["High-confidence accuracy", Math.round(100*hi.correct/hi.n)+"%", "vs 32% before calibration"],
+    ["Sign errors caught", s.sign_caught, "positive driver on a down move"],
+  ];
+  document.getElementById("tiles").innerHTML = t.map(([k,v,n])=>
+    `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="n">${n}</div></div>`).join("");
+}
+function calib(s){
+  const rows=[["high","High confidence","var(--good)"],["med","Medium","var(--warn)"],["low","Low (abstains)","var(--muted)"]];
+  const body = rows.map(([k,name,col])=>{
+    const b=s.conf[k], r=b.n?b.correct/b.n:0;
+    return `<div class="cbar"><span class="name">${name}</span>
+      <span class="track"><span class="fill" style="width:${Math.max(r*100,1.5)}%;background:${col}"></span></span>
+      <span class="pct">${Math.round(r*100)}% · ${b.correct}/${b.n}</span></div>`;
+  }).join("");
+  document.getElementById("calib").innerHTML =
+    `<div class="lab">CALIBRATION — judge-verified "correct" rate within each stated confidence</div>${body}`;
+}
+function decompBar(d){
+  const items = CH.map(([k])=>[k, d[k]||0]);
+  const tot = items.reduce((a,[,v])=>a+Math.abs(v),0)||1;
+  const dom = items.slice().sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0][0];
+  const segs = items.map(([k,v])=>{
+    const w = Math.abs(v)/tot*100;
+    return w<0.5?"":`<span class="seg" data-c="${k}" style="flex:0 0 ${w}%" title="${k}: ${pct(v)}"></span>`;
+  }).join("");
+  const labs = CH.map(([k,name,col])=>{
+    const v=d[k]||0;
+    return `<span class="dl ${k===dom?'dom':''}"><span class="swatch" style="background:${col}"></span>${name} <b>${pct(v)}</b></span>`;
+  }).join("");
+  return {html:`<div class="decomp"><div class="dbar">${segs}</div><div class="dlabels">${labs}</div></div>`, dom};
+}
+function evidence(ev){
+  if(!ev.length) return "";
+  const items = ev.map(e=>{
+    const tag = e.firm_specific ? `<span class="tag firm">FIRM-SPECIFIC</span>`
+              : (e.is_macro ? `<span class="tag macro">MACRO TAPE</span>` : "");
+    const host = e.url ? new URL(e.url).hostname.replace("www.","") : "";
+    return `<div class="src">
+      <div class="meta">${e.published_date||""} ${tag}<span>tickers: ${e.tickers&&e.tickers.length?e.tickers.join(", "):"—"}</span></div>
+      ${e.headline?`<div class="hl">${e.headline}</div>`:""}
+      <div class="q">“${(e.verbatim||"").replace(/</g,"&lt;")}…”</div>
+      <div class="bk">↩ back-link <code>${e.chunk_id}</code>${e.url?` · <a href="${e.url}" target="_blank" rel="noopener">${host}</a>`:""}</div>
+    </div>`;
+  }).join("");
+  return `<details class="ev"><summary>${ev.length} cited source${ev.length>1?"s":""} — verbatim, back-linked</summary>${items}</details>`;
+}
+function card(a){
+  const {html:dbar, dom} = decompBar(a.decomp);
+  const conf=a.confidence||"low";
+  const confLabel = a.abstain? "abstained" : conf;
+  const vClass = a.verdict?("v-"+a.verdict):"";
+  const vChip = a.verdict?`<span class="chip ${vClass}">judge: ${a.verdict}</span>`:"";
+  const gate = (a.gate_notes||[]).length?`<span class="chip gate" title="${a.gate_notes.join('; ')}">⚙ gate applied</span>`:"";
+  const sign = a.sign_violation?`<span class="chip gate">⚠ sign-checked</span>`:"";
+  return `<article class="card" data-route="${a.route}" data-conf="${conf}" data-abstain="${a.abstain}" data-verdict="${a.verdict||''}">
+    <div class="crow">
+      <div class="firm">${a.firm}<span class="tk">${a.t}</span><span class="mo">${a.month}</span></div>
+      <div class="move ${a.total>=0?'up':'down'}">${pct(a.total)}</div>
+    </div>
+    ${dbar}
+    <div class="route"><span class="arrow">→ routed to</span> <b>${dom==='idio'?'firm-specific':dom}</b> search:
+       scope <code>${ROUTE_TXT[a.route]||a.route}</code></div>
+    <div class="answer">
+      <div class="adrv">${a.driver||"—"}</div>
+      <div class="chips">
+        <span class="chip ${conf}"><span class="ic"></span>${confLabel}</span>
+        ${vChip}${gate}${sign}
+      </div>
+      <div class="reason">${a.reasoning||""}</div>
+      ${evidence(a.evidence)}
+    </div>
+  </article>`;
+}
+const FILTERS = [["all","All"],["committed","Committed (high+med)"],["correct","Judged correct"],["abstain","Abstained"],
+  ["idio","Idiosyncratic"],["macro","Macro"],["mixed","Mixed"]];
+function applyFilter(f){
+  document.querySelectorAll("#filters button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.f===f));
+  document.querySelectorAll(".card").forEach(c=>{
+    let show=true;
+    if(f==="committed") show = (c.dataset.conf==="high"||c.dataset.conf==="med") && c.dataset.abstain!=="true";
+    else if(f==="correct") show = c.dataset.verdict==="correct";
+    else if(f==="abstain") show = c.dataset.abstain==="true";
+    else if(["idio","macro","mixed","sector"].includes(f)) show = c.dataset.route===f;
+    c.classList.toggle("hidden", !show);
+  });
+}
+function render(){
+  tiles(DATA.stats); calib(DATA.stats);
+  document.getElementById("filters").innerHTML = FILTERS.map(([f,l])=>
+    `<button data-f="${f}" aria-pressed="${f==='all'}">${l}</button>`).join("");
+  document.getElementById("filters").addEventListener("click",e=>{ if(e.target.dataset.f) applyFilter(e.target.dataset.f); });
+  document.getElementById("cards").innerHTML = DATA.activations.map(card).join("");
+  const s=DATA.stats;
+  document.getElementById("foot").innerHTML =
+    `Routes: ${s.routes.idio} idiosyncratic · ${s.routes.macro} macro · ${s.routes.mixed} mixed &nbsp;|&nbsp; `+
+    `Grading is an adversarial, channel-aware LLM judge reading the verbatim cited source — a self-consistent metric, not human ground truth. `+
+    `"Correct when it commits" = judged-correct rate over high+med confidence calls; low confidence is the deliberate abstain bucket.`;
+}
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  const r=document.documentElement; r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");
+});
+render();
+</script>
+</body>
+</html>

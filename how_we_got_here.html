@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How we got here — the workflow</title>
+<style>
+  .viz-root{
+    color-scheme:light;
+    --plane:#f9f9f7;--surface:#fcfcfb;--surface-2:#f3f2ee;
+    --ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;--grid:#e1e0d9;--border:rgba(11,11,11,0.10);
+    --do:#2a78d6;--test:#1baf7a;--pivot:#eb6834;--find:#4a3aa7;
+  }
+  :root[data-theme="dark"] .viz-root{
+    color-scheme:dark;
+    --plane:#0d0d0d;--surface:#1a1a19;--surface-2:#232320;
+    --ink:#fff;--ink-2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--border:rgba(255,255,255,0.10);
+    --do:#3987e5;--test:#199e70;--pivot:#d95926;--find:#9085e9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .viz-root{background:var(--plane);color:var(--ink);min-height:100vh;padding:32px 22px 70px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto}
+  .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  h1{font-size:22px;font-weight:660;margin:0;letter-spacing:-0.01em}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:6px 0 18px;max-width:72ch;line-height:1.5}
+  .toggle{background:var(--surface);border:1px solid var(--border);color:var(--ink-2);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+
+  .tiles{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+  .tile b{font-size:20px;font-weight:660;letter-spacing:-0.01em}
+  .tile span{font-size:11.5px;color:var(--ink-2);margin-left:6px}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2)}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .dot.do{background:var(--do)}.dot.test{background:var(--test)}.dot.pivot{background:var(--pivot)}.dot.find{background:var(--find)}
+
+  .phase{margin:22px 0 6px;font-size:12px;font-weight:700;letter-spacing:0.04em;color:var(--muted);text-transform:uppercase}
+  .node{display:grid;grid-template-columns:38px 1fr;column-gap:14px}
+  .rail{position:relative;display:flex;justify-content:center}
+  .rail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--grid)}
+  .node:first-of-type .rail::before{top:22px}
+  .mk{position:relative;z-index:1;width:26px;height:26px;border-radius:50%;background:var(--surface);
+     border:2px solid var(--grid);display:flex;align-items:center;justify-content:center;margin-top:9px;font-size:11px;font-weight:700;color:var(--ink-2)}
+  .mk.do{border-color:var(--do);color:var(--do)} .mk.test{border-color:var(--test);color:var(--test)}
+  .mk.pivot{border-color:var(--pivot);color:var(--pivot);background:color-mix(in srgb,var(--pivot) 12%,var(--surface))}
+  .mk.find{border-color:var(--find);color:var(--find)}
+  .body{padding:8px 0 14px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 15px}
+  .node.pivot .card{border-color:color-mix(in srgb,var(--pivot) 45%,var(--border));border-left-width:3px}
+  .row1{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px}
+  .who{font-size:10.5px;font-weight:700;letter-spacing:0.03em;padding:2px 7px;border-radius:5px}
+  .who.you{background:var(--ink);color:var(--plane)}
+  .who.me{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--border)}
+  .ttl{font-size:14px;font-weight:600}
+  .tag{font-size:10px;font-weight:700;letter-spacing:0.03em;padding:2px 7px;border-radius:20px;text-transform:uppercase}
+  .tag.do{color:var(--do);background:color-mix(in srgb,var(--do) 13%,transparent)}
+  .tag.test{color:var(--test);background:color-mix(in srgb,var(--test) 15%,transparent)}
+  .tag.pivot{color:var(--pivot);background:color-mix(in srgb,var(--pivot) 15%,transparent)}
+  .tag.find{color:var(--find);background:color-mix(in srgb,var(--find) 15%,transparent)}
+  .note{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .note b{color:var(--ink)}
+  .dead{margin-left:6px;font-size:10.5px;font-weight:700;color:var(--muted);border:1px dashed var(--border);padding:1px 6px;border-radius:5px}
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <div class="hh">
+    <div><h1>How we got here</h1></div>
+    <button class="toggle" id="themeBtn">◐ Theme</button>
+  </div>
+  <p class="sub">The path from a routine key rotation to a measured <b>57%→0% false-explanation</b> result on live
+  data. The through-line isn't a straight build — it's a series of <b>your course-corrections</b>, each of which
+  redirected the work toward something more honest and more useful.</p>
+
+  <div class="tiles" id="tiles"></div>
+  <div class="legend">
+    <span class="lg"><span class="dot do"></span>Build</span>
+    <span class="lg"><span class="dot test"></span>Test / measure</span>
+    <span class="lg"><span class="dot pivot"></span>Your pivot</span>
+    <span class="lg"><span class="dot find"></span>Finding / correction</span>
+  </div>
+
+  <div id="timeline"></div>
+  <p class="foot">Four of the six turning points were yours. Each pivot moved the work down a level of honesty:
+  from “does it run” → “is it accurate” → “is it useful” → “is it better than the trivial baseline.” The last
+  question is the one that finally produced a number worth trusting.</p>
+</div>
+</div>
+<script>
+const STEPS = [
+ {p:"Setup"},
+ {n:1,t:"do",who:"me",title:"Rotated the Groq API key",note:"Updated <b>groq.env</b>, verified live — 200 OK, real generation (not the Cloudflare/urllib red herring)."},
+
+ {p:"Build the hybrid"},
+ {n:2,t:"test",who:"me",title:"Tested the new attribution pipeline",note:"LLM vs deterministic head-to-head — caught <b>naming-from-noise</b> (BP’s −40% attributed to “Barack Obama”)."},
+ {n:3,t:"pivot",who:"you",title:"“Are we using Qdrant?”",note:"Decision: keep Qdrant as the retrieval engine, but <b>route it by the return decomposition</b> (macro/sector/idio) instead of replacing it."},
+ {n:4,t:"do",who:"me",title:"Built the hybrid docset",note:"New <b>market_color_events</b> collection — chunk-granular, entity-tagged, back-linked to the source chunk."},
+ {n:5,t:"do",who:"me",title:"Beta-correlated peer subsets",note:"Your idea — search only the peers a stock actually co-moves with, not the whole coarse sector."},
+ {n:6,t:"do",who:"me",title:"Closed the loop with verbatim citations",note:"Routed retrieval → LLM synthesis over the <b>verbatim source</b> (not a summary) → cited, back-linked answers."},
+
+ {p:"Measure &amp; correct"},
+ {n:7,t:"test",who:"me",title:"Adversarial judge scored it",note:"Precision ~<b>29%</b>, and badly over-confident — “high” handed out 70% of the time."},
+ {n:8,t:"do",who:"me",title:"Added a grounding + sign gate",note:"Calibration jumped: correct-when-it-commits <b>32%→67%</b>. Fixed trust, not recall."},
+ {n:9,t:"find",who:"me",title:"Tried a macro-centroid re-rank",note:"Measured <b>neutral</b> — the leakage it targeted was elsewhere. Dropped it.",dead:true},
+ {n:10,t:"find",who:"me",title:"Caught the evaluation itself was wrong",note:"It demanded firm-specific news for genuinely <b>macro</b> moves. Made the judge channel-aware → 54%."},
+ {n:11,t:"find",who:"me",title:"Verified the decomposition vs beta×market",note:"It was <b>right 7/8</b> — I’d been too harsh. The macro attributions were legitimate."},
+
+ {p:"Product reality — live data"},
+ {n:12,t:"pivot",who:"you",title:"“Feels underwhelming for all that.”",note:"Reframed from explaining obvious mega-moves to <b>narrative-trap detection</b> (151 cases where the headline misleads)."},
+ {n:13,t:"pivot",who:"you",title:"“The product delivers NEWS.”",note:"Left the 2010–2012 backtest, moved to the <b>live daily graph</b> (eg_live2)."},
+ {n:14,t:"test",who:"me",title:"Ran it on recent activations",note:"6 of 8 recent notable moves came back <b>“unexplained.”</b>"},
+ {n:15,t:"pivot",who:"you",title:"“Are you sure coverage is limited?”",note:"Caught my over-claim: the pipeline had ingested only <b>19%</b> of a 21,285-article corpus. I was wrong."},
+ {n:16,t:"do",who:"me",title:"Indexed the remaining 81%",note:"Recovered dispositive news the pipeline had skipped — IBM earnings warning, PayPal $53B bid, Pentair guidance cut."},
+ {n:17,t:"pivot",who:"you",title:"“How does this compare to standard embeddings?”",note:"The honest realization: on live data it <b>was</b> plain embeddings. No baseline had been run."},
+ {n:18,t:"do",who:"me",title:"Grounded it &amp; ran the head-to-head",note:"Dictionary entity-linking + abstention → <b>false-explanation 57%→0%</b> on live data. The first result worth trusting."},
+];
+
+const TILES=[["18","steps"],["6","pivots (4 yours)"],["1","dead-end, named"],["3","self-corrections"]];
+document.getElementById("tiles").innerHTML = TILES.map(([b,s])=>`<div class="tile"><b>${b}</b><span>${s}</span></div>`).join("");
+
+const LAB={do:"build",test:"test",pivot:"pivot",find:"finding"};
+document.getElementById("timeline").innerHTML = STEPS.map(s=>{
+  if(s.p) return `<div class="phase">${s.p}</div>`;
+  return `<div class="node ${s.t}">
+    <div class="rail"><div class="mk ${s.t}">${s.n}</div></div>
+    <div class="body"><div class="card">
+      <div class="row1"><span class="who ${s.who}">${s.who==='you'?'YOU':'ME'}</span>
+        <span class="ttl">${s.title}</span><span class="tag ${s.t}">${LAB[s.t]}</span>${s.dead?'<span class="dead">DEAD-END</span>':''}</div>
+      <div class="note">${s.note}</div>
+    </div></div></div>`;
+}).join("");
+document.getElementById("themeBtn").addEventListener("click",()=>{const r=document.documentElement;r.setAttribute("data-theme",r.getAttribute("data-theme")==="dark"?"light":"dark")});
+</script>
+</body>
+</html>

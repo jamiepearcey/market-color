@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The process — grounded attribution + sector overview</title>
+<style>
+  .viz-root{
+    color-scheme:light;
+    --plane:#f9f9f7;--surface:#fcfcfb;--surface-2:#f3f2ee;
+    --ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;--grid:#e1e0d9;--border:rgba(11,11,11,0.10);
+    --accent:#2a78d6;--sector:#eb6834;--good:#0ca30c;--good-ink:#006300;--warn:#fab219;--neutral:#898781;
+  }
+  :root[data-theme="dark"] .viz-root{
+    color-scheme:dark;
+    --plane:#0d0d0d;--surface:#1a1a19;--surface-2:#232320;
+    --ink:#fff;--ink-2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--border:rgba(255,255,255,0.10);
+    --accent:#3987e5;--sector:#d95926;--good:#0ca30c;--good-ink:#0ca30c;--warn:#fab219;--neutral:#898781;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .viz-root{background:var(--plane);color:var(--ink);min-height:100vh;padding:32px 22px 70px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto}
+  .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  h1{font-size:21px;font-weight:660;margin:0;letter-spacing:-0.01em}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:6px 0 22px;max-width:74ch;line-height:1.5}
+  .toggle{background:var(--surface);border:1px solid var(--border);color:var(--ink-2);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+
+  .status{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .sl{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2)}
+  .sq{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .sq.live{background:var(--good)} .sq.bt{background:var(--warn)} .sq.no{background:var(--neutral);opacity:.5}
+
+  .flow{display:flex;flex-direction:column;align-items:center}
+  .stage{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    border-left:3px solid var(--accent);padding:12px 15px;display:flex;gap:12px;align-items:flex-start}
+  .num{flex:0 0 24px;height:24px;border-radius:50%;background:color-mix(in srgb,var(--accent) 13%,transparent);
+    color:var(--accent);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .t{font-size:14px;font-weight:620;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .d{font-size:12.5px;color:var(--ink-2);line-height:1.45;margin-top:3px}
+  .d code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:11.5px}
+  .badge{font-size:9.5px;font-weight:700;letter-spacing:0.03em;padding:2px 7px;border-radius:20px;text-transform:uppercase}
+  .badge.live{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good-ink)}
+  .badge.bt{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--ink)}
+  .badge.no{background:var(--surface-2);color:var(--muted);border:1px dashed var(--border)}
+  .badge.chip{background:var(--surface-2);color:var(--muted)}
+
+  .conn{width:2px;height:18px;background:var(--grid)}
+  .conn.arrow{position:relative}
+  .conn.arrow::after{content:"";position:absolute;bottom:-1px;left:-4px;border:5px solid transparent;border-top-color:var(--grid)}
+  .band{width:100%;max-width:600px;text-align:center;font-size:11px;color:var(--muted);border-top:1px dashed var(--border);margin:8px 0;padding-top:8px}
+  .price{width:100%;max-width:600px;text-align:right;font-size:11px;color:var(--muted);margin:-6px 0 2px;padding-right:6px}
+
+  /* decompose = the router */
+  .decomp{width:100%;max-width:600px;background:color-mix(in srgb,var(--warn) 13%,var(--surface));
+    border:1px solid color-mix(in srgb,var(--warn) 50%,var(--border));border-radius:12px;border-left:3px solid var(--sector);padding:12px 15px;display:flex;gap:12px;align-items:flex-start}
+  .decomp .num{background:color-mix(in srgb,var(--sector) 15%,transparent);color:var(--sector)}
+
+  /* two modes */
+  .modes{width:100%;max-width:600px;display:flex;gap:16px;margin-top:8px;align-items:stretch}
+  .mode{flex:1;display:flex;flex-direction:column;gap:8px}
+  .mhdr{font-size:11.5px;font-weight:700;letter-spacing:0.03em;text-align:center;padding:5px;border-radius:8px}
+  .mhdr.idio{color:var(--good-ink);background:color-mix(in srgb,var(--good) 12%,transparent)}
+  .mhdr.sec{color:var(--sector);background:color-mix(in srgb,var(--sector) 13%,transparent)}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px}
+  .box.dashed{border-style:dashed;background:transparent}
+  .box .bt2{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .box .bd{font-size:11.5px;color:var(--ink-2);line-height:1.45;margin-top:4px}
+  .mini{font-size:11px;color:var(--muted);text-align:center}
+  .out{border-radius:10px;padding:10px 12px}
+  .out.answer{background:color-mix(in srgb,var(--good) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--good) 42%,var(--border))}
+  .out.abstain{background:var(--surface-2);border:1px solid var(--border)}
+  .out .ot{font-size:12.5px;font-weight:640}
+  .out.answer .ot{color:var(--good-ink)} .out.abstain .ot{color:var(--ink-2)}
+  .out .od{font-size:11px;color:var(--ink-2);margin-top:3px;line-height:1.4}
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;line-height:1.6;text-align:center;max-width:640px;margin-left:auto;margin-right:auto}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <div class="hh"><div><h1>The process — two modes, honestly marked</h1></div>
+    <button class="toggle" id="themeBtn">◐ Theme</button></div>
+  <p class="sub">A standing index (1–3), then per notable move a <b>decomposition routes to one of two modes</b>:
+  firm-grounded attribution for idiosyncratic moves, or a breadth-ranked <b>sector/macro overview</b> for the
+  non-idiosyncratic ones. Everything below now runs on live data.</p>
+
+  <div class="status">
+    <span class="sl"><span class="sq live"></span>live — running on the current corpus &amp; price feed</span>
+  </div>
+
+  <div class="flow">
+    <div class="stage"><div class="num">1</div><div><div class="t">Crawl <span class="badge chip">ingest</span> <span class="badge live">live</span></div>
+      <div class="d">News feeds → raw corpus, <b>21,285 articles</b> (~760/day).</div></div></div>
+    <div class="conn arrow"></div>
+    <div class="stage"><div class="num">2</div><div><div class="t">Embed the full corpus <span class="badge chip">index</span> <span class="badge live">live</span></div>
+      <div class="d">Every article body (MiniLM 384-d) → Qdrant <code>market_color</code>, <b>17,134 docs</b> — whole corpus, no sampling.</div></div></div>
+    <div class="conn arrow"></div>
+    <div class="stage"><div class="num">3</div><div><div class="t">Ground to tickers <span class="badge chip">entity-link</span> <span class="badge live">live</span></div>
+      <div class="d">Dictionary link company→ticker → <code>ticker→docs</code>, <b>260 tickers</b>. No hallucination.</div></div></div>
+
+    <div class="band">↑ standing index (once) &nbsp;·&nbsp; ↓ per notable move</div>
+
+    <div class="price">← price feed</div>
+    <div class="stage"><div class="num">4</div><div><div class="t">Detect activation <span class="badge chip">signal</span> <span class="badge live">live</span></div>
+      <div class="d">Abnormal-return z-score flags a notable move.</div></div></div>
+    <div class="conn arrow"></div>
+
+    <div class="decomp"><div class="num">5</div><div><div class="t">Decompose the move → macro % / sector % / idio % <span class="badge live">live</span></div>
+      <div class="d">The <b>router</b> (<code>live_decompose.py</code>). 2-factor split on live prices: market beta (ACWI) + same-sector peer average → macro / sector / idio %. Dominant channel picks the mode. <i>All 8 recent activations resolved idio-dominant (IBM −31%, PayPal +16%, NVVE −94% idio).</i></div></div></div>
+
+    <div class="modes">
+      <div class="mode">
+        <div class="mhdr idio">IDIOSYNCRATIC MOVE ↓</div>
+        <div class="box"><div class="bt2">6a · Grounded retrieval <span class="badge live">live</span></div>
+          <div class="bd">Semantic query + date window + <b>ticker filter</b>. Firm-scoped, point-in-time.</div></div>
+        <div class="mini">◇ firm-specific news in corpus?</div>
+        <div class="out answer"><div class="ot">✓ Cited explanation</div>
+          <div class="od">Synthesize over verbatim source + back-link. <i>IBM → “craters 23% on earnings warning.”</i></div></div>
+        <div class="out abstain"><div class="ot">○ else — Abstain</div>
+          <div class="od">“No firm-specific news” rather than a wrong story. <i>Nuvve → not a KEYTRUDA approval.</i></div></div>
+      </div>
+      <div class="mode">
+        <div class="mhdr sec">SECTOR / MACRO MOVE ↓</div>
+        <div class="box"><div class="bt2">6b · Theme aggregation <span class="badge live">live</span></div>
+          <div class="bd">KMeans over the <b>whole 17k corpus</b> (<code>live_themes.py</code>), ranked by <b>volume × breadth</b> (firms/sectors each spans).</div></div>
+        <div class="mini">this is where embeddings actually earn their keep</div>
+        <div class="out answer"><div class="ot">▤ Broad overview digest</div>
+          <div class="od">Top live narratives by volume: <i>AI capex (1,196) · China trade · Trump/Fed · crypto · Iran/Hormuz/oil · ECB/inflation · FX.</i></div></div>
+        <div class="out abstain"><div class="ot">◷ Impact = breadth × activations aligned</div>
+          <div class="od">Each theme scored by firms it spans (breadth ~NER-approx) and moves it coincides with.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Both modes now run on live data: the router splits every move on live prices, the idiosyncratic
+  path serves grounded-or-abstained firm news, and the sector/macro path gives the <b>big picture</b> — what’s
+  driving the market, not just a firm-by-firm answer. Caveat: theme <i>breadth</i> leans on dictionary
+  entity-linking, which has a noise floor; the clusters &amp; volumes are solid, the per-sector counts approximate.</p>
+</div>
+</div>
+<script>
+document.getElementById("themeBtn").addEventListener("click",()=>{const r=document.documentElement;r.setAttribute("data-theme",r.getAttribute("data-theme")==="dark"?"light":"dark")});
+</script>
+</body>
+</html>

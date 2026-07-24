@@ -1,0 +1,1997 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attribution Engine — decomposition-routed news attribution</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f3f2ee;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --macro:#2a78d6; --sector:#eb6834; --idio:#1baf7a;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --good-ink:#006300;
+  }
+  :root[data-theme="dark"] .viz-root, .viz-root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232320;
+    --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+    --macro:#3987e5; --sector:#d95926; --idio:#199e70;
+    --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --good-ink:#0ca30c;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .viz-root { background:var(--plane); color:var(--ink); min-height:100vh;
+    padding:32px 20px 80px; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  header.h { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:6px; }
+  h1 { font-size:22px; font-weight:650; margin:0; letter-spacing:-0.01em; }
+  .sub { color:var(--ink-2); font-size:14px; margin:6px 0 24px; max-width:70ch; line-height:1.5; }
+  .toggle { background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:8px; padding:7px 12px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .toggle:hover { color:var(--ink); }
+
+  /* stat tiles */
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px; }
+  .tile { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 16px 14px; }
+  .tile .k { font-size:12px; color:var(--muted); font-weight:500; }
+  .tile .v { font-size:30px; font-weight:660; letter-spacing:-0.02em; margin-top:6px; line-height:1; }
+  .tile .n { font-size:12px; color:var(--ink-2); margin-top:6px; }
+
+  /* calibration strip */
+  .calib { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:22px; }
+  .calib .lab { font-size:12px; color:var(--muted); font-weight:500; margin-bottom:10px; }
+  .cbar { display:flex; align-items:center; gap:12px; margin:7px 0; }
+  .cbar .name { width:130px; font-size:13px; color:var(--ink-2); }
+  .cbar .track { flex:1; height:10px; background:var(--surface-2); border-radius:5px; overflow:hidden; }
+  .cbar .fill { height:100%; border-radius:5px; }
+  .cbar .pct { width:96px; text-align:right; font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); }
+
+  /* filters */
+  .filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .filters button { background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:20px; padding:6px 13px; font-size:13px; cursor:pointer; }
+  .filters button[aria-pressed="true"] { background:var(--ink); color:var(--plane); border-color:var(--ink); }
+
+  /* cards */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px; margin-bottom:14px; }
+  .crow { display:flex; justify-content:space-between; align-items:baseline; gap:16px; }
+  .firm { font-size:16px; font-weight:620; }
+  .firm .tk { color:var(--muted); font-weight:500; font-size:13px; margin-left:7px; }
+  .firm .mo { color:var(--muted); font-weight:500; font-size:13px; margin-left:7px; }
+  .move { font-size:22px; font-weight:680; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .up { color:var(--good-ink); } .down { color:var(--crit); }
+
+  /* decomposition bar */
+  .decomp { margin:15px 0 4px; }
+  .dbar { display:flex; gap:2px; height:22px; border-radius:5px; overflow:hidden; }
+  .seg { position:relative; min-width:2px; }
+  .seg[data-c="macro"] { background:var(--macro); } .seg[data-c="sector"] { background:var(--sector); } .seg[data-c="idio"] { background:var(--idio); }
+  .dlabels { display:flex; gap:14px; margin-top:8px; flex-wrap:wrap; }
+  .dl { font-size:12px; color:var(--ink-2); display:flex; align-items:center; gap:6px; }
+  .swatch { width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .dl b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  .dl.dom { font-weight:600; }
+
+  .route { font-size:12.5px; color:var(--ink-2); margin:13px 0 2px; }
+  .route .arrow { color:var(--muted); }
+  .route code { background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:11.5px; color:var(--ink-2); }
+
+  /* answer */
+  .answer { margin-top:14px; padding-top:14px; border-top:1px solid var(--grid); }
+  .adrv { font-size:15px; font-weight:560; line-height:1.4; }
+  .chips { display:flex; gap:8px; margin:10px 0 2px; flex-wrap:wrap; }
+  .chip { font-size:12px; font-weight:550; padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; }
+  .chip .ic { width:8px; height:8px; border-radius:50%; }
+  .chip.high { background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good-ink); }
+  .chip.med { background:color-mix(in srgb,var(--warn) 22%,transparent); color:var(--ink); }
+  .chip.low { background:var(--surface-2); color:var(--ink-2); }
+  .chip.high .ic{background:var(--good);} .chip.med .ic{background:var(--warn);} .chip.low .ic{background:var(--muted);}
+  .chip.v-correct { background:color-mix(in srgb,var(--good) 15%,transparent); color:var(--good-ink); }
+  .chip.v-weak { background:color-mix(in srgb,var(--warn) 22%,transparent); color:var(--ink); }
+  .chip.v-wrong { background:color-mix(in srgb,var(--crit) 15%,transparent); color:var(--crit); }
+  .chip.gate { background:transparent; border:1px dashed var(--border); color:var(--muted); font-weight:500; }
+  .reason { font-size:13px; color:var(--ink-2); line-height:1.5; margin-top:9px; }
+
+  /* evidence */
+  details.ev { margin-top:12px; }
+  details.ev > summary { cursor:pointer; font-size:12.5px; color:var(--macro); list-style:none; user-select:none; }
+  details.ev > summary::-webkit-details-marker { display:none; }
+  details.ev > summary::before { content:"▸ "; }
+  details.ev[open] > summary::before { content:"▾ "; }
+  .src { border-left:2px solid var(--grid); padding:8px 0 8px 13px; margin:11px 0; }
+  .src .meta { font-size:11.5px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:5px; }
+  .tag { font-size:10.5px; font-weight:600; padding:1px 6px; border-radius:4px; letter-spacing:0.02em; }
+  .tag.firm { background:color-mix(in srgb,var(--idio) 20%,transparent); color:var(--idio); }
+  .tag.macro { background:color-mix(in srgb,var(--macro) 18%,transparent); color:var(--macro); }
+  .src .hl { font-size:12.5px; color:var(--ink); font-weight:550; margin-bottom:4px; }
+  .src .q { font-size:12.5px; color:var(--ink-2); line-height:1.55; }
+  .src .bk { font-size:11px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+  .src .bk a { color:var(--macro); text-decoration:none; } .src .bk a:hover { text-decoration:underline; }
+  .foot { color:var(--muted); font-size:12px; margin-top:26px; line-height:1.6; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <header class="h">
+    <div>
+      <h1>Attribution Engine</h1>
+    </div>
+    <button class="toggle" id="themeBtn">◐ Theme</button>
+  </header>
+  <p class="sub">Every large stock move is first <b>decomposed</b> into macro / sector / firm-specific return, that
+  decomposition <b>routes</b> a scoped news search, and the answer is <b>synthesized from the verbatim source</b> —
+  then graded by an adversarial, channel-aware judge. Confident answers are trustworthy; when the evidence is thin it abstains.</p>
+
+  <div class="tiles" id="tiles"></div>
+  <div class="calib" id="calib"></div>
+  <div class="filters" id="filters"></div>
+  <div id="cards"></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+</div>
+<script>
+const DATA = {
+ "stats": {
+  "n": 40,
+  "named": 35,
+  "precision_correct": 20,
+  "conf": {
+   "high": {
+    "n": 18,
+    "correct": 12
+   },
+   "med": {
+    "n": 11,
+    "correct": 8
+   },
+   "low": {
+    "n": 11,
+    "correct": 0
+   }
+  },
+  "routes": {
+   "idio": 10,
+   "sector": 0,
+   "macro": 11,
+   "mixed": 19
+  },
+  "sign_caught": 5
+ },
+ "activations": [
+  {
+   "firm": "American Airlines",
+   "t": "AAL",
+   "sec": "Financials",
+   "month": "2012-01",
+   "total": 0.5096,
+   "decomp": {
+    "macro": 0.0682,
+    "sector": 0.123,
+    "idio": 0.3184
+   },
+   "route": "idio",
+   "scope": "tickers=AAL",
+   "driver": "potential US Airways\u2011American Airlines merger",
+   "confidence": "high",
+   "reasoning": "A reported potential merger with US Airways could boost revenue, matching the large idiosyncratic move.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_bbe545f73f711004:0",
+     "url": "http://www.bloomberg.com/news/2012-01-20/us-airways-said-to-consider-american-airlines-merger-to-fill-revenue-gap.html",
+     "tickers": [
+      "AAL"
+     ],
+     "is_macro": false,
+     "published_date": "2012-01-20",
+     "headline": "US Airways Said to Consider American Airlines Merger to Fill Revenue Gap",
+     "firm_specific": true,
+     "verbatim": "US Airways Said to Consider American Airlines Merger to Fill Revenue Gap \u2014 US Airways Group Inc. (LCC) is studying a potential merger with bankrupt AMR Corp. (AAMRQ) that would fix a weak domestic route system at American Airlines and boost revenue, two people familiar with the matter said. President Scott Kirby is leading US Airways\u2019 analysis of how to combine the airlines, said the people, who asked not to be identified because the matter is private. Any bid may still be close to a year away, because AMR now hold"
+    }
+   ]
+  },
+  {
+   "firm": "Blackberry",
+   "t": "BB",
+   "sec": "Materials",
+   "month": "2011-09",
+   "total": -0.4703,
+   "decomp": {
+    "macro": -0.115,
+    "sector": -0.0375,
+    "idio": -0.3178
+   },
+   "route": "idio",
+   "scope": "tickers=BB",
+   "driver": "Patent\u2011infringement settlement requiring RIM to pay royalties to Dolby",
+   "confidence": "high",
+   "reasoning": "The routed idiosyncratic channel dominates and the verbatim source reports a settlement with royalty payments, a negative event likely driving the -47% move.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_01de68138a84c958:0",
+     "url": "http://www.bloomberg.com/news/2011-09-13/rim-cair-haig-greenpeace-discovery-intellectual-property.html",
+     "tickers": [
+      "BB",
+      "DLB"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-13",
+     "headline": "RIM, CAIR, Greenpeace, Discovery: Intellectual Property",
+     "firm_specific": true,
+     "verbatim": "RIM, CAIR, Greenpeace, Discovery: Intellectual Property \u2014 Research In Motion Ltd. (RIMM) , maker of the BlackBerry smartphone and Playbook tablet computer, agreed to pay patent royalties to Dolby Laboratories Inc. (DLB) to end a legal battle over technology to improve audio quality. RIM will pay \u201cstandard terms,\u201d San Francisco-based Dolby said in a statement yesterday, settling patent-infringement lawsuits filed in June in the U.S. and Germany. While financial terms weren\u2019t disclosed, Dolby told analysts on a confe"
+    }
+   ]
+  },
+  {
+   "firm": "Bp",
+   "t": "BP",
+   "sec": "Energy",
+   "month": "2010-06",
+   "total": -0.3969,
+   "decomp": {
+    "macro": -0.0154,
+    "sector": -0.0011,
+    "idio": -0.3804
+   },
+   "route": "idio",
+   "scope": "tickers=BP",
+   "driver": "Fitch credit rating downgrade due to spill\u2011related cost concerns",
+   "confidence": "high",
+   "reasoning": "The routed idiosyncratic share dominates and the rating_action evidence directly links a Fitch downgrade to BP\u2019s share decline in June 2010.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_dd3874894c3364c2:3",
+     "url": "http://www.bloomberg.com/news/2010-06-16/bp-cancels-dividend-for-first-three-quarters-to-conserve-funds-for-spill.html",
+     "tickers": [
+      "BP"
+     ],
+     "is_macro": false,
+     "published_date": "2010-06-17",
+     "headline": "BP Rebounds on Deal to Phase in Payments to Oil Spill Fund",
+     "firm_specific": true,
+     "verbatim": "BP Rebounds on Deal to Phase in Payments to Oil Spill Fund \u2014 an analyst at ING Wholesale Banking in Edinburgh. \u201cThe hope is that it\u2019s far too much for what is actually going to be required. This doesn\u2019t mean the downfall of BP; it can get through this.\u201d Credit Score Cut BP had come under pressure to reach an agreement with the U.S. Administration this week after Fitch Ratings lowered BP\u2019s credit score by six to BBB, two levels above junk, on concern that costs from the spill would undermine the company\u2019s ability to"
+    }
+   ]
+  },
+  {
+   "firm": "Natwest",
+   "t": "NWG",
+   "sec": "Financials",
+   "month": "2011-08",
+   "total": -0.3798,
+   "decomp": {
+    "macro": -0.1383,
+    "sector": -0.0476,
+    "idio": -0.194
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "rating withdrawal on CMBS bonds affecting NatWest",
+   "confidence": "med",
+   "reasoning": "Rating agencies pulled ratings from banks' CMBS offerings, a rating\u2011related shock that aligns with the idiosyncratic share of the move and is a direct driver-type event for NatWest.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_82ae30dcaa5fe776:2",
+     "url": "http://www.bloomberg.com/news/2011-08-24/wall-street-plans-5-billion-in-commercial-mortgage-debt-as-spreads-jump.html",
+     "tickers": [
+      "BAC",
+      "JPM",
+      "MS",
+      "NWG",
+      "WFC"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-24",
+     "headline": "Wall Street Banks Plan $5 Billion in CMBS Sales as Spreads Soar",
+     "firm_specific": true,
+     "verbatim": "Wall Street Banks Plan $5 Billion in CMBS Sales as Spreads Soar \u2014 pulled in July after Standard & Poor\u2019s yanked its ratings, according to a person familiar with the sale. The offering will not carry grades from S&P, whose unprecedented move to withdraw the ratings after the bonds had been placed with investors, rankled the $600 billion market. The deal may be increased in size, the person said. Bank of America Corp., Morgan Stanley, Wells Fargo & Co. (WFC) , Royal Bank of Scotland Group Plc and JPMorgan Chase & Co "
+    }
+   ]
+  },
+  {
+   "firm": "Vestas Wind Systems A S",
+   "t": "VWSYF",
+   "sec": "Industrials",
+   "month": "2012-05",
+   "total": -0.3675,
+   "decomp": {
+    "macro": -0.2578,
+    "sector": -0.0152,
+    "idio": -0.0944
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "European debt crisis risk\u2011off sentiment",
+   "confidence": "med",
+   "reasoning": "Macro news on the Eurozone debt crisis spooked investors, driving a risk\u2011off sell\u2011off that weighed on industrial stocks like Vestas.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_8deafa2fc24e955e:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/peru-borrowing-costs-rise-to-three-month-high-on-european-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Peru Borrowing Costs Rise to Three-Month High on European Crisis",
+     "firm_specific": false,
+     "verbatim": "Peru Borrowing Costs Rise to Three-Month High on European Crisis \u2014 Peru\u2019s benchmark borrowing costs in dollars rose to a three-month high as concern that Europe \u2019s debt crisis will worsen should Greece leave the euro curbed demand for higher-yielding, emerging-market assets. The extra yield investors demand to own Peruvian government bonds instead of U.S. Treasuries climbed eight basis points, or 0.08 percentage point, to 198 at 2:53 p.m. in Lima, according to JPMorgan Chase & Co. That\u2019s the highest since Feb. 28. "
+    },
+    {
+     "chunk_id": "bbg_711f6ea6b69e42c2:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/treasuries-snap-three-day-decline-on-demand-for-safety.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Treasuries Rise on Europe, Notes May Sell at Record Yield",
+     "firm_specific": false,
+     "verbatim": "Treasuries Rise on Europe, Notes May Sell at Record Yield \u2014 Treasuries rose, with 10-year notes snapping a three-day decline, before European leaders meet for a summit in Brussels to address the region\u2019s debt crisis. Five-year note yields traded almost the lowest levels since February as the U.S. prepares to sell $35 billion of the securities at what may be a record low auction yield, after demand approached the most ever at a two-year note sale yesterday. The Federal Reserve purchased $1.8 billion of securities in"
+    },
+    {
+     "chunk_id": "bbg_51facdc554818afc:0",
+     "url": "http://www.bloomberg.com/news/2012-05-09/gold-silver-tumble-as-deadlock-in-greece-drives-dollar-higher.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-09",
+     "headline": "Gold Drops to Four-Month Low on Concerns Euro to Weaken",
+     "firm_specific": false,
+     "verbatim": "Gold Drops to Four-Month Low on Concerns Euro to Weaken \u2014 Gold dropped to a four-month low as deepening political turmoil in Greece boosted the appeal of the dollar as a safe haven and curbed demand for precious metals as alternative assets. Silver fell to the lowest since January. The euro weakened for an eighth session against the dollar as Greek politicians struggled to form a new government, raising concern that the nation may leave the currency bloc. Commodities plunged to the lowest level this year yesterday "
+    }
+   ]
+  },
+  {
+   "firm": "Erste Group Bank",
+   "t": "EBKOF",
+   "sec": "Energy",
+   "month": "2011-09",
+   "total": -0.3413,
+   "decomp": {
+    "macro": -0.1357,
+    "sector": -0.0202,
+    "idio": -0.1854
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Regulatory pressure from Hungary and Orban's loan\u2011loss plan threatening Austrian banks including Erste",
+   "confidence": "med",
+   "reasoning": "Negative regulatory news (Orban's plan and Hungarian forced loss coverage) aligns with the largest idiosyncratic share of the move and explains the sharp September decline.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_e9123f0c5a6dc224:2",
+     "url": "http://www.bloomberg.com/news/2011-09-12/forint-drops-3rd-day-as-hungary-s-otp-suspended-before-loan-plan.html",
+     "tickers": [
+      "EBKOF"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-12",
+     "headline": "Forint Weakens a Third Day as Premier Orban Backs Loan Loss Plan",
+     "firm_specific": true,
+     "verbatim": "Forint Weakens a Third Day as Premier Orban Backs Loan Loss Plan \u2014 Orban\u2019s plan threatens the \u201cexistence\u201d of Austrian banks including Erste Group Bank AG (EBS) and Raiffeisen Bank International AG (RBI) , Austria Press Agency reported, citing an interview. \u201cThis is a course of action that we can\u2019t accept.\u201d Spindelegger\u2019s comments were confirmed by his spokesman Alexander Schallenberg. Poised OTP competes mostly with units of international banks, including Raiffeisen, Erste, UniCredit SpA (UCG) and Bayerische Landes"
+    },
+    {
+     "chunk_id": "bbg_0e093ce6b2bd20b6:0",
+     "url": "http://www.bloomberg.com/news/2011-09-12/orban-says-feasible-to-fix-franc-rate-on-hungary-loans.html",
+     "tickers": [
+      "EBKOF"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-12",
+     "headline": "Hungary to Force Banks to Foot Franc Losses, Irking Austria",
+     "firm_specific": true,
+     "verbatim": "Hungary to Force Banks to Foot Franc Losses, Irking Austria \u2014 Hungary is set to force lenders to swallow currency losses on Swiss franc mortgages. Financial stocks and the forint fell as the country\u2019s banks and the Austrian government criticized the plan. Hungary wants to allow fixing the Swiss franc at more than 20 percent below market rates for early repayment, Prime Minister Viktor Orban said today in parliament. Austria \u201cfirmly rejects\u201d the measure, which may cause \u201cenormous losses\u201d to banks and risks regional "
+    }
+   ]
+  },
+  {
+   "firm": "Agricultural Bank Of China",
+   "t": "ACGBY",
+   "sec": "Materials",
+   "month": "2011-10",
+   "total": 0.3322,
+   "decomp": {
+    "macro": 0.1273,
+    "sector": -0.0059,
+    "idio": 0.2108
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Central Huijin Investment Ltd bought shares of Agricultural Bank of China, signaling government support and prompting a sharp price rise",
+   "confidence": "high",
+   "reasoning": "The verbatim source directly links the bank's 2%+ jump to Central Huijin's stake purchase, a firm\u2011specific event outweighing macro/sector factors",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_059f47b0603aafa5:0",
+     "url": "http://www.bloomberg.com/news/2011-10-11/china-s-stocks-rally-after-sovereign-wealth-unit-buys-shares-of-top-banks.html",
+     "tickers": [
+      "ACGBY",
+      "CUAEF"
+     ],
+     "is_macro": false,
+     "published_date": "2011-10-11",
+     "headline": "China\u2019s Stocks Rise After Sovereign Wealth Unit Buys Bank Shares",
+     "firm_specific": true,
+     "verbatim": "China\u2019s Stocks Rise After Sovereign Wealth Unit Buys Bank Shares \u2014 China\u2019s stocks rose for the first time in five days as a state-run investment arm began buying shares of the nation\u2019s four biggest banks after valuations dropped to levels reached during the global financial crisis. Industrial & Commercial Bank of China (601398) Ltd. climbed the most in six weeks while China Construction Bank Corp. (939) , Agricultural Bank of China Ltd. (601288) and Bank of China Ltd. (3988) jumped at least 2 percent after Central "
+    }
+   ]
+  },
+  {
+   "firm": "Baidu",
+   "t": "BIDU",
+   "sec": "Technology",
+   "month": "2011-09",
+   "total": -0.3101,
+   "decomp": {
+    "macro": -0.1768,
+    "sector": 0.005,
+    "idio": -0.1383
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Alibaba\u2019s launch of its eTao search engine heightened competition for Baidu, pressuring its stock",
+   "confidence": "med",
+   "reasoning": "Idiosyncratic competition evidence directly mentions Alibaba targeting Baidu, matching the negative idiosyncratic share; macro evidence is generic and unrelated, so competition is the plausible driver",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_6e10340314f0747d:0",
+     "url": "http://www.bloomberg.com/news/2011-09-10/alibaba-s-ma-says-he-wants-to-cause-sleepless-nights-for-baidu.html",
+     "tickers": [
+      "BIDU"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-12",
+     "headline": "Alibaba Vows \u2018Sleepless Nights\u2019 for Baidu in Search Market",
+     "firm_specific": true,
+     "verbatim": "Alibaba Vows \u2018Sleepless Nights\u2019 for Baidu in Search Market \u2014 Alibaba Group Holding Ltd. started its search-engine service last year to \u201ccause sleepless nights\u201d for Baidu Inc., the industry leader in China , Chief Executive Officer Jack Ma said. \u201cMaking life difficult for companies with established positions is what we most want to do,\u201d Ma said Sept. 10 at a conference in Hangzhou, eastern China, where Alibaba is based. He didn\u2019t elaborate on the remarks about Baidu. Alibaba, China\u2019s biggest electronic-commerce comp"
+    }
+   ]
+  },
+  {
+   "firm": "Lloyds Banking Group",
+   "t": "LYG",
+   "sec": "Financials",
+   "month": "2010-07",
+   "total": 0.308,
+   "decomp": {
+    "macro": 0.1705,
+    "sector": -0.0033,
+    "idio": 0.1408
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Lloyds expected \u00a31\u202fbillion H1 profit boosting CEO Daniels\u2019s position",
+   "confidence": "high",
+   "reasoning": "Idiosyncratic earnings news directly supports the large idiosyncratic share and is a concrete driver, outweighing generic macro mentions",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_372b31a7d4459fc7:0",
+     "url": "http://www.bloomberg.com/news/2010-07-31/lloyds-banking-profit-likely-to-bolster-ceo-daniels-s-position-ft-reports.html",
+     "tickers": [
+      "LYG"
+     ],
+     "is_macro": false,
+     "published_date": "2010-07-31",
+     "headline": "Lloyds Banking Profit Likely to Bolster CEO Daniels's Position, FT Reports",
+     "firm_specific": true,
+     "verbatim": "Lloyds Banking Profit Likely to Bolster CEO Daniels's Position, FT Reports \u2014 Lloyds Banking Group Plc expects to report a 1 billion-pound profit ($1.6 billion) for the first half of the year, bolstering Chief Executive Officer Eric Daniels \u2019s position at the bank, the FT reported. Daniels and the bank were criticized by investors earlier this year over pay policy, the newspaper said. Lloyds is scheduled to report earnings next week. To contact the reporter on this story: Eduard Gismatullin in London at egismatullin"
+    }
+   ]
+  },
+  {
+   "firm": "Deutsche Bank",
+   "t": "DB",
+   "sec": "Financials",
+   "month": "2011-08",
+   "total": -0.3062,
+   "decomp": {
+    "macro": -0.126,
+    "sector": -0.0477,
+    "idio": -0.1325
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "none identified",
+   "confidence": "low",
+   "reasoning": "Only broad funding and monetary\u2011policy news appear; no specific idiosyncratic event for DB is evident",
+   "gate_notes": [
+    "mixed:ungrounded->cap-low"
+   ],
+   "sign_violation": false,
+   "abstain": true,
+   "verdict": "wrong",
+   "channel_appropriate": false,
+   "evidence": []
+  },
+  {
+   "firm": "Southern Copper",
+   "t": "SCCO",
+   "sec": "Materials",
+   "month": "2011-09",
+   "total": -0.3011,
+   "decomp": {
+    "macro": -0.2512,
+    "sector": -0.1196,
+    "idio": 0.0697
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "insufficient specific evidence",
+   "confidence": "low",
+   "reasoning": "Only generic macro demand/supply news is retrieved; no firm\u2011specific earnings, guidance, or M&A info to explain the move",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": true,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_148b00d3124e3d14:0",
+     "url": "http://www.bloomberg.com/news/2011-09-06/gold-may-decline-for-a-second-day-after-rally-to-record-encourages-sales.html",
+     "tickers": [
+      "CME"
+     ],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors",
+     "firm_specific": false,
+     "verbatim": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors \u2014 Gold dropped the most in two weeks as a rebound in global equities eroded demand for an alternative asset and spurred investors to sell the metal after its rally to an all-time high. The MSCI All-Country World Index climbed as much as 2.8 percent while the Standard & Poor\u2019s 500 Index futures jumped 2.7 percent after legal challenges to Germany \u2019s role in the euro rescue funds were rejected by the nation\u2019s top court. Gold futures slipped fr"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:1",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 unseasonably quiet August. Commercial real estate contacts have reported steady to slightly improved market conditions in most parts of the Third District since the previous Beige Book. Generally positive results were reported by service-sector firms. Upward price pressures from food, energy, and other commodities have lessened somewhat. The ability to pass along costs remains mixed, and there is little evidence of wage pressure. In response to ongoing"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:3",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 markets, growing market share, and product shifts as positive factors. Declining demand was attributed to sluggish residential construction, softening domestic consumption, and the falloff in public infrastructure spending. One industrial supply firm indicated steady growth overall but noted some softness in sales to those manufacturers most sensitive to business cycles. Although the outlook among Third District manufacturers remains somewhat optimisti"
+    },
+    {
+     "chunk_id": "bbg_55555e7575ab1442:0",
+     "url": "http://www.bloomberg.com/news/2011-09-26/inflation-concern-may-trigger-repeal-of-iof-tax-jpmorgan-says.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-26",
+     "headline": "Inflation Concern May Trigger Repeal of IOF Tax, JPMorgan Says",
+     "firm_specific": false,
+     "verbatim": "Inflation Concern May Trigger Repeal of IOF Tax, JPMorgan Says \u2014 Julio Callegari, who oversees 4.3 billion reais ($2.3 billion) as head of fixed-income securities at JPMorgan Asset Management in Brazil, said the odds the Brazilian government may remove the tax on foreign-exchange derivatives are \u201crelatively high.\u201d Callegari commented today in an interview at JPMorgan\u2019s offices in Sao Paulo. On IOF tax and inflation risks: \u201cThe important message is, if the Brazilian real depreciates too fast, and more than the fall "
+    }
+   ]
+  },
+  {
+   "firm": "Daimler",
+   "t": "MBGAF",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.2909,
+   "decomp": {
+    "macro": -0.1082,
+    "sector": -0.015,
+    "idio": -0.1677
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Industrial production slowdown reduced demand for Daimler\u2019s vehicles, contributing to its sharp decline",
+   "confidence": "high",
+   "reasoning": "The evidence cites a fall in German industrial production and a 4.3% drop in Daimler shares that day, linking macro\u2011level demand weakness to the stock move",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_9394c07350a981bd:2",
+     "url": "http://www.bloomberg.com/news/2011-08-05/german-stocks-drop-for-eighth-day-in-longest-decline-since-1993.html",
+     "tickers": [
+      "MBGAF",
+      "TKA.DE",
+      "VWAGY"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-05",
+     "headline": "German Stocks Slide for Eighth Day in Longest Decline for DAX Since 1993",
+     "firm_specific": true,
+     "verbatim": "German Stocks Slide for Eighth Day in Longest Decline for DAX Since 1993 \u2014 called for a July gain of 85,000. In Germany, industrial production unexpectedly fell in June as construction activity waned and investment-goods output retreated. Global Rout Global stocks yesterday had their biggest one-day rout since March 2009, wiping off more than $4.4 trillion from equity-market value worldwide since July 26 as concern mounted that the U.S. economy is weakening. Daimler, owner of the Mercedes-Benz luxury-vehicle brand,"
+    }
+   ]
+  },
+  {
+   "firm": "Bank Of America",
+   "t": "BAC",
+   "sec": "Financials",
+   "month": "2011-09",
+   "total": -0.2889,
+   "decomp": {
+    "macro": -0.1744,
+    "sector": -0.0903,
+    "idio": -0.0241
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "Reduced demand for gold amid equity rebound and broader macro slowdown",
+   "confidence": "med",
+   "reasoning": "Macro evidence shows equity rally cut gold demand and Beige Book notes slower growth, matching the large macro share of the move",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_148b00d3124e3d14:0",
+     "url": "http://www.bloomberg.com/news/2011-09-06/gold-may-decline-for-a-second-day-after-rally-to-record-encourages-sales.html",
+     "tickers": [
+      "CME"
+     ],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors",
+     "firm_specific": false,
+     "verbatim": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors \u2014 Gold dropped the most in two weeks as a rebound in global equities eroded demand for an alternative asset and spurred investors to sell the metal after its rally to an all-time high. The MSCI All-Country World Index climbed as much as 2.8 percent while the Standard & Poor\u2019s 500 Index futures jumped 2.7 percent after legal challenges to Germany \u2019s role in the euro rescue funds were rejected by the nation\u2019s top court. Gold futures slipped fr"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:1",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 unseasonably quiet August. Commercial real estate contacts have reported steady to slightly improved market conditions in most parts of the Third District since the previous Beige Book. Generally positive results were reported by service-sector firms. Upward price pressures from food, energy, and other commodities have lessened somewhat. The ability to pass along costs remains mixed, and there is little evidence of wage pressure. In response to ongoing"
+    }
+   ]
+  },
+  {
+   "firm": "Barclays",
+   "t": "BCS",
+   "sec": "Financials",
+   "month": "2010-07",
+   "total": 0.2726,
+   "decomp": {
+    "macro": 0.1805,
+    "sector": 0.0061,
+    "idio": 0.086
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "Slowing US economic growth and record\u2011low Treasury yields (monetary\u2011policy shock)",
+   "confidence": "med",
+   "reasoning": "Macro evidence shows a GDP slowdown, falling inflation and ultra\u2011low yields prompting risk\u2011off sentiment, which aligns with the large macro share in the decomposition.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_486cff29f6b5d185:0",
+     "url": "http://www.bloomberg.com/news/2010-07-30/treasury-two-year-notes-rise-head-for-monthly-advance-before-gdp-report.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-30",
+     "headline": "Treasuries Gain as Growth Slows, Pushing 2-Year Note Yields to Record Low",
+     "firm_specific": false,
+     "verbatim": "Treasuries Gain as Growth Slows, Pushing 2-Year Note Yields to Record Low \u2014 Treasuries climbed, pushing two-year note yields to the lowest ever, as a government report showing U.S. economic growth slowed in the second quarter spurred demand for the world\u2019s safest securities. U.S. notes gained for a fourth month. Economic expansion cooled to a 2.4 percent annual pace last quarter, lower than forecast, Commerce Department data showed. Federal Reserve Bank of St. Louis President James Bullard said yesterday the centra"
+    },
+    {
+     "chunk_id": "bbg_b7694e8d97209879:3",
+     "url": "http://www.bloomberg.com/news/2010-07-01/two-year-treasury-yields-are-near-record-low-on-growth-employment-outlook.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-01",
+     "headline": "Treasury Yield Curve Reahces the Lowest Since October on Inflation Outlook",
+     "firm_specific": false,
+     "verbatim": "Treasury Yield Curve Reahces the Lowest Since October on Inflation Outlook \u2014 median prediction of 71 economists in a Bloomberg survey. A report today may show initial jobless claims , a gauge of firings, fell to 455,000 last week from 457,000 in the prior seven days, according to a separate Bloomberg survey. \u2018Setback Risk\u2019 Two-year notes declined as some investors bet that yields may have dropped to levels not justified by the outlook for the world\u2019s largest economy. \u201cGiven where valuations are, there\u2019s certainly m"
+    },
+    {
+     "chunk_id": "bbg_ee1c62f49a8c05ca:0",
+     "url": "http://www.bloomberg.com/news/2010-07-16/treasuries-head-for-weekly-gain-before-data-to-show-consumer-prices-fell.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-16",
+     "headline": "Treasuries Rise as Asian Stocks Decline Before U.S. Consumer Prices Report",
+     "firm_specific": false,
+     "verbatim": "Treasuries Rise as Asian Stocks Decline Before U.S. Consumer Prices Report \u2014 Treasuries rose and were headed for a weekly gain before reports that are forecast to show a U.S. inflation gauge matched the lowest in four decades and consumer confidence deteriorated. The 10-year note advanced for a third day and two-year yields were near a record low. Consumer prices likely dropped in June for a third straight month, showing inflation is contained as the recovery cools, economists said. Former Bank of England policy ma"
+    }
+   ]
+  },
+  {
+   "firm": "New York Times",
+   "t": "NYT",
+   "sec": "Financials",
+   "month": "2011-10",
+   "total": 0.2712,
+   "decomp": {
+    "macro": 0.1575,
+    "sector": 0.0558,
+    "idio": 0.0579
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "European sovereign debt crisis and heightened market risk",
+   "confidence": "low",
+   "reasoning": "Macro news about Greece default risk, Fed\u2019s downside warning, and EU debt\u2011plan uncertainty aligns with the largest decomposition share, explaining the large NYT move.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver",
+    "sign-violation->cap-low"
+   ],
+   "sign_violation": true,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_279d51e988eb4452:1",
+     "url": "http://www.bloomberg.com/news/2011-10-06/hedge-funds-post-worst-performance-in-more-than-a-year-on-falling-stocks.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-06",
+     "headline": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks",
+     "firm_specific": false,
+     "verbatim": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks \u2014 and equity markets generated negative returns.\u201d The MSCI World (MXWO) Index of global stocks tumbled 8.6 percent in September, including dividends, as Greece edged closer to defaulting on its sovereign debt and the cost of insuring western European countries\u2019 loans rose to records. The Federal Reserve said Sept. 21 that there are \u201csignificant downside risks\u201d in the U.S. economy , prompting the central bank to announce a $400 billion debt-tra"
+    },
+    {
+     "chunk_id": "bbg_2bfc3131e343c64d:2",
+     "url": "http://www.bloomberg.com/news/2011-10-20/swiss-stocks-little-changed-before-brussels-meeting-on-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-20",
+     "headline": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls",
+     "firm_specific": false,
+     "verbatim": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls \u2014 radical,\u201d Darren Williams, a senior European economist at AllianceBernstein LP in London , wrote in a report today. \u201cThis may disappoint the exaggerated expectations now embedded in markets.\u201d \u2018Uncertainty Reigns\u2019 A disagreement over the European Central Bank \u2019s role threatens to stymie progress on a comprehensive strategy to end the crisis. Luxembourg Prime Minister Jean-Claude Juncker , who chairs the group of euro-area finance ministers, indicated an i"
+    }
+   ]
+  },
+  {
+   "firm": "Omv",
+   "t": "OMVKY",
+   "sec": "Industrials",
+   "month": "2011-09",
+   "total": -0.2629,
+   "decomp": {
+    "macro": -0.0999,
+    "sector": 0.0079,
+    "idio": -0.1709
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Libya oil\u2011production disruption costing OMV about \u20ac200\u202fmillion",
+   "confidence": "high",
+   "reasoning": "The idiosyncratic news of a supply shock from Libya and a \u20ac200\u202fm loss matches the largest negative share in the decomposition, explaining the sharp September drop.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_c7678b14d4fb8223:0",
+     "url": "http://www.bloomberg.com/news/2011-09-03/omv-sees-libya-oil-rebuilding-taking-a-year-sueddeutsche-says.html",
+     "tickers": [
+      "OMVKY"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-03",
+     "headline": "OMV Sees Libya Oil Rebuilding Taking a Year, Sueddeutsche Says",
+     "firm_specific": true,
+     "verbatim": "OMV Sees Libya Oil Rebuilding Taking a Year, Sueddeutsche Says \u2014 Libya \u2019s oil-production facilities may need a year to recover, Sueddeutsche reported citing Gerhard Roiss, head of Austrian oil company OMV AG. (OMV) OMV, which received 10 percent of its oil from Libya before the uprising, expects its contract to remain valid under the new government, the newspaper said. The supply disruption has so far cost OMV about 200 million euros ($284 million), Sueddeutsche reported. To contact the reporter on this story: Chri"
+    }
+   ]
+  },
+  {
+   "firm": "Jpmorgan Chase",
+   "t": "JPM",
+   "sec": "Financials",
+   "month": "2012-05",
+   "total": -0.2597,
+   "decomp": {
+    "macro": -0.1637,
+    "sector": -0.057,
+    "idio": -0.039
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "European debt\u2011crisis concerns heightened risk aversion",
+   "confidence": "med",
+   "reasoning": "Macro news shows Europe\u2019s debt crisis spurring flight to safety, higher Treasury yields and rising borrowing costs, matching the largest macro share of the move.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_8deafa2fc24e955e:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/peru-borrowing-costs-rise-to-three-month-high-on-european-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Peru Borrowing Costs Rise to Three-Month High on European Crisis",
+     "firm_specific": false,
+     "verbatim": "Peru Borrowing Costs Rise to Three-Month High on European Crisis \u2014 Peru\u2019s benchmark borrowing costs in dollars rose to a three-month high as concern that Europe \u2019s debt crisis will worsen should Greece leave the euro curbed demand for higher-yielding, emerging-market assets. The extra yield investors demand to own Peruvian government bonds instead of U.S. Treasuries climbed eight basis points, or 0.08 percentage point, to 198 at 2:53 p.m. in Lima, according to JPMorgan Chase & Co. That\u2019s the highest since Feb. 28. "
+    },
+    {
+     "chunk_id": "bbg_711f6ea6b69e42c2:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/treasuries-snap-three-day-decline-on-demand-for-safety.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Treasuries Rise on Europe, Notes May Sell at Record Yield",
+     "firm_specific": false,
+     "verbatim": "Treasuries Rise on Europe, Notes May Sell at Record Yield \u2014 Treasuries rose, with 10-year notes snapping a three-day decline, before European leaders meet for a summit in Brussels to address the region\u2019s debt crisis. Five-year note yields traded almost the lowest levels since February as the U.S. prepares to sell $35 billion of the securities at what may be a record low auction yield, after demand approached the most ever at a two-year note sale yesterday. The Federal Reserve purchased $1.8 billion of securities in"
+    }
+   ]
+  },
+  {
+   "firm": "Morgan Stanley",
+   "t": "MS",
+   "sec": "Financials",
+   "month": "2011-09",
+   "total": -0.2588,
+   "decomp": {
+    "macro": -0.225,
+    "sector": -0.0921,
+    "idio": 0.0583
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "macro demand slowdown and risk\u2011off sentiment",
+   "confidence": "med",
+   "reasoning": "Macro factors explain most of the move (\u201122.5%); evidence shows profit\u2011taking after equity rebound, reduced gold demand, and subdued business outlook in the Fed Beige Book, indicating broader demand weakness.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_148b00d3124e3d14:0",
+     "url": "http://www.bloomberg.com/news/2011-09-06/gold-may-decline-for-a-second-day-after-rally-to-record-encourages-sales.html",
+     "tickers": [
+      "CME"
+     ],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors",
+     "firm_specific": false,
+     "verbatim": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors \u2014 Gold dropped the most in two weeks as a rebound in global equities eroded demand for an alternative asset and spurred investors to sell the metal after its rally to an all-time high. The MSCI All-Country World Index climbed as much as 2.8 percent while the Standard & Poor\u2019s 500 Index futures jumped 2.7 percent after legal challenges to Germany \u2019s role in the euro rescue funds were rejected by the nation\u2019s top court. Gold futures slipped fr"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:1",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 unseasonably quiet August. Commercial real estate contacts have reported steady to slightly improved market conditions in most parts of the Third District since the previous Beige Book. Generally positive results were reported by service-sector firms. Upward price pressures from food, energy, and other commodities have lessened somewhat. The ability to pass along costs remains mixed, and there is little evidence of wage pressure. In response to ongoing"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:3",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 markets, growing market share, and product shifts as positive factors. Declining demand was attributed to sluggish residential construction, softening domestic consumption, and the falloff in public infrastructure spending. One industrial supply firm indicated steady growth overall but noted some softness in sales to those manufacturers most sensitive to business cycles. Although the outlook among Third District manufacturers remains somewhat optimisti"
+    }
+   ]
+  },
+  {
+   "firm": "Lg Display",
+   "t": "LPL",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.256,
+   "decomp": {
+    "macro": -0.1105,
+    "sector": -0.0248,
+    "idio": -0.1207
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Demand slowdown and profit slump as TV sales weaken",
+   "confidence": "high",
+   "reasoning": "LG Display\u2019s profit fell 96% and it plans to cut spending and halt new plant construction due to slowing flat\u2011screen TV demand, directly explaining the large idiosyncratic share of the move.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_d70d7c89c8df5bb7:0",
+     "url": "http://www.bloomberg.com/news/2011-08-29/lg-display-may-reduce-spending-next-year-as-tv-demand-slows-1-.html",
+     "tickers": [
+      "LPL"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-29",
+     "headline": "LG Display May Reduce Spending Next Year as TV Demand Slows",
+     "firm_specific": true,
+     "verbatim": "LG Display May Reduce Spending Next Year as TV Demand Slows \u2014 LG Display Co., the world\u2019s second- largest maker of liquid-crystal displays, may cut spending next year as slowing flat-screen television sales damp demand. The company may spend about 3 trillion won ($2.8 billion) in 2012, Chief Executive Officer Kwon Young Soo said. Kwon\u2019s comments, made to the Korea Times in an interview, were confirmed by Son Young Jun, a LG Display spokesman in Seoul. It plans to spend about 4 trillion won this year. LG Display, wh"
+    }
+   ]
+  },
+  {
+   "firm": "Ubs",
+   "t": "UBS",
+   "sec": "Financials",
+   "month": "2010-07",
+   "total": 0.2497,
+   "decomp": {
+    "macro": 0.1125,
+    "sector": 0.0214,
+    "idio": 0.1158
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "earnings beat",
+   "confidence": "high",
+   "reasoning": "UBS surged the most in 15 months after beating analysts' earnings estimates, directly explaining the large idiosyncratic share of the move.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_0c5fb9470e52732c:0",
+     "url": "http://www.bloomberg.com/news/2010-07-30/european-stocks-post-weekly-drop-as-u-s-growth-slows-nestle-shares-slide.html",
+     "tickers": [
+      "CL",
+      "NSRGY",
+      "UBS",
+      "UL"
+     ],
+     "is_macro": false,
+     "published_date": "2010-07-30",
+     "headline": "European Stocks Post Weekly Drop as U.S. Growth Slows; Nestle Shares Slide",
+     "firm_specific": true,
+     "verbatim": "European Stocks Post Weekly Drop as U.S. Growth Slows; Nestle Shares Slide \u2014 European stocks declined this week as slower-than-forecast U.S. economic growth overshadowed a rally in banks after European Union stress tests eased concern that lenders may need to raise more capital. Nestle SA and Unilever led food companies lower as U.S. rivals Kellogg Co. and Colgate-Palmolive Co. reported revenue that missed estimates. Gamesa Corporacion Tecnologica SA tumbled 12 percent after reducing its forecast for wind turbine s"
+    }
+   ]
+  },
+  {
+   "firm": "Sony",
+   "t": "SONY",
+   "sec": "Financials",
+   "month": "2012-04",
+   "total": -0.2479,
+   "decomp": {
+    "macro": -0.0452,
+    "sector": -0.0124,
+    "idio": -0.1903
+   },
+   "route": "idio",
+   "scope": "tickers=SONY",
+   "driver": "job cuts/restructuring",
+   "confidence": "high",
+   "reasoning": "Idiosyncratic share dominates; Sony announced cutting 10,000 jobs, which aligns with the sharp -24.8% drop.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_b2993b70350c587e:0",
+     "url": "http://www.bloomberg.com/news/2012-04-10/asia-stocks-swing-between-gains-losses-exporters-gain.html",
+     "tickers": [
+      "BHP",
+      "CRBJF",
+      "SONY"
+     ],
+     "is_macro": false,
+     "published_date": "2012-04-10",
+     "headline": "Asian Stocks Swing Between Gains, Losses on BOJ, China",
+     "firm_specific": true,
+     "verbatim": "Asian Stocks Swing Between Gains, Losses on BOJ, China \u2014 Asian stocks slipped, with the region\u2019s benchmark falling for a fifth day as markets opened from a holiday, after the Bank of Japan didn\u2019t add to monetary stimulus and China reported an unexpected trade surplus. Sony Corp. (6758) , which yesterday said it will cut 10,000 jobs, extended declines as the yen rose after the Bank of Japan\u2019s decision to leave its stimulus measures unchanged. China Resources Land Ltd. and other mainland developers dropped after bett"
+    }
+   ]
+  },
+  {
+   "firm": "Rio Tinto",
+   "t": "RTNTF",
+   "sec": "Health Care",
+   "month": "2011-09",
+   "total": -0.2371,
+   "decomp": {
+    "macro": -0.0438,
+    "sector": 0.0002,
+    "idio": -0.1935
+   },
+   "route": "idio",
+   "scope": "tickers=RTNTF",
+   "driver": "Mongolia's push to raise its stake in the Oyu\u202fTolgoi copper\u2011gold mine, creating regulatory uncertainty for Rio Tinto",
+   "confidence": "high",
+   "reasoning": "The routed idiosyncratic share (-19.4%) aligns with news that Mongolia may amend the investment accord and increase its stake, alarming investors and driving the sharp drop.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_5b2d3f542e6c251b:0",
+     "url": "http://www.bloomberg.com/news/2011-09-25/rio-says-changes-to-oyu-tolgoi-stake-accord-may-alarm-mongolia-investors.html",
+     "tickers": [
+      "RTNTF"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-26",
+     "headline": "Rio Says Accord Changes May Alarm Mongolia Investors",
+     "firm_specific": true,
+     "verbatim": "Rio Says Accord Changes May Alarm Mongolia Investors \u2014 Rio Tinto Group said that potential changes by Mongolia to an investment accord that at present gives partner Ivanhoe Mines Ltd. control of one of the world\u2019s largest copper mines will alarm investors. \u201cThe most important thing that foreign investors require when they\u2019re making their investment decisions is the feeling of predictability and stability in the country in which they operate,\u201d Cameron McRae, Rio Tinto\u2019s Mongolia country director, said in the capital"
+    },
+    {
+     "chunk_id": "bbg_771f26eac4c649c1:0",
+     "url": "http://www.bloomberg.com/news/2011-09-25/mongolia-wants-to-raise-stake-in-oyu-tolgoi-to-50-minister-zorigt-says.html",
+     "tickers": [
+      "RTNTF"
+     ],
+     "is_macro": false,
+     "published_date": "2011-09-26",
+     "headline": "Mongolia Sparks Rio Concern With Push to Raise Stake in Record Copper Mine",
+     "firm_specific": true,
+     "verbatim": "Mongolia Sparks Rio Concern With Push to Raise Stake in Record Copper Mine \u2014 Ivanhoe Mines Ltd. fell in Toronto trading after Mongolia said it wanted to boost its stake in one of the world\u2019s largest undeveloped copper-gold mines two years after agreeing to cap its stake until 2039. Ivanhoe, developing the Oyu Tolgoi deposit with Rio Tinto Group, fell C$1.51, or 9.1 percent, to C$15 yesterday at 4 p.m. in Toronto Stock Exchange trading, after earlier dropping as much as 21 percent. Rio declined 20.5 pence, or 0.7 pe"
+    }
+   ]
+  },
+  {
+   "firm": "Ford Motor",
+   "t": "F",
+   "sec": "Cons Disc",
+   "month": "2010-07",
+   "total": 0.2365,
+   "decomp": {
+    "macro": 0.0916,
+    "sector": 0.0409,
+    "idio": 0.1041
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Ford reported a Q1 profit \u2013 the first for any U.S. automaker since 2004 \u2013 boosting its stock despite not taking bailout funds",
+   "confidence": "high",
+   "reasoning": "Firm\u2011specific earnings news aligns with the largest idiosyncratic share of the move, outweighing broader macro/sector factors",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_6d80ac527e34161b:2",
+     "url": "http://www.bloomberg.com/news/2010-07-30/obama-trumpeting-success-of-automaker-bailouts-to-skeptical-u-s-voters.html",
+     "tickers": [
+      "F",
+      "GM"
+     ],
+     "is_macro": false,
+     "published_date": "2010-07-30",
+     "headline": "Obama Making Sales Pitch for Auto Bailouts to Skeptical Voters",
+     "firm_specific": true,
+     "verbatim": "Obama Making Sales Pitch for Auto Bailouts to Skeptical Voters \u2014 industry -- including Ford Motor Co., which didn\u2019t seek federal aid -- has re-hired 55,000 workers after shedding 334,000 in the year before. \u201cHistory will record that we did the right thing\u201d by stepping in, Ronald Bloom , the administration\u2019s senior counselor for manufacturing policy, said today in an interview on Bloomberg Television. The administration\u2019s auto team was \u201casked to put together a tough-minded plan to put these companies back on their f"
+    }
+   ]
+  },
+  {
+   "firm": "Volkswagen",
+   "t": "VWAGY",
+   "sec": "Industrials",
+   "month": "2011-10",
+   "total": 0.2348,
+   "decomp": {
+    "macro": 0.1619,
+    "sector": 0.0353,
+    "idio": 0.0376
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "European debt\u2011crisis stress and Fed policy concerns",
+   "confidence": "low",
+   "reasoning": "Macro news about Greece default risk, Fed debt\u2011trading plan and EU uncertainty aligns with the 16.2% macro share driving VW's +23.5% move.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver",
+    "sign-violation->cap-low"
+   ],
+   "sign_violation": true,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_279d51e988eb4452:1",
+     "url": "http://www.bloomberg.com/news/2011-10-06/hedge-funds-post-worst-performance-in-more-than-a-year-on-falling-stocks.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-06",
+     "headline": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks",
+     "firm_specific": false,
+     "verbatim": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks \u2014 and equity markets generated negative returns.\u201d The MSCI World (MXWO) Index of global stocks tumbled 8.6 percent in September, including dividends, as Greece edged closer to defaulting on its sovereign debt and the cost of insuring western European countries\u2019 loans rose to records. The Federal Reserve said Sept. 21 that there are \u201csignificant downside risks\u201d in the U.S. economy , prompting the central bank to announce a $400 billion debt-tra"
+    },
+    {
+     "chunk_id": "bbg_2bfc3131e343c64d:2",
+     "url": "http://www.bloomberg.com/news/2011-10-20/swiss-stocks-little-changed-before-brussels-meeting-on-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-20",
+     "headline": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls",
+     "firm_specific": false,
+     "verbatim": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls \u2014 radical,\u201d Darren Williams, a senior European economist at AllianceBernstein LP in London , wrote in a report today. \u201cThis may disappoint the exaggerated expectations now embedded in markets.\u201d \u2018Uncertainty Reigns\u2019 A disagreement over the European Central Bank \u2019s role threatens to stymie progress on a comprehensive strategy to end the crisis. Luxembourg Prime Minister Jean-Claude Juncker , who chairs the group of euro-area finance ministers, indicated an i"
+    }
+   ]
+  },
+  {
+   "firm": "Bhp",
+   "t": "BHP",
+   "sec": "Materials",
+   "month": "2011-09",
+   "total": -0.2346,
+   "decomp": {
+    "macro": -0.2444,
+    "sector": -0.08,
+    "idio": 0.0898
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "macro demand slowdown reflected in Beige Book reports of declining industrial and consumer demand",
+   "confidence": "med",
+   "reasoning": "Macro evidence shows weakened demand across sectors and lower commodity prices, aligning with the large negative macro share in the decomposition",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_148b00d3124e3d14:0",
+     "url": "http://www.bloomberg.com/news/2011-09-06/gold-may-decline-for-a-second-day-after-rally-to-record-encourages-sales.html",
+     "tickers": [
+      "CME"
+     ],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors",
+     "firm_specific": false,
+     "verbatim": "Gold Drops Most in Two Weeks as Equity Rebound Trims Demand From Investors \u2014 Gold dropped the most in two weeks as a rebound in global equities eroded demand for an alternative asset and spurred investors to sell the metal after its rally to an all-time high. The MSCI All-Country World Index climbed as much as 2.8 percent while the Standard & Poor\u2019s 500 Index futures jumped 2.7 percent after legal challenges to Germany \u2019s role in the euro rescue funds were rejected by the nation\u2019s top court. Gold futures slipped fr"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:1",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 unseasonably quiet August. Commercial real estate contacts have reported steady to slightly improved market conditions in most parts of the Third District since the previous Beige Book. Generally positive results were reported by service-sector firms. Upward price pressures from food, energy, and other commodities have lessened somewhat. The ability to pass along costs remains mixed, and there is little evidence of wage pressure. In response to ongoing"
+    },
+    {
+     "chunk_id": "bbg_356b06fa3b44e8e1:3",
+     "url": "http://www.bloomberg.com/news/2011-09-07/u-s-federal-reserve-beige-book-philadelphia-district-text-.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-09-07",
+     "headline": "U.S. Federal Reserve Beige Book: Philadelphia District (Text)",
+     "firm_specific": false,
+     "verbatim": "U.S. Federal Reserve Beige Book: Philadelphia District (Text) \u2014 markets, growing market share, and product shifts as positive factors. Declining demand was attributed to sluggish residential construction, softening domestic consumption, and the falloff in public infrastructure spending. One industrial supply firm indicated steady growth overall but noted some softness in sales to those manufacturers most sensitive to business cycles. Although the outlook among Third District manufacturers remains somewhat optimisti"
+    }
+   ]
+  },
+  {
+   "firm": "Metlife",
+   "t": "MET",
+   "sec": "Financials",
+   "month": "2011-10",
+   "total": 0.2273,
+   "decomp": {
+    "macro": 0.1557,
+    "sector": 0.0388,
+    "idio": 0.0329
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "Macro market stress from Greece debt concerns and Fed policy uncertainty",
+   "confidence": "low",
+   "reasoning": "Broad macro news about sovereign debt worries and Fed\u2019s downside risk comments aligns with the large macro share in the decomposition, explaining the strong move.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver",
+    "sign-violation->cap-low"
+   ],
+   "sign_violation": true,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_279d51e988eb4452:1",
+     "url": "http://www.bloomberg.com/news/2011-10-06/hedge-funds-post-worst-performance-in-more-than-a-year-on-falling-stocks.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-06",
+     "headline": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks",
+     "firm_specific": false,
+     "verbatim": "Hedge Funds Post Worst Performance in More Than a Year on Falling Stocks \u2014 and equity markets generated negative returns.\u201d The MSCI World (MXWO) Index of global stocks tumbled 8.6 percent in September, including dividends, as Greece edged closer to defaulting on its sovereign debt and the cost of insuring western European countries\u2019 loans rose to records. The Federal Reserve said Sept. 21 that there are \u201csignificant downside risks\u201d in the U.S. economy , prompting the central bank to announce a $400 billion debt-tra"
+    },
+    {
+     "chunk_id": "bbg_2bfc3131e343c64d:2",
+     "url": "http://www.bloomberg.com/news/2011-10-20/swiss-stocks-little-changed-before-brussels-meeting-on-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2011-10-20",
+     "headline": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls",
+     "firm_specific": false,
+     "verbatim": "Swiss Stocks Drop Amid Debt-Plan Split; Credit Suisse Falls \u2014 radical,\u201d Darren Williams, a senior European economist at AllianceBernstein LP in London , wrote in a report today. \u201cThis may disappoint the exaggerated expectations now embedded in markets.\u201d \u2018Uncertainty Reigns\u2019 A disagreement over the European Central Bank \u2019s role threatens to stymie progress on a comprehensive strategy to end the crisis. Luxembourg Prime Minister Jean-Claude Juncker , who chairs the group of euro-area finance ministers, indicated an i"
+    }
+   ]
+  },
+  {
+   "firm": "Deutsche Boerse",
+   "t": "DBOEY",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.2252,
+   "decomp": {
+    "macro": -0.0689,
+    "sector": -0.0067,
+    "idio": -0.1496
+   },
+   "route": "idio",
+   "scope": "tickers=DBOEY",
+   "driver": "EU regulatory probe into Deutsche Boerse's NYSE Euronext takeover",
+   "confidence": "high",
+   "reasoning": "Idiosyncratic share dominates (-15%); evidence cites a regulator investigation causing a 5.1% drop, matching the move.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_7b5e7a91a733489e:0",
+     "url": "http://www.bloomberg.com/news/2011-08-04/allianz-deutsche-boerse-e-on-german-equity-preview.html",
+     "tickers": [
+      "DBOEY"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-05",
+     "headline": "Allianz, Deutsche Boerse, E.ON: German Equity Preview",
+     "firm_specific": true,
+     "verbatim": "Allianz, Deutsche Boerse, E.ON: German Equity Preview \u2014 The following is a list of companies whose shares may have unusual price changes in Frankfurt. Stock symbols are in parentheses after company names. Share prices are from the last close. The DAX Index fell 3.4 percent to 6,414.76. Allianz SE (ALV) : Europe \u2019s biggest insurer publishes second-quarter earnings. The shares fell 2.4 percent to 82.83 euros. Deutsche Boerse AG (DB1) (DB1 GY): The stock exchange faces an expanded probe by European Union regulators in"
+    }
+   ]
+  },
+  {
+   "firm": "United Airlines",
+   "t": "UAL",
+   "sec": "Cons Disc",
+   "month": "2011-07",
+   "total": -0.2223,
+   "decomp": {
+    "macro": -0.0531,
+    "sector": -0.0566,
+    "idio": -0.1126
+   },
+   "route": "idio",
+   "scope": "tickers=UAL",
+   "driver": "earnings beat and fare hikes",
+   "confidence": "low",
+   "reasoning": "United posted a profit beat and raised fares to offset higher fuel costs, directly boosting its July performance, matching the idiosyncratic share of the move.",
+   "gate_notes": [
+    "sign-violation->cap-low"
+   ],
+   "sign_violation": true,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_bb1d5fcd4ef19177:0",
+     "url": "http://www.bloomberg.com/news/2011-07-21/united-continental-profit-beats-estimates-as-higher-fares-blunt-fuel-costs.html",
+     "tickers": [
+      "ALK",
+      "UAL"
+     ],
+     "is_macro": false,
+     "published_date": "2011-07-21",
+     "headline": "United Continental, US Airways Exceed Estimates as Fares Blunt Fuel Costs",
+     "firm_specific": true,
+     "verbatim": "United Continental, US Airways Exceed Estimates as Fares Blunt Fuel Costs \u2014 United Continental Holdings Inc. (UAL) , US Airways Group Inc. (LCC) and Alaska Air Group Inc. (ALK) all reported higher quarterly profits than analysts estimated as fare increases helped blunt rising fuel costs. United\u2019s profit excluding certain items was $577 million, or $1.49 a share, exceeding the $1.43 average estimate in a Bloomberg survey. US Airways posted earnings of 56 cents a share, topping a 54-cent estimate, while Alaska \u2019s pro"
+    }
+   ]
+  },
+  {
+   "firm": "Citigroup",
+   "t": "C",
+   "sec": "Financials",
+   "month": "2012-05",
+   "total": -0.2199,
+   "decomp": {
+    "macro": -0.218,
+    "sector": -0.0636,
+    "idio": 0.0617
+   },
+   "route": "macro",
+   "scope": "is_macro=true",
+   "driver": "European debt crisis risk-off sentiment",
+   "confidence": "med",
+   "reasoning": "Macro evidence shows heightened concern over Greece and Eurozone debt, driving investors to safe assets and pulling down financial stocks like Citigroup.",
+   "gate_notes": [
+    "macro:cap-med",
+    "macro:generic-not-firm-driver"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_8deafa2fc24e955e:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/peru-borrowing-costs-rise-to-three-month-high-on-european-crisis.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Peru Borrowing Costs Rise to Three-Month High on European Crisis",
+     "firm_specific": false,
+     "verbatim": "Peru Borrowing Costs Rise to Three-Month High on European Crisis \u2014 Peru\u2019s benchmark borrowing costs in dollars rose to a three-month high as concern that Europe \u2019s debt crisis will worsen should Greece leave the euro curbed demand for higher-yielding, emerging-market assets. The extra yield investors demand to own Peruvian government bonds instead of U.S. Treasuries climbed eight basis points, or 0.08 percentage point, to 198 at 2:53 p.m. in Lima, according to JPMorgan Chase & Co. That\u2019s the highest since Feb. 28. "
+    },
+    {
+     "chunk_id": "bbg_711f6ea6b69e42c2:0",
+     "url": "http://www.bloomberg.com/news/2012-05-23/treasuries-snap-three-day-decline-on-demand-for-safety.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2012-05-23",
+     "headline": "Treasuries Rise on Europe, Notes May Sell at Record Yield",
+     "firm_specific": false,
+     "verbatim": "Treasuries Rise on Europe, Notes May Sell at Record Yield \u2014 Treasuries rose, with 10-year notes snapping a three-day decline, before European leaders meet for a summit in Brussels to address the region\u2019s debt crisis. Five-year note yields traded almost the lowest levels since February as the U.S. prepares to sell $35 billion of the securities at what may be a record low auction yield, after demand approached the most ever at a two-year note sale yesterday. The Federal Reserve purchased $1.8 billion of securities in"
+    }
+   ]
+  },
+  {
+   "firm": "American International Group",
+   "t": "AIG",
+   "sec": "Financials",
+   "month": "2010-01",
+   "total": -0.2129,
+   "decomp": {
+    "macro": -0.0994,
+    "sector": 0.0226,
+    "idio": -0.1361
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Regulatory scrutiny of the AIG bailout and Fed involvement",
+   "confidence": "high",
+   "reasoning": "The retrieved news focus on hearings and secrecy surrounding the Fed\u2019s purchase of AIG\u2019s CDS and bailout, indicating regulatory/macro pressure drove the decline.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "weak",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_fd38d9e90f447b00:2",
+     "url": "http://www.bloomberg.com/news/2010-01-25/goldman-parachute-awaits-geithner-to-ease-fall-caroline-baum.html",
+     "tickers": [
+      "AIG"
+     ],
+     "is_macro": false,
+     "published_date": "2010-01-26",
+     "headline": "Goldman Parachute Awaits Geithner to Ease Fall: Caroline Baum",
+     "firm_specific": true,
+     "verbatim": "Goldman Parachute Awaits Geithner to Ease Fall: Caroline Baum \u2014 Generale SA, 100 cents on the dollar to cancel, then and there, the credit default swaps the insurer sold them. They also want to know why the New York Fed pressured AIG to withhold that information in its regulatory filings. Secrecy\u2019s Downside So do we. Secrecy surrounding the AIG bailout has worked to compound suspicions the New York Fed did something fishy, that it found a back-door way to pump money into the banks and, in the process, hosed the res"
+    },
+    {
+     "chunk_id": "bbg_9eae7226f353fb34:2",
+     "url": "http://www.bloomberg.com/news/2010-01-28/secret-banking-cabal-emerges-from-aig-shadows-david-reilly.html",
+     "tickers": [
+      "AIG"
+     ],
+     "is_macro": false,
+     "published_date": "2010-01-29",
+     "headline": "Secret Banking Cabal Emerges From AIG Shadows: David Reilly",
+     "firm_specific": true,
+     "verbatim": "Secret Banking Cabal Emerges From AIG Shadows: David Reilly \u2014 time of the AIG moves. He maintained during Wednesday\u2019s hearing that the New York bank had to buy the insurance contracts, known as credit default swaps, to keep AIG from failing, which would have threatened the financial system. The hearing before the House Committee on Oversight and Government Reform also focused on what many in Congress believe was the New York Fed\u2019s subsequent attempt to cover up buyout details and who benefited. By pursuing this lin"
+    }
+   ]
+  },
+  {
+   "firm": "Siemens",
+   "t": "SIEGY",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.2098,
+   "decomp": {
+    "macro": -0.0846,
+    "sector": -0.0129,
+    "idio": -0.1123
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "insufficient evidence to identify a specific driver",
+   "confidence": "low",
+   "reasoning": "Retrieved items only discuss general order growth and macro trends, lacking a concrete earnings, guidance, or corporate event; thus no clear driver can be assigned.",
+   "gate_notes": [
+    "mixed:ungrounded->cap-low"
+   ],
+   "sign_violation": false,
+   "abstain": true,
+   "verdict": "wrong",
+   "channel_appropriate": false,
+   "evidence": []
+  },
+  {
+   "firm": "Goldman Sachs Group",
+   "t": "GS",
+   "sec": "Financials",
+   "month": "2012-01",
+   "total": 0.2092,
+   "decomp": {
+    "macro": 0.0814,
+    "sector": 0.0709,
+    "idio": 0.0569
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Earnings beat \u2013 smaller-than-expected Q4 profit decline and analyst optimism",
+   "confidence": "high",
+   "reasoning": "Analyst notes a smaller profit decline and upward bias to earnings estimates, indicating an earnings surprise that likely drove the stock rise, outweighing generic macro factors.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_aaf41dfd38e9959f:0",
+     "url": "http://www.bloomberg.com/news/2012-01-24/goldman-sachs-s-prospects-more-optimistic-jmp-s-trone-says.html",
+     "tickers": [
+      "GS"
+     ],
+     "is_macro": false,
+     "published_date": "2012-01-24",
+     "headline": "Goldman Sachs\u2019s Prospects \u2018More Optimistic,\u2019 JMP\u2019s Trone Says",
+     "firm_specific": true,
+     "verbatim": "Goldman Sachs\u2019s Prospects \u2018More Optimistic,\u2019 JMP\u2019s Trone Says \u2014 Goldman Sachs Group Inc. (GS) \u2019s prospects have improved as the risk of a European bank meltdown eases and the firm adapts to structural changes in the market, JMP Securities analyst David Trone said. After a meeting yesterday with Goldman Sachs Chief Financial Officer David Viniar, Trone said he was \u201cmore optimistic about near-term prospects than we have been in sometime.\u201d He said today in a note to clients that he sees \u201csome upward bias\u201d to his earni"
+    }
+   ]
+  },
+  {
+   "firm": "Telefonica",
+   "t": "TELFY",
+   "sec": "Industrials",
+   "month": "2010-07",
+   "total": 0.209,
+   "decomp": {
+    "macro": 0.1234,
+    "sector": 0.0137,
+    "idio": 0.072
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Favorable macro environment with low inflation expectations and rising Treasury yields supporting equities",
+   "confidence": "low",
+   "reasoning": "Macro share dominates (12.3%); evidence shows low inflation and Treasury market moves that broadly boost stocks",
+   "gate_notes": [
+    "mixed:ungrounded->cap-low"
+   ],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_ee1c62f49a8c05ca:0",
+     "url": "http://www.bloomberg.com/news/2010-07-16/treasuries-head-for-weekly-gain-before-data-to-show-consumer-prices-fell.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-16",
+     "headline": "Treasuries Rise as Asian Stocks Decline Before U.S. Consumer Prices Report",
+     "firm_specific": false,
+     "verbatim": "Treasuries Rise as Asian Stocks Decline Before U.S. Consumer Prices Report \u2014 Treasuries rose and were headed for a weekly gain before reports that are forecast to show a U.S. inflation gauge matched the lowest in four decades and consumer confidence deteriorated. The 10-year note advanced for a third day and two-year yields were near a record low. Consumer prices likely dropped in June for a third straight month, showing inflation is contained as the recovery cools, economists said. Former Bank of England policy ma"
+    },
+    {
+     "chunk_id": "bbg_5806bb5025cb43d6:1",
+     "url": "http://www.bloomberg.com/news/2010-07-20/u-s-stock-index-futures-drop-before-goldman-earnings-ibm-falls-on-sales.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-20",
+     "headline": "U.S. Stocks Erase Losses as Homebuilders, Materials Shares Rise",
+     "firm_specific": false,
+     "verbatim": "U.S. Stocks Erase Losses as Homebuilders, Materials Shares Rise \u2014 after declining as much as 1.4 percent earlier. \u201cThe market has digested the perfect storm of bad economic and earnings news at the open,\u201d said Art Hogan , chief market analyst at New York-based Jefferies Group Inc. \u201cMaterials and energy stocks are rising on a turnaround in commodity prices.,\u201d and \u201cit\u2019s knocked out one of the legs in the sell-story.\u201d Stocks rallied as traders speculated Federal Reserve Chairman Ben S. Bernanke may announce a reductio"
+    },
+    {
+     "chunk_id": "bbg_b7694e8d97209879:3",
+     "url": "http://www.bloomberg.com/news/2010-07-01/two-year-treasury-yields-are-near-record-low-on-growth-employment-outlook.html",
+     "tickers": [],
+     "is_macro": true,
+     "published_date": "2010-07-01",
+     "headline": "Treasury Yield Curve Reahces the Lowest Since October on Inflation Outlook",
+     "firm_specific": false,
+     "verbatim": "Treasury Yield Curve Reahces the Lowest Since October on Inflation Outlook \u2014 median prediction of 71 economists in a Bloomberg survey. A report today may show initial jobless claims , a gauge of firings, fell to 455,000 last week from 457,000 in the prior seven days, according to a separate Bloomberg survey. \u2018Setback Risk\u2019 Two-year notes declined as some investors bet that yields may have dropped to levels not justified by the outlook for the world\u2019s largest economy. \u201cGiven where valuations are, there\u2019s certainly m"
+    }
+   ]
+  },
+  {
+   "firm": "Micron Technology",
+   "t": "MU",
+   "sec": "Technology",
+   "month": "2012-04",
+   "total": -0.2063,
+   "decomp": {
+    "macro": -0.083,
+    "sector": -0.0179,
+    "idio": -0.1054
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "insufficient evidence",
+   "confidence": "low",
+   "reasoning": "No clear idiosyncratic or macro news explains the -20.6% move; retrieved items are generic or positive for Micron",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": true,
+   "verdict": "wrong",
+   "channel_appropriate": false,
+   "evidence": [
+    {
+     "chunk_id": "bbg_3c72a30dccbe3cd6:0",
+     "url": "http://www.bloomberg.com/news/2012-04-04/rambus-files-appeal-of-antitrust-trial-loss-to-hynix-micron-1-.html",
+     "tickers": [
+      "MU",
+      "RMBS"
+     ],
+     "is_macro": false,
+     "published_date": "2012-04-05",
+     "headline": "Rambus Appeals California Antitrust Trial Loss to Hynix, Micron",
+     "firm_specific": true,
+     "verbatim": "Rambus Appeals California Antitrust Trial Loss to Hynix, Micron \u2014 Rambus Inc. (RMBS) appealed its loss of a $3.95 billion jury trial over its allegations that Micron Technology Inc. and Hynix Semiconductor Inc. (000660) conspired to prevent its memory chips from becoming an industry standard. The November verdict sent Rambus shares down as much as 78 percent, the biggest one-day loss since the company went public in 1997. Micron rose as much as 25 percent, the most since its initial public offering in 1984. A state"
+    }
+   ]
+  },
+  {
+   "firm": "Honda Motor",
+   "t": "HMC",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.203,
+   "decomp": {
+    "macro": -0.0487,
+    "sector": -0.0253,
+    "idio": -0.1291
+   },
+   "route": "idio",
+   "scope": "tickers=HMC",
+   "driver": "Strong yen cutting Honda's earnings (exchange\u2011rate impact)",
+   "confidence": "high",
+   "reasoning": "Idiosyncratic share is largest; evidence cites a stronger yen reducing operating profit, a firm\u2011specific earnings hit driving the drop.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_0577ad151fcb8a84:3",
+     "url": "http://www.bloomberg.com/news/2011-08-01/honda-motor-raises-full-year-net-income-forecast-by-18-to-2-96-billion.html",
+     "tickers": [
+      "HMC"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-01",
+     "headline": "Honda Raises Full Year Net Income Forecast by 18% on Faster Quake Recovery",
+     "firm_specific": true,
+     "verbatim": "Honda Raises Full Year Net Income Forecast by 18% on Faster Quake Recovery \u2014 272 billion yen a year earlier. Honda was expected to post a net loss of 36.2 billion yen, according to the mean of eight analysts\u2019 estimates compiled by Bloomberg. Sales fell 27 percent to 1.7 trillion yen from 2.4 trillion yen in the period. A stronger yen cut Honda\u2019s first-quarter operating profit by 22.5 billion yen, while the impact from the earthquake was 225 billion yen. Global car sales fell 39 percent in the three months ended Jun"
+    },
+    {
+     "chunk_id": "bbg_0577ad151fcb8a84:2",
+     "url": "http://www.bloomberg.com/news/2011-08-01/honda-motor-raises-full-year-net-income-forecast-by-18-to-2-96-billion.html",
+     "tickers": [
+      "HMC"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-01",
+     "headline": "Honda Raises Full Year Net Income Forecast by 18% on Faster Quake Recovery",
+     "firm_specific": true,
+     "verbatim": "Honda Raises Full Year Net Income Forecast by 18% on Faster Quake Recovery \u2014 sales forecast by 4.8 percent to 8.7 trillion yen, up from a previous estimate for 8.3 trillion yen. The automaker now expects to sell 3.435 million vehicles in the year ending March 2012, up from an earlier estimate of 3.3 million. \u201cWe\u2018ve been able to move up the recovery from the parts shortage,\u2019\u2019 Fumihiko Ike, Honda\u2019s chief financial officer, said in Tokyo today. \u2018\u2018Most of the increase in higher sales will be booked in this quarter.\u2019\u2019 H"
+    }
+   ]
+  },
+  {
+   "firm": "Oracle",
+   "t": "ORCL",
+   "sec": "Technology",
+   "month": "2011-12",
+   "total": -0.2007,
+   "decomp": {
+    "macro": -0.017,
+    "sector": -0.001,
+    "idio": -0.1827
+   },
+   "route": "idio",
+   "scope": "tickers=ORCL",
+   "driver": "Oracle's false\u2011advertising lawsuit against HP",
+   "confidence": "high",
+   "reasoning": "The idiosyncratic share dominates the move; the most relevant news is Oracle accusing HP of false advertising (legal dispute) which likely drove the sharp decline.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_321e274527c87d64:0",
+     "url": "http://www.bloomberg.com/news/2011-12-03/oracle-adds-false-advertising-claims-to-hp-suit-over-itanium.html",
+     "tickers": [
+      "HPE",
+      "ORCL"
+     ],
+     "is_macro": false,
+     "published_date": "2011-12-03",
+     "headline": "Oracle Accuses HP of False Advertising in Revised Itanium Suit",
+     "firm_specific": true,
+     "verbatim": "Oracle Accuses HP of False Advertising in Revised Itanium Suit \u2014 Oracle Corp., accussing Hewlett- Packard Co. (HPQ) of false advertising in a revised countersuit, said HP secretly paid Intel Corp. (INTC) to continue producing the Itanium computer chip. OrSacle claims HP \u201cmade false and deceptive statements\u201d to Oracle and the public regarding the future of the chip to induce Oracle to continue to build software that runs on HP servers that use the Itanium chip, according to an amended complaint provided by Deborah H"
+    }
+   ]
+  },
+  {
+   "firm": "Anglo American",
+   "t": "AAUKF",
+   "sec": "Industrials",
+   "month": "2011-08",
+   "total": -0.1998,
+   "decomp": {
+    "macro": -0.0774,
+    "sector": -0.0123,
+    "idio": -0.1101
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "potential acquisition of Macarthur Coal (counter\u2011bid)",
+   "confidence": "low",
+   "reasoning": "Anglo American was reported to be weighing a counter\u2011bid for Macarthur Coal, an M&A rumor that aligns with the dominant idiosyncratic share of the move.",
+   "gate_notes": [
+    "sign-violation->cap-low"
+   ],
+   "sign_violation": true,
+   "abstain": false,
+   "verdict": "wrong",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_dc788df003216a9c:1",
+     "url": "http://www.bloomberg.com/news/2011-08-19/anglo-american-said-to-weigh-counterbid-for-macarthur-coal.html",
+     "tickers": [
+      "AAUKF",
+      "BTU",
+      "MT"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-19",
+     "headline": "Anglo American Said to Weigh Counterbid for Macarthur Coal",
+     "firm_specific": true,
+     "verbatim": "Anglo American Said to Weigh Counterbid for Macarthur Coal \u2014 mining research at Standard Bank Group Ltd., said by telephone. \u201cThey have the firepower because they were a bit stingy on dividends. Maybe they kept the money for this instance potentially.\u201d Anglo American doesn\u2019t comment on speculation, said Emily Blyth, a London-based spokeswoman. She also said the company \u201cdoes examine growth opportunities in our core commodity groups across geographies.\u201d Calls to Macarthur today weren't answered. Macarthur rose 48 ce"
+    }
+   ]
+  },
+  {
+   "firm": "Bank Of New York Mellon",
+   "t": "BNY",
+   "sec": "Financials",
+   "month": "2011-08",
+   "total": -0.1946,
+   "decomp": {
+    "macro": -0.0699,
+    "sector": -0.0526,
+    "idio": -0.0721
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "Legal/regulatory issue: alleged misrepresentation of mortgage securities",
+   "confidence": "med",
+   "reasoning": "Negative state\u2011law claim that BNY misled investors on mortgage securities likely pressured the stock in August 2011",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_8ad7c48c43c5384a:0",
+     "url": "http://www.bloomberg.com/news/2011-08-04/new-york-ag-to-intervene-in-bofa-mortgage-bond-deal-lawyer-says.html",
+     "tickers": [
+      "BNY"
+     ],
+     "is_macro": false,
+     "published_date": "2011-08-05",
+     "headline": "BNY Mellon Broke New York Law, Misled Investors on Mortgages, State Claims",
+     "firm_specific": true,
+     "verbatim": "BNY Mellon Broke New York Law, Misled Investors on Mortgages, State Claims \u2014 Bank of New York Mellon Corp. (BK) violated state law in its role representing investors in mortgage securities created by Bank of America Corp. (BAC) \u2019s Countrywide Financial unit, the New York Attorney General said. BNY Mellon should pay penalties and restitution to investors, Attorney General Eric Schneiderman said yesterday in a court filing involving Bank of America\u2019s proposed $8.5 billion mortgage-bond settlement. Schneiderman, who s"
+    }
+   ]
+  },
+  {
+   "firm": "National Australia Bank",
+   "t": "NAUBF",
+   "sec": "Energy",
+   "month": "2012-05",
+   "total": -0.1881,
+   "decomp": {
+    "macro": -0.043,
+    "sector": -0.0144,
+    "idio": -0.1307
+   },
+   "route": "idio",
+   "scope": "tickers=NAUBF",
+   "driver": "Competitive pressure cutting loan margins",
+   "confidence": "high",
+   "reasoning": "CEO Clyne warned loan margins will narrow due to competition, directly affecting NAB's profitability, matching the large idiosyncratic share.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": false,
+   "verdict": "correct",
+   "channel_appropriate": true,
+   "evidence": [
+    {
+     "chunk_id": "bbg_f406c8bbf0fcfc1d:0",
+     "url": "http://www.bloomberg.com/news/2012-05-13/lending-profits-to-keep-falling-on-competition-nab-s-clyne-says.html",
+     "tickers": [
+      "NAUBF"
+     ],
+     "is_macro": false,
+     "published_date": "2012-05-14",
+     "headline": "Competition Will Cut Bank Loan Margins, NAB CEO Clyne Says",
+     "firm_specific": true,
+     "verbatim": "Competition Will Cut Bank Loan Margins, NAB CEO Clyne Says \u2014 Australian home-loan margins will narrow as competition among banks crimps profits, National Australia Bank Ltd. (NAB) Chief Executive Officer Cameron Clyne said. Margins will continue to contract by about 5 basis points a quarter, the head of the nation\u2019s fourth-biggest bank said in an Australian Broadcasting Corp. television interview yesterday. \u201cWe\u2019re all trying to chase asset growth in a weak credit environment and we\u2019re all trying to raise more depos"
+    }
+   ]
+  },
+  {
+   "firm": "Blackrock",
+   "t": "BLK",
+   "sec": "Financials",
+   "month": "2010-09",
+   "total": 0.1818,
+   "decomp": {
+    "macro": 0.0964,
+    "sector": 0.0075,
+    "idio": 0.0779
+   },
+   "route": "mixed",
+   "scope": "firm-own OR macro",
+   "driver": "none identified",
+   "confidence": "low",
+   "reasoning": "Evidence only contains generic commentary on insurers' capital rules and GCC yields; no earnings, M&A, or other driver-type news found.",
+   "gate_notes": [],
+   "sign_violation": false,
+   "abstain": true,
+   "verdict": "wrong",
+   "channel_appropriate": false,
+   "evidence": [
+    {
+     "chunk_id": "bbg_bde18aad29dbde35:1",
+     "url": "http://www.bloomberg.com/news/2010-09-21/u-s-insurers-may-see-higher-capital-requirements-regulators-group-says.html",
+     "tickers": [
+      "BLK"
+     ],
+     "is_macro": false,
+     "published_date": "2010-09-21",
+     "headline": "U.S. Insurers May See Higher Capital Requirements",
+     "firm_specific": true,
+     "verbatim": "U.S. Insurers May See Higher Capital Requirements \u2014 set new standards. BlackRock will review more than 7,000 securities by year- end. The New York-based firm will calculate loss expectations for the holdings, which will determine how much capital insurers must hold to cushion potential declines. Life insurance companies, led by MetLife Inc., asked for relief last year after the capital required to protect against losses on depressed mortgage investments soared. Regulators discontinued their reliance on RMBS ratings"
+    },
+    {
+     "chunk_id": "bbg_81c70d93d3e029da:0",
+     "url": "http://www.bloomberg.com/news/2010-09-21/gulf-cooperation-credit-interesting-due-to-high-yields-blackrock-says.html",
+     "tickers": [
+      "BLK"
+     ],
+     "is_macro": false,
+     "published_date": "2010-09-21",
+     "headline": "Gulf Arab States' Debt Is `Interesting' Due to High Yields, BlackRock Says",
+     "firm_specific": true,
+     "verbatim": "Gulf Arab States' Debt Is `Interesting' Due to High Yields, BlackRock Says \u2014 Gulf Cooperation Council countries\u2019 debt is \u201cinteresting\u201d for investors because of high yields, according to BlackRock Inc., the world\u2019s biggest money manager. \u201cThere is a global search for yield and the GCC is an interesting place to look,\u201d Nick Anderson, managing director for Middle East and Africa at BlackRock, told a conference in Dubai today. \u201cYou are seeing people increasingly focused on the region because there are some high yields."
+    }
+   ]
+  }
+ ]
+};
+const pct = x => (x>=0?"+":"")+(x*100).toFixed(1)+"%";
+const CH = [["macro","Macro","var(--macro)"],["sector","Sector","var(--sector)"],["idio","Firm-specific","var(--idio)"]];
+const ROUTE_TXT = {idio:"the firm's own news", sector:"beta-correlated peers", macro:"macro catalysts", mixed:"firm-own OR macro"};
+
+function tiles(s){
+  const committedN = s.conf.high.n + s.conf.med.n, committedC = s.conf.high.correct + s.conf.med.correct;
+  const hi = s.conf.high;
+  const t = [
+    ["Activations", s.n, "biggest moves, 2010–2012"],
+    ["Correct when it commits", Math.round(100*committedC/committedN)+"%", committedC+"/"+committedN+" high+med calls"],
+    ["High-confidence accuracy", Math.round(100*hi.correct/hi.n)+"%", "vs 32% before calibration"],
+    ["Sign errors caught", s.sign_caught, "positive driver on a down move"],
+  ];
+  document.getElementById("tiles").innerHTML = t.map(([k,v,n])=>
+    `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="n">${n}</div></div>`).join("");
+}
+function calib(s){
+  const rows=[["high","High confidence","var(--good)"],["med","Medium","var(--warn)"],["low","Low (abstains)","var(--muted)"]];
+  const body = rows.map(([k,name,col])=>{
+    const b=s.conf[k], r=b.n?b.correct/b.n:0;
+    return `<div class="cbar"><span class="name">${name}</span>
+      <span class="track"><span class="fill" style="width:${Math.max(r*100,1.5)}%;background:${col}"></span></span>
+      <span class="pct">${Math.round(r*100)}% · ${b.correct}/${b.n}</span></div>`;
+  }).join("");
+  document.getElementById("calib").innerHTML =
+    `<div class="lab">CALIBRATION — judge-verified "correct" rate within each stated confidence</div>${body}`;
+}
+function decompBar(d){
+  const items = CH.map(([k])=>[k, d[k]||0]);
+  const tot = items.reduce((a,[,v])=>a+Math.abs(v),0)||1;
+  const dom = items.slice().sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0][0];
+  const segs = items.map(([k,v])=>{
+    const w = Math.abs(v)/tot*100;
+    return w<0.5?"":`<span class="seg" data-c="${k}" style="flex:0 0 ${w}%" title="${k}: ${pct(v)}"></span>`;
+  }).join("");
+  const labs = CH.map(([k,name,col])=>{
+    const v=d[k]||0;
+    return `<span class="dl ${k===dom?'dom':''}"><span class="swatch" style="background:${col}"></span>${name} <b>${pct(v)}</b></span>`;
+  }).join("");
+  return {html:`<div class="decomp"><div class="dbar">${segs}</div><div class="dlabels">${labs}</div></div>`, dom};
+}
+function evidence(ev){
+  if(!ev.length) return "";
+  const items = ev.map(e=>{
+    const tag = e.firm_specific ? `<span class="tag firm">FIRM-SPECIFIC</span>`
+              : (e.is_macro ? `<span class="tag macro">MACRO TAPE</span>` : "");
+    const host = e.url ? new URL(e.url).hostname.replace("www.","") : "";
+    return `<div class="src">
+      <div class="meta">${e.published_date||""} ${tag}<span>tickers: ${e.tickers&&e.tickers.length?e.tickers.join(", "):"—"}</span></div>
+      ${e.headline?`<div class="hl">${e.headline}</div>`:""}
+      <div class="q">“${(e.verbatim||"").replace(/</g,"&lt;")}…”</div>
+      <div class="bk">↩ back-link <code>${e.chunk_id}</code>${e.url?` · <a href="${e.url}" target="_blank" rel="noopener">${host}</a>`:""}</div>
+    </div>`;
+  }).join("");
+  return `<details class="ev"><summary>${ev.length} cited source${ev.length>1?"s":""} — verbatim, back-linked</summary>${items}</details>`;
+}
+function card(a){
+  const {html:dbar, dom} = decompBar(a.decomp);
+  const conf=a.confidence||"low";
+  const confLabel = a.abstain? "abstained" : conf;
+  const vClass = a.verdict?("v-"+a.verdict):"";
+  const vChip = a.verdict?`<span class="chip ${vClass}">judge: ${a.verdict}</span>`:"";
+  const gate = (a.gate_notes||[]).length?`<span class="chip gate" title="${a.gate_notes.join('; ')}">⚙ gate applied</span>`:"";
+  const sign = a.sign_violation?`<span class="chip gate">⚠ sign-checked</span>`:"";
+  return `<article class="card" data-route="${a.route}" data-conf="${conf}" data-abstain="${a.abstain}" data-verdict="${a.verdict||''}">
+    <div class="crow">
+      <div class="firm">${a.firm}<span class="tk">${a.t}</span><span class="mo">${a.month}</span></div>
+      <div class="move ${a.total>=0?'up':'down'}">${pct(a.total)}</div>
+    </div>
+    ${dbar}
+    <div class="route"><span class="arrow">→ routed to</span> <b>${dom==='idio'?'firm-specific':dom}</b> search:
+       scope <code>${ROUTE_TXT[a.route]||a.route}</code></div>
+    <div class="answer">
+      <div class="adrv">${a.driver||"—"}</div>
+      <div class="chips">
+        <span class="chip ${conf}"><span class="ic"></span>${confLabel}</span>
+        ${vChip}${gate}${sign}
+      </div>
+      <div class="reason">${a.reasoning||""}</div>
+      ${evidence(a.evidence)}
+    </div>
+  </article>`;
+}
+const FILTERS = [["all","All"],["committed","Committed (high+med)"],["correct","Judged correct"],["abstain","Abstained"],
+  ["idio","Idiosyncratic"],["macro","Macro"],["mixed","Mixed"]];
+function applyFilter(f){
+  document.querySelectorAll("#filters button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.f===f));
+  document.querySelectorAll(".card").forEach(c=>{
+    let show=true;
+    if(f==="committed") show = (c.dataset.conf==="high"||c.dataset.conf==="med") && c.dataset.abstain!=="true";
+    else if(f==="correct") show = c.dataset.verdict==="correct";
+    else if(f==="abstain") show = c.dataset.abstain==="true";
+    else if(["idio","macro","mixed","sector"].includes(f)) show = c.dataset.route===f;
+    c.classList.toggle("hidden", !show);
+  });
+}
+function render(){
+  tiles(DATA.stats); calib(DATA.stats);
+  document.getElementById("filters").innerHTML = FILTERS.map(([f,l])=>
+    `<button data-f="${f}" aria-pressed="${f==='all'}">${l}</button>`).join("");
+  document.getElementById("filters").addEventListener("click",e=>{ if(e.target.dataset.f) applyFilter(e.target.dataset.f); });
+  document.getElementById("cards").innerHTML = DATA.activations.map(card).join("");
+  const s=DATA.stats;
+  document.getElementById("foot").innerHTML =
+    `Routes: ${s.routes.idio} idiosyncratic · ${s.routes.macro} macro · ${s.routes.mixed} mixed &nbsp;|&nbsp; `+
+    `Grading is an adversarial, channel-aware LLM judge reading the verbatim cited source — a self-consistent metric, not human ground truth. `+
+    `"Correct when it commits" = judged-correct rate over high+med confidence calls; low confidence is the deliberate abstain bucket.`;
+}
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  const r=document.documentElement; r.setAttribute("data-theme", r.getAttribute("data-theme")==="dark"?"light":"dark");
+});
+render();
+</script>
+</body>
+</html>
