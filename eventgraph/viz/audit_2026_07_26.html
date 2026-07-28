@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text-exposure findings — centring audit &amp; representation ladder</title>
+<style>
+.viz-root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --surface-2:#f3f3f0; --border:#dcdbd4;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7973;
+  --b100:#cde2fb; --b250:#86b6ef; --b450:#2a78d6; --b550:#1c5cab; --b650:#104281;
+  --accent:#2a78d6; --dim:#b9b8b0; --s1:#2a78d6; --s2:#eb6834;
+  --grid:#e7e6e0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:var(--surface-1); color:var(--text-primary);
+  padding:28px 30px 40px; max-width:1080px; margin:0 auto;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])) .viz-root{
+    color-scheme: dark;
+    --surface-1:#1a1a19; --surface-2:#242422; --border:#3a3a37;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8d8c84;
+    --b100:#104281; --b250:#1c5cab; --b450:#3987e5; --b550:#6da7ec; --b650:#9ec5f4;
+    --accent:#3987e5; --dim:#5a5a55; --grid:#2e2e2b; --s1:#3987e5; --s2:#d95926;
+  }
+}
+:root[data-theme="dark"] .viz-root{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --surface-2:#242422; --border:#3a3a37;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8d8c84;
+  --b100:#104281; --b250:#1c5cab; --b450:#3987e5; --b550:#6da7ec; --b650:#9ec5f4;
+  --accent:#3987e5; --dim:#5a5a55; --grid:#2e2e2b; --s1:#3987e5; --s2:#d95926;
+}
+h1{font-size:19px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{font-size:13px;color:var(--text-secondary);margin:0 0 26px;line-height:1.5;max-width:74ch}
+h2{font-size:14px;margin:30px 0 3px;letter-spacing:-.005em}
+.note{font-size:12px;color:var(--text-secondary);margin:0 0 14px;line-height:1.5;max-width:80ch}
+.hero{display:flex;gap:34px;align-items:baseline;margin:16px 0 4px;flex-wrap:wrap}
+.hero .n{font-size:46px;font-weight:600;letter-spacing:-.02em;line-height:1}
+.hero .lbl{font-size:12px;color:var(--text-secondary);max-width:30ch;line-height:1.45}
+.legend{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--text-secondary);margin:0 0 10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+svg{display:block;overflow:visible}
+.axis text{font-size:11px;fill:var(--text-muted)}
+.rowlab{font-size:12px;fill:var(--text-primary)}
+.rowsub{font-size:10.5px;fill:var(--text-muted)}
+.val{font-size:11px;font-weight:600;fill:var(--text-primary)}
+.verdict{font-size:10.5px;font-weight:600}
+.grid line{stroke:var(--grid);stroke-width:1}
+.zero{stroke:var(--text-muted);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .12s;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:12px;line-height:1.45;
+  box-shadow:0 4px 14px rgba(0,0,0,.14);max-width:290px;z-index:50;color:var(--text-primary)}
+.tip b{font-size:12.5px}
+table{border-collapse:collapse;font-size:12px;margin-top:10px;width:100%}
+th,td{text-align:right;padding:5px 9px;border-bottom:1px solid var(--border)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--text-secondary);font-weight:600}
+details{margin-top:16px}summary{font-size:12px;color:var(--text-secondary);cursor:pointer}
+.foot{font-size:11.5px;color:var(--text-muted);margin-top:26px;line-height:1.6;max-width:82ch;
+  border-top:1px solid var(--border);padding-top:14px}
+.hit{cursor:crosshair}
+</style>
+</head>
+<body data-palette="#2a78d6,#eb6834">
+<div class="viz-root">
+
+<h1>What the audit found — 26 July 2026</h1>
+<p class="sub">Forward covariance signal from news text, incremental to a price-history baseline.
+114 events, Bloomberg 2010–2012, leakage-free (profiles strictly pre-event). Two things happened:
+an artifact check <em>destroyed</em> three results, and two representation changes <em>improved</em>
+the survivor.</p>
+
+<div class="hero">
+  <div><div class="n" style="color:var(--accent)">+0.049</div>
+    <div class="lbl">best configuration<br>forward IC increment (t 5.5)</div></div>
+  <div><div class="n" style="color:var(--text-muted)">+0.028</div>
+    <div class="lbl">where the day started<br>(t 2.6)</div></div>
+  <div><div class="n" style="color:var(--text-muted)">3</div>
+    <div class="lbl">findings retracted or demoted<br>by the centring check</div></div>
+</div>
+
+<h2>1 · The centring check — uncentred vs mean-centred</h2>
+<p class="note">Transformer embedding spaces are anisotropic: uncentred cosine similarity is dominated by
+proximity to the corpus centroid, which tracks <strong>coverage volume</strong>, which tracks <strong>firm
+size</strong> — which predicts co-movement for reasons unrelated to text. Mean-centring removes it.
+All measures are on a correlation scale.</p>
+<div class="legend">
+  <span><i style="background:var(--s1)"></i>uncentred (as originally reported)</span>
+  <span><i style="background:var(--s2)"></i>mean-centred</span>
+</div>
+<svg id="dumb" width="1000" height="250" role="img" aria-label="Dumbbell chart of uncentred versus mean-centred effect sizes"></svg>
+
+<h2>2 · The representation ladder — how the survivor improved</h2>
+<p class="note">Same 114 events, same leakage discipline, same controls throughout
+(mean-centred, headline-mention excluded, and controlled for coverage volume — without which
+the full-corpus arm measures firm size at +0.093). Dots are the point estimate of the forward IC
+increment over trailing correlation; whiskers are bootstrap 95% CIs.</p>
+<div class="legend">
+  <span><i style="background:var(--accent)"></i>best configuration</span>
+  <span><i style="background:var(--dim)"></i>cumulative rung</span>
+  <span><i style="background:var(--surface-1);box-shadow:inset 0 0 0 2px var(--dim)"></i>side branch (no LLM)</span>
+  <span style="color:var(--text-muted)">— whiskers: bootstrap 95% CI</span>
+</div>
+<svg id="ladder" width="1000" height="300" role="img" aria-label="Bar chart of forward IC increment by configuration"></svg>
+
+<details><summary>Table view — all values</summary>
+  <table id="tbl"><thead><tr><th>Result / configuration</th><th>uncentred</th><th>centred</th><th>95% CI</th><th>verdict</th></tr></thead><tbody></tbody></table>
+</details>
+
+<p class="foot"><strong>Read with care.</strong> This is second-moment — co-movement, not returns and not
+direction. One regime, one outlet, one market. The winning configuration was chosen by looking at
+outcomes across many variants, so it is <em>exploratory</em>, not confirmatory: nothing here is
+out-of-sample yet. Effect sizes are small in absolute terms (an IC of 0.05).
+Sparse idf vectors are not anisotropic, so the centring artifact cannot arise in the lexical space at all —
+which is part of why it is the more trustworthy representation.</p>
+
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const AUDIT=[
+ {k:"Forward covariance (F31)",m:"IC increment",a:.028,b:.028,v:"survived",
+  why:"The project's one surviving predictive finding. Unmoved by centring — not an anisotropy artifact."},
+ {k:"Hedge persistence (F32)",m:"IC increment",a:.028,b:.028,v:"survived",
+  why:"Built on the same causal-quote profiles; inherits the robustness."},
+ {k:"Embedding exposure (F22)",m:"correlation",a:.057,b:.033,v:"demoted",
+  why:"Still positive, but its tf-idf baseline is +0.047 and unaffected by centring — so the embedding no longer beats bag-of-words. The whole margin was the artifact."},
+ {k:"Mechanism factors (F23)",m:"correlation",a:.076,b:.038,v:"demoted",
+  why:"Halves. Extracted factors change identity entirely: f20 goes from 'trade unions / mineworkers' to 'Bank of America / Wall Street'."},
+ {k:"Subject profiles (F42, mine)",m:"IC increment",a:.033,b:-.017,v:"died",
+  why:"Retracted the same day it was recorded. The apparent gain was centroid proximity — i.e. firm size — not information."},
+ {k:"Embedding risk baskets",m:"impact-Δ",a:.091,b:-.009,v:"died",
+  why:"Placebo p 0.005 → 0.690, and a RANDOM basket (+0.057) now beats it. Uncentred it picked a Finance-dominated basket; centred, Manufacturing. Mechanism: size proxy → banks → FOMC sensitivity."}
+];
+const LADDER=[
+ {k:"F31 baseline",s:"dense · mean-pool · graph docs",v:.028,lo:.007,hi:.048,t:"t 2.6",em:0,
+  why:"Where the day started. Cosine between the MEAN of a firm's 80 causal quotes and the MEAN of the event's."},
+ {k:"+ best-match pooling",s:"dense · top-3 · graph docs",v:.032,lo:.011,hi:.053,t:"t 3.0",em:0,
+  why:"Mean-pooling averages 'second-line trial success, breakthrough' into 'generic pharma'. Best-match preserves it. Raw gain was +0.042; a quarter of that was coverage bias, removed here."},
+ {k:"+ lexical representation",s:"idf terms · top-3 · graph docs",v:.048,lo:.029,hi:.066,t:"t 5.2",em:0,
+  why:"The largest single gain. Sparse term overlap beats dense embedding — the fourth independent confirmation of that in this repo."},
+ {k:"+ full corpus added",s:"idf terms · top-3 · graph + alias-matched",v:.049,lo:.032,hi:.066,t:"t 5.5",em:1,
+  why:"Best configuration. Adding alias-matched documents to the graph's does not dilute, and gives the strongest contemporaneous reading (+0.041)."},
+ {k:"zero-LLM path",s:"idf terms · top-3 · full corpus only",v:.028,lo:.003,hi:.052,t:"t 2.3",em:2,
+  why:"Side branch, not a rung. No extraction, no embeddings, no GPU, no API — and it reproduces F31's original headline exactly. The graph adds ~70% on top of it."}
+];
+const tip=document.getElementById('tip');
+const show=(e,h)=>{tip.innerHTML=h;tip.style.opacity=1;
+  tip.style.left=Math.min(e.clientX+14,innerWidth-306)+'px';
+  tip.style.top=Math.min(e.clientY+14,innerHeight-140)+'px';};
+const hide=()=>tip.style.opacity=0;
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a={})=>{const x=document.createElementNS(NS,n);for(const k in a)x.setAttribute(k,a[k]);return x;};
+const fmt=v=>(v>=0?"+":"−")+Math.abs(v).toFixed(3);
+
+/* ---------- 1. dumbbell ---------- */
+(()=>{
+  const svg=document.getElementById('dumb'),L=250,R=930,T=16,rowH=36;
+  const lo=-.03,hi=.10, X=v=>L+(v-lo)/(hi-lo)*(R-L);
+  const g=el('g');svg.appendChild(g);
+  for(let t=-0.02;t<=.10001;t+=.02){
+    const x=X(t);
+    g.appendChild(el('line',{x1:x,x2:x,y1:T-6,y2:T+AUDIT.length*rowH-10,class:'grid'}));
+    const tx=el('text',{x:x,y:T+AUDIT.length*rowH+8,'text-anchor':'middle',class:'axis'});
+    tx.textContent=(t>0?"+":"")+t.toFixed(2);g.appendChild(tx);
+  }
+  const z=el('line',{x1:X(0),x2:X(0),y1:T-6,y2:T+AUDIT.length*rowH-10,class:'zero'});g.appendChild(z);
+  AUDIT.forEach((d,i)=>{
+    const y=T+i*rowH+10;
+    const lab=el('text',{x:L-14,y:y+1,'text-anchor':'end',class:'rowlab'});lab.textContent=d.k;g.appendChild(lab);
+    const sub=el('text',{x:L-14,y:y+13,'text-anchor':'end',class:'rowsub'});sub.textContent=d.m;g.appendChild(sub);
+    g.appendChild(el('line',{x1:X(d.a),x2:X(d.b),y1:y,y2:y,stroke:'var(--dim)','stroke-width':2}));
+    const same=Math.abs(d.a-d.b)<0.0015;
+    g.appendChild(el('circle',{cx:X(d.a),cy:y,r:5.5,fill:'var(--s1)',stroke:'var(--surface-1)','stroke-width':2}));
+    // when before==after the marks coincide; ring the top one in the other hue so
+    // both identities stay visible rather than one silently hiding the other
+    g.appendChild(el('circle',{cx:X(d.b),cy:y,r:same?4.2:5.5,fill:'var(--s2)',
+      stroke:same?'var(--s1)':'var(--surface-1)','stroke-width':same?3:2}));
+    const vt=el('text',{x:X(d.b)+(d.b<d.a?-13:13),y:y+4,'text-anchor':d.b<d.a?'end':'start',class:'val'});
+    vt.textContent=fmt(d.b);g.appendChild(vt);
+    const col=d.v==='survived'?'var(--text-primary)':d.v==='demoted'?'var(--text-secondary)':'var(--text-muted)';
+    const vd=el('text',{x:R+8,y:y+4,class:'verdict',fill:col});vd.textContent=d.v;g.appendChild(vd);
+    const hitR=el('rect',{x:L-240,y:y-15,width:R-L+250,height:30,fill:'transparent',class:'hit'});
+    hitR.addEventListener('mousemove',e=>show(e,`<b>${d.k}</b><br><span style="color:var(--text-secondary)">${d.m}</span><br>
+      uncentred ${fmt(d.a)} → centred <b>${fmt(d.b)}</b> · ${d.v}<br>
+      <span style="color:var(--text-secondary)">${d.why}</span>`));
+    hitR.addEventListener('mouseleave',hide);g.appendChild(hitR);
+  });
+})();
+
+/* ---------- 2. ladder ---------- */
+(()=>{
+  const svg=document.getElementById('ladder'),L=250,R=880,T=14,rowH=48;
+  const hi=.075, X=v=>L+v/hi*(R-L);
+  const g=el('g');svg.appendChild(g);
+  g.appendChild(el('line',{x1:X(0),x2:X(0),y1:T-4,y2:T+LADDER.length*48-8,class:'zero'}));
+  for(let t=0;t<=.075001;t+=.015){
+    const x=X(t);
+    g.appendChild(el('line',{x1:x,x2:x,y1:T-4,y2:T+LADDER.length*rowH-8,class:'grid'}));
+    const tx=el('text',{x:x,y:T+LADDER.length*rowH+8,'text-anchor':'middle',class:'axis'});
+    tx.textContent=(t===0?"0":"+"+t.toFixed(3));g.appendChild(tx);
+  }
+  LADDER.forEach((d,i)=>{
+    const y=T+i*rowH+12, bh=17;
+    const lab=el('text',{x:L-14,y:y+7,'text-anchor':'end',class:'rowlab'});lab.textContent=d.k;g.appendChild(lab);
+    const sub=el('text',{x:L-14,y:y+20,'text-anchor':'end',class:'rowsub'});sub.textContent=d.s;g.appendChild(sub);
+    const cy=y+bh/2;
+    const fill=d.em===1?'var(--accent)':'var(--dim)';
+    // dot + CI rather than bar + whisker: these are point ESTIMATES with
+    // uncertainty, and a bar's area implies a magnitude the estimate lacks.
+    g.appendChild(el('line',{x1:X(d.lo),x2:X(d.hi),y1:cy,y2:cy,stroke:'var(--text-muted)','stroke-width':2}));
+    [d.lo,d.hi].forEach(v=>g.appendChild(el('line',{x1:X(v),x2:X(v),y1:cy-5,y2:cy+5,
+      stroke:'var(--text-muted)','stroke-width':2})));
+    g.appendChild(el('circle',{cx:X(d.v),cy:cy,r:6.5,
+      fill:d.em===2?'var(--surface-1)':fill,
+      stroke:d.em===2?'var(--dim)':'var(--surface-1)','stroke-width':d.em===2?2.5:2}));
+    const vt=el('text',{x:X(d.hi)+12,y:cy+4,class:'val'});vt.textContent=fmt(d.v)+"   "+d.t;g.appendChild(vt);
+    const hitR=el('rect',{x:L-240,y:y-8,width:R-L+250,height:rowH-6,fill:'transparent',class:'hit'});
+    hitR.addEventListener('mousemove',e=>show(e,`<b>${d.k}</b><br><span style="color:var(--text-secondary)">${d.s}</span><br>
+      forward IC increment <b>${fmt(d.v)}</b> (${d.t}) · 95% CI [${fmt(d.lo)}, ${fmt(d.hi)}]<br>
+      <span style="color:var(--text-secondary)">${d.why}</span>`));
+    hitR.addEventListener('mouseleave',hide);g.appendChild(hitR);
+  });
+})();
+
+/* ---------- table ---------- */
+(()=>{
+  const tb=document.querySelector('#tbl tbody');
+  AUDIT.forEach(d=>{const r=document.createElement('tr');
+    r.innerHTML=`<td>${d.k} <span style="color:var(--text-muted)">(${d.m})</span></td>
+      <td>${fmt(d.a)}</td><td>${fmt(d.b)}</td><td>—</td><td>${d.v}</td>`;tb.appendChild(r);});
+  LADDER.forEach(d=>{const r=document.createElement('tr');
+    r.innerHTML=`<td>${d.k} <span style="color:var(--text-muted)">(${d.s})</span></td>
+      <td>—</td><td>${fmt(d.v)} ${d.t}</td><td>[${fmt(d.lo)}, ${fmt(d.hi)}]</td>
+      <td>${d.em===1?'best':d.em===2?'side branch':'rung'}</td>`;tb.appendChild(r);});
+})();
+</script>
+</body>
+</html>

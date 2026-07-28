@@ -133,6 +133,38 @@ plus an earnings pass (`event_type` ∈ earnings/guidance/… + resolved US symb
 wins; unmapped slugs fall through unchanged). `--dry`/`--unmapped` to preview
 and dump the residual tail for manual mapping.
 
+**EM/frontier calendar — the observation store** (`scripts/em_calendar.py` +
+`config/em_calendar_sources.json` + `lake/0012_calendar_observation.sql`;
+strategy in `docs/EM-CALENDAR-STRATEGY.md`):
+
+The formal plane's three modes above assume a source that publishes an
+authoritative schedule. Emerging and frontier markets mostly don't: statistics
+offices publish "when ready", advance calendars silently change, and the change
+is itself informative. 0007's supersession rule keys on `(series_id, event_time)`
+and therefore *cannot represent a reschedule* — the moved date lands under a new
+key and the abandoned one survives as "current".
+
+`eg.calendar_observation` fixes this by moving identity onto the **occurrence**
+`(series_id, period_ref)` and demoting `event_time` to a belief attribute under
+revision. The fact stored is the *observation* ("on 2026-07-10 the CBN site said
+the MPC meets 2026-07-22"), which stays true forever — so "never UPDATE a fact
+row" gets stronger, not weaker. Three distinct time axes (`observed_at` /
+`knowable_at` / `ingested_at`; 0007 conflated the last two) make
+`eg.v_calendar_asof(as_of)` an exact point-in-time answer, and
+`eg.v_schedule_revision` turns date changes into a queryable fact table.
+`event_date_local` is authoritative for date-precision claims: storing only the
+UTC instant moves the calendar date back a day for every venue east of
+Greenwich, the same class of error that understated the 8-K event window
+2.2× → 3.2×.
+
+`em_calendar.py snapshot` fetches every registered source and stores the raw
+bytes content-addressed under `<graph-dir>/raw/`, **whether or not a parser
+exists** — silent upstream mutation is the phenomenon being captured, and a
+revision history cannot be bought or backfilled. `parse` runs the parsers that
+do exist (KNBS Advance Release Calendar, IFES ElectionGuide) over the newest
+artifact per source; `report` shows coverage and flags calendars whose newest
+entry is already in the past; `revisions` lists date/status moves.
+
 **Implied-probability feed** (`scripts/implied_prob.py` + `lake/0011_market_quote.sql`)
 — closes the `v_prob_divergence` loop (narrative `probability_annotation` vs
 market-implied prob per proposition):

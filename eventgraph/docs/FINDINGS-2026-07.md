@@ -672,3 +672,1221 @@ uv run scripts/formal_calendar.py alfred|ics|edgar ...
 uv run scripts/implied_prob.py kalshi|polymarket ...
 uv run scripts/load_formal.py --graph-dir <g> --db <duckdb>
 ```
+
+---
+
+## 8. Taxonomy correction + sector x event-class risk (2026-07-26)
+
+`scripts/taxonomy.py` (substring fallback) · `scripts/sector_event_risk.py`
+
+### F35. The `other` bucket was half a mapping failure and half the extractor refusing
+Exact-match-only `EVENT_TYPE_MAP` left **26.4%** of eg100k events (52.9% india2021,
+75.9% eg_live2) in `other`. Decomposing it:
+
+- **~12.5% was a mapping failure** spread over **1,540 distinct strings** — variants
+  (`court_case` / `court_ruling` / `court_hearing` / `court_decision`), so no
+  realistic number of dict keys fixes it. An ordered substring fallback (same
+  technique `SECTOR_TEXT_MAP` already used) recovered about half: eg100k
+  **26.4% -> 19.8%**.
+- **The rest is irreducible**: 69% of the remaining `other` is the extractor
+  emitting the literal string `"other"`/null. No taxonomy work touches that; it
+  needs re-extraction or a second-pass classifier into the controlled vocab.
+- The largest unmapped strings are **not classes at all** — `event` (1,271),
+  `meeting` (1,171), `announcement`, `report`. These are deliberately kept in
+  `other` via `EVENT_TYPE_NON_INFORMATIVE`; mapping them anywhere would
+  manufacture classification that does not exist.
+
+### F36. Coverage share and immediate risk are close to inversely related
+Sector-matched lift (each event divided by its OWN sector's non-event control):
+
+| class | n | lift | 95% CI |
+|---|---|---|---|
+| earnings | 350 | **1.97x** | [1.73, 2.23] |
+| guidance | 343 | 1.48x | [1.31, 1.66] |
+| monetary_policy | 230 | 1.35x | [1.19, 1.54] |
+| legal_regulatory | 197 | 1.31x | [1.10, 1.56] |
+| rating_action | 141 | 1.30x | [1.07, 1.54] |
+| **m_and_a** | **907** | **1.21x** | [1.11, 1.31] |
+
+**M&A is the largest class by volume (2.6x earnings) and nearly the weakest by
+risk.** A "what is this name's news made of" panel that weights by share is
+therefore weighting by almost the wrong thing.
+
+Sector-matching turned out to matter little in practice — control sigma runs
+0.734-0.774 across all 12 sectors, because names are already standardised by
+their own trailing residual vol. Correct in principle, ~5% correction in fact.
+
+### F37. Earnings risk varies ~2x by sector; the low-vol sectors take the biggest jolt
+Consumer Staples **3.16x**, Health Care 2.67x, Info Tech 2.66x, Industrials 2.22x
+vs Energy 1.73x, Materials 1.48x. Same class, different risk regime — the
+conditional structure F-series keeps finding. Guidance splits equally hard:
+Info Tech 1.99x vs Communication Services 0.99x.
+
+### F38. A missing class, found by the data and then confirmed — but underpowered
+Health Care's `other` ran **2.40x** while every other sector's sat near 1.0-1.3x.
+Inspecting it showed FDA reviews, clinical trials and study results with no home
+in the 30-class vocab. Pre-registered prediction: split them out and HC `other`
+should fall toward the other sectors.
+
+**Confirmed in mechanism:** HC `other` **n=17 -> n=8, 2.40x -> 1.62x**, and the
+nine cells that left became `clinical_trial` at **3.09x — the highest lift in the
+sector, above earnings (2.67x)**.
+
+**NOT confirmed in magnitude.** n=9 in Health Care, n=24 globally, and the global
+CI is **[0.84, 2.86] — it crosses 1**. The class is real and separable; its risk
+is not estimated.
+
+### The binding constraint is density, again
+All of Health Care rests on **161 event cells**. At this corpus density the
+taxonomy can *identify* classes but cannot *estimate* their risk. This is the
+density wall from section 5 lesson 3, arriving at the same conclusion from a new
+direction: the fix is the 446k BBG corpus, not a better classifier.
+
+**Caveats:** 23 classes tested at 95%, so ~1 false positive is expected by
+construction — treat n<50 rows as suggestive. Contemporaneous risk description,
+not forecast (F17/F18 bound the channel at 0-3%; F24/F28 killed direction). One
+regime (2008-2014), one outlet.
+
+### F39. The event-class attribution is doc-union, and that is a bug
+Every consumer of event classes builds cells as:
+
+    doctypes[doc_id] = {every event_type anywhere in the document}
+    cell[(effect_entity_ticker, date)] |= doctypes[doc_id]
+
+so **every entity on the receiving end of any causal edge inherits every event
+class in that document**. A blind sample of 320 `m_and_a` cells (dumped with no
+sigma attached — `scripts/subclass_dump.py`) shows what that produces:
+
+- **11% are ETFs / index proxies** (HYG, TLT, FEZ, RSX, GLD, FXI) tagged to deals
+- **3% are roundup columns** — "Medtronic, Monsanto, Warner Music, Coach, Eaton:
+  Intellectual Property", "CMPC, Itau, Pao de Acucar, Vale: Latin America Equity
+  Preview"
+- resolution errors: **RGCO** tagged to "Ex-**RBG** Resources Chairman Ordered to
+  Pay $44m"; **ORIC** (IPO'd 2020) tagged to a 2010 Astellas bid for **OSI**
+  Pharmaceuticals — the 2026-knowledge-on-2010-names anachronism the honesty
+  ledger warns about
+- the bulk of the remainder are executive hires, patent suits and sector
+  commentary that are not M&A for that name at all
+
+**The correct path exists and is unused.** `event.issuer_entity` names the entity
+an event is about (32.5% populated, 10,214 resolving to a ticker).
+`causal_event_edge.event_id` would be better still but is **0% populated**
+(134,366 rows, none linked) — a schema field that was never filled.
+
+Re-measuring with issuer attribution (`scripts/attribution_compare.py`):
+
+| class | union n | lift | issuer n | lift | delta |
+|---|---|---|---|---|---|
+| earnings | 350 | 1.97x | 531 | **2.17x** | +0.20 |
+| guidance | 343 | 1.48x | 196 | **1.61x** | +0.13 |
+| rating_action | 141 | 1.30x | 117 | **1.43x** | +0.13 |
+| `other` | 296 | 1.19x | 75 | **0.86x** | −0.32 |
+| debt_issuance | 46 | 1.48x | 46 | 0.91x | −0.57 |
+| m_and_a | 907 | 1.21x | 621 | 1.18x | −0.03 |
+
+`other` falling **below** the control (CI [0.73, 1.00]) is the reassuring
+direction: unclassified events attributed to their real issuer are genuinely
+uninformative, which is what an honest residual bucket should look like.
+
+**The fix must be hybrid.** Macro classes collapse under issuer attribution
+(monetary_policy 230 -> 1, employment 56 -> 0, disaster 21 -> 0) because a Fed
+decision has no corporate issuer. Corporate classes should attribute via
+`issuer_entity`; macro classes need the exposure/edge path they have now.
+
+### F40. There is no hidden M&A signal — the targets are not in the universe
+> **CORRECTED by F41 (same day).** The conclusion "the signal was never sampled"
+> is right that the population is tiny, but the attribution to SURVIVORSHIP is
+> wrong. Measured across 574 takeover headlines, delisting/price-availability is
+> the SMALLEST of three leaks; extraction misses and entity resolution dominate.
+> And the signal is not absent — where it reaches a priceable name it runs
+> **1.80x vs the 1.21x pooled**, with a 9.55-sigma tail. Read F41 first.
+The pre-registered hypothesis was that `m_and_a`'s flat 1.21x concealed a
+takeover-premium sub-bucket (announced targets gap 20-40%). **Refuted twice.**
+
+Fixing the attribution moved it **1.21x -> 1.18x**. And scanning the blind sample
+for explicit deal language finds **14 of 320 cells (4%)** — of which, on
+inspection, essentially **one or two** are the tagged name being an announced
+target (ARES/GS/JPM all appear as advisers on the same GNC story; NIKA is not
+Ista; EC is not a party to Bridas/BP).
+
+So the signal is not diluted — **it was never sampled**. Takeover targets get
+acquired and delisted, and the universe is defined by current-day resolvability,
+so the names that would show 3x are structurally absent. This is the
+survivorship caveat in section 4 turning up as a hard ceiling rather than a
+footnote: **no amount of classification or LLM sub-labelling recovers a
+population that is missing.** Testing it properly needs delisted-inclusive
+price data (CRSP / FirstRateData), already on the deferred list.
+
+**Method note.** The LLM contribution here was not sub-classification — it was
+*inspection*. Reading 320 blind headlines found a structural attribution bug and
+a survivorship ceiling, both of which dominate anything a finer taxonomy could
+have delivered. Blindness was enforced mechanically (the dump script never loads
+the price panel) so this is not a post-hoc story fitted to the outcome.
+
+
+### F41. Takeover signal exists at 1.80x — 95.5% of it never reaches a priceable name
+Two independent probes of F40's claim, one embedding and one lexical.
+
+**Embedding (`scripts/embed_takeover_probe.py`).** No encoder is installed, so the
+query is built BY EXAMPLE: seed on the 34 chunks in `receptors/data_bloomberg`
+(11,100 all-MiniLM vectors, same `bbg_` doc_id namespace as the lake) carrying
+explicit takeover language, take their centroid, rank every chunk by cosine. The
+direction is real — top hits are the LME takeover-bid process, LSE/LCH.Clearnet,
+NYSE Euronext. But only 22 of 172 retrieved docs overlap eg100k, so it is
+underpowered; used only to confirm the lexical probe is not missing phrasing.
+
+**Lexical, full corpus (574 takeover headlines).** The taxonomy is doing its job —
+353 are labelled `m_and_a`. The pipeline is not:
+
+| stage | share |
+|---|---|
+| no causal edge at all | **48.1%** |
+| edge exists, no entity resolves to a ticker | **40.2%** |
+| ticker but no price that day | 7.1% |
+| **PRICEABLE** | **4.7%** |
+
+Decomposing the 275 edgeless docs further: **66.2% have no event row either** — the
+extractor emitted nothing at all for a document whose headline says "takeover".
+The F39 issuer_entity path recovers only 3.3% of them.
+
+**So the three leaks, ranked:** extraction misses (~32% of all takeover docs
+produce nothing), entity resolution (~40%), and price availability/delisting
+(~7%). **Survivorship is the smallest, not the largest** — which is the opposite
+of what F40 asserted.
+
+**And the signal is real where it lands.** The 28 priceable cells average
+**1.80x** against the 0.753 control — well above the 1.21x pooled `m_and_a` — with
+14% exceeding 2 sigma:
+
+| sigma | name | headline |
+|---|---|---|
+| **9.55** | STX | Seagate's Default Swaps Surge to Highest Since 2008 Amid Takeover Report |
+| 4.11 | CVI | Carl Icahn and CVR Energy Agree on Tender Offer |
+| 2.90 | OVV | Encana Shares Soar After PetroChina Agrees to Buy Gas Assets |
+| 1.60 | FSLR | First Solar Jumps Most in 17 Months on Takeover Speculation |
+
+**Implication, and it is more optimistic than F40.** The answer to "is there higher
+signal in the flat buckets" is **yes — 1.80x vs 1.21x, with fat tails**. It is not
+blocked by a structural ceiling that needs CRSP; it is blocked by **pipeline
+recall**, and ~88% of the loss (extraction + resolution) is addressable with work
+already prototyped in this repo (`resolve_llm.py` for the resolution leg). The
+density wall from F35-F38 is therefore not the only constraint — RECALL is a
+second, separately fixable one.
+
+
+### Re-run verification (2026-07-26, after regenerating the classification side-car and mcp_cache)
+
+`classify_layer.py` had never been re-run after taxonomy.py gained its substring
+fallback, so every stored artifact and the 60 MB panel cache were still on the old
+vocab. Both were regenerated (eg100k `other` 26.4% -> 19.8%, 27 -> 31 classes
+present, `clinical_trial`/`operations`/`fiscal_policy`/`fund_flows` now materialised)
+and **every headline number above was re-derived on the fresh cache**. Nothing moved
+materially:
+
+| figure | as first reported | re-run |
+|---|---|---|
+| earnings, doc-union | 1.97x (n=350) | **1.96x** (n=359) |
+| earnings, issuer | 2.17x (n=531) | **2.17x** (n=544) |
+| guidance, issuer | 1.61x | **1.65x** |
+| m_and_a, doc-union | 1.21x (n=907) | **1.20x** (n=919) |
+| m_and_a, issuer | 1.18x | **1.17x** |
+| `other`, issuer | 0.86x | **0.86x** |
+| rating_action, issuer | 1.43x | **1.43x** |
+| clinical_trial | 1.70x, CI [0.84, 2.86] | **1.70x**, CI [0.85, 2.81] |
+| graph takeover reach | 4.5% | **4.7%** |
+| primitive takeover reach | 56.4% | **56.4%** |
+| primitive subject / mentioned | 1.38x / 1.05x | **1.36x / 1.05x** |
+| m_and_a subject / mentioned | 1.41x / 1.04x | **1.39x / 1.05x** |
+
+The cache rebuild dropped 123 tickers as stale and rebuilt 3,502 event cells
+(from 3,473), so counts shift by ~1-3% throughout; no lift moved by more than
+0.05x and no conclusion changes. `clinical_trial` still crosses 1.0 and remains
+unestablished.
+
+### F42. ~~F31's dead contemporaneous signal was profile THINNESS, not absence~~ — **RETRACTED, see F43**
+> **RETRACTED same day.** Every number below is real but the interpretation is
+> wrong: the subject-profile gain is **centroid proximity in an uncentred
+> embedding space**, not information. Mean-centring the space destroys it
+> (contemporaneous +0.048 -> +0.006 t0.4; forward +0.033 -> -0.017 t-1.4). F31's
+> original result, by contrast, SURVIVES centring. Read F43.
+`scripts/rigor_recheck_t3_profile.py` — one variable changed (where profile text
+comes from); universe, events, baskets, windows and non-mention exclusion held
+identical. `--profile edge` reproduces F31 exactly, to three decimals.
+
+**Why look.** F31 builds firm profiles from causal-edge quotes only — the
+high-precision/low-recall path. Measured: **median 3 documents per firm, and 81%
+of firms rest on fewer than 10.** That is thin enough that a null could be
+under-powering rather than absence.
+
+| profile source | contemporaneous increment | forward increment |
+|---|---|---|
+| **edge** (F31 baseline) | +0.016 (t1.5) CI [−0.004, +0.036] — **not significant** | +0.028 (t2.7) |
+| **both** (edge + headline-subject) | **+0.027 (t2.6)** CI [+0.006, +0.047] | +0.025 (t2.4) |
+| **subject** (headline-named only) | **+0.048 (t3.8)** CI [+0.024, +0.072] | **+0.033 (t2.7)** |
+| subject + `--strict-mention` | **+0.048 (t3.8)** | **+0.033 (t2.7)** |
+
+**F31's headline conclusion — "contemporaneous exposure is mostly price history;
+text adds ~0 clean" — does not survive better profile attribution.** The
+increment triples and crosses firmly into significance.
+
+**It is not leakage.** `--strict-mention` folds every firm named in an event
+document's HEADLINE into the exclusion set (5,228 documents) — the original T2
+exclusion covered causal-effect / sentiment / relation targets only, so
+headline-named firms had been counted as "non-mentioned". The result does not move
+by a single decimal. Profiles remain strictly pre-event throughout, so the
+leakage-free property F31 established is preserved.
+
+**Text quantity vs firm composition, honestly separated.** `subject` mode drops
+firms that never appear in a headline, so its universe differs. `both` keeps
+**every** edge firm and only adds text — and on that fixed firm set the
+contemporaneous increment still goes **+0.016 (t1.5) -> +0.027 (t2.6)**, i.e. more
+text alone moves it from null to significant. The additional lift to +0.048 in
+subject-only mode plausibly reflects a cleaner firm subset as well, and that part
+is not isolated here.
+
+Curiosity worth flagging: **`both` scores below `subject` on both metrics**, so
+folding the causal-edge quotes back in *dilutes*. Either the edge quotes are
+noisier than headline+lede text, or n is small enough that this is chance.
+
+**What this does and does not change.** It is still second-moment — covariance and
+risk, not returns or direction. F24/F25/F28/F29 are untouched. But F30/F31's
+"contemporaneous text adds nothing" was load-bearing in the strategic read that the
+news channel is a 0-3% sliver, and it turns out to have been an artifact of how
+little text each profile got. One regime (2010-2012), one outlet, 114 events.
+
+**Method note.** The earlier claim that F17/F18/F30/F31 were contaminated by the
+doc-union bug was WRONG — all four read `causal_event_edge.effect_entity`, never
+`doctypes`. The exposure was recall/thinness, a different mechanism reaching a
+similar place. Right conclusion, wrong reason, corrected before running.
+
+
+### F43. The centring check — F31 survives it, F42 does not, and it reverses the causal-vs-primitive call
+A skeptical question ("how can name and subject carry anything predictive?")
+prompted the adversarial check neither F31 nor F42 had faced. Transformer
+embedding spaces are strongly anisotropic: cosine in an UNCENTRED space is
+dominated by proximity to the corpus centroid, and a heavily-covered firm has a
+diverse profile whose mean sits near that centroid — hence near ANY event vector.
+Such firms are also large, liquid, and co-move more with any basket. That is a
+confound with nothing to do with news content.
+
+`--center` mean-centres the embedding space before averaging. Forward text
+increment over the price-history baseline:
+
+| profile source | uncentred | **centred** |
+|---|---|---|
+| **edge** (causal-edge quotes — F31) | +0.028 (t2.7) | **+0.028 (t2.6) — SURVIVES** |
+| **subject** (headline + lede — F42) | +0.033 (t2.7) | **−0.017 (t−1.4) — COLLAPSES** |
+
+Contemporaneous is null in both arms once centred (+0.006 / +0.006), so **F31's
+original contemporaneous conclusion stands and F42's "revival" is dead.**
+
+**Three consequences.**
+
+1. **F31 is strengthened, not weakened.** The one surviving predictive finding in
+   the project passed an adversarial check it had never been given. The forward
+   covariance signal is not an anisotropy artifact.
+2. **F42 is retracted.** The profile-thinness story was measured correctly and
+   interpreted wrongly.
+3. **The causal-vs-primitive call reverses.** The claim two turns earlier — that
+   causal extraction adds nothing and the cheap headline path beats it — is
+   **wrong**. Centred, it is the exact opposite: **causal-edge quotes carry the
+   signal that survives; headline+lede text carries none.** The plausible
+   mechanism is selection — a causal-edge quote is the specific span asserting a
+   relation, which is high-information and low-redundancy, whereas headline+lede
+   is generic text dominated by the space's common component.
+
+**Doctrine.** Every embedding-cosine result in this repo predating this check is
+suspect until re-run with `--center`; anisotropy inflates uncentred cosine
+similarity systematically and in the direction of size/coverage. `--sector-control`
+is worth keeping too, though it exonerated the text here: a same-sector dummy is
+worth +0.011 (t0.8) contemporaneously, and the returns are already residualised on
+macro plus the 9 SPDR sector ETFs, so broad sector is gone from the target before
+the test begins.
+
+### F44. The causal extraction earns its keep on DOCUMENT ATTRIBUTION, not span semantics
+F43 showed causal-edge quotes survive mean-centring where headline+lede text does
+not. Two explanations were live: (a) the extracted causal SPAN is the informative
+unit, or (b) the causal edge merely identifies the right DOCUMENTS and any text
+from them would do. `--profile edge_random` separates them: same firms, same
+documents, same months, same counts — but a **deterministically chosen random
+sentence** from the document instead of the extracted span.
+
+Forward text increment over the price-history baseline, all mean-centred:
+
+| arm | documents | text | forward increment |
+|---|---|---|---|
+| `edge` | causal-edge | the causal span | **+0.028 (t2.6)** CI [+0.007, +0.048] |
+| `edge_random` | causal-edge | a random sentence | **+0.022 (t2.0)** CI [+0.001, +0.042] |
+| `subject` | headline-matched | headline + lede | **−0.017 (t−1.4)** |
+
+**A random sentence recovers ~79% of the signal.** The span premium (+0.006) sits
+well inside overlapping CIs and is **not established**. Meanwhile changing the
+DOCUMENT SET destroys the signal outright.
+
+**So the extraction's contribution is retrieval, not semantics.** What matters is
+identifying documents that assert an exposure relationship for a firm — not
+parsing what the relationship says. A headline naming a firm indicates *coverage*;
+a causal edge indicates a *claim about that firm's drivers*, and only the latter
+predicts residual co-movement.
+
+**Caveat not excluded:** the `subject` arm also has a narrower firm universe (201
+firms with profile text vs edge's ~800), so document-set and universe composition
+are not fully separated. The clean missing cell is causal-edge documents with
+headline-only text.
+
+**Implication.** If the value is document→firm attribution rather than causal
+parsing, the expensive LLM step may be reducible to a much cheaper linking task —
+but NOT to naive headline matching, which measurably fails. That is a sharper and
+more useful specification than either "the graph works" or "the graph is
+unnecessary".
+
+### F45. Centring audit of every embedding-cosine result — two survive, two die, one is demoted
+`EMB_CENTER=1` added to `event_embedding_risk.py`, `embed_exposure.py`,
+`hedge_overlay.py`, `mechanism_factors.py`, `information_gap.py`; each run
+baseline-then-centred. All baselines reproduced their recorded values first.
+
+| result | script | uncentred | **centred** | verdict |
+|---|---|---|---|---|
+| **F31** forward covariance | `rigor_recheck_t3` | +0.028 (t2.7) | **+0.028 (t2.6)** | **SURVIVES** |
+| **F32** hedge persistence | `hedge_overlay` | +0.028 (t2.7); revert −0.191 vs −0.280 | **+0.028 (t2.6); −0.184 vs −0.271** | **SURVIVES** |
+| **edge-hunt #2** embedding risk baskets | `event_embedding_risk --st` | +0.091, placebo **p=0.005**, beats GICS +0.062 and random +0.004 | **−0.009, placebo p=0.690, random (+0.057) BEATS it** | **DIES** |
+| **F42** subject profiles (mine) | `rigor_recheck_t3_profile` | +0.048 / +0.033 | **+0.006 / −0.017** | **DIES** |
+| **F22** embedding exposure | `embed_exposure` | +0.057 (t7) vs tf-idf +0.047 | **+0.033 (t4) vs tf-idf +0.047** | **DEMOTED** |
+
+**The risk-basket death is the notable one.** The edge-hunt doc already recorded
+the *edge* as null OOS but retained the methodological claim that "the embedding is
+a good basket constructor / risk-mapping tool". It is not. Uncentred, the `rate`
+anchor selected a **Finance-dominated** basket; centred it selects
+**Manufacturing**. The mechanism is now legible: heavily-covered names sit near the
+corpus centroid, the centroid is near every anchor, banks are the most-covered
+names in a 2010-12 Bloomberg corpus, and banks genuinely move on FOMC. The
+apparent skill was size proxy -> banks -> FOMC sensitivity.
+
+**F22 is demoted rather than killed.** The embedding still carries signal (t4) but
+**no longer beats the tf-idf baseline it was credited with beating** (+0.033 vs
++0.047). tf-idf is sparse and non-anisotropic, so its number is unaffected — the
+entire "embeddings beat bag-of-words" margin was the artifact.
+
+**The pattern across the whole audit:** everything built on **causal-edge quotes**
+survives centring untouched (F31, F32); everything built on **broader or
+differently-selected text** dies or shrinks (risk baskets, F42, F22). That is F44's
+conclusion arriving independently — the causal edge's contribution is identifying
+*which documents pertain to a firm*, and results resting on that are robust while
+results resting on generic text similarity are not.
+
+**Not yet re-run:** `mechanism_factors` (F23), `information_gap` (F29),
+`mechanism_direction`, and the `news_*latent/clusters` family. F23/F29 were already
+recorded as null or negative, so the expected value is lower, but the flag is in
+place for `mechanism_factors` and `information_gap`.
+
+### F46. Second-order propagation from drug trials — NULL at sector resolution
+`scripts/second_order_trials.py`. First run of the event-backward angle: take an
+event, then ask which firms it should touch WITHOUT being named in it.
+
+157 trial documents (110 from the `clinical_trial` class created in F38, plus 47
+recovered by headline patterns for phase/FDA/endpoint language), 64 event days with
+at least one named priceable firm, 29 naming a Health Care firm.
+
+| group | n | event \|sigma\| | base | lift |
+|---|---|---|---|---|
+| **named** (first-order) | 72 | 1.119 | 0.757 | **1.48x** |
+| **2nd-order**: unmentioned Health Care | 2,442 | 0.776 | 0.742 | **1.05x** |
+| control: unmentioned other sectors | 21,264 | 0.798 | 0.753 | **1.06x** |
+
+Circular-shift placebo on the second-order group: **p = 0.177**. Widening the
+window to +/-2 sessions changes nothing (1.04x vs control 1.05x, p = 0.119), so
+this is not a timing artifact.
+
+**The sanity check passes and the test fails.** Named firms move 1.48x on trial
+days, so the event set is real. But unmentioned Health Care firms move **no more
+than unmentioned firms in any other sector** — 1.05x vs 1.06x is a dead heat. That
+is the pre-registered "trial days are just noisy days" branch: a small
+everyone-moves-slightly-more effect, not propagation.
+
+**What actually died is the SECTOR PROXY, not necessarily the thesis.** "Unmentioned
+Health Care firm" is a poor stand-in for "exposed to this trial". The economics that
+motivated the test are indication-level — a same-indication rival gains when your
+readout fails, a licensee moves with its partner's data — and a random biotech is
+not exposed to an unrelated oncology readout at all. Diluting 39 Health Care names
+into one bucket guarantees that a real effect on 2-3 of them is invisible.
+
+**Which is the argument for `graph_transitivity.py`.** It defines second-order
+exposure by SHARED DRIVERS IN THE CAUSAL GRAPH (`bridge2`: an edge connects a driver
+of i to a driver of j; `parent2`: directed common cause) rather than by sector
+membership, with hub exclusion as a kill condition and `child2` as a built-in
+collider placebo. That is the sharper instrument for the same question, it is fully
+implemented, and it has still never been run.
+
+**Honest limits:** 39 Health Care names in the priceable universe, 29 usable event
+days. Even a correct exposure map would be thin here.
+
+### F47. Can the LLM be dropped? Labels yes, document selection no (so far)
+Two separable questions, opposite answers.
+
+**Classification — YES, without a model.** `EVENT_TYPE_PATTERNS` reads event_type
+SLUGS; applied to prose it misses most of it, because newswires write verbs
+("acquisit" matches "acquisition" but not "acquires", "buys", "bid for"). Measured
+on the 26,362 eg100k headlines that name a verified firm, one iteration of prose
+triggers (`taxonomy.classify_headline`, landed):
+
+| | unclassified |
+|---|---|
+| slug patterns only | **61.6%** |
+| + prose triggers | **41.1%** |
+
+Recovered: market_move 1,919 · **roundup 1,334** · m_and_a 761 · operations 354 ·
+guidance 306 · debt_issuance 226 · monetary_policy 177 · legal 142 · rest 206.
+
+The two EXCLUSION classes matter as much as the event classes. `roundup`
+("Colombian Stocks: Ecopetrol, Rubiales, Canacol") catches the bystander documents
+F39 showed were poisoning every bucket via doc-union — at source, rather than
+downstream. `opinion` catches bylined columns ("...: David Reilly"). Both are
+classifications, not failures; callers drop them. The residual 41.1% is dominated
+by more verb constructions a second iteration would catch, so parity with the LLM
+path's 19.8% looks reachable.
+
+**Document selection — NO, not yet.** F44 established the LLM's real contribution
+is identifying WHICH DOCUMENTS assert an exposure relationship for a firm. Two
+deterministic substitutes, both against F31's centred **+0.028 (t2.6)** benchmark,
+same events, same machinery:
+
+| document selector | firm-doc entries | forward increment (centred) |
+|---|---|---|
+| `edge` — LLM causal edges | — | **+0.028 (t2.6)** |
+| `subject` — headline names the firm | 4,249 | **−0.017 (t−1.4)** |
+| `causal_lex` — headline names the firm AND asserts a driver relation | 422 | **−0.017 (t−0.8)** |
+
+Both fail identically, and **at very different text volumes** (4,249 vs 422
+entries), so this is not the thinness story — headline-derived document sets simply
+do not carry it, filtered or not.
+
+**The likely reason, and the untested next candidate.** Causal edges are extracted
+from document BODIES. A document can assert "X drives Y" in paragraph four with a
+headline that says nothing of the sort, so headline-level filtering is
+structurally blind to exactly the documents the edge is marking. The remaining
+candidate is body-level causal-language filtering; untested.
+
+**Process note.** The first `causal_lex` run returned +0.028 (t2.6) — identical to
+the edge baseline to three decimals — because a string patch silently missed on
+indentation and `_CAUSAL_LEX` was referenced but never defined, so the run was just
+the baseline again. It looked like a clean positive. **A patch that fails silently
+produces a perfect false negative**; the diagnostic print line being absent was the
+only tell. Verify the patch landed before believing the number.
+
+### F48. ~~Causal-chain search — the chain fails its kill condition~~ — **SUPERSEDED by F49**
+> **The chain verdict below was produced by a DEFECTIVE driver construction** —
+> driver sets aggregated over all of 2010-12 (median 3, mean 6.4, **max 129** per
+> firm) instead of the trailing window, which both diluted them and leaked
+> post-event edges. Fixed in F49; the conclusion reverses. The embedding results
+> below stand.
+Design: search the causal graph for a 2-hop chain from the event's cause to a
+candidate firm's own drivers (`bridge`), then weight candidates by relevance in
+the CAUSAL embedding space (mean-centred causal-quote profiles — the one
+representation that survived F43/F45). Both features tested against the same
+forward co-movement target, incremental to trailing correlation, on the same 114
+events. `scripts/rigor_recheck_t3_profile.py --chain`.
+
+**Hub-exclusion sensitivity is the whole result.** `graph_transitivity.py`
+pre-registered the rule: *"KILL CONDITION: effect must survive hub exclusion"*,
+because macro hubs (Greece in 2011, the Fed) connect everything.
+
+| top-% entities excluded as hubs | bridge -> fwd | **bridge \| trail -> fwd** | events |
+|---|---|---|---|
+| 0.25% | +0.041 (t2.7) | **+0.032 (t2.1)** | 67 |
+| 1.0% | +0.009 (t0.4) | **−0.002 (t−0.1)** | 36 |
+| 2.0% | +0.009 (t0.3) | **−0.002 (t−0.1)** | 21 |
+
+**The chain effect exists only when hubs are left in.** Excluding the top 1% by
+degree removes it entirely. The point estimate COLLAPSES (+0.032 -> −0.002) rather
+than merely widening its interval, which points at hub-driven rather than at power
+loss — though n does fall to 36/21, so power is not fully excluded. Either way the
+pre-registered kill condition fires: what looks like second-order causal
+propagation is largely "both firms connect to the same high-degree macro entity",
+i.e. shared macro beta that entity-level residualisation does not remove.
+
+**The embedding weighting survives everything.** Incremental to trailing
+correlation AND to the bridge feature:
+
+| control set | emb increment |
+|---|---|
+| trail only | +0.028 (t2.6) |
+| trail + sector dummy | +0.055 (t4.5) |
+| trail + bridge (hub 1%/2%) | **+0.027 (t2.5)** |
+| trail + bridge (hub 0.25%) | **+0.022 (t2.1)** |
+
+At loose hub exclusion the two features overlap substantially — adding bridge cuts
+the embedding increment 0.028 -> 0.022, and adding embedding cuts bridge 0.032 ->
+0.024 (t1.7, CI now crossing zero). Neither subsumes the other, but only the
+embedding is robust to the hub rule.
+
+**Read:** the *ranking* half of the proposal works and is now the most heavily
+defended result in the project — it has survived mean-centring, a same-sector
+dummy, headline-mention exclusion, and a graph-structure control. The *search* half
+does not survive its own pre-registered hub test. Second-order exposure, at this
+corpus density, is not recoverable from graph topology once you remove the
+entities that connect everything.
+
+
+### F49. Driver SPECIFICITY was the defect — windowed, the chain strengthens and the kill condition no longer fires
+Challenge raised: *are the drivers of high enough specificity?* They were not.
+
+`graph_transitivity.py` specifies "features per pair-month, from the entity causal
+graph over the same trailing window as the correlation" and "hubs: WITHIN-WINDOW
+degree". F48's implementation used neither — driver sets and hub degree were built
+over all of 2010-12.
+
+| driver construction | drivers per firm |
+|---|---|
+| whole 2010-12 (F48, wrong) | median 3, mean 6.4, **max 129** |
+| trailing window (F49, correct) | median 1, mean 1.8, max 26 |
+
+A firm with 129 drivers bridges to nearly anything, and the set included edges from
+months AFTER the event — dilution plus leakage.
+
+**Rebuilt windowed, the chain gets STRONGER, not weaker:**
+
+| | F48 (global drivers) | **F49 (windowed)** |
+|---|---|---|
+| bridge -> fwd, hub 0.25% | +0.041 (t2.7) | **+0.058 (t2.5)** |
+| bridge \| trail, hub 0.25% | +0.032 (t2.1) | **+0.049 (t2.1)** |
+| bridge \| trail, hub 1.0% | **−0.002 (t−0.1)** | **+0.033 (t1.3)** |
+| bridge \| trail + emb, hub 0.25% | +0.024 (t1.7) | **+0.045 (t1.9)** |
+
+**The kill condition no longer fires.** Under the global construction the point
+estimate COLLAPSED and flipped sign at 1% hub exclusion (+0.032 -> −0.002), the
+signature of a hub-driven artifact. Windowed, it HOLDS (+0.049 -> +0.033) and only
+the interval widens as n falls 33 -> 22. That is power, not hubs.
+
+**And the chain is now complementary to the embedding, not redundant with it.**
+Controlling for the causal-embedding score, bridge still carries +0.045 (t1.9) —
+against +0.024 (t1.7) under the defective construction. The embedding meanwhile is
+unmoved by adding bridge (+0.028 -> +0.026, t2.4), as it has been by every other
+control.
+
+**Status: promising, not established.** At strict hub exclusion the bridge CIs
+cross zero (t1.3-1.9), and n is 22-33 events. The specificity fix moved every
+point estimate in the same direction, which is the encouraging sign; the sample is
+too thin to call it. **This is the first result today where a correction made a
+finding stronger rather than weaker**, and the honest next step is more events, not
+more controls — which points back at the 446k corpus.
+
+**Method note.** Two implementation defects in one day produced two wrong
+conclusions (F42 interpretation, F48 chain verdict). Both were caught by external
+challenge rather than by the harness. A spec existed in `graph_transitivity.py`'s
+docstring and was not followed; reading the pre-registered design before
+implementing it would have prevented this one.
+
+### F50. INFORMATION SPECIFICITY — mean-pooling was averaging the signal away
+Challenge raised: the causal descriptions may not be specific enough — "second
+line trial success breakthrough" is the level at which exposure is actually
+determined. F31 scores a firm by `cosine(MEAN of up to 80 causal quotes, MEAN of
+up to 40 event quotes)`. **Mean-pooling is exactly the operation that turns
+"second-line trial success, breakthrough designation" into "generic pharma".**
+
+Replacing it with best-match pooling — does ANY of this firm's causal descriptions
+match ANY of this event's, closely? — `scripts/rigor_recheck_t3_profile.py --pool`:
+
+| pooling | contemporaneous | **forward** |
+|---|---|---|
+| `mean` (F31 original) | +0.006 (t0.5) | **+0.028 (t2.6)** |
+| `max` (single best pair) | +0.022 (t1.9) | **+0.042 (t4.2)** |
+| `top3` (mean of best 3) | +0.024 (t2.1) | **+0.042 (t4.2)** |
+
+max and top3 agree to three decimals, so this is not one fluke match.
+
+**But max-pooling has a mechanical coverage bias** — a firm with 80 quotes gets 80
+chances at a high match, a firm with 2 gets 2 — and coverage tracks size, which
+tracks co-movement. The same class of confound as anisotropy, so it must be
+excluded before believing anything. Controlling for log(pre-event quote count),
+with `--strict-mention` also on:
+
+| | raw | **coverage-controlled** |
+|---|---|---|
+| log #quotes -> forward, alone | — | **+0.029 (t2.4)** — the confound is real |
+| emb \\| trail, forward | +0.042 (t4.2) | **+0.032 (t3.0)** — SURVIVES |
+| emb \\| trail, contemporaneous | +0.024 (t2.1) | **+0.017 (t1.5)** — DIES |
+
+**Verdict, split.** The specificity insight is CORRECT and gives the only genuine
+improvement of the day: forward **+0.028 -> +0.032 (t2.6 -> t3.0)**, after killing
+a coverage confound that accounted for roughly a quarter of the raw gain. The
+contemporaneous "revival" does NOT survive — **F31's original contemporaneous
+conclusion stands**, and my F42 retraction of it remains correct.
+
+**The forward result has now passed every adversarial control raised today:**
+mean-centring (anisotropy), a same-sector dummy, headline-mention exclusion, a
+graph-structure control, and coverage volume. It is the most defended number in
+the project at **+0.032 (t3.0)**.
+
+**And it explains the F44 anomaly.** A random sentence from a causal document
+scored +0.022 against the causal span's +0.028 — suspiciously close if span
+selection mattered. Under mean-pooling it wouldn't: averaging 80 quotes washes out
+whichever sentence you picked. The specificity question and that anomaly have the
+same answer.
+
+### F51. LEXICAL beats dense — the embedding space was the wrong space
+Challenge raised: max-pooling still searches *embedding* similarity, which is
+fuzzy exactly where specificity lives; try a keyword/hybrid instead. Implemented
+as idf-weighted term-overlap over the SAME causal quotes, same pooling, same
+events, same controls (`--sim {dense,lexical,hybrid}`).
+
+**Forward increment, fully controlled** (mean-centred, top3 pooling,
+`--strict-mention`, and coverage-controlled for log #quotes):
+
+| similarity space | contemporaneous | **forward** |
+|---|---|---|
+| dense (all-MiniLM cosine) | +0.017 (t1.5) — dies | **+0.032 (t3.0)** |
+| **lexical (idf term overlap)** | **+0.036 (t3.0)** | **+0.048 (t5.2)** |
+| hybrid (z-average of both) | +0.031 (t2.5) | +0.047 (t4.5) |
+
+**Lexical wins outright, and hybrid is no better than lexical alone** — adding the
+dense channel slightly dilutes it. The whole embedding apparatus is being beaten by
+idf-weighted term overlap.
+
+**Third independent confirmation in this repo that sparse beats dense.** F45 found
+`embed_exposure`'s tf-idf baseline (+0.047) beating its centred embedding (+0.033);
+F23's centred mechanism factors (+0.038) also landed below that same tf-idf +0.047;
+now quote-level lexical (+0.048) beats quote-level dense (+0.032) under the full
+control set. Three different harnesses, same verdict.
+
+**And lexical is structurally more trustworthy.** Sparse idf vectors are not
+anisotropic, so the centroid-proximity artifact that killed three findings today
+(F43/F45) cannot arise in this space at all. `--center` is a no-op for it.
+
+**F31's contemporaneous null was a property of the REPRESENTATION, not of text.**
+It reported contemporaneous text adding ~0 over price history. That holds for dense
+mean-pooled profiles and collapsed under every attempt to revive it (F42 retracted,
+F50 died under coverage control). In lexical space with best-match pooling it is
+**+0.036 (t3.0)**, surviving coverage control, strict-mention and centring.
+
+**Cumulative effect of the two challenges** (specificity of pooling, then of
+representation): forward **+0.028 (t2.6) -> +0.048 (t5.2)**. A 71% larger effect
+and roughly double the t, from the same data, same events, same leakage discipline.
+
+**Production implication.** `retrieval_router.py` builds hybrid SCOPING (metadata
+filters + dense), not dense+sparse fusion, and the Qdrant collection is empty.
+There is now a measured reason to build it with **sparse/BM25 as the primary
+channel** rather than as an afterthought to the dense one.
+
+### F52. In LEXICAL space the full corpus works — the graph adds ~70%, it is no longer a prerequisite
+Challenge raised: if we are using sparse representations, why stay inside the
+graph? Because F44/F47 said document selection was what the LLM earned — but
+**both were measured in DENSE space**, which F51 established is the wrong space.
+Re-running full-corpus (alias-matched) attribution with lexical similarity:
+
+| document set | representation | forward, coverage-controlled |
+|---|---|---|
+| graph (causal-edge docs) | dense | +0.032 (t3.0) |
+| graph (causal-edge docs) | **lexical** | **+0.048 (t5.2)** |
+| full corpus (alias-matched) | dense | **−0.017 (t−1.4)** — null |
+| full corpus (alias-matched) | **lexical** | **+0.028 (t2.3)** — works |
+
+**F47's "document selection: NO" was a dense-space artifact.** Full-corpus
+attribution goes from null/negative to positive and significant purely by changing
+representation. The graph still wins — **+0.048 vs +0.028, about 70% more signal**
+— so causal-edge selection earns its keep, but it is no longer a PREREQUISITE.
+
+**The zero-LLM path now reproduces F31's original headline.** Alias matching plus
+idf term overlap on the full corpus gives **+0.028 (t2.3)** — the same number F31
+reported (+0.028, t2.6) using LLM causal extraction and dense embeddings. The
+entire extraction pipeline can be replaced, at the cost of the 70% the graph adds.
+
+**Coverage control is doing much heavier lifting here, as it must.** In the
+full-corpus arm, log(#quotes) alone predicts forward co-movement at **+0.093
+(t7.8)** versus +0.029 (t2.4) in the graph arm — because alias attribution gives a
+firm ~70 documents against the graph's ~3, and the count tracks prominence. Raw
+uncontrolled the arm reads +0.071 (t6.3); controlled it is +0.028. Anyone running
+this path without the coverage control will measure firm size.
+
+**What this unlocks.** The full-corpus lexical path needs **no extraction, no
+embeddings, no GPU, no API** — so the 446k Bloomberg corpus becomes immediately
+runnable rather than gated on extraction spend. n has been the binding constraint
+on every result today (114 events overall, 22-33 for the chain). This is the first
+route to lifting it that costs nothing.
+
+**Caveat:** the two arms do not cover identical firm sets (the subject path drops
+firms never named in a headline), so the +0.048 vs +0.028 gap conflates document
+selection with universe composition. Isolating that needs the `both` arm re-run in
+lexical space.
+
+### F53. Recency decay HURTS, and the graph's advantage is not universe composition
+Two loose ends, both negative-to-neutral, both informative.
+
+**Recency weighting — tested and rejected.** `preprofile` treats a 2010-01 quote
+identically to a 2012-11 one when scoring a 2012-12 event, and under best-match
+pooling a stale perfect match beats a fresh good one. Exponential decay
+(`--half-life`, months) makes it WORSE in both arms:
+
+| arm | no decay | with decay |
+|---|---|---|
+| graph (edge) | +0.048 (t5.2) | **+0.036 (t3.9)** at 6-month half-life |
+| full corpus (subject) | +0.028 (t2.3) | **+0.021 (t1.8)** at 12-month half-life |
+
+The graph result is explicable — median 3 quotes per firm, so downweighting most of
+them leaves nothing to match. The full-corpus arm has ~70 documents per firm and a
+wide time spread, where decay *should* have helped, and it did not.
+
+**So firm exposure profiles are STABLE over 1-3 years.** That is informative about
+what the signal is: a durable structural signature (what this firm is exposed to),
+not a decaying news-flow effect. It is finer than sector — a same-sector dummy is
+worth only +0.011 (t0.8) — but it behaves like a characteristic, not like news.
+Anyone reading this as "news predicts covariance" should read it as "text reveals a
+stable exposure characteristic that price history alone estimates noisily".
+
+**The graph's advantage survives the universe control.** F52's +0.048 vs +0.028 gap
+conflated document selection with firm coverage, since the subject path drops firms
+never named in a headline. The `both` arm (union of documents AND firms) settles it:
+
+| arm (lexical, top3, fully controlled) | contemporaneous | forward |
+|---|---|---|
+| graph only | +0.036 (t3.0) | +0.048 (t5.2) |
+| full corpus only | +0.016 (t1.5) | +0.028 (t2.3) |
+| **both** | **+0.041 (t3.8)** | **+0.049 (t5.5)** |
+
+`both` matches the graph arm on forward (+0.049 vs +0.048) on a strictly larger
+universe, so the gap is **document selection, not composition** — the graph's ~70%
+advantage is real. Adding full-corpus documents does not dilute it, and improves
+the contemporaneous reading to its strongest value of the day (+0.041, t3.8).
+
+**Best configuration found:** `--profile both --sim lexical --pool top3 --center
+--strict-mention --nq-control`, no recency decay.
+
+### F54. The signal is NOT interpretable — it lives in common vocabulary, not specific language
+Challenge raised: *prove a signal I can infer something from, not statistics.* The
+lexical representation makes that answerable, because the matching terms can be
+printed. `--examples` dumps, per event, the firms ranked most exposed while never
+being mentioned, and **the actual shared terms driving each match**.
+
+**What is actually driving the matches:**
+
+```
+TM     ~ apple           : nissan, motor        Toyota "exposed" to an Apple event
+BLK    ~ apple           : inc                  matched on the word "inc"
+SHEL   ~ apple           : fuel
+JPM    ~ goldman_sachs   : york-based, asked, new
+BP     ~ bank_of_america : estimate
+GOOGL  ~ goldman_sachs   : goldman, sachs       <- co-mention, not inference
+
+most common match terms overall:
+percent(16) · goldman(12) · sachs(11) · inc(6) · china(5) · much(4) · group(4)
+```
+
+**The single largest driver is "percent".** Where matches are not generic filler
+they are largely CO-MENTION — the firm's own past coverage names the event's
+subject.
+
+**The decisive test.** If the signal were carried by specific exposure language
+("second-line trial success, breakthrough"), restricting to rare, high-information
+terms should PRESERVE or strengthen it. It does the opposite:
+
+| min-idf | terms kept | forward increment | events |
+|---|---|---|---|
+| none | 8,598 | **+0.049 (t5.5)** | 114 |
+| 3.0 | 8,588 | +0.052 (t5.8) | 114 |
+| 4.5 | 8,394 | +0.046 (t4.8) | 114 |
+| 6.0 | 7,135 | **+0.011 (t1.0)** | 89 |
+| 7.0 | 6,047 | **+0.002 (t0.2)** | 46 |
+
+**The entire effect lives in terms appearing in more than ~12 of 5,485 quotes.**
+Restrict to genuinely distinctive vocabulary and it is zero. The point estimate
+collapses monotonically (+0.049 → +0.011 → +0.002) rather than merely widening,
+though n does fall as firms lose all overlap.
+
+**So the specificity story is backwards.** F50/F51's gains were real as
+measurements, but not for the stated reason: best-match pooling and lexical
+matching improved the statistic while the *content* doing the work is common
+newswire register, not specific exposure language.
+
+**And it contradicts F31's core interpretive claim** — "genuine latent inference
+(pre-event-only), not retrieval". Inspecting the matches, it IS retrieval:
+co-mention plus vocabulary-register overlap. The most likely mechanism is
+register similarity acting as a crude topic/sub-sector proxy — finer than a GICS
+dummy (which was worth only +0.011), which is why the sector control did not
+catch it, but the same family of thing F18 already identified: *"the news graph is
+largely a text-derived sector/sub-sector classifier."*
+
+**Status of the +0.049: statistically robust, interpretively empty.** It survived
+mean-centring, a sector dummy, headline-mention exclusion, a graph-structure
+control and a coverage control — and then failed the simplest check of all, which
+was to look at it. **A statistic that survives five adversarial controls can still
+be measuring nothing you would want to act on.** That is the lesson of the day.
+
+### F55. Learned sparse selection — fits in-sample, transfers to nothing
+Challenge raised: rather than a hand-set idf cut, TRAIN something to find which
+sparse features matter in which cases. Done: L1 (LassoCV) over the 8,598-term
+shared-vocabulary matrix, 13,489 firm-event rows, target residualised on trailing
+correlation first so the model must find something price history does not already
+have, and a strict **train-on-early / test-on-late** split (train ≤ 2012-03).
+
+| | IC vs residualised target |
+|---|---|
+| in-sample | **+0.158** |
+| **out-of-sample** | **+0.004** |
+
+39 of 8,598 terms selected. **It fits and it does not transfer.**
+
+**And the selected terms say exactly why:**
+
+```
++0.298 banking   +0.287 european   +0.175 report    +0.150 billion
++0.147 concern   +0.121 america    +0.110 europe    +0.110 banks
++0.093 group     +0.090 securities +0.082 government
+-0.180 inc       -0.154 companies  -0.139 quarter   -0.109 rose
+                 +0.060 his        +0.057 five      +0.057 plc
+```
+
+Two kinds of word, neither of them an exposure characteristic: **period topic**
+(banking, european, europe, banks, securities, government — the 2010-12 sovereign
+crisis) and **newswire furniture** (inc, report, companies, quarter, rose, group,
+his, five, plc, shares).
+
+The model learned *what 2010-2012 was about*. The test period begins 2012-04, the
+dominant topic moves, and the learned weights are worth +0.004.
+
+**This also explains the +0.049 retrospectively.** None of the earlier tests had a
+train/test split — the IC was cross-sectional within each event, pooled across
+events, all inside one period. Period-specific topic vocabulary scores perfectly
+well under that design. **Requiring the relationship to transfer across time is
+what kills it**, and that requirement was never imposed until now.
+
+**Would a neural network help? No, and the diagnostic says why.** Capacity is not
+the binding constraint — L1 already fits at +0.158 in-sample. More capacity fits
+the period topic *better* and transfers no further, probably worse. The
+constraint is that the learnable structure is a time-local topic, not a
+characteristic. That is the same conclusion `news_latent_signal.py` and
+`news_raw_latent.py` reached by PLS ("the constraint is redundancy with price, not
+representation or sample size") — now confirmed on sparse features with the terms
+made visible.
+
+**Closing status of this line.** The forward covariance signal is: statistically
+robust within period, uninterpretable on inspection (F54), and non-transferable
+across time (F55). Three independent ways of asking "is this real?" — controls,
+content, and time — and only the first says yes.
+
+### F56. Forward-looking bias, hybrid, and term downranking — all tested, all fail out-of-sample
+Three proposed fixes, all evaluated on the **time-split OOS** metric F55 established
+as the only meaningful one.
+
+| variant | rows | in-sample | **OOS** |
+|---|---|---|---|
+| baseline (all terms, all modality) | 13,489 | +0.158 | **+0.004** |
+| **forward-looking only** (`modality='forecast'`) | 1,432 | +0.214 | **undefined** |
+| **stability-selected terms** | 13,489 | +0.080 | **−0.044** |
+| sparse+dense hybrid (F51) | — | — | no better than lexical, which is +0.004 |
+
+**Forward-looking bias.** The extractor already tags 34,736 of 134,366 edges
+(26%) as `modality='forecast'` — genuine exposure assertions ("should drop more in
+the fourth quarter due to lower crude prices"), and a well-motivated filter, since
+exposure claims are what the task needs rather than event reporting. But it cuts
+the sample 90% to 1,432 rows; the 22 selected terms are zero for nearly every test
+row, so predictions have no variance and OOS is undefined. The selected terms are
+still furniture: `five`, `inc`, `out`, `because`.
+
+**Term downranking via stability selection.** Keep only terms whose sign is
+consistent across both halves of the TRAINING period — aimed squarely at F55's
+failure. **4 terms of 8,598 qualify (0.05%)**: `billion`, `climbed`, `inc`,
+`companies`. All furniture. OOS **−0.044**.
+
+**Read the 4-of-8,598 number.** It is not that we picked the wrong terms — it is
+that **the vocabulary has essentially no temporally stable predictive structure at
+all**, not even within one training period, let alone across the regime boundary.
+
+**This line is exhausted, and the pattern is now unambiguous.** Across
+representation (dense/lexical/hybrid), pooling (mean/max/top3), document selection
+(graph/full-corpus/causal-lexical/forward-looking), term weighting (idf
+threshold/L1/stability), and capacity (overlap score → L1): **every variant fits
+in-sample and none transfers.** That is the signature of a sample-size and
+single-regime problem, not a method problem — which means more method variants have
+negative expected value, and the only moves with positive expected value are more
+data (the 446k corpus) or a different market (`india2021`).
+
+### F57. LLM-as-activation-pathway — pre-registered pilot on POST-CUTOFF data, and it fails
+The one untested channel: lexical/embedding matching can only find what is
+textually co-present, so it can never supply a link like "Hormuz closure ->
+peripheral fuel costs -> airlines". An LLM reasoning over the event could. Tested
+properly for the first time.
+
+**Why this design is clean.** eg100k (2010-12) is disqualified — F55 showed the
+failure mode is TEMPORAL TRANSFER, and hindsight over a period saturated in
+training data manufactures exactly that appearance. `eg_live2` runs
+**2026-06-27..07-19, after the reasoning model's May 2026 cutoff**. Blindness was
+mechanical: `llm_exposure_dump.py` loads no prices; predictions were written to
+`data/llm_exposure_predictions.json` from the events and universe alone;
+`llm_exposure_score.py` was the first thing to touch a price.
+
+**The shock.** All 12 extracted events collapse to one story — US-Iran, Strait of
+Hormuz, oil +11% on the week, dollar and yields up, gold down on revived Fed hike
+bets. Two transmission channels predicted: oil (producers benefit, fuel-intensive
+transport suffers) and rates (long-duration assets hit).
+
+**Result — mean |standardised abnormal move|, 2026-07-08..17:**
+
+| basket | value |
+|---|---|
+| most_exposed (15 reasoned names) | **0.660** |
+| least_exposed (15 reasoned names) | 0.764 |
+| whole universe (264 names) | 0.755 |
+
+**gap most−least −0.104, permutation p = 0.821.** The reasoned basket moved LESS
+than the basket predicted to be inert, and less than the universe. Not merely
+insignificant — the wrong sign.
+
+**A pre-registered weakness did fire, but does not rescue it.** `least_exposed` was
+flagged in advance as micro-cap-skewed (VANI 1.40, TRUP 1.09, CALM 1.04 top that
+list), and standardising by trailing vol evidently does not neutralise fat-tailed
+small-cap idiosyncratics. But the uncontaminated comparison — **most_exposed vs the
+whole universe — is −0.095**, also the wrong sign.
+
+**The reasoning was not uniformly wrong.** Within the exposed basket, the ordering
+has some sense: EOG 0.84, FANG 0.84 (shale E&P, highest crude torque) and AAL 0.84
+top it. The thesis failed on TLT (0.42) and LMT (0.40) — the rates and defense
+channels, which I weighted and which did nothing.
+
+**Honest limits.** One shock, not twelve — a 23-day corpus cannot deliver
+independent events. Eight sessions. And residualising on the equal-weight universe
+removes the market-wide component of an oil shock by construction, leaving only
+cross-sectional differential exposure (which is what was predicted, so the test is
+fair, but the residual signal is small).
+
+**Status: the hypothesis is not supported, on a pilot too small to be a verdict.**
+What now exists is a pre-registered, hindsight-free harness. The daily scraper is
+running, so every additional month adds clean post-cutoff events. This is the one
+question in the project where waiting genuinely improves the answer rather than
+deferring it.
+
+### F58. Stable 10-K text beats news text 16x — and three optimisation attempts all failed
+Following the diagnosis in F53/F55 (we were estimating a stable characteristic with
+a time-varying event stream), the input was swapped for **10-K Item 1 business
+descriptions** — what a firm IS, not what happened to it. 162 names, 8,911 pairs,
+period A 2014-2019 predicting period B 2020-2026.
+
+| feature | predicts period-B correlation, incremental to period-A |
+|---|---|
+| same-sector dummy | +0.103 raw |
+| **news text** (the whole day's work) | **+0.004** |
+| **10-K business text** | **+0.064** |
+
+**Unchanged by a same-sector control** (+0.064 -> +0.064), so unlike the news graph
+this is NOT merely a text-derived industry classifier — F18's verdict does not
+carry over. Permutation null (400 firm-label shuffles of the text matrix, the
+correct null for dyadic data): **p = 0.002**.
+
+**The anachronism check passes.** The filing is from 2025-26, i.e. the end of
+period B, so it might describe what each firm BECAME. It predicts B-early
+(2020-22) at +0.055 and B-late (2023-26) at +0.054 — flat, which is what a stable
+characteristic does and a look-ahead artifact does not.
+
+**And it is interpretable, which nothing else today was.** The top pairs:
+
+```
+IMO  ~ XOM   exxon, exxonmobil, mobil          Imperial Oil is Exxon-controlled
+AMT  ~ SBAC  towers, tenants, rooftop, sites   both cell-tower REITs
+BNY  ~ NTRS  custody, servicing, trust         both custody banks
+MA   ~ V     four-party, prepaid, authorization
+ARES ~ BX    secondaries, multi-asset          both alternative managers
+HUT  ~ WULF  hpc, campus, compute, electrical  bitcoin miners pivoting to AI
+                                               corr rose +0.08 -> +0.30
+```
+
+HUT~WULF is the case for the method: GICS separates them, the text does not, and
+their correlation subsequently rose.
+
+**THREE OPTIMISATIONS, ALL NEGATIVE — recorded so they are not retried.**
+
+| attempt | result |
+|---|---|
+| aggressive boilerplate stoplist | **+0.065 -> +0.047** — also stripped `securities`/`exchange`/`commission`, which are furniture for most filers but genuine business vocabulary for financials |
+| surgical stoplist (furniture only) | +0.064 — no change; the stoplist was never the lever |
+| cut each doc at the "Available Information" marker | **+0.034** — mangles ~10 docs into short sparse vectors whose L2 normalisation distorts similarity to everything |
+
+**Robustness: the result is NOT carried by a few names.** Jackknife by firm — drop
+each in turn — moves it at most **−0.0068** (JPM), and the **top-5 names account
+for 12% of total absolute influence**, with inflating and deflating names roughly
+balanced.
+
+**What would actually help, untried:** more text per firm (the current input is a
+600KB range-slice truncated to 2,500 chars; full Item 1 runs to tens of thousands),
+more names (ADRs file 20-F not 10-K, which is why 129 of 312 are missing), and
+multiple split points rather than one. All are DATA improvements. Every
+representation-side lever tried today has been neutral or negative.
+
+**Caveat on novelty:** this substantially reproduces the Hoberg-Phillips
+text-based-industry literature, which builds firm similarity from 10-K product
+descriptions. The contribution here is not the method but the comparison — it is
+the first correctly-specified baseline this project has had, and it shows the news
+apparatus was underperforming a much simpler input by 16x the whole time.
+
+### F59. Optimising the stable-text signal — extraction quality helps, more text partly imports look-ahead
+Following F58's conclusion that the remaining levers are all DATA-side, the Item 1
+extractor was improved (score the segment's OPENING rather than the whole window,
+so a TOC followed by prose no longer wins; cut at the Item 1A/1B/2 header) and the
+kept length was varied.
+
+| text | incremental | permutation p | anachronism (early / late) |
+|---|---|---|---|
+| 2,500 chars, original extraction | +0.064 | 0.002 | +0.055 / +0.054 — flat |
+| 2,500 chars, **fixed extraction** | **+0.073** | 0.005 | — |
+| **6,000 chars** | **+0.090** | 0.005 | **+0.072 / +0.088 — gap opens** |
+| 20,000 chars | +0.062 | 0.025 | — |
+
+**Extraction quality is a genuine gain: +0.064 -> +0.073 at identical length.**
+
+**The move to 6,000 chars is partly NOT a gain.** The anachronism check was flat at
+2,500 chars and opens to +0.072 early / +0.088 late at 6,000 — longer extracts pull
+in more recent-specific content (current products, recent acquisitions, the current
+risk environment), which is look-ahead against a period-B window that starts in
+2020. **The defensible number is the early-period one, ~+0.072**, not +0.090.
+
+**Inverted U, and the reason is visible in the pairs.** Item 1 opens with the
+business description and drifts into regulation, competition and human capital. At
+6,000 chars the top pairs already include `AMD~DE` matching purely on SAFE-HARBOUR
+boilerplate (*cautionary, forward-looking, uncertainties, differ*) — two firms with
+corrB −0.12. At 20,000 that generic tail dominates and the signal falls to +0.062.
+
+**Good pairs at 6,000, for the record:** `AAL~DAL` (*congress, peb, arbitration,
+nmb* — Railway Labor Act machinery, airline-specific), `NTRS~OPY` (*high-net-worth,
+fiduciary, custody, aum*), `AMZN~CPNG` (*app-based, omnichannel*), `PSKY~WBD`
+(*warner, bros, theaters, netflix*), `AMT~SBAC`, `CVX~XOM`.
+
+**Net of the whole optimisation pass: +0.064 -> ~+0.072 defensible** (+0.090
+nominal, discounted for look-ahead). Still ~18x the news-text equivalent of +0.004.
+
+**Next lever, and it is data again:** the safe-harbour and risk-factor language
+should be excluded structurally (they are identifiable SECTIONS, not scattered
+words), and the 130 missing names are mostly ADRs filing 20-F rather than 10-K.
+
+### F60. Coverage pays, structural section-cutting does not fire
+Two levers from F59, both data-side.
+
+**20-F support — WORKED.** Foreign private issuers file 20-F, not 10-K, which is
+why 130 of 312 names were missing; their business description sits in Item 4
+"Information on the Company" / "Business Overview" rather than Item 1.
+
+| | before | **after** |
+|---|---|---|
+| descriptions | 182 | **227** |
+| usable names | 161 | **197** |
+| pairs | 8,778 | **13,695** |
+| incremental (6k chars) | +0.090 | +0.090 |
+| permutation p | 0.005 | **0.002** |
+
+Same effect size, 56% more pairs, better significance. Coverage buys power, not
+magnitude — which is the expected and honest outcome.
+
+**Structural section-cutting — DID NOT FIRE.** The intent was to cut safe-harbour
+and risk sections where they live (they are SECTIONS, and the word-level stoplist
+attempt already failed in F58). Median description length after the change is
+19,999 of a 20,000 cap, i.e. **the end-marker regex essentially never matched**.
+Widening the header regex to catch 20-F's Item 4 changed where extraction starts,
+and the Item 1A/forward-looking markers do not appear within the window from there.
+Recorded as not-yet-solved rather than as a null: the lever was never actually
+pulled.
+
+**Standing position on this signal:**
+
+| | value |
+|---|---|
+| nominal, 6,000 chars | +0.090 (p 0.002) |
+| **defensible, discounted for look-ahead** | **~+0.072** |
+| news-text equivalent (F55) | +0.004 |
+| same-sector dummy | control, and it changes nothing |
+
+The anachronism gap (+0.072 early / +0.088 late) is stable across both fetches, so
+the discount is a property of using 6,000 chars of a 2025-26 filing to predict a
+window opening in 2020 — not noise.
+
+### F61. Walk-forward across four disjoint regimes — the look-ahead concern is REFUTED
+The strongest test available without a second market: walk the A/B split forward so
+period B moves from nine years before the 10-K filing to contemporaneous with it. A
+stable characteristic should hold everywhere; look-ahead from a 2025-26 filing must
+DECAY the further back period B sits.
+
+| period A | period B | distance from filing | pairs | incremental | p |
+|---|---|---|---|---|---|
+| 2014-01 .. 2016-07 | 2016-07 .. 2019-01 | ~9 yr before | 11,935 | **+0.101** | 0.005 |
+| 2016-07 .. 2019-01 | 2019-01 .. 2021-07 | ~6 yr before | 13,366 | +0.049 | 0.005 |
+| 2019-01 .. 2021-07 | 2021-07 .. 2024-01 | ~3 yr before | 16,471 | **+0.119** | 0.005 |
+| 2021-07 .. 2024-01 | 2024-01 .. 2026-08 | contemporaneous | 19,306 | +0.068 | 0.005 |
+
+**All four significant. No decay with distance from the filing — the pattern is
+non-monotone and if anything runs the wrong way for the look-ahead story** (the
+earliest window is the second highest; the contemporaneous one is near the bottom).
+
+**So the F59 discount to ~+0.072 was too conservative.** That discount rested on
+the within-B early/late gap (+0.072 / +0.088), which the full walk shows is regime
+variation rather than distance-from-filing. Mean across the four disjoint splits is
+**~+0.084**, every one of them out-of-time by construction.
+
+**Magnitude is regime-dependent (+0.049 to +0.119) but the sign and significance
+never are.** That is the profile of a real but time-varying relationship, not an
+artifact — artifacts do not survive four disjoint windows at p=0.005 while varying
+2.4x in size.
+
+**Final standing of this signal:**
+
+| property | status |
+|---|---|
+| effect | **~+0.084 mean across four disjoint out-of-time splits** |
+| significance | p = 0.005 in every split (firm-label permutation, the correct dyadic null) |
+| vs news text | +0.004 (F55) — **~20x** |
+| vs same-sector dummy | control changes nothing (+0.090 -> +0.090) |
+| look-ahead | refuted by walk-forward |
+| single-name dependence | refuted by jackknife (top-5 = 12% of influence) |
+| interpretability | pairs readable and economically correct |
+| universe | 197 names, up to 19,306 pairs |
+
+**This is the only result from the entire session that survives every check applied
+to it.** Its limitation is not rigour but novelty: it substantially reproduces the
+Hoberg-Phillips text-based-industry literature. The contribution is the comparison
+— the news apparatus this project was built around is beaten ~20x by 10-K text that
+takes an afternoon to fetch.
+
+### F62. The +0.084 is real, robust, and ECONOMICALLY REDUNDANT
+"What does the output mean, is there usable information in it" — the right
+question, and the honest answer is no. Two tests convert the partial correlation
+into something a user could act on. Both fail.
+
+**(1) Does it improve a correlation FORECAST?** Firms split in half; the model
+fitted on one half's pairs and tested on the other half's — out-of-sample by FIRM,
+not just by time.
+
+| forecast | RMSE |
+|---|---|
+| price history only | 0.1115 |
+| **+ business-text similarity** | **0.1120** |
+| improvement | **−0.45%** |
+
+**Adding text makes the forecast slightly worse.** A partial correlation of +0.084
+explains 0.084² ~ 0.7% of residual variance; net of estimation error on the
+coefficient, that is not enough to help.
+
+**(2) Does it flag usable pairs?** Conditioning on "price history says unrelated,
+text says same business" — the diversification-trap screen, which is where such a
+signal would earn its keep:
+
+```
+INFY ~ MAN   sim 0.11    Infosys ~ ManpowerGroup
+EOG  ~ LMT   sim 0.13    shale E&P ~ defense prime
+BIIB ~ KO    sim 0.14    biotech ~ Coca-Cola
+GLD  ~ JPM   sim 0.13    gold ETF ~ a bank
+```
+
+Economically meaningless. And the apparent convergence is mostly mean reversion:
+ALL low-correlation pairs converged +0.046, the text-flagged ones +0.076 — a
++0.030 edge on pairs that make no sense.
+
+**THE MECHANISM, and it is the whole answer.** Where text similarity is high AND
+meaningful, price history already knows: AMT~SBAC corrA **+0.64**, CVX~XOM **+0.63**,
+BAC~JPM **+0.74**, AAL~DAL **+0.70**. Where price history is uninformative (low corrA),
+the text flags are noise. **The signal is redundant precisely where it would need
+to add value.**
+
+HUT~WULF (bitcoin miners pivoting to AI, corrA +0.08 -> corrB +0.30) is the one
+genuine catch — and one pair is an anecdote.
+
+**Final verdict on the whole day.** The 10-K signal is statistically the most
+robust thing in this project: ~+0.084 across four disjoint out-of-time regimes, all
+p=0.005, look-ahead refuted, jackknife-robust, sector-independent, interpretable.
+**And it is worth nothing**, because it re-describes relationships a correlation
+matrix already contains. That is a more useful thing to know than another
+representation variant, but it should be stated plainly rather than dressed as a
+result.
