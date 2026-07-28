@@ -1,0 +1,47 @@
+{
+  "written_before_seeing_any_price_data": true,
+  "author": "claude-opus-5 (knowledge cutoff May 2026; event window 2026-06-27..2026-07-19 is post-cutoff)",
+  "shock": "US-Iran escalation, Strait of Hormuz disrupted. Oil +6% Brent / +9% WTI daily, ~+11% weekly. Dollar stronger, government bond yields climbing, gold falling as Fed rate-hike bets revive.",
+  "window": ["2026-07-08", "2026-07-17"],
+  "reasoning": "Two transmission channels, both cross-sectional. (1) OIL: a supply shock via Hormuz raises crude, which is a windfall for producers/services and a direct cost shock for fuel-intensive transport. (2) RATES: the quotes say the oil spike de-anchored inflation expectations and revived hike bets, with yields up and gold down. That is a discount-rate shock, which hits long-duration assets hardest - high-multiple growth, REITs, utilities, long bonds. Names exposed to NEITHER channel and with domestic, non-fuel, non-duration cash flows should be the least moved.",
+  "most_exposed": [
+    {"t": "AAL",   "why": "US airline; jet fuel is the largest variable cost and the quotes explicitly note airfares rising"},
+    {"t": "UAL",   "why": "same fuel channel, plus long-haul routes over affected airspace"},
+    {"t": "DAL",   "why": "same fuel channel"},
+    {"t": "LUV",   "why": "domestic US airline, historically the most fuel-hedged - included deliberately as a within-industry contrast"},
+    {"t": "RYAAY", "why": "European low-cost carrier; fuel plus European equity weakness noted in the quotes"},
+    {"t": "XOM",   "why": "integrated major; direct crude price beneficiary"},
+    {"t": "CVX",   "why": "integrated major; same"},
+    {"t": "SHEL",  "why": "integrated major with large trading arm; benefits from dislocation as well as level"},
+    {"t": "HAL",   "why": "oil services; activity and pricing lever off crude"},
+    {"t": "BKR",   "why": "oil services; same"},
+    {"t": "EOG",   "why": "US shale E&P; highest torque to crude of the producers here"},
+    {"t": "FANG",  "why": "US shale E&P; same"},
+    {"t": "LMT",   "why": "defense prime; active US strikes on Iran"},
+    {"t": "NOC",   "why": "defense prime; same"},
+    {"t": "TLT",   "why": "long-duration Treasuries; the rates channel is a direct hit and the quotes state yields climbed"}
+  ],
+  "least_exposed": [
+    {"t": "CALM",  "why": "US shell eggs; domestic, food-price driven, no fuel or duration channel"},
+    {"t": "JVA",   "why": "coffee trading micro-cap; own commodity cycle, unrelated to crude or rates"},
+    {"t": "TRUP",  "why": "pet insurance; domestic subscription cash flows"},
+    {"t": "LMND",  "why": "insurtech; idiosyncratic, no oil or Hormuz linkage"},
+    {"t": "PRAA",  "why": "debt collection; domestic receivables"},
+    {"t": "BNED",  "why": "campus bookstores; domestic retail, own distress cycle"},
+    {"t": "POLA",  "why": "micro-cap apparel; idiosyncratic"},
+    {"t": "SNAL",  "why": "animal health micro-cap; idiosyncratic"},
+    {"t": "VANI",  "why": "micro-cap; idiosyncratic"},
+    {"t": "SDOT",  "why": "micro-cap; idiosyncratic"},
+    {"t": "ALOY",  "why": "micro-cap media; idiosyncratic"},
+    {"t": "GIS",   "why": "packaged food; defensive, domestic, low duration"},
+    {"t": "SYY",   "why": "US foodservice distribution - note this one has a fuel cost channel, so it is the weakest member of this list"},
+    {"t": "CAH",   "why": "drug distribution; regulated domestic margins"},
+    {"t": "NBHC",  "why": "small US regional bank; domestic lending, no Hormuz channel"}
+  ],
+  "falsifiable_prediction": "Mean |standardised abnormal move| over the window is HIGHER for most_exposed than for least_exposed, and higher than the universe mean. If the gap is <= 0 the reasoning channel adds nothing.",
+  "known_weaknesses": [
+    "All 12 extracted events are the same macro story, so this is effectively ONE shock, not 12 independent tests.",
+    "least_exposed is skewed to micro-caps, which carry high idiosyncratic vol; standardising by each name's own trailing vol is meant to neutralise that but may not fully.",
+    "23-day corpus, 264-name universe: a pilot, not a verdict."
+  ]
+}

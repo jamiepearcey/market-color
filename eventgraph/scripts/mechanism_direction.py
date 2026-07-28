@@ -67,6 +67,10 @@ for s in uni: im[("C",s)]=(len(allq),len(allq)+len(comp_q[s])); allq+=comp_q[s]
 for k in evs: im[("E",k)]=(len(allq),len(allq)+len(ev_q[k])); allq+=ev_q[k]
 print(f"encoding {len(allq)} quotes ...",flush=True)
 emb=model.encode(allq,batch_size=256,normalize_embeddings=True,convert_to_numpy=True,show_progress_bar=False)
+if __import__("os").environ.get("EMB_CENTER"):
+    emb = emb - emb.mean(0)
+    _n = np.linalg.norm(emb, axis=1, keepdims=True); emb = emb / np.where(_n > 0, _n, 1)
+    print("[EMB_CENTER] embedding space mean-centred", flush=True)
 def vec(kk): a,b=im[kk]; v=emb[a:b].mean(0); n=np.linalg.norm(v); return v/n if n else v
 cv={s:vec(("C",s)) for s in uni}; ev={k:vec(("E",k)) for k in evs}
 EM=np.array([ev[k] for k in evs]); cen=KMeans(K,n_init=5,random_state=0).fit(EM).cluster_centers_

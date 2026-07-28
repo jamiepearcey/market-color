@@ -29,6 +29,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cross_sectional_ic import yahoo, logret, wls, FN, DIR, SKIP
 from news_contagion import ar_series
+from liquidity import tradeable, usable_window  # noqa: E402
 
 
 def months_between(y0, y1):

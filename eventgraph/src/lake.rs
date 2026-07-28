@@ -55,6 +55,7 @@ pub fn load_script(
         "0002_facts.sql", "0003_realised.sql", "0004_analytics.sql", "0005_v2.sql",
         "0006_options.sql", "0007_lineage.sql", "0008_provenance.sql",
         "0009_surprise.sql", "0010_series_alias.sql", "0011_market_quote.sql",
+        "0012_calendar_observation.sql",
     ] {
         s.push_str(&format!(".read {}\n", ddl_dir.join(f).to_string_lossy()));
     }

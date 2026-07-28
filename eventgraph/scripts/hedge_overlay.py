@@ -77,6 +77,14 @@ for s in uni:
     for (qm,qt) in comp_qm[s]: qmeta.append((s,qm)); allq.append(qt)
 for k in evs: im[("E",k)]=(len(allq),len(allq)+len(ev_q[k])); allq+=ev_q[k]
 emb=model.encode(allq,batch_size=256,normalize_embeddings=True,convert_to_numpy=True,show_progress_bar=False)
+# EMB_CENTER=1 -> mean-centre the embedding space (F43). Transformer spaces are
+# anisotropic: uncentred cosine is dominated by proximity to the corpus centroid,
+# which tracks coverage volume and therefore firm size. Two results died here.
+if __import__("os").environ.get("EMB_CENTER"):
+    import numpy as _np
+    emb = emb - emb.mean(0)
+    _n = _np.linalg.norm(emb, axis=1, keepdims=True); emb = emb / _np.where(_n > 0, _n, 1)
+    print("[EMB_CENTER] embedding space mean-centred", flush=True)
 qbyfirm=collections.defaultdict(list)
 for gi,(s,qm) in enumerate(qmeta): qbyfirm[s].append((gi,qm))
 def ev_vec(k): a,b=im[("E",k)]; v=emb[a:b].mean(0); n=np.linalg.norm(v); return v/n if n else v

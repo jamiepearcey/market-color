@@ -83,6 +83,14 @@ for (m,k) in evs:
     idxmap[("E",(m,k))]=[len(allq)+i for i in range(len(ev_q[(m,k)]))]; allq+=ev_q[(m,k)]
 print(f"encoding {len(allq)} quote strings ...",flush=True)
 emb=model.encode(allq,batch_size=256,normalize_embeddings=True,show_progress_bar=False,convert_to_numpy=True)
+# EMB_CENTER=1 -> mean-centre the embedding space (F43). Transformer spaces are
+# anisotropic: uncentred cosine is dominated by proximity to the corpus centroid,
+# which tracks coverage volume and therefore firm size. Two results died here.
+if __import__("os").environ.get("EMB_CENTER"):
+    import numpy as _np
+    emb = emb - emb.mean(0)
+    _n = _np.linalg.norm(emb, axis=1, keepdims=True); emb = emb / _np.where(_n > 0, _n, 1)
+    print("[EMB_CENTER] embedding space mean-centred", flush=True)
 def vecof(kk):
     idl=idxmap.get(kk,[])
     if not idl: return None

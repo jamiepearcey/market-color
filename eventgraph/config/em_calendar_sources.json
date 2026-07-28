@@ -1,0 +1,179 @@
+{
+  "version": "em-cal-v1",
+  "note": "EM/frontier event-calendar source registry (Phase 0 of docs/EM-CALENDAR-STRATEGY.md). Every entry was LIVE-PROBED on 2026-07-26; `probe` records what the fetch actually returned. `mode`: parse = a parser exists and emits eg.calendar_observation rows; snapshot = fetched and content-addressed raw only (revision history accrues even when parsing lags -- this is deliberate, per the strategy: the snapshot clock is the un-backfillable asset). `tier` follows the source ladder: primary = the institution's own publication, secondary = multilateral/exchange republication, narrative = press, model = inferred. Blocked sources stay registered with their blocker documented so the backlog is visible rather than silently dropped.",
+  "venues": {
+    "KE": {"tz": "Africa/Nairobi",   "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "NG": {"tz": "Africa/Lagos",     "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "GH": {"tz": "Africa/Accra",     "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "ZA": {"tz": "Africa/Johannesburg", "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "EG": {"tz": "Africa/Cairo",     "trading_days": ["Sun","Mon","Tue","Wed","Thu"], "calendar_system": "gregorian+hijri"},
+    "TR": {"tz": "Europe/Istanbul",  "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "PK": {"tz": "Asia/Karachi",     "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian+hijri"},
+    "ZM": {"tz": "Africa/Lusaka",    "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "WAEMU": {"tz": "Africa/Abidjan","trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"},
+    "GLOBAL": {"tz": "UTC", "trading_days": ["Mon","Tue","Wed","Thu","Fri"], "calendar_system": "gregorian"}
+  },
+  "sources": [
+    {
+      "source_id": "knbs-arc", "venue": "KE", "authority": "KNBS", "tier": "primary",
+      "url": "https://www.knbs.or.ke/release-calendar/",
+      "kind": "html_table", "parser": "knbs_arc", "mode": "parse",
+      "classes": ["cpi", "gdp", "trade", "monetary", "production"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 191080, "note": "true Advance Release Calendar: 1 table / 143 rows, cols = Month | Publication Name | Product Name | Final day of reference period | Frequency | Expected Release Date"}
+    },
+    {
+      "source_id": "knbs-arc-pdf", "venue": "KE", "authority": "KNBS", "tier": "primary",
+      "url": "https://www.knbs.or.ke/wp-content/uploads/2026/07/ADVANCE-RELEASE-CALENDAR-FY-2025-2026.pdf",
+      "kind": "pdf", "parser": null, "mode": "snapshot",
+      "classes": ["cpi", "gdp", "trade", "monetary"],
+      "probe": {"date": "2026-07-26", "status": 200, "note": "the authoritative artifact behind knbs-arc's HTML table. Prior editions are still linked and worth capturing before they rotate: /wp-content/uploads/2025/01/ADVANCE-RELEASE-CALENDAR-FY-2024-2025.pdf and .../Advance-Release-Calendar-for-the-Financial-Year-2023-2024.pdf. Unlike a live page these carry an archival knowable_at (the upload path month), so they are legitimate belief-history backfill rather than pretend-backfill."}
+    },
+    {
+      "source_id": "ifes-electionguide", "venue": "GLOBAL", "authority": "IFES", "tier": "secondary",
+      "url": "https://www.electionguide.org/elections/type/upcoming/",
+      "kind": "html_table", "parser": "electionguide", "mode": "parse",
+      "classes": ["election"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 112838, "note": "78 rows; rows carry a native (d)=definitive / (t)=tentative flag -> maps directly onto our status axis (confirmed vs scheduled)"}
+    },
+    {
+      "source_id": "cbe-mpc-schedule", "venue": "EG", "authority": "CBE", "tier": "primary",
+      "url": "https://www.cbe.org.eg/en/monetary-policy/mpc-meetings-schedule",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 123582, "note": "BLOCKED: Sitecore SPA, 0 tables/0 dates in served HTML. Real endpoint is /api/sitecore/MPCMeetings/GetMPCMeetingsDetails but GET 404s and POST is rejected 403 by an F5 WAF. Snapshot-only until the call is reproduced with correct headers/cookies."}
+    },
+    {
+      "source_id": "cbe-auctions", "venue": "EG", "authority": "CBE", "tier": "primary",
+      "url": "https://www.cbe.org.eg/en/auctions",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["tbill_auction", "bond_auction", "sukuk_auction"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 136952, "note": "same Sitecore SPA pattern as cbe-mpc-schedule"}
+    },
+    {
+      "source_id": "bog-mpc-dates", "venue": "GH", "authority": "Bank of Ghana", "tier": "primary",
+      "url": "https://www.bog.gov.gh/monetary-policy/mpc-meeting-dates/",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 226329, "note": "page resolves but served body carries no date content (WordPress theme shell); dates likely injected client-side or published as a PDF. Snapshot-only pending a look at the rendered DOM."}
+    },
+    {
+      "source_id": "bog-mpc-releases", "venue": "GH", "authority": "Bank of Ghana", "tier": "primary",
+      "url": "https://www.bog.gov.gh/mpc_press_release/",
+      "kind": "html_list", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "note": "MPC press-release index; realised-side (occurred) evidence rather than forward schedule"}
+    },
+    {
+      "source_id": "dmo-ng-issuance", "venue": "NG", "authority": "DMO Nigeria", "tier": "primary",
+      "url": "https://www.dmo.gov.ng/fgn-bonds/bonds-issuance-calendar",
+      "kind": "doc_folder", "parser": null, "mode": "snapshot",
+      "classes": ["bond_auction"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 157602, "note": "the quarterly issuance calendar is a PDF in a WP-Download-Manager folder; document list is loaded client-side so no direct .pdf hrefs in served HTML. Needs the PDF lane (LLM-transcriber + deterministic verifier)."}
+    },
+    {
+      "source_id": "cbn-ng-monetary", "venue": "NG", "authority": "CBN", "tier": "primary",
+      "url": "https://www.cbn.gov.ng/Documents/MonetaryPolicy.html",
+      "kind": "html_list", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "note": "CBN publishes MPC communiques as dated PDFs under /Out/<year>/CCD/; the homepage exposed 'MPC Communique No. 163 July 21 2026'. Communique numbering is a clean period_ref."}
+    },
+    {
+      "source_id": "cbk-ke-mpc", "venue": "KE", "authority": "CBK", "tier": "primary",
+      "url": "https://www.centralbank.go.ke/monetary-policy/",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "note": "MPC landing page"}
+    },
+    {
+      "source_id": "cbk-ke-tbills", "venue": "KE", "authority": "CBK", "tier": "primary",
+      "url": "https://www.centralbank.go.ke/securities/treasury-bills/",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["tbill_auction"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 64786, "note": "weekly T-bill auction notices; densest exogenous dated event set in the venue"}
+    },
+    {
+      "source_id": "sarb-za-mpc", "venue": "ZA", "authority": "SARB", "tier": "primary",
+      "url": "https://www.resbank.co.za/en/home/what-we-do/monetary-policy/monetary-policy-committee",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "note": "MPC page; SARB publishes an annual meeting-dates list"}
+    },
+    {
+      "source_id": "sbp-pk-mpc", "venue": "PK", "authority": "SBP", "tier": "primary",
+      "url": "https://www.sbp.org.pk/our-operations/monetary-policy",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["mpc"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 107273, "note": "page has a 'Monetary Policy Calendar' section rendered client-side (1 table / 9 rows, no dates in served HTML)"}
+    },
+    {
+      "source_id": "gss-gh-upcoming", "venue": "GH", "authority": "Ghana Statistical Service", "tier": "primary",
+      "url": "https://statsghana.gov.gh/releases/upcoming",
+      "kind": "html_list", "parser": null, "mode": "snapshot",
+      "classes": ["cpi", "gdp"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 63409, "note": "dedicated /releases/upcoming path exists (homepage linked .../releases/upcoming/annual-inflation-2025-release); list rendered client-side"}
+    },
+    {
+      "source_id": "tuik-tr-takvim", "venue": "TR", "authority": "TurkStat", "tier": "primary",
+      "url": "https://www.tuik.gov.tr/Kurumsal/Veri_Takvimi",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["cpi", "gdp", "trade", "employment"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 2892, "note": "BLOCKED: shell page for the calendar app at takvim.tuik.gov.tr/tr/ (references ../ulusaltakvim/index.css); takvim.tuik.gov.tr/Home/Index 302s back to the main TurkStat site. Needs the real app path or its JSON endpoint."}
+    },
+    {
+      "source_id": "opec-meetings", "venue": "GLOBAL", "authority": "OPEC", "tier": "secondary",
+      "url": "https://www.opec.org/meetings.html",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["opec_meeting"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 195274, "note": "meeting index page"}
+    },
+    {
+      "source_id": "fitch-sov-calendar", "venue": "GLOBAL", "authority": "Fitch Ratings", "tier": "secondary",
+      "url": "https://www.fitchratings.com/sovereign-rating-review-calendar",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["rating_review"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 1284875, "note": "EU CRA Regulation sovereign review calendar -- ex-ante, exact, free, covers EM sovereigns. Served as a JS app with 0 extractable links. High value, worth the effort to unblock."}
+    },
+    {
+      "source_id": "moodys-sov-calendar", "venue": "GLOBAL", "authority": "Moody's", "tier": "secondary",
+      "url": "https://ratings.moodys.com/sovereign-calendar",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["rating_review"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 5770, "note": "JS app shell"}
+    },
+    {
+      "source_id": "sp-sov-calendar", "venue": "GLOBAL", "authority": "S&P Global Ratings", "tier": "secondary",
+      "url": "https://www.spglobal.com/ratings/en/regulatory/sovereign-rating-calendar",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["rating_review"],
+      "probe": {"date": "2026-07-26", "status": 403, "note": "BLOCKED: 403 to a plain client"}
+    },
+    {
+      "source_id": "imf-dsbb", "venue": "GLOBAL", "authority": "IMF", "tier": "secondary",
+      "url": "https://dsbb.imf.org/",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["cpi", "gdp", "reserves", "fiscal"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 44059, "note": "BLOCKED: SPA shell -- /sdds/country-list and /e-gdds/country-list return the same 44059-byte bundle. This is the single highest-leverage unlock (one adapter -> Advance Release Calendars for dozens of countries); needs its JSON API."}
+    },
+    {
+      "source_id": "imf-board-calendar", "venue": "GLOBAL", "authority": "IMF", "tier": "secondary",
+      "url": "https://www.imf.org/external/np/sec/bc/eng/index.aspx",
+      "kind": "html", "parser": null, "mode": "snapshot",
+      "classes": ["imf_board"],
+      "probe": {"date": "2026-07-26", "status": 403, "note": "BLOCKED: 403 to a plain client; imf.org edge rejects non-browser UAs"}
+    },
+    {
+      "source_id": "boz-zm", "venue": "ZM", "authority": "Bank of Zambia", "tier": "primary",
+      "url": "https://www.boz.zm/",
+      "kind": "spa", "parser": null, "mode": "snapshot",
+      "classes": ["mpc", "tbill_auction"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 9929, "note": "JS-rendered shell, 0 links extractable"}
+    },
+    {
+      "source_id": "bceao-publications", "venue": "WAEMU", "authority": "BCEAO", "tier": "primary",
+      "url": "https://www.bceao.int/",
+      "kind": "html_list", "parser": null, "mode": "snapshot",
+      "classes": ["mpc", "bond_auction"],
+      "probe": {"date": "2026-07-26", "status": 200, "bytes": 151456, "note": "French-language; covers 8 WAEMU sovereigns from one authority -- good coverage-per-source ratio"}
+    }
+  ]
+}
